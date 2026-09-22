@@ -31,7 +31,7 @@ export interface ToolCapability {
 // capabilities.test.ts).
 export const TOOL_CAPABILITIES: Record<string, ToolCapability> = {
   money: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 2
-  trend: { providers: ["google"], default: "google" },
+  trend: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 4
   strategy: { providers: ["google", "anthropic"], default: "google" },
   calendar: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 2
   prompt: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 1
@@ -46,7 +46,7 @@ export const TOOL_CAPABILITIES: Record<string, ToolCapability> = {
   homepage: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 3
   proposal: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 1
   presentation: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 1
-  "business-plan": { providers: ["google"], default: "google" },
+  "business-plan": { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 4
   grant: { providers: ["google"], default: "google" },
 };
 
