@@ -33,6 +33,8 @@ export interface ApiKeySlot {
   connected: boolean;
   last4: string | null;
   updatedAt: string | null;
+  /** Flagged by the rotation classifier on a 401/403 — cleared automatically on a successful re-verify or re-save. */
+  broken: boolean;
 }
 
 export interface ApiKeyStatus {
@@ -42,7 +44,7 @@ export interface ApiKeyStatus {
 }
 
 function emptySlots(): ApiKeySlot[] {
-  return [1, 2, 3].map((priority) => ({ priority: priority as ApiKeyPriority, connected: false, last4: null, updatedAt: null }));
+  return [1, 2, 3].map((priority) => ({ priority: priority as ApiKeyPriority, connected: false, last4: null, updatedAt: null, broken: false }));
 }
 
 export async function getApiKeyStatus(): Promise<ApiKeyStatus> {
@@ -56,13 +58,14 @@ export async function getApiKeyStatus(): Promise<ApiKeyStatus> {
 
   // The view is already scoped to auth.uid() — no extra filter needed,
   // and it never has a ciphertext column to accidentally select.
-  const { data } = await supabase.from("user_api_key_status").select("provider, priority, last4, updated_at");
+  const { data } = await supabase.from("user_api_key_status").select("provider, priority, last4, updated_at, broken");
   for (const row of data ?? []) {
     const slot = providers[row.provider as ApiKeyProvider]?.[row.priority - 1];
     if (!slot) continue;
     slot.connected = true;
     slot.last4 = row.last4;
     slot.updatedAt = row.updated_at;
+    slot.broken = !!row.broken;
   }
   const connected = API_KEY_PROVIDERS.some((p) => providers[p].some((s) => s.connected));
   return { enabled, connected, providers };

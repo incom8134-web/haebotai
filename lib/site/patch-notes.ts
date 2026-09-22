@@ -4,6 +4,17 @@ export type NoteKind = "new" | "improved" | "fixed";
 
 export const PATCH_NOTES: { version: string; date: string; title: Bilingual; items: { kind: NoteKind; text: Bilingual }[] }[] = [
   {
+    version: "1.7.0",
+    date: "2026-09-22",
+    title: { ko: "15개 도구에서 Claude 선택, 키 상태 한눈에", en: "Choose Claude on 15 tools, key status at a glance" },
+    items: [
+      { kind: "new", text: { ko: "블로그·기획서·발표자료·캘린더 등 15개 도구에서 Gemini 대신 내 Claude 키로 실행 가능", en: "Blog, proposal, presentation, calendar and 11 more tools can now run on your own Claude key instead of Gemini" } },
+      { kind: "new", text: { ko: "도구 실행 화면에 엔진 선택 탭과 실시간 예상 크레딧 표시", en: "Run pages show an engine picker with a live estimated-credits line" } },
+      { kind: "new", text: { ko: "API 키 화면: 인증 실패한 키에 경고 표시, 각 엔진이 어떤 도구에 쓰이는지 실시간 안내", en: "API key screen flags keys that failed auth, and lists which tools each provider currently powers" } },
+      { kind: "improved", text: { ko: "결과·라이브러리에 어떤 엔진으로 생성했는지 배지로 표시", en: "Results and Library now show a badge for which engine generated them" } },
+    ],
+  },
+  {
     version: "1.6.1",
     date: "2026-09-21",
     title: { ko: "새 첫 화면과 로그인, 화면 깨짐 수정", en: "New landing and sign-in, layout fixes" },

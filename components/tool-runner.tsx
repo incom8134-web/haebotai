@@ -13,6 +13,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Segmented } from "@/components/site/page";
 import { ToolForm, type ToolFormValues } from "@/components/tool-form";
 import { RunResult } from "@/components/run-result";
 import { getTool } from "@/lib/tools/registry";
@@ -25,7 +26,11 @@ import { getExperience } from "@/lib/tools/experience";
 import { cn } from "@/lib/utils";
 import { ExField } from "@/components/tools/experience/controls";
 import { Stage } from "@/components/tools/experience/stage";
-import { useLocale, useT } from "@/lib/i18n/context";
+import { useLocale, useT, useBi } from "@/lib/i18n/context";
+import { useLocalValue } from "@/lib/hooks/use-local-list";
+import { resolveCost } from "@/lib/ai/resolve-provider";
+import { mapRunError } from "@/lib/ai/client-error-messages";
+import { PROVIDER_LABEL, type ProviderId } from "@/lib/ai/types";
 import type { DictKey } from "@/lib/i18n/dictionaries";
 import type { Source } from "@/lib/tools/registry/shared";
 import type { BusinessProfile } from "@/lib/tools/types";
@@ -97,6 +102,11 @@ function ToolRunner({
   chainedFrom,
   initialBrief,
   initialPreset,
+  availableProviders,
+  supportedProviders,
+  defaultProvider,
+  hasOwnKey,
+  isStudent,
 }: {
   toolId: string;
   profile: BusinessProfile | null;
@@ -105,11 +115,26 @@ function ToolRunner({
   initialBrief?: string;
   /** Index into this tool's presets (lib/tools/content.json), from ?preset=. */
   initialPreset?: number;
+  /** Engines this tool supports AND the user actually has a usable key for (google always included). */
+  availableProviders: ProviderId[];
+  /** Every engine this tool's capability entry lists, regardless of key status — used only to decide whether to show the "register a key" hint. */
+  supportedProviders: ProviderId[];
+  defaultProvider: ProviderId;
+  /** Which of availableProviders the user has their own (non-broken) key for — drives the live cost line. */
+  hasOwnKey: Partial<Record<ProviderId, boolean>>;
+  isStudent: boolean;
 }) {
   const manifest = getTool(toolId);
   const exp = getExperience(toolId);
   const { locale } = useLocale();
   const t = useT();
+  const L = useBi();
+  const [savedProvider, setSavedProvider] = useLocalValue(`haebot-engine-${toolId}`);
+  const provider =
+    savedProvider && availableProviders.includes(savedProvider as ProviderId)
+      ? (savedProvider as ProviderId)
+      : defaultProvider;
+  const cost = manifest ? resolveCost(provider, !!hasOwnKey[provider], isStudent, manifest.estimatedCredits) : 0;
 
   const [values, setValues] = useState<ToolFormValues>(() =>
     chainedFrom
@@ -131,8 +156,9 @@ function ToolRunner({
     sources: Source[];
     creditsUsed: number;
     runId: string;
+    provider: ProviderId;
   } | null>(null);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<ReturnType<typeof mapRunError> | null>(null);
   const [showCancel, setShowCancel] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -163,18 +189,18 @@ function ToolRunner({
       const res = await fetch(`/api/tools/${toolId}/run`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(
-          chainedFrom
-            ? { ...serialized, chainedFromRunId: chainedFrom.runId }
-            : serialized,
-        ),
+        body: JSON.stringify({
+          ...serialized,
+          provider,
+          ...(chainedFrom ? { chainedFromRunId: chainedFrom.runId } : {}),
+        }),
         signal: controller.signal,
       });
 
       if (!res.ok || !res.body) {
-        const data = await res.json().catch(() => ({ error: t("run_failed") }));
+        const data = await res.json().catch(() => ({ error: null }));
         setPhase("error");
-        setErrorMsg(data.error ?? t("run_failed"));
+        setErrorMsg(data.error ? mapRunError(data.error) : { ko: t("run_failed"), en: t("run_failed") });
         return;
       }
 
@@ -200,16 +226,17 @@ function ToolRunner({
               sources: event.sources ?? [],
               creditsUsed: event.creditsUsed,
               runId: event.runId,
+              provider: event.provider ?? provider,
             });
           } else if (event.type === "error") {
             setPhase("error");
-            setErrorMsg(event.error);
+            setErrorMsg(mapRunError(event.error));
           }
         }
       }
     } catch {
       setPhase(controller.signal.aborted ? "cancelled" : "error");
-      if (!controller.signal.aborted) setErrorMsg(t("network_error"));
+      if (!controller.signal.aborted) setErrorMsg({ ko: t("network_error"), en: t("network_error") });
     } finally {
       clearTimeout(cancelTimer);
       setShowCancel(false);
@@ -262,7 +289,7 @@ function ToolRunner({
           </span>
           <span className="text-sm font-semibold break-keep">{locale === "en" ? manifest.name_en : manifest.name_ko}</span>
           <span className="rounded-full border border-hairline px-2.5 py-0.5 font-mono text-2xs whitespace-nowrap text-fg-subtle">
-            {t("estimated_credits")} {manifest.estimatedCredits} {t("credits")} · ~{manifest.estimatedSeconds}
+            {t("estimated_credits")} {cost} {t("credits")} · ~{manifest.estimatedSeconds}
             {t("seconds")}
           </span>
         </div>
@@ -316,6 +343,24 @@ function ToolRunner({
           )}
         </div>
       )}
+
+      {availableProviders.length > 1 ? (
+        <div className="mt-4">
+          <Segmented
+            value={provider}
+            onChange={(v) => setSavedProvider(v)}
+            label={L({ ko: "엔진 선택", en: "Choose engine" })}
+            options={availableProviders.map((p) => ({ value: p, label: PROVIDER_LABEL[p] }))}
+          />
+        </div>
+      ) : supportedProviders.length > 1 ? (
+        <p className="mt-4 text-xs text-fg-subtle">
+          {L({ ko: "Claude/ChatGPT 엔진을 쓰려면 API 키를 등록하세요 → ", en: "Register an API key to use the Claude/ChatGPT engine → " })}
+          <Link href="/account/api-key" className="text-accent hover:underline">
+            {L({ ko: "API 키 관리", en: "Manage API keys" })}
+          </Link>
+        </p>
+      ) : null}
 
       {exp ? (
         <ol className="mt-5 space-y-4">
@@ -378,6 +423,7 @@ function ToolRunner({
             sources={final.sources}
             creditsUsed={final.creditsUsed}
             runId={final.runId}
+            provider={final.provider}
           />
         </div>
       ) : null}
@@ -390,7 +436,12 @@ function ToolRunner({
 
       {phase === "error" && errorMsg ? (
         <div className="mt-6 glass rounded-[20px] p-4 ">
-          <p className="text-sm text-danger">{errorMsg}</p>
+          <p className="text-sm text-danger">{L(errorMsg)}</p>
+          {errorMsg.link ? (
+            <Link href={errorMsg.link} className="mt-1 inline-block text-sm text-accent hover:underline">
+              {L({ ko: "API 키 관리로 이동", en: "Go to API key settings" })}
+            </Link>
+          ) : null}
         </div>
       ) : null}
       </div>
