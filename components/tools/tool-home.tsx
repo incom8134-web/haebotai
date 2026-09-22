@@ -9,6 +9,8 @@ import { CATEGORY_LABELS } from "@/lib/tools/registry/categories";
 import { getToolContent } from "@/lib/tools/content";
 import { presetLines } from "@/lib/tools/preset-lines";
 import { useFavorites } from "@/lib/hooks/use-local-list";
+import { getToolCapability } from "@/lib/ai/capabilities";
+import { PROVIDER_LABEL } from "@/lib/ai/types";
 import { useBi, useLocale } from "@/lib/i18n/context";
 import type { ToolManifest } from "@/lib/tools/types";
 import { primaryButton, secondaryButton } from "@/components/site/page";
@@ -30,6 +32,7 @@ function ToolHome({ toolId }: { toolId: string }) {
   const chainsFrom = (tool.acceptsChainFrom ?? []).map((id) => getTool(id)).filter((t): t is ToolManifest => !!t);
   const chainsTo = listTools().filter((t) => t.acceptsChainFrom?.includes(tool.id));
   const related = listTools().filter((t) => t.category === tool.category && t.id !== tool.id);
+  const engines = getToolCapability(tool.id)?.providers ?? ["google"];
 
   async function copyPreset(i: number) {
     try {
@@ -69,7 +72,7 @@ function ToolHome({ toolId }: { toolId: string }) {
             ))}
           </ul>
 
-          <div className="mt-6 grid grid-cols-2 gap-2 rounded-2xl border border-hairline bg-bg/30 p-3 text-center">
+          <div className={cn("mt-6 grid gap-2 rounded-2xl border border-hairline bg-bg/30 p-3 text-center", engines.length > 1 ? "grid-cols-3" : "grid-cols-2")}>
             <div>
               <p className="font-mono text-lg">{tool.estimatedCredits}</p>
               <p className="text-2xs text-fg-subtle">{L({ ko: "예상 크레딧", en: "est. credits" })}</p>
@@ -78,6 +81,12 @@ function ToolHome({ toolId }: { toolId: string }) {
               <p className="font-mono text-lg">~{tool.estimatedSeconds}s</p>
               <p className="text-2xs text-fg-subtle">{L({ ko: "소요 시간", en: "to finish" })}</p>
             </div>
+            {engines.length > 1 ? (
+              <div>
+                <p className="font-mono text-sm leading-tight">{engines.map((p) => PROVIDER_LABEL[p]).join(" / ")}</p>
+                <p className="text-2xs text-fg-subtle">{L({ ko: "지원 엔진", en: "engines" })}</p>
+              </div>
+            ) : null}
           </div>
 
           <div className="mt-4 flex gap-2">

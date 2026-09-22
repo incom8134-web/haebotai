@@ -266,7 +266,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         .eq("id", runId)
         .eq("user_id", user.id);
 
-      controller.enqueue(encodeEvent({ type: "done", output, sources, creditsUsed, runId }));
+      controller.enqueue(encodeEvent({ type: "done", output, sources, creditsUsed, runId, provider }));
       controller.close();
     },
   });

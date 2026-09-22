@@ -2,15 +2,25 @@
 
 import { useActionState, useState, useTransition } from "react";
 import Link from "next/link";
-import { ArrowRight, Check, CircleCheck, CircleGauge, Crown, GraduationCap, KeyRound, LogOut, Trash2 } from "lucide-react";
+import { AlertTriangle, ArrowRight, Check, CircleCheck, CircleGauge, Crown, GraduationCap, KeyRound, LogOut, Trash2 } from "lucide-react";
 import { PLANS } from "@/lib/site/plans";
 import { requestStudentVerification, type StudentRequestState } from "@/lib/actions/membership";
 import { deleteApiKey, saveApiKey, testApiKey, type ApiKeyActionState } from "@/lib/actions/api-keys";
 import { useBi } from "@/lib/i18n/context";
 import type { Membership } from "@/lib/membership";
 import type { ApiKeyPriority, ApiKeyProvider, ApiKeySlot, ApiKeyStatus } from "@/lib/api-keys";
+import { getToolCapability } from "@/lib/ai/capabilities";
+import { listTools } from "@/lib/tools/registry";
 import { PageHeader, inputClass, primaryButton, secondaryButton, textareaClass } from "@/components/site/page";
 import { cn } from "@/lib/utils";
+
+// Which tools currently run on a given provider, read live from the
+// capability map so this list can never drift out of sync with reality.
+function toolNamesForProvider(provider: ApiKeyProvider): { ko: string; en: string }[] {
+  return listTools()
+    .filter((tool) => getToolCapability(tool.id)?.providers.includes(provider))
+    .map((tool) => ({ ko: tool.name_ko, en: tool.name_en }));
+}
 
 // Account pages, each its own URL under /account: overview, credits &
 // limits (credits-view.tsx), student membership, and my API key.
@@ -33,23 +43,31 @@ const KEY_MSG: Record<string, { ko: string; en: string }> = {
   signed_out: { ko: "로그인이 필요해요.", en: "Please sign in." },
 };
 
-const PROVIDER_INFO: Record<ApiKeyProvider, { name: string; placeholder: string; description: { ko: string; en: string } }> = {
-  google: {
-    name: "Google Gemini",
-    placeholder: "AIza…",
-    description: { ko: "1순위부터 차례로 쓰고, 한도가 차면 다음 순위 키로 자동 전환해요. 비용은 해봇이 아닌 본인 Google 계정으로 청구돼요.", en: "Used in priority order, switching automatically when one hits its quota. Costs are billed to your own Google account, not Haebot." },
-  },
-  anthropic: {
-    name: "Anthropic (Claude)",
-    placeholder: "sk-ant-…",
-    description: { ko: "Claude 옵션에 쓰일 예정이에요. 1순위부터 차례로 자동 전환돼요.", en: "Will be used for the Claude option once it ships. Switches automatically in priority order." },
-  },
-  openai: {
-    name: "ChatGPT (OpenAI)",
-    placeholder: "sk-…",
-    description: { ko: "GPT 기반 도구가 추가되면 사용돼요. 지금은 안전하게 등록·보관만 해요.", en: "Will be used once GPT-based tools are added. For now it's only securely registered and stored." },
-  },
+const PROVIDER_INFO: Record<ApiKeyProvider, { name: string; placeholder: string }> = {
+  google: { name: "Google Gemini", placeholder: "AIza…" },
+  anthropic: { name: "Anthropic (Claude)", placeholder: "sk-ant-…" },
+  openai: { name: "ChatGPT (OpenAI)", placeholder: "sk-…" },
 };
+
+/** Static fallback for a provider with no tools enabled yet (openai, pre-Stage-5). */
+const PROVIDER_FALLBACK_DESCRIPTION: Partial<Record<ApiKeyProvider, { ko: string; en: string }>> = {
+  openai: { ko: "GPT 기반 도구가 추가되면 사용돼요. 지금은 안전하게 등록·보관만 해요.", en: "Will be used once GPT-based tools are added. For now it's only securely registered and stored." },
+};
+
+function providerDescription(provider: ApiKeyProvider): { ko: string; en: string } {
+  if (provider === "google") {
+    return {
+      ko: "1순위부터 차례로 쓰고, 한도가 차면 다음 순위 키로 자동 전환해요. 비용은 해봇이 아닌 본인 Google 계정으로 청구돼요.",
+      en: "Used in priority order, switching automatically when one hits its quota. Costs are billed to your own Google account, not Haebot.",
+    };
+  }
+  const tools = toolNamesForProvider(provider);
+  if (tools.length === 0) return PROVIDER_FALLBACK_DESCRIPTION[provider] ?? { ko: "", en: "" };
+  return {
+    ko: `${tools.map((t) => t.ko).join(", ")}에 쓰여요. 1순위부터 차례로 자동 전환돼요.`,
+    en: `Powers ${tools.map((t) => t.en).join(", ")}. Switches automatically in priority order.`,
+  };
+}
 
 function AccountOverview({ email, balance, membership, apiKey, brandName, signOut }: { email: string; balance: number | null; membership: Membership; apiKey: ApiKeyStatus; brandName: string | null; signOut: () => void }) {
   const L = useBi();
@@ -164,6 +182,7 @@ function KeySlotRow({ provider, slot, placeholder }: { provider: ApiKeyProvider;
   const [busy, startTransition] = useTransition();
   const shown = other ?? state;
   const connected = state?.ok ? true : other?.message === "deleted" ? false : slot.connected;
+  const broken = other?.ok ? false : slot.broken;
 
   return (
     <div className="rounded-xl bg-surface-2/50 p-3.5">
@@ -174,6 +193,12 @@ function KeySlotRow({ provider, slot, placeholder }: { provider: ApiKeyProvider;
             <CircleCheck size={14} className="text-studio-success" aria-hidden />
             {L({ ko: "적용됨", en: "Applied" })} · **** {slot.last4}
           </span>
+          {broken ? (
+            <span className="flex items-center gap-1 text-2xs text-danger">
+              <AlertTriangle size={12} aria-hidden />
+              {L({ ko: "인증 실패 — 다시 확인하거나 교체하세요", en: "Auth failed — re-test or replace this key" })}
+            </span>
+          ) : null}
           <div className="flex gap-2">
             <button type="button" disabled={busy} onClick={() => startTransition(async () => setOther(await testApiKey(provider, slot.priority)))} className={cn(secondaryButton, "h-8 px-3 text-2xs")}>{L({ ko: "확인", en: "Test" })}</button>
             <button
@@ -206,7 +231,7 @@ function ProviderKeyCard({ provider, slots }: { provider: ApiKeyProvider; slots:
     <div className="glass rounded-[24px] p-6">
       <p className="font-semibold">{info.name}</p>
       <p className="text-2xs text-fg-subtle">{L({ ko: "API 키 (최대 3개)", en: "API Key (Maximum 3)" })}</p>
-      <p className="mt-2 text-sm text-fg-muted">{L(info.description)}</p>
+      <p className="mt-2 text-sm text-fg-muted">{L(providerDescription(provider))}</p>
       <div className="mt-4 space-y-2">
         {slots.map((slot) => (
           <KeySlotRow key={slot.priority} provider={provider} slot={slot} placeholder={info.placeholder} />
