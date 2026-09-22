@@ -241,6 +241,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         controller.close();
         return;
       }
+      // logo: sanitizeSvg may have stripped unrecognized-but-harmless
+      // attributes — store and return that cleaned version, not the
+      // model's raw one (the cosmetic typing preview above already
+      // streamed the raw text, which is fine; nothing renders it as an
+      // image until this point).
+      if (outputSafety.output !== undefined) output = outputSafety.output;
 
       const creditsUsed = cost;
       // Settles the ledger and stamps credits_used/credits_settled on the
