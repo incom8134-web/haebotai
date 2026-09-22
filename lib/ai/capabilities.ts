@@ -40,10 +40,10 @@ export const TOOL_CAPABILITIES: Record<string, ToolCapability> = {
   keyword: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 2
   place: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 2
   image: { providers: ["google"], default: "google" },
-  logo: { providers: ["google"], default: "google" },
+  logo: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 3
   "brand-model": { providers: ["google"], default: "google" },
-  sangsepage: { providers: ["google"], default: "google" },
-  homepage: { providers: ["google"], default: "google" },
+  sangsepage: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 3
+  homepage: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 3
   proposal: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 1
   presentation: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 1
   "business-plan": { providers: ["google"], default: "google" },
