@@ -2,31 +2,33 @@ import assert from "node:assert";
 import { test } from "node:test";
 import { ownKeyRequiredError, resolveCost, resolveRequestedProvider } from "./resolve-provider.ts";
 
-// blog: still google-only in the current capability map (copy and
-// strategy are the two anthropic-enabled tools as of Phase 3b).
+// grant: permanently google-only — it's a static placeholder that never
+// reaches any adapter (lib/tools/generate.ts), so it never gets a second
+// provider. A stable "still google-only" fixture, unlike a text tool
+// that's only *not yet* enabled.
 
 test("no provider requested: resolves to the tool's default (google)", () => {
-  const result = resolveRequestedProvider("blog", undefined);
+  const result = resolveRequestedProvider("grant", undefined);
   assert.deepEqual(result, { ok: true, provider: "google" });
 });
 
 test("google is always allowed, even for a tool with no explicit override", () => {
-  const result = resolveRequestedProvider("blog", "google");
+  const result = resolveRequestedProvider("grant", "google");
   assert.deepEqual(result, { ok: true, provider: "google" });
 });
 
 test("rejects a provider the capability map disallows for this tool", () => {
-  const result = resolveRequestedProvider("blog", "anthropic");
+  const result = resolveRequestedProvider("grant", "anthropic");
   assert.equal(result.ok, false);
 });
 
-test("allows anthropic for a tool the capability map has enabled it for (strategy, Phase 3b)", () => {
+test("allows anthropic for a tool the capability map has enabled it for (strategy)", () => {
   const result = resolveRequestedProvider("strategy", "anthropic");
   assert.deepEqual(result, { ok: true, provider: "anthropic" });
 });
 
 test("rejects garbage input, not just unsupported providers", () => {
-  const result = resolveRequestedProvider("blog", "not-a-real-provider");
+  const result = resolveRequestedProvider("grant", "not-a-real-provider");
   assert.equal(result.ok, false);
 });
 
