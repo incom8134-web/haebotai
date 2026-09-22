@@ -1,31 +1,66 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { ArrowUpRight, BookOpen, Headset, Lightbulb, WandSparkles } from "lucide-react";
+import { ArrowUpRight, BookOpen, Check, Copy, Headset, Lightbulb, Plus, WandSparkles } from "lucide-react";
+import { getTool } from "@/lib/tools/registry";
 import { getToolContent } from "@/lib/tools/content";
+import { presetLines } from "@/lib/tools/preset-lines";
 import { useBi } from "@/lib/i18n/context";
-import { Plus } from "lucide-react";
 
 // Guide rail beside every tool's run form: examples that refill the form,
 // tips, what a result looks like, and where to get help — so suggestions
-// and help live inside each AI, not only on its overview page.
+// and help live inside each AI, not only on its overview page. Preset
+// cards mirror ToolHome's example gallery (same presetLines + copy
+// pattern) so the run page isn't thinner than the overview page it links
+// from.
 export function RunGuide({ toolId, onPreset }: { toolId: string; onPreset: (index: number) => void }) {
   const L = useBi();
   const c = getToolContent(toolId);
-  if (!c) return null;
+  const tool = getTool(toolId);
+  const [copied, setCopied] = useState<number | null>(null);
+  if (!c || !tool) return null;
+
+  async function copyPreset(i: number) {
+    try {
+      await navigator.clipboard.writeText(presetLines(tool!, c!.presets[i]).join("\n"));
+      setCopied(i);
+      setTimeout(() => setCopied(null), 1600);
+    } catch {
+      /* clipboard blocked */
+    }
+  }
+
   return (
     <div className="space-y-4">
       <section className="glass rounded-[24px] p-5">
         <p className="flex items-center gap-2 text-sm font-semibold"><WandSparkles size={15} className="text-studio-cyan" aria-hidden /> {L({ ko: "예시로 채우기", en: "Fill with an example" })}</p>
-        <div className="mt-3 space-y-1.5">
+        <div className="mt-3 space-y-2">
           {c.presets.map((p, i) => (
-            <button key={p.title.en} type="button" onClick={() => onPreset(i)} className="group flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-colors hover:bg-surface-2/50">
-              <span className="min-w-0">
-                <span className="block truncate font-medium">{L(p.title)}</span>
-                <span className="block text-2xs text-fg-subtle">{L(p.tag)}</span>
-              </span>
-              <Plus size={14} className="shrink-0 text-fg-subtle transition-transform duration-500 ease-[var(--spring)] group-hover:rotate-90 group-hover:text-studio-cyan" aria-hidden />
-            </button>
+            <div key={p.title.en} className="rounded-2xl border border-hairline bg-bg/30 p-3.5 transition-colors hover:border-hairline-str">
+              <div className="flex items-center justify-between gap-2">
+                <span className="rounded-full bg-studio-cyan/12 px-2.5 py-1 text-2xs font-medium text-studio-cyan">{L(p.tag)}</span>
+                <button
+                  type="button"
+                  onClick={() => copyPreset(i)}
+                  className="grid size-7 shrink-0 place-items-center rounded-lg text-fg-subtle transition-colors hover:bg-surface-2/60 hover:text-fg"
+                  aria-label={L({ ko: "입력값 복사", en: "Copy inputs" })}
+                >
+                  {copied === i ? <Check size={13} className="text-studio-success" aria-hidden /> : <Copy size={13} aria-hidden />}
+                </button>
+              </div>
+              <button type="button" onClick={() => onPreset(i)} className="group mt-2.5 block w-full text-left">
+                <span className="flex items-center gap-1.5 text-sm font-medium">
+                  {L(p.title)}
+                  <Plus size={13} className="shrink-0 text-fg-subtle transition-transform duration-500 ease-[var(--spring)] group-hover:rotate-90 group-hover:text-studio-cyan" aria-hidden />
+                </span>
+                <ul className="mt-1.5 space-y-0.5">
+                  {presetLines(tool, p).slice(0, 2).map((line) => (
+                    <li key={line} className="truncate text-2xs text-fg-subtle" title={line}>{line}</li>
+                  ))}
+                </ul>
+              </button>
+            </div>
           ))}
         </div>
       </section>

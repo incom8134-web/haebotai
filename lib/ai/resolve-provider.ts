@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { getToolCapability } from "./capabilities.ts";
+import { DEFAULT_TOOL_CAPABILITY, getToolCapability } from "./capabilities.ts";
 import { PROVIDER_LABEL, type ProviderId } from "./types.ts";
 
 // Pure decision logic for engine selection, pulled out of the run route
@@ -16,7 +16,7 @@ export type ProviderResolution = { ok: true; provider: ProviderId } | { ok: fals
  * (product decision): an unsupported request is a 400, not a downgrade.
  */
 export function resolveRequestedProvider(toolId: string, requestedProvider: unknown): ProviderResolution {
-  const capability = getToolCapability(toolId) ?? { providers: ["google" as const], default: "google" as const };
+  const capability = getToolCapability(toolId) ?? DEFAULT_TOOL_CAPABILITY;
   if (requestedProvider === undefined) return { ok: true, provider: capability.default };
 
   const parsed = providerSchema.safeParse(requestedProvider);

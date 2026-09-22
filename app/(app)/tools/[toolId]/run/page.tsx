@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { ToolRunner } from "@/components/tool-runner";
 import { getTool } from "@/lib/tools/registry";
-import { getToolCapability } from "@/lib/ai/capabilities";
+import { DEFAULT_TOOL_CAPABILITY, getToolCapability } from "@/lib/ai/capabilities";
 import { getBusinessProfile } from "@/lib/profile";
 import { getApiKeyStatus } from "@/lib/api-keys";
 import { getMembership } from "@/lib/membership";
@@ -38,7 +38,7 @@ export default async function ToolPage({
   // for this tool AND the user has at least one non-broken key — never
   // offer an engine the run route would just reject (product decision:
   // no silent fallback, so don't dangle an option that can't work).
-  const capability = getToolCapability(toolId) ?? { providers: ["google" as const], default: "google" as const };
+  const capability = getToolCapability(toolId) ?? DEFAULT_TOOL_CAPABILITY;
   const usable = (p: ProviderId) => keyStatus.providers[p].some((s) => s.connected && !s.broken);
   const availableProviders = capability.providers.filter((p) => p === "google" || usable(p));
   const hasOwnKey = Object.fromEntries(capability.providers.map((p) => [p, usable(p)])) as Partial<Record<ProviderId, boolean>>;
