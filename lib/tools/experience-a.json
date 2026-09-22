@@ -1,0 +1,132 @@
+{
+  "money": {
+    "layout": "split", "visual": "routes",
+    "hero": { "title": { "ko": "이미 가진 것에서 시작하세요", "en": "Start with what you already have" }, "story": { "ko": "새 기술을 배우기 전에, 지금의 경력과 시간으로 벌 수 있는 길부터 찾습니다. 조건을 솔직하게 적을수록 바로 내일 시작할 수 있는 답이 나와요.", "en": "Before learning anything new, find what your current experience and time can earn. The more honest the constraints, the more startable the answer." } },
+    "sections": [
+      { "title": { "ko": "나는 무엇을 잘하나요", "en": "What you're good at" }, "hint": { "ko": "자격증, 경력 연수, 해 본 일을 구체적으로", "en": "Certificates, years, things you've actually done" }, "fields": ["skills", "interests"] },
+      { "title": { "ko": "현실적인 조건", "en": "Real-world constraints" }, "hint": { "ko": "시간과 돈, 감당할 수 있는 위험", "en": "Time, money and how much risk you can take" }, "fields": ["weekly_hours", "capital", "risk", "avoid"] }
+    ],
+    "ui": {
+      "skills": { "placeholder": { "ko": "예: 제과 10년차, 케이크·구움과자 전문, 매장 근무 중", "en": "e.g. 10 years as a pastry chef, cakes and baked goods" } },
+      "weekly_hours": { "display": "slider", "min": 2, "max": 40, "step": 1, "unit": { "ko": "시간/주", "en": "hrs/week" } },
+      "capital": { "display": "segmented" },
+      "risk": { "display": "cards", "options": { "low": { "icon": "shield", "desc": { "ko": "잃지 않는 게 먼저", "en": "Don't lose money first" } }, "mid": { "icon": "scale", "desc": { "ko": "적당히 걸어 볼게요", "en": "Some risk is fine" } }, "high": { "icon": "rocket", "desc": { "ko": "크게 벌 수 있다면", "en": "Go big if it pays" } } } },
+      "interests": { "placeholder": { "ko": "Enter로 추가 — 예: 클래스, 소량 판매", "en": "Press Enter — e.g. classes, small batches" } }
+    },
+    "stage": { "headline": { "ko": "세 갈래 길과, 각각의 첫걸음", "en": "Three routes, each with a first step" }, "story": { "ko": "누가 돈을 내는지, 첫 주에 무엇을 할지, 얼마나 힘든지까지. 마음에 드는 길은 트렌드 분석으로 바로 검증할 수 있어요.", "en": "Who pays, what to do in week one, how hard it is. Validate your favorite with Trend Analysis in one click." }, "promises": [ { "icon": "route", "text": { "ko": "방향 3가지", "en": "3 routes" } }, { "icon": "footprints", "text": { "ko": "첫 행동", "en": "First step" } }, { "icon": "badge-alert", "text": { "ko": "수입은 추정 표시", "en": "Income marked as estimate" } } ] }
+  },
+  "trend": {
+    "layout": "split", "visual": "score",
+    "hero": { "title": { "ko": "감이 아니라 근거로 고르세요", "en": "Choose on evidence, not gut feel" }, "story": { "ko": "후보 아이디어를 나란히 놓고 수요, 경쟁, 타이밍을 실제 검색 자료로 비교합니다. 모든 숫자 옆에는 출처가 붙어요.", "en": "Line up your ideas and compare demand, competition and timing using live search. Every number has a source beside it." } },
+    "sections": [
+      { "title": { "ko": "비교할 후보", "en": "Candidates to compare" }, "hint": { "ko": "2~5개가 가장 비교하기 좋아요", "en": "2–5 works best" }, "fields": ["ideas"] },
+      { "title": { "ko": "어디서, 언제, 얼마로", "en": "Where, when, how much" }, "hint": { "ko": "지역과 연령대까지 적으면 근거가 정확해져요", "en": "Region and age range sharpen the evidence" }, "fields": ["target_market", "budget", "entry_timing"] }
+    ],
+    "ui": {
+      "ideas": { "placeholder": { "ko": "Enter로 추가 — 예: 밀키트 구독", "en": "Press Enter — e.g. meal-kit subscription" } },
+      "target_market": { "placeholder": { "ko": "예: 20~30대 1인 가구, 수도권", "en": "e.g. single households in their 20s–30s, Seoul area" } },
+      "budget": { "display": "segmented" },
+      "entry_timing": { "display": "cards", "options": { "now": { "icon": "zap", "desc": { "ko": "이번 달 시작", "en": "Start this month" } }, "3m": { "icon": "calendar-clock", "desc": { "ko": "준비 후 시작", "en": "After preparing" } }, "1y": { "icon": "telescope", "desc": { "ko": "길게 보고", "en": "Long view" } } } }
+    },
+    "stage": { "headline": { "ko": "점수표 한 장, 출처와 함께", "en": "One scorecard, sources attached" }, "story": { "ko": "아이디어마다 10점 만점 점수와 이유를 보여 드려요. 확인하지 못한 수치는 숨기지 않고 추정이라고 표시합니다.", "en": "Each idea gets a score out of 10 with reasons. Unverified numbers are labeled, not hidden." }, "promises": [ { "icon": "search", "text": { "ko": "실시간 검색", "en": "Live search" } }, { "icon": "link", "text": { "ko": "숫자마다 출처", "en": "Source per number" } }, { "icon": "trophy", "text": { "ko": "1위 추천", "en": "Top pick" } } ] }
+  },
+  "strategy": {
+    "layout": "steps", "visual": "compass",
+    "hero": { "title": { "ko": "무엇을 말할지 먼저 정하세요", "en": "Decide what to say, first" }, "story": { "ko": "카피도, 디자인도, 발표도 결국 하나의 약속에서 나옵니다. 사업 이야기를 들려주시면 누구에게 무엇을 약속할지 정리하고, 캠페인 방향 세 가지 중 하나를 골라 드려요.", "en": "Copy, design and decks all grow from one promise. Tell us about the business and we'll define who you serve and what you promise, then pick one of three campaign routes." } },
+    "sections": [
+      { "title": { "ko": "사업 이야기", "en": "Your business, in brief" }, "hint": { "ko": "무엇을, 누구에게, 어디서 파는지", "en": "What, to whom, where" }, "fields": ["context"] },
+      { "title": { "ko": "경쟁과 목표", "en": "Competition and goal" }, "hint": { "ko": "비교당하는 브랜드와 이번에 이루고 싶은 것", "en": "Who you're compared with, and this round's goal" }, "fields": ["competitors", "goal"] },
+      { "title": { "ko": "고객의 목소리", "en": "Your customer's voice" }, "hint": { "ko": "리뷰나 대화에서 들은 한마디가 전략을 날카롭게 해요", "en": "One real quote from a review or chat sharpens everything" }, "fields": ["customer_voice"] }
+    ],
+    "ui": {
+      "context": { "placeholder": { "ko": "예: 해운대 천연발효빵 베이커리. 아침 7시 오픈, 주말 브런치 수요가 많음.", "en": "e.g. A sourdough bakery in Haeundae, opens at 7, busy weekend brunch." } },
+      "goal": { "placeholder": { "ko": "예: 평일 오전 매출 늘리기", "en": "e.g. Grow weekday morning sales" } },
+      "customer_voice": { "placeholder": { "ko": "예: \"빵은 좋은데 아침엔 들를 시간이 없어요\"", "en": "e.g. \"Love the bread, but no time in the morning\"" } }
+    },
+    "stage": { "headline": { "ko": "한 장으로 정리된 포지셔닝", "en": "Positioning on a single page" }, "story": { "ko": "대상, 경쟁 구도, 핵심 긴장, 약속, 믿을 이유. 그리고 방향 세 가지 중 추천 하나. 결과는 카피와 발표자료가 그대로 이어받아요.", "en": "Audience, competitive frame, tension, promise, reasons to believe — plus one recommended route of three. Copy and decks pick it up directly." }, "promises": [ { "icon": "compass", "text": { "ko": "방향 3가지", "en": "3 routes" } }, { "icon": "search", "text": { "ko": "경쟁 근거", "en": "Competitive evidence" } }, { "icon": "link", "text": { "ko": "카피·발표로 연결", "en": "Feeds copy & decks" } } ] }
+  },
+  "calendar": {
+    "layout": "split", "visual": "calendar",
+    "hero": { "title": { "ko": "결심을 13주짜리 일정으로", "en": "Turn a decision into 13 weeks" }, "story": { "ko": "하고 싶은 일은 정했는데 월요일에 뭘 해야 할지 모르겠다면. 매주 할 일과 확인할 결과물을 정해 캘린더에 바로 넣어 드려요.", "en": "You know what you want to do, but not what to do on Monday. Get weekly tasks and deliverables, straight into your calendar." } },
+    "sections": [
+      { "title": { "ko": "무엇을 실행하나요", "en": "What you're executing" }, "hint": { "ko": "한두 문장이면 충분해요", "en": "A sentence or two is enough" }, "fields": ["model"] },
+      { "title": { "ko": "언제, 어떤 속도로", "en": "When, and how fast" }, "hint": { "ko": "시작일을 고르면 끝나는 날이 바로 보여요", "en": "Pick a start date to see the finish" }, "fields": ["start_date", "pace", "milestones"] }
+    ],
+    "ui": {
+      "model": { "placeholder": { "ko": "예: 동네 베이커리의 주말 원데이 클래스 (정원 6명)", "en": "e.g. Weekend one-day baking classes, 6 seats" } },
+      "start_date": { "display": "date" },
+      "pace": { "display": "cards", "options": { "steady": { "icon": "footprints", "desc": { "ko": "본업과 함께", "en": "Alongside a job" } }, "sprint": { "icon": "flame", "desc": { "ko": "여기에 집중", "en": "Main focus" } } } },
+      "milestones": { "placeholder": { "ko": "Enter로 추가 — 예: 첫 모집 공지", "en": "Press Enter — e.g. first signup post" } }
+    },
+    "stage": { "headline": { "ko": "13주, 주마다 한 줄", "en": "13 weeks, one line each" }, "story": { "ko": "세 단계로 나눈 주간 계획에 마일스톤을 배치합니다. .ics로 내보내면 구글·애플 캘린더에 그대로 들어가요.", "en": "A weekly plan in three phases with your milestones placed. Export .ics straight into Google or Apple Calendar." }, "promises": [ { "icon": "calendar-days", "text": { "ko": "13주 계획", "en": "13-week plan" } }, { "icon": "flag", "text": { "ko": "마일스톤 배치", "en": "Milestones placed" } }, { "icon": "file-down", "text": { "ko": ".ics 내보내기", "en": ".ics export" } } ] }
+  },
+  "prompt": {
+    "layout": "steps", "visual": "prompt",
+    "hero": { "title": { "ko": "매번 설명하지 마세요. 한 번만 제대로", "en": "Stop re-explaining. Explain once, properly" }, "story": { "ko": "대화형 AI, 이미지 AI, 코딩 에이전트, 영상 AI는 좋은 프롬프트의 모양이 전혀 다릅니다. 어디에 쓸지부터 고르면 그 AI에 맞는 구조로 설계해 드려요.", "en": "Chat AIs, image AIs, coding agents and video AIs want completely different prompts. Pick where it will run, and we design for that." } },
+    "sections": [
+      { "title": { "ko": "어떤 AI가 실행하나요", "en": "Which AI will run it" }, "hint": { "ko": "종류마다 잘 먹히는 구조가 달라요", "en": "Each kind responds to a different structure" }, "fields": ["target_type", "target_model"] },
+      { "title": { "ko": "무엇을 시킬까요", "en": "What should it do" }, "hint": { "ko": "평소 말하듯 적으면 됩니다", "en": "Write it the way you'd say it" }, "fields": ["task", "constraints"] },
+      { "title": { "ko": "세부 설정", "en": "Fine-tuning" }, "hint": { "ko": "모르면 기본값으로 두세요", "en": "Leave defaults if unsure" }, "fields": ["tone", "output_format"] },
+      { "title": { "ko": "참고할 것 (선택)", "en": "References (optional)" }, "hint": { "ko": "예시 입력과 마음에 들었던 프롬프트가 있으면 품질이 크게 올라가요", "en": "A sample input and a prompt you liked raise quality most" }, "fields": ["example_input", "style_example"] }
+    ],
+    "ui": {
+      "target_type": { "display": "cards", "options": { "chat": { "icon": "message-square", "desc": { "ko": "ChatGPT · Claude · Gemini", "en": "ChatGPT · Claude · Gemini" } }, "image": { "icon": "image", "desc": { "ko": "Midjourney · DALL·E", "en": "Midjourney · DALL·E" } }, "coding": { "icon": "code-xml", "desc": { "ko": "Claude Code · Cursor", "en": "Claude Code · Cursor" } }, "video": { "icon": "clapperboard", "desc": { "ko": "Sora · Veo · Runway", "en": "Sora · Veo · Runway" } } } },
+      "target_model": { "display": "segmented" },
+      "task": { "placeholder": { "ko": "예: 인스타그램 릴스 대본을 쓰는 프롬프트. 시청자가 이탈하지 않고, 약간의 유머가 있어야 함.", "en": "e.g. A prompt that writes Instagram Reels scripts — keeps viewers watching, with some humor." } },
+      "tone": { "display": "segmented" },
+      "output_format": { "display": "segmented" },
+      "constraints": { "placeholder": { "ko": "Enter로 추가 — 예: 300자 이내", "en": "Press Enter — e.g. under 300 characters" } },
+      "style_example": { "placeholder": { "ko": "예전에 결과가 좋았던 프롬프트를 붙여 넣으세요. 형식과 말투를 참고해요.", "en": "Paste a prompt that worked well before — we'll follow its structure and tone." } }
+    },
+    "stage": { "headline": { "ko": "복사해서 바로 쓰는 완성 프롬프트", "en": "A finished prompt, ready to paste" }, "story": { "ko": "역할, 입력 변수, 단계, 출력 형식까지 갖춘 프롬프트와, 예시 입력을 넣었을 때의 기대 결과, 자주 실패하는 경우와 대처법을 함께 드려요.", "en": "Role, input variables, steps and output format — plus the expected result for a sample input and common failure modes with fixes." }, "promises": [ { "icon": "braces", "text": { "ko": "변수 표시", "en": "Variables marked" } }, { "icon": "flask-conical", "text": { "ko": "예시로 검증", "en": "Tested on a sample" } }, { "icon": "life-buoy", "text": { "ko": "실패 대처법", "en": "Failure fixes" } } ] }
+  },
+  "blog": {
+    "layout": "split", "visual": "article",
+    "hero": { "title": { "ko": "검색하는 사람이 끝까지 읽는 글", "en": "Posts searchers read to the end" }, "story": { "ko": "제목 다섯 개 중 하나를 고르고, 소제목과 본문, 이미지 자리, 해시태그까지 한 번에. 플랫폼마다 다른 글 구조를 알아서 맞춥니다.", "en": "Five titles to choose from, then outline, body, image slots and hashtags in one go — structured for your platform." } },
+    "sections": [
+      { "title": { "ko": "무엇에 대해, 누구에게", "en": "About what, for whom" }, "hint": { "ko": "키워드 전략 결과를 이어받을 수도 있어요", "en": "Or chain in from Keyword Strategy" }, "fields": ["topic", "audience"] },
+      { "title": { "ko": "어디에, 어떤 글로", "en": "Where, and what kind" }, "hint": { "ko": "플랫폼과 글 유형이 구조를 바꿔요", "en": "Platform and type change the structure" }, "fields": ["platform", "post_type", "length"] },
+      { "title": { "ko": "틀리면 안 되는 사실", "en": "Facts that must be right" }, "hint": { "ko": "가격, 영업시간, 주소처럼 확정된 정보", "en": "Prices, hours, addresses" }, "fields": ["must_include_facts"] }
+    ],
+    "ui": {
+      "topic": { "placeholder": { "ko": "예: 봄 시즌 딸기 디저트 신메뉴", "en": "e.g. Our spring strawberry dessert menu" } },
+      "platform": { "display": "cards", "options": { "naver": { "icon": "badge-check", "desc": { "ko": "검색 노출 중심", "en": "Search-first" } }, "tistory": { "icon": "file-code", "desc": { "ko": "구글·다음 SEO", "en": "Google SEO" } }, "brunch": { "icon": "feather", "desc": { "ko": "읽는 맛 중심", "en": "Reading-first" } }, "wordpress": { "icon": "globe", "desc": { "ko": "해외·자사 블로그", "en": "Own site" } } } },
+      "post_type": { "display": "segmented" },
+      "length": { "display": "slider-select" },
+      "must_include_facts": { "placeholder": { "ko": "예: 1조각 6,500원 / 오전 7시~오후 8시 / 월요일 휴무", "en": "e.g. ₩6,500 a slice / 7am–8pm / closed Mondays" } }
+    },
+    "stage": { "headline": { "ko": "제목부터 해시태그까지, 한 편 완성", "en": "One finished post, title to hashtags" }, "story": { "ko": "브랜드 톤으로 쓰고, 사실은 출처와 함께. 어느 소제목 뒤에 어떤 사진을 넣을지도 알려 드려요.", "en": "Written in your brand voice, facts sourced, and it tells you which photo goes where." }, "promises": [ { "icon": "heading", "text": { "ko": "제목 5개", "en": "5 titles" } }, { "icon": "image", "text": { "ko": "이미지 자리", "en": "Image slots" } }, { "icon": "file-down", "text": { "ko": ".docx", "en": ".docx" } } ] }
+  },
+  "copy": {
+    "layout": "split", "visual": "copy",
+    "hero": { "title": { "ko": "같은 말, 채널마다 다르게", "en": "Same message, right for every channel" }, "story": { "ko": "인스타그램 캡션과 문자 한 통은 길이도, 말투도 달라야 합니다. 하나의 핵심 메시지를 정하고, 고객이 움직이는 이유별로 다른 각도의 카피를 씁니다.", "en": "An Instagram caption and a text message need different length and voice. We set one core message, then write different angles for each reason people act." } },
+    "sections": [
+      { "title": { "ko": "무엇을 알리나요", "en": "What you're announcing" }, "hint": { "ko": "한두 문장으로", "en": "In a sentence or two" }, "fields": ["offer", "audience", "goal"] },
+      { "title": { "ko": "어디에 쓰나요", "en": "Where it will run" }, "hint": { "ko": "채널을 고르면 글자 수 제한도 함께 보여요", "en": "Pick channels to see their length limits" }, "fields": ["channels", "variants"] },
+      { "title": { "ko": "꼭 들어갈 사실", "en": "Facts to include" }, "hint": { "ko": "가격·기간은 여기에 넣어야 정확해요", "en": "Put prices and dates here to keep them exact" }, "fields": ["must_include"] }
+    ],
+    "ui": {
+      "offer": { "placeholder": { "ko": "예: 봄 딸기 타르트 출시, 4월 한 달 한정", "en": "e.g. Spring strawberry tart, April only" } },
+      "goal": { "display": "cards", "options": { "awareness": { "icon": "megaphone", "desc": { "ko": "많이 보이게", "en": "Get seen" } }, "conversion": { "icon": "mouse-pointer-click", "desc": { "ko": "지금 사게", "en": "Get action" } }, "retention": { "icon": "repeat", "desc": { "ko": "다시 오게", "en": "Bring back" } } } },
+      "channels": { "display": "toggles", "options": { "instagram": { "desc": { "ko": "캡션 ~2,200자", "en": "~2,200 chars" } }, "paid_social": { "desc": { "ko": "헤드라인 ~40자", "en": "~40-char headline" } }, "email": { "desc": { "ko": "제목 ~40자", "en": "~40-char subject" } }, "landing": { "desc": { "ko": "섹션 헤드라인", "en": "Section headlines" } }, "sms": { "desc": { "ko": "~90자 (SMS)", "en": "~90 chars" } } } },
+      "variants": { "display": "slider", "min": 1, "max": 5, "step": 1, "unit": { "ko": "가지", "en": "each" } },
+      "must_include": { "placeholder": { "ko": "Enter로 추가 — 예: 4월 한정", "en": "Press Enter — e.g. April only" } }
+    },
+    "stage": { "headline": { "ko": "고객이 움직이는 이유만큼의 카피", "en": "Copy for every reason people act" }, "story": { "ko": "희소성, 품질, 편리함처럼 서로 다른 설득 각도로 헤드라인·본문·행동 유도를 쓰고, 채널별로 다시 다듬습니다. 피해야 할 표현 목록도 함께요.", "en": "Headline, body and CTA per persuasion angle — scarcity, quality, convenience — then tuned per channel, with words to avoid." }, "promises": [ { "icon": "layers", "text": { "ko": "동기별 각도", "en": "Angles by motive" } }, { "icon": "smartphone", "text": { "ko": "채널별 버전", "en": "Per-channel versions" } }, { "icon": "ban", "text": { "ko": "피할 표현", "en": "Words to avoid" } } ] }
+  },
+  "keyword": {
+    "layout": "split", "visual": "tiers",
+    "hero": { "title": { "ko": "이길 수 있는 키워드부터", "en": "Start with keywords you can win" }, "story": { "ko": "'케이크'로는 1페이지에 못 올라갑니다. 하지만 '해운대 레터링 케이크'는 가능하죠. 경쟁 강도에 따라 세 단계로 나누고, 아무도 제대로 답하지 않은 주제를 찾아 드려요.", "en": "You won't rank for \"cake\". You can for \"Haeundae lettering cake\". We tier keywords by competition and find topics nobody answers well." } },
+    "sections": [
+      { "title": { "ko": "대표 키워드", "en": "Your main keyword" }, "hint": { "ko": "가장 팔고 싶은 것을 한 단어로", "en": "What you most want to sell" }, "fields": ["primary_keyword", "region"] },
+      { "title": { "ko": "누가, 어디서 찾나요", "en": "Who searches, and where" }, "hint": { "ko": "의도에 따라 전혀 다른 키워드가 나와요", "en": "Intent changes everything" }, "fields": ["intent", "platforms"] }
+    ],
+    "ui": {
+      "primary_keyword": { "placeholder": { "ko": "예: 수제 케이크 주문", "en": "e.g. custom cake order" } },
+      "region": { "placeholder": { "ko": "예: 부산 해운대 (매장이 있다면 꼭)", "en": "e.g. Haeundae, Busan (if you have a store)" } },
+      "intent": { "display": "cards", "options": { "buy": { "icon": "shopping-bag", "desc": { "ko": "주문·가격·예약", "en": "Order, price, book" } }, "learn": { "icon": "book-open", "desc": { "ko": "방법·비교·추천", "en": "How-to, compare" } }, "local": { "icon": "map-pin", "desc": { "ko": "근처·지역명", "en": "Near me, area" } } } },
+      "platforms": { "display": "toggles" }
+    },
+    "stage": { "headline": { "ko": "지금 공략할 것, 나중에 노릴 것", "en": "Target now, aim for later" }, "story": { "ko": "마이크로·미드·메가 키워드를 네 개씩, 그리고 경쟁자가 비워 둔 콘텐츠 공백 세 가지. 고른 키워드로 블로그 원고를 바로 시작할 수 있어요.", "en": "Four micro, mid and mega keywords each, plus three content gaps. Start a blog draft from any of them." }, "promises": [ { "icon": "triangle", "text": { "ko": "3단계 티어", "en": "3 tiers" } }, { "icon": "scan-search", "text": { "ko": "콘텐츠 공백", "en": "Content gaps" } }, { "icon": "arrow-right", "text": { "ko": "블로그로 연결", "en": "Into a blog post" } } ] }
+  }
+}

@@ -1,0 +1,160 @@
+{
+  "place": {
+    "layout": "split", "visual": "map",
+    "hero": { "title": { "ko": "지도에서 먼저 눈에 띄는 가게", "en": "The shop people notice first on the map" }, "story": { "ko": "손님은 지도 앱에서 가게를 고릅니다. 소개글, 대표 키워드, 사진 구성, 매주 할 일을 정리해 드려요. 가짜 리뷰 대신 진짜 리뷰를 늘리는 방법으로요.", "en": "Customers choose on the map. We tune your description, keywords, photos and weekly routine — growing real reviews, never fake ones." } },
+    "sections": [
+      { "title": { "ko": "어떤 가게인가요", "en": "Which business" }, "hint": { "ko": "지도에 등록된 이름 그대로", "en": "Exactly as listed on the map" }, "fields": ["business_name", "region"] },
+      { "title": { "ko": "지금 모습과 경쟁자", "en": "Where you are now" }, "hint": { "ko": "현재 소개글을 붙여 넣으면 무엇이 달라지는지 비교해 드려요", "en": "Paste your current listing to see what changes" }, "fields": ["current_info", "competitors"] }
+    ],
+    "ui": {
+      "business_name": { "placeholder": { "ko": "예: 해봇 베이커리", "en": "e.g. Haebot Bakery" } },
+      "region": { "placeholder": { "ko": "예: 부산 해운대구", "en": "e.g. Haeundae-gu, Busan" } },
+      "current_info": { "placeholder": { "ko": "지금 지도 앱에 올라가 있는 소개글을 그대로 붙여 넣으세요", "en": "Paste your current map listing text" } },
+      "competitors": { "placeholder": { "ko": "Enter로 추가 — 근처 경쟁 가게", "en": "Press Enter — nearby competitors" } }
+    },
+    "stage": { "headline": { "ko": "소개글, 키워드, 그리고 이번 주 할 일", "en": "Description, keywords, and this week's to-dos" }, "story": { "ko": "지역 검색에 맞춘 소개글과 대표 키워드 다섯 개, 찍어야 할 사진 목록, 리뷰에 답하는 문장, 매주 반복할 체크리스트.", "en": "A local-search description, five keywords, a shot list, review replies and a weekly checklist." }, "promises": [ { "icon": "map-pin", "text": { "ko": "지역 키워드", "en": "Local keywords" } }, { "icon": "camera", "text": { "ko": "사진 목록", "en": "Shot list" } }, { "icon": "shield-check", "text": { "ko": "정직한 리뷰 전략", "en": "Honest reviews" } } ] }
+  },
+  "image": {
+    "layout": "canvas", "visual": "gallery",
+    "hero": { "title": { "ko": "사진 한 장이 광고가 되기까지", "en": "From one photo to an ad" }, "story": { "ko": "스튜디오를 빌리지 않아도 됩니다. 어디에 쓸지 고르면 조명과 구도가 알아서 맞춰지고, 실제 제품 사진을 넣으면 모양과 색을 그대로 지켜요.", "en": "No studio needed. Pick where it's going and lighting and composition follow; add your real product photo and its shape and color stay true." } },
+    "sections": [
+      { "title": { "ko": "어디에 쓸 사진인가요", "en": "Where will it be used" }, "hint": { "ko": "용도에 맞는 빛과 구도가 적용돼요", "en": "Sets lighting and composition" }, "fields": ["preset"] },
+      { "title": { "ko": "장면 설명", "en": "Describe the scene" }, "hint": { "ko": "재질과 빛 방향을 적으면 상업 사진처럼 나와요", "en": "Material and light direction make it look commercial" }, "fields": ["description"] },
+      { "title": { "ko": "비율과 참조 사진", "en": "Ratio and reference" }, "hint": { "ko": "참조 사진은 선택이지만, 제품이 있다면 꼭", "en": "Optional, but add it if you have the product" }, "fields": ["ratio", "reference"] }
+    ],
+    "ui": {
+      "preset": { "display": "cards", "options": { "studio": { "icon": "aperture", "desc": { "ko": "쇼핑몰 대표컷", "en": "Store hero shot" } }, "packaging": { "icon": "package", "desc": { "ko": "패키지·박스", "en": "Pack & box" } }, "3d_render": { "icon": "box", "desc": { "ko": "테크·하드웨어", "en": "Tech hardware" } }, "landing_ui": { "icon": "layout-template", "desc": { "ko": "웹·앱 화면", "en": "Web & app UI" } }, "ad_banner": { "icon": "megaphone", "desc": { "ko": "배너·SNS 광고", "en": "Banner & social ad" } }, "background": { "icon": "mountain", "desc": { "ko": "합성용 배경", "en": "Background plate" } } } },
+      "description": { "placeholder": { "ko": "예: 미니멀한 세라믹 세럼 병, 흰 대리석 위, 부드러운 직사광과 야자수 잎 그림자", "en": "e.g. Minimal ceramic serum bottle on white marble, soft sunlight, palm-leaf shadows" } },
+      "ratio": { "display": "ratio" }
+    },
+    "stage": { "headline": { "ko": "용도별 네 컷", "en": "Four shots, one purpose" }, "story": { "ko": "정면, 45도, 클로즈업, 문구 여백 컷. 마음에 드는 컷은 상세페이지나 블로그로 바로 이어갈 수 있어요.", "en": "Front, 45°, close-up and a copy-space shot. Send your favorite into a detail page or blog post." }, "promises": [ { "icon": "images", "text": { "ko": "4컷 생성", "en": "4 shots" } }, { "icon": "scan", "text": { "ko": "제품 형태 유지", "en": "Product stays true" } }, { "icon": "ban", "text": { "ko": "실존 인물·타사 로고 없음", "en": "No real people or logos" } } ] }
+  },
+  "logo": {
+    "layout": "canvas", "visual": "logo",
+    "hero": { "title": { "ko": "이름에 얼굴을 입히는 일", "en": "Giving your name a face" }, "story": { "ko": "브랜드명과 떠오르는 단어 세 개면 충분합니다. 여섯 가지 시안을 확대해도 깨지지 않는 벡터로 만들어 드려요.", "en": "A name and three words is enough. Six concepts, as vectors that stay sharp at any size." } },
+    "sections": [
+      { "title": { "ko": "이름과 느낌", "en": "Name and feeling" }, "hint": { "ko": "추상어 하나, 구체어 하나를 섞으면 좋아요", "en": "Mix an abstract word with a concrete one" }, "fields": ["brand_name", "keywords"] },
+      { "title": { "ko": "형태", "en": "Form" }, "hint": { "ko": "어디에 쓰일지 생각해 보세요 — 간판, 앱 아이콘, 도장", "en": "Think where it lives — sign, app icon, stamp" }, "fields": ["style"] },
+      { "title": { "ko": "색", "en": "Color" }, "hint": { "ko": "브랜드 컬러는 프로필에서 가져와요", "en": "Brand colors come from your profile" }, "fields": ["color_tendency"] }
+    ],
+    "ui": {
+      "brand_name": { "placeholder": { "ko": "예: 해봇 베이커리", "en": "e.g. Haebot Bakery" } },
+      "keywords": { "placeholder": { "ko": "Enter로 추가 — 예: 밀, 아침, 손맛", "en": "Press Enter — e.g. wheat, morning, handmade" } },
+      "style": { "display": "cards", "options": { "wordmark": { "icon": "type", "desc": { "ko": "글자만으로", "en": "Letters only" } }, "symbol_wordmark": { "icon": "shapes", "desc": { "ko": "심볼 + 글자", "en": "Symbol + name" } }, "initial": { "icon": "square-dashed", "desc": { "ko": "첫 글자 모노그램", "en": "Monogram" } }, "emblem": { "icon": "badge", "desc": { "ko": "원형·배지형", "en": "Seal or badge" } } } },
+      "color_tendency": { "display": "swatches" }
+    },
+    "stage": { "headline": { "ko": "여섯 개의 얼굴", "en": "Six faces" }, "story": { "ko": "각 시안의 아이디어와 쓰임새를 함께 설명합니다. 스크립트 같은 위험 요소는 걸러낸 안전한 SVG예요.", "en": "Each concept comes with its idea and use. Sanitized SVG, scripts stripped." }, "promises": [ { "icon": "shapes", "text": { "ko": "시안 6개", "en": "6 concepts" } }, { "icon": "vector-square", "text": { "ko": "SVG 벡터", "en": "SVG vectors" } }, { "icon": "shield-check", "text": { "ko": "안전 검증", "en": "Sanitized" } } ] }
+  },
+  "brand-model": {
+    "layout": "canvas", "visual": "model",
+    "hero": { "title": { "ko": "섭외 없이, 제품을 입은 모델", "en": "A model wearing your product, no casting" }, "story": { "ko": "제품 사진 한 장으로 타깃 고객을 닮은 가상 모델 컷을 만듭니다. 실존 인물을 닮은 얼굴은 만들지 않아요.", "en": "One product photo becomes shots of a virtual model who looks like your customer. Never a real person's likeness." } },
+    "sections": [
+      { "title": { "ko": "제품 사진", "en": "Product photo" }, "hint": { "ko": "배경이 깔끔하고 제품이 절반 이상 차지하는 사진", "en": "Clean background, product fills half the frame" }, "fields": ["product_photo"] },
+      { "title": { "ko": "누가, 어떤 분위기로", "en": "Who, and what mood" }, "hint": { "ko": "타깃 고객과 비슷한 모델이 가장 잘 팔려요", "en": "Models who look like your buyers sell best" }, "fields": ["model_profile", "mood"] },
+      { "title": { "ko": "어디서", "en": "Where" }, "hint": { "ko": "배경과 비율", "en": "Setting and ratio" }, "fields": ["setting", "ratio"] }
+    ],
+    "ui": {
+      "model_profile": { "display": "segmented" },
+      "mood": { "display": "cards", "options": { "minimal": { "icon": "minus", "desc": { "ko": "여백, 절제", "en": "Clean, restrained" } }, "casual": { "icon": "coffee", "desc": { "ko": "일상, 편안함", "en": "Everyday ease" } }, "luxury": { "icon": "gem", "desc": { "ko": "고급, 조명", "en": "Premium light" } }, "natural": { "icon": "leaf", "desc": { "ko": "자연광, 야외", "en": "Daylight" } } } },
+      "setting": { "display": "segmented" },
+      "ratio": { "display": "ratio" }
+    },
+    "stage": { "headline": { "ko": "네 컷, 한 명의 모델", "en": "Four shots, one consistent model" }, "story": { "ko": "같은 모델이 네 가지 포즈로 제품을 보여 줍니다. 제품 형태가 원본과 일치하는지 확인해요.", "en": "The same model shows your product in four poses; we check the product matches the original." }, "promises": [ { "icon": "user-round", "text": { "ko": "가상 모델", "en": "Virtual model" } }, { "icon": "scan", "text": { "ko": "제품 일치 확인", "en": "Product match check" } }, { "icon": "ban", "text": { "ko": "실존 인물 차단", "en": "No real likeness" } } ] }
+  },
+  "sangsepage": {
+    "layout": "split", "visual": "page",
+    "hero": { "title": { "ko": "스크롤을 멈추게 하는 상세페이지", "en": "A detail page that stops the scroll" }, "story": { "ko": "후킹 헤드라인, 공감, 특징, 사용법, 신뢰, 자주 묻는 질문. 사고 싶어지는 순서대로 쌓아 860px 이미지로 만들어 드려요. 입력하지 않은 효능은 절대 쓰지 않습니다.", "en": "Hook, empathy, features, how-to, trust, FAQ — stacked in buying order and rendered at 860px. Never claims you didn't provide." } },
+    "sections": [
+      { "title": { "ko": "무엇을 파나요", "en": "What you're selling" }, "hint": { "ko": "제품명과 가격", "en": "Name and price" }, "fields": ["product_name", "price"] },
+      { "title": { "ko": "왜 사야 하나요", "en": "Why buy it" }, "hint": { "ko": "'맛있어요'보다 '당류 5g 이하'처럼 확인 가능한 사실로", "en": "Checkable facts, like \"under 5g sugar\"" }, "fields": ["features", "target_customer", "competitor"] },
+      { "title": { "ko": "보여 줄 모습", "en": "How it looks" }, "hint": { "ko": "사진과 분위기", "en": "Photos and mood" }, "fields": ["product_photos", "page_mood"] }
+    ],
+    "ui": {
+      "product_name": { "placeholder": { "ko": "예: 저당 수제 그래놀라 500g", "en": "e.g. Low-sugar granola, 500g" } },
+      "features": { "placeholder": { "ko": "Enter로 추가 — 예: 당류 5g 이하", "en": "Press Enter — e.g. under 5g sugar" } },
+      "page_mood": { "display": "cards", "options": { "clean": { "icon": "layout-list", "desc": { "ko": "스펙 비교가 중요할 때", "en": "When specs matter" } }, "warm": { "icon": "heart", "desc": { "ko": "이야기로 설득할 때", "en": "When story sells" } }, "premium": { "icon": "gem", "desc": { "ko": "선물·고가 제품", "en": "Gifts, high-end" } } } }
+    },
+    "stage": { "headline": { "ko": "사고 싶어지는 순서", "en": "Built in buying order" }, "story": { "ko": "여섯 섹션을 스토어 규격 860px 이미지로 렌더링합니다. 과장 광고 표현은 걸러 내요.", "en": "Six sections rendered at the 860px store standard, with exaggerated claims filtered out." }, "promises": [ { "icon": "layers", "text": { "ko": "6개 섹션", "en": "6 sections" } }, { "icon": "smartphone", "text": { "ko": "860px 이미지", "en": "860px image" } }, { "icon": "shield-check", "text": { "ko": "과장 표현 차단", "en": "No false claims" } } ] }
+  },
+  "homepage": {
+    "layout": "split", "visual": "site",
+    "hero": { "title": { "ko": "고르는 대로 쌓이는 홈페이지", "en": "A website that builds as you choose" }, "story": { "ko": "목적과 필요한 섹션만 고르세요. 오른쪽 미리보기에 사이트 뼈대가 바로 쌓이고, 실행하면 프로필 정보로 채운 반응형 사이트를 ZIP으로 드려요.", "en": "Just pick a purpose and sections. The preview builds the skeleton as you go; run it and get a responsive site filled from your profile, as a ZIP." } },
+    "sections": [
+      { "title": { "ko": "사이트의 목적", "en": "What the site is for" }, "hint": { "ko": "목적에 따라 첫 화면 행동 버튼이 달라져요", "en": "Changes the main call to action" }, "fields": ["purpose"] },
+      { "title": { "ko": "필요한 섹션", "en": "Sections you need" }, "hint": { "ko": "후기는 실제 후기가 있을 때만 고르세요", "en": "Only pick testimonials if you have real ones" }, "fields": ["sections"] },
+      { "title": { "ko": "참고 사이트 (선택)", "en": "Reference site (optional)" }, "hint": { "ko": "분위기만 참고하고 베끼지 않아요", "en": "For mood only — never copied" }, "fields": ["reference_site"] }
+    ],
+    "ui": {
+      "purpose": { "display": "cards", "options": { "intro": { "icon": "store", "desc": { "ko": "가게·회사 소개", "en": "About the business" } }, "booking": { "icon": "calendar-check", "desc": { "ko": "예약 받기", "en": "Take bookings" } }, "sales": { "icon": "shopping-cart", "desc": { "ko": "상품 판매", "en": "Sell products" } }, "portfolio": { "icon": "gallery-horizontal", "desc": { "ko": "작업물 보여 주기", "en": "Show work" } }, "landing": { "icon": "rocket", "desc": { "ko": "하나의 제품·이벤트", "en": "One product or event" } } } },
+      "sections": { "display": "toggles" },
+      "reference_site": { "placeholder": { "ko": "https://", "en": "https://" } }
+    },
+    "stage": { "headline": { "ko": "미리보기가 곧 설계도", "en": "The preview is the blueprint" }, "story": { "ko": "주소·가격·수상 이력은 프로필에 있는 것만 씁니다. 없는 정보는 [입력 필요]로 남겨 두니, 지어낸 내용이 올라갈 일이 없어요.", "en": "Addresses, prices and awards come only from your profile; anything missing stays as [needs input]." }, "promises": [ { "icon": "monitor-smartphone", "text": { "ko": "반응형", "en": "Responsive" } }, { "icon": "folder-archive", "text": { "ko": "ZIP 다운로드", "en": "ZIP download" } }, { "icon": "shield-check", "text": { "ko": "사실만", "en": "Facts only" } } ] }
+  },
+  "proposal": {
+    "layout": "split", "visual": "doc",
+    "hero": { "title": { "ko": "받는 사람이 '예'라고 말하게", "en": "Written so they say yes" }, "story": { "ko": "좋은 제안서는 우리 자랑이 아니라 상대의 문제에서 시작합니다. 대상과 내용을 알려 주시면 배경, 제안, 기대 효과, 조건, 다음 단계를 갖춘 초안을 써 드려요.", "en": "Good proposals start with their problem, not your pitch. Tell us who and what, and get a draft with background, offer, benefits, terms and next step." } },
+    "sections": [
+      { "title": { "ko": "누구에게, 무엇을", "en": "To whom, and what" }, "hint": { "ko": "상대가 지금 겪는 문제를 한 줄 넣으면 설득력이 커져요", "en": "One line on their current problem makes it persuasive" }, "fields": ["target", "content"] },
+      { "title": { "ko": "조건", "en": "Terms" }, "hint": { "ko": "예산과 기간", "en": "Budget and duration" }, "fields": ["budget", "duration"] },
+      { "title": { "ko": "우리만의 이유와 자료", "en": "Why us, and materials" }, "hint": { "ko": "메뉴판·포트폴리오 사진을 올리면 내용에 반영돼요", "en": "Menus or portfolio photos get reflected" }, "fields": ["differentiators", "attachments"] }
+    ],
+    "ui": {
+      "target": { "placeholder": { "ko": "예: 해운대 지역 카페 3곳", "en": "e.g. Three cafés in Haeundae" } },
+      "content": { "placeholder": { "ko": "예: 주 3회 수제 디저트 납품, 시즌 메뉴 공동 개발", "en": "e.g. Desserts three times a week, co-developed seasonal menu" } },
+      "differentiators": { "placeholder": { "ko": "Enter로 추가 — 예: 당일 생산", "en": "Press Enter — e.g. made same day" } }
+    },
+    "stage": { "headline": { "ko": "바로 보낼 수 있는 초안", "en": "A draft you can send" }, "story": { "ko": "표지, 개요, 문제, 해결, 실행 계획, 일정, 가격, 회사 소개. 서식이 잡힌 Word 파일로 내려받아 다듬으세요.", "en": "Cover, summary, problem, solution, plan, timeline, pricing, about — as a formatted Word file." }, "promises": [ { "icon": "user-round", "text": { "ko": "상대 관점", "en": "Their point of view" } }, { "icon": "calendar-range", "text": { "ko": "일정·가격표", "en": "Timeline & pricing" } }, { "icon": "file-down", "text": { "ko": ".docx", "en": ".docx" } } ] }
+  },
+  "presentation": {
+    "layout": "split", "visual": "deck",
+    "hero": { "title": { "ko": "주제만 주세요. 이야기는 저희가 짭니다", "en": "Give us the topic. We'll build the story" }, "story": { "ko": "슬라이드를 나열하기 전에 듣는 사람을 설득할 흐름부터 세웁니다. 장마다 헤드라인, 요점, 시각 자료 제안, 발표 메모까지 — 마지막 장엔 요청할 한 가지를 남겨요.", "en": "Before listing slides, we build the arc that persuades your audience. Every slide gets a headline, points, a visual idea and speaker notes — ending with one clear ask." } },
+    "sections": [
+      { "title": { "ko": "무엇을 발표하나요", "en": "What you're presenting" }, "hint": { "ko": "주제와 이 발표로 얻고 싶은 것", "en": "Topic, and what you want from it" }, "fields": ["brief"] },
+      { "title": { "ko": "목적과 청중", "en": "Purpose and audience" }, "hint": { "ko": "목적이 흐름의 뼈대를 바꿔요", "en": "Purpose changes the backbone" }, "fields": ["purpose", "audience"] },
+      { "title": { "ko": "분량과 디자인 톤", "en": "Length and design tone" }, "hint": { "ko": "슬라이드 수를 움직이면 미리보기가 따라와요", "en": "Move the slider and the preview follows" }, "fields": ["slide_count", "design_tone"] },
+      { "title": { "ko": "꼭 넣을 자료 (선택)", "en": "Material to include (optional)" }, "hint": { "ko": "수치와 사실을 붙여 넣으면 그대로 반영해요", "en": "Paste figures and facts to use as-is" }, "fields": ["reference"] }
+    ],
+    "ui": {
+      "brief": { "placeholder": { "ko": "예: 소상공인을 위한 AI 마케팅 자동화 솔루션 제안", "en": "e.g. Proposing AI marketing automation for small businesses" } },
+      "purpose": { "display": "cards", "options": { "pitch": { "icon": "handshake", "desc": { "ko": "설득·제안", "en": "Persuade" } }, "report": { "icon": "chart-column", "desc": { "ko": "성과 보고", "en": "Report results" } }, "launch": { "icon": "rocket", "desc": { "ko": "런칭 전략", "en": "Launch plan" } }, "education": { "icon": "graduation-cap", "desc": { "ko": "교육·강의", "en": "Teach" } } } },
+      "audience": { "placeholder": { "ko": "예: 지자체 담당자, 투자자", "en": "e.g. city officials, investors" } },
+      "slide_count": { "display": "slider-select" },
+      "design_tone": { "display": "cards", "options": { "trust": { "icon": "shield-check", "desc": { "ko": "보고·공공기관", "en": "Reports, public sector" } }, "bold": { "icon": "zap", "desc": { "ko": "피칭·런칭", "en": "Pitches, launches" } } } },
+      "reference": { "placeholder": { "ko": "발표에 꼭 들어가야 할 사실, 수치, 데이터를 붙여 넣으세요", "en": "Paste facts, figures and data that must be included" } }
+    },
+    "stage": { "headline": { "ko": "흐름이 먼저 서는 발표자료", "en": "A deck where the story comes first" }, "story": { "ko": "목차를 짜고, 장마다 내용과 발표 메모를 쓴 뒤, 마지막에 청중에게 요청할 한 가지로 닫습니다.", "en": "We plan the outline, write each slide and its notes, then close on one ask for your audience." }, "promises": [ { "icon": "list-tree", "text": { "ko": "흐름 자동 설계", "en": "Auto-planned flow" } }, { "icon": "notebook-pen", "text": { "ko": "발표 메모", "en": "Speaker notes" } }, { "icon": "target", "text": { "ko": "마무리 요청", "en": "Closing ask" } } ] }
+  },
+  "business-plan": {
+    "layout": "steps", "visual": "plan",
+    "hero": { "title": { "ko": "숫자가 맞는 사업계획서", "en": "A business plan where the numbers add up" }, "story": { "ko": "심사위원이 가장 먼저 보는 건 손익분기입니다. 단가와 비용을 넣는 순간 손익분기가 바로 계산되고, 목적에 맞는 구조로 본문을 써서 Word와 Excel로 드려요.", "en": "Reviewers look at break-even first. It's calculated the moment you enter price and costs; then we write the narrative for your purpose and deliver Word and Excel." } },
+    "sections": [
+      { "title": { "ko": "무엇을, 왜 쓰나요", "en": "What, and why" }, "hint": { "ko": "투자와 정부지원은 강조점이 달라요", "en": "Investors and grant reviewers look for different things" }, "fields": ["item", "purpose"] },
+      { "title": { "ko": "시장과 팀", "en": "Market and team" }, "hint": { "ko": "시장 규모는 출처와 함께, 없으면 추정으로 표시해요", "en": "Market size is sourced or marked as estimate" }, "fields": ["market", "team"] },
+      { "title": { "ko": "숫자", "en": "The numbers" }, "hint": { "ko": "아는 숫자만 넣으세요. 손익분기가 바로 계산돼요", "en": "Enter what you know — break-even updates live" }, "fields": ["unit_price", "monthly_sales_target", "fixed_cost", "variable_cost_rate"] }
+    ],
+    "ui": {
+      "item": { "placeholder": { "ko": "예: 비건 디저트 정기배송 서비스, 월 4회 배송", "en": "e.g. Vegan dessert subscription, four deliveries a month" } },
+      "purpose": { "display": "cards", "options": { "investment": { "icon": "trending-up", "desc": { "ko": "성장성·시장", "en": "Growth & market" } }, "government": { "icon": "landmark", "desc": { "ko": "공공성·실현성", "en": "Feasibility" } }, "internal": { "icon": "clipboard-check", "desc": { "ko": "의사결정용", "en": "For decisions" } }, "loan": { "icon": "banknote", "desc": { "ko": "상환 능력", "en": "Repayment" } } } },
+      "variable_cost_rate": { "display": "slider", "min": 0, "max": 90, "step": 1, "unit": { "ko": "%", "en": "%" } }
+    },
+    "stage": { "headline": { "ko": "본문과 재무 가정, 두 파일로", "en": "Narrative and financials, two files" }, "story": { "ko": "문제, 해결, 시장, 팀, 자금 계획 순서로 쓰고, 3개년 손익과 가정은 수식이 살아 있는 Excel로 드립니다.", "en": "Problem, solution, market, team, funding — plus a 3-year P&L with live formulas in Excel." }, "promises": [ { "icon": "calculator", "text": { "ko": "손익분기 즉시 계산", "en": "Live break-even" } }, { "icon": "file-down", "text": { "ko": "Word + Excel", "en": "Word + Excel" } }, { "icon": "search", "text": { "ko": "시장 근거", "en": "Market evidence" } } ] }
+  },
+  "grant": {
+    "layout": "split", "visual": "checklist",
+    "hero": { "title": { "ko": "받을 수 있는 지원금부터", "en": "Start with money you can actually get" }, "story": { "ko": "공고는 많지만 자격이 맞는 건 몇 개뿐입니다. 업력, 지역, 매출, 인원으로 먼저 걸러 내고, 서류 준비 순서까지 정리해 드려요. 실제 공고가 확인되지 않으면 없는 공고를 지어내지 않습니다.", "en": "Plenty of programs, few you qualify for. We filter by years, region, revenue and headcount, then order the paperwork. No real listing, no result — we never invent one." } },
+    "sections": [
+      { "title": { "ko": "우리 회사는", "en": "Your company" }, "hint": { "ko": "자격 요건을 가르는 네 가지", "en": "The four things that decide eligibility" }, "fields": ["years_in_business", "region", "revenue_band", "employee_count"] },
+      { "title": { "ko": "원하는 지원", "en": "Support you want" }, "hint": { "ko": "여러 개 골라도 돼요", "en": "Pick as many as fit" }, "fields": ["support_types", "tech_fields"] }
+    ],
+    "ui": {
+      "years_in_business": { "display": "segmented" },
+      "region": { "display": "segmented" },
+      "revenue_band": { "display": "segmented" },
+      "employee_count": { "display": "slider", "min": 1, "max": 100, "step": 1, "unit": { "ko": "명", "en": "people" } },
+      "support_types": { "display": "toggles" },
+      "tech_fields": { "placeholder": { "ko": "Enter로 추가 — 예: 스마트팩토리", "en": "Press Enter — e.g. smart factory" } }
+    },
+    "stage": { "headline": { "ko": "자격이 맞는 공고와 서류 순서", "en": "Programs you qualify for, and the paperwork order" }, "story": { "ko": "공고마다 원문 링크, 자격 충족 여부, 필요한 서류. 공공 데이터 연결이 준비 중일 때는 솔직하게 알려 드려요.", "en": "Each program with its source link, eligibility check and documents. If the public data feed isn't connected yet, we say so." }, "promises": [ { "icon": "funnel", "text": { "ko": "자격 먼저 필터", "en": "Eligibility first" } }, { "icon": "list-checks", "text": { "ko": "서류 체크리스트", "en": "Document checklist" } }, { "icon": "shield-check", "text": { "ko": "가짜 공고 없음", "en": "No invented listings" } } ] }
+  }
+}

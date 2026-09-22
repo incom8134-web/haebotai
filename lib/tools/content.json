@@ -1,0 +1,2347 @@
+{
+  "money": {
+    "tagline": {
+      "ko": "내가 가진 것으로 돈이 되는 방향 3가지",
+      "en": "Three ways to earn from what you already have"
+    },
+    "description": {
+      "ko": "경력, 시간, 자본, 리스크 성향을 넣으면 현실적으로 시작할 수 있는 수익화 방향 3가지를 첫 행동과 함께 제안합니다. 결과는 트렌드 분석과 90일 캘린더로 그대로 이어집니다.",
+      "en": "Enter your skills, time, capital and risk appetite, and get three realistic monetization directions with a first step for each. Results flow straight into Trend Analysis and the 90-Day Calendar."
+    },
+    "features": [
+      {
+        "icon": "user-round",
+        "title": {
+          "ko": "내 상황 기준",
+          "en": "Built on your situation"
+        },
+        "body": {
+          "ko": "주당 가용시간과 초기 자본을 반영해 지금 당장 시작 가능한 것만 추립니다.",
+          "en": "Filters by weekly hours and starting capital, so every idea is startable now."
+        }
+      },
+      {
+        "icon": "link",
+        "title": {
+          "ko": "다음 단계로 바로 연결",
+          "en": "Chains to the next step"
+        },
+        "body": {
+          "ko": "고른 방향을 트렌드 분석이나 90일 캘린더에 파일 없이 넘깁니다.",
+          "en": "Send your pick to Trend Analysis or the 90-Day Calendar — no file exports."
+        }
+      },
+      {
+        "icon": "shield-check",
+        "title": {
+          "ko": "추정은 추정이라고",
+          "en": "Estimates are labeled"
+        },
+        "body": {
+          "ko": "예상 수입처럼 확인할 수 없는 숫자에는 추정 배지가 붙습니다.",
+          "en": "Unverifiable figures like expected income always carry an estimate badge."
+        }
+      }
+    ],
+    "presets": [
+      {
+        "title": {
+          "ko": "주말 제과 클래스",
+          "en": "Weekend baking classes"
+        },
+        "tag": {
+          "ko": "부업",
+          "en": "Side income"
+        },
+        "values": {
+          "skills": "10년차 제과사, 케이크·구움과자 전문. 매장 근무 중.",
+          "weekly_hours": 8,
+          "capital": "1m",
+          "risk": "low",
+          "interests": [
+            "클래스",
+            "소량 판매"
+          ],
+          "avoid": "대량 생산"
+        }
+      },
+      {
+        "title": {
+          "ko": "디자이너의 디지털 상품",
+          "en": "Designer's digital products"
+        },
+        "tag": {
+          "ko": "무자본",
+          "en": "No capital"
+        },
+        "values": {
+          "skills": "UI 디자이너 5년차, 피그마·일러스트 능숙",
+          "weekly_hours": 10,
+          "capital": "0",
+          "risk": "mid",
+          "interests": [
+            "템플릿",
+            "온라인 강의"
+          ]
+        }
+      },
+      {
+        "title": {
+          "ko": "퇴직 후 지역 창업",
+          "en": "Local business after retirement"
+        },
+        "tag": {
+          "ko": "창업",
+          "en": "Startup"
+        },
+        "values": {
+          "skills": "제조업 품질관리 25년, 현장 교육 경험 다수",
+          "weekly_hours": 30,
+          "capital": "5m+",
+          "risk": "mid",
+          "interests": [
+            "교육",
+            "컨설팅"
+          ]
+        }
+      }
+    ],
+    "steps": [
+      {
+        "ko": "보유 기술과 경력을 구체적으로 적습니다.",
+        "en": "Describe your skills and experience concretely."
+      },
+      {
+        "ko": "시간·자본·리스크 성향을 고릅니다.",
+        "en": "Pick your time, capital and risk appetite."
+      },
+      {
+        "ko": "마음에 드는 방향을 트렌드 분석으로 검증합니다.",
+        "en": "Validate your favorite direction with Trend Analysis."
+      }
+    ],
+    "tips": [
+      {
+        "ko": "'요리 잘함'보다 '한식 조리기능사, 반찬가게 3년'처럼 쓰면 결과가 훨씬 구체적입니다.",
+        "en": "\"Korean-cuisine certified, 3 years at a side-dish shop\" beats \"good at cooking\"."
+      },
+      {
+        "ko": "피하고 싶은 일을 적으면 맞지 않는 제안이 줄어듭니다.",
+        "en": "Listing what you want to avoid removes poor-fit ideas."
+      }
+    ],
+    "faq": [
+      {
+        "q": {
+          "ko": "제안된 수입은 보장되나요?",
+          "en": "Is the suggested income guaranteed?"
+        },
+        "a": {
+          "ko": "아닙니다. 수입 수치는 모두 추정이며 배지로 표시됩니다. 실제 시장 근거는 트렌드 분석에서 출처와 함께 확인하세요.",
+          "en": "No. Income figures are estimates and are badged as such. Check real market evidence with sources in Trend Analysis."
+        }
+      }
+    ],
+    "sample": {
+      "ko": "① 원데이 구움과자 클래스 — 첫 행동: 동네 공방 2곳에 주말 대관 문의\n② 시즌 한정 선물 세트 소량 판매 — 첫 행동: 인스타그램 사전 예약 폼 만들기\n③ 제과 레시피 PDF + 영상 — 첫 행동: 가장 반응 좋은 레시피 1개 촬영",
+      "en": "① One-day baking class — first step: ask two local studios about weekend rental\n② Seasonal gift boxes, small batch — first step: open an Instagram pre-order form\n③ Recipe PDF + video — first step: film your best-received recipe"
+    }
+  },
+  "trend": {
+    "tagline": {
+      "ko": "후보 아이디어를 실제 근거로 점수화",
+      "en": "Score ideas against real evidence"
+    },
+    "description": {
+      "ko": "후보 아이디어들을 웹 검색 근거로 수요, 경쟁, 진입 타이밍을 비교해 점수를 매깁니다. 모든 수치에는 출처 링크가 붙고, 출처가 없는 수치는 추정으로 표시됩니다.",
+      "en": "Compares candidate ideas on demand, competition and timing using live web evidence. Every figure links to a source; anything unsourced is marked as an estimate."
+    },
+    "features": [
+      {
+        "icon": "search",
+        "title": {
+          "ko": "실시간 웹 근거",
+          "en": "Live web evidence"
+        },
+        "body": {
+          "ko": "사전학습 추측이 아니라 검색으로 찾은 자료를 인용합니다.",
+          "en": "Cites what search actually finds — not pretrained guesses."
+        }
+      },
+      {
+        "icon": "shield-check",
+        "title": {
+          "ko": "출처 패널",
+          "en": "Sources panel"
+        },
+        "body": {
+          "ko": "각 주장 옆에 제목·도메인·링크가 달린 출처가 붙습니다.",
+          "en": "Each claim lists a source with title, domain and link."
+        }
+      },
+      {
+        "icon": "link",
+        "title": {
+          "ko": "사업계획서로 이어짐",
+          "en": "Feeds your business plan"
+        },
+        "body": {
+          "ko": "1위 아이디어를 사업계획서나 90일 캘린더로 넘깁니다.",
+          "en": "Send the winner to Business Plan or the 90-Day Calendar."
+        }
+      }
+    ],
+    "presets": [
+      {
+        "title": {
+          "ko": "1인 가구 밀키트",
+          "en": "Single-household meal kits"
+        },
+        "tag": {
+          "ko": "식품",
+          "en": "Food"
+        },
+        "values": {
+          "ideas": [
+            "밀키트 구독",
+            "반찬 정기배송",
+            "도시락 케이터링"
+          ],
+          "target_market": "20~30대 1인 가구, 수도권",
+          "budget": "5m",
+          "entry_timing": "3m"
+        }
+      },
+      {
+        "title": {
+          "ko": "반려동물 수제 간식",
+          "en": "Handmade pet treats"
+        },
+        "tag": {
+          "ko": "펫",
+          "en": "Pets"
+        },
+        "values": {
+          "ideas": [
+            "수제 간식",
+            "반려견 생일 케이크",
+            "노령견 영양식"
+          ],
+          "target_market": "반려견 보호자 30~40대",
+          "budget": "1m",
+          "entry_timing": "now"
+        }
+      },
+      {
+        "title": {
+          "ko": "시니어 디지털 교육",
+          "en": "Digital skills for seniors"
+        },
+        "tag": {
+          "ko": "교육",
+          "en": "Education"
+        },
+        "values": {
+          "ideas": [
+            "스마트폰 활용 교실",
+            "키오스크 사용 교육",
+            "온라인 쇼핑 강좌"
+          ],
+          "target_market": "60대 이상, 지방 중소도시",
+          "budget": "0",
+          "entry_timing": "now"
+        }
+      }
+    ],
+    "steps": [
+      {
+        "ko": "비교할 아이디어를 2~5개 넣습니다. 수익화 발굴 결과를 이어받을 수도 있습니다.",
+        "en": "Add 2–5 ideas, or chain them in from Monetization Finder."
+      },
+      {
+        "ko": "타겟 시장과 예산, 진입 시점을 고릅니다.",
+        "en": "Set target market, budget and entry timing."
+      },
+      {
+        "ko": "점수와 출처를 확인하고 1위를 다음 도구로 넘깁니다.",
+        "en": "Review scores and sources, then chain the winner onward."
+      }
+    ],
+    "tips": [
+      {
+        "ko": "타겟 시장에 지역과 연령대를 함께 적으면 근거가 훨씬 정확해집니다.",
+        "en": "Add region and age range to the target market for sharper evidence."
+      }
+    ],
+    "faq": [
+      {
+        "q": {
+          "ko": "왜 어떤 수치에는 출처가 없나요?",
+          "en": "Why do some figures have no source?"
+        },
+        "a": {
+          "ko": "검색으로 확인하지 못한 수치입니다. 숨기지 않고 추정 배지를 붙여 보여 드립니다.",
+          "en": "Search couldn't confirm them. Instead of hiding that, we show them with an estimate badge."
+        }
+      }
+    ],
+    "sample": {
+      "ko": "밀키트 구독 — 7.8/10\n수요: 1인 가구 비중 증가 (통계청 출처)\n경쟁: 대형 3사 과점, 지역 특화 틈새 존재\n진입: 3개월 내 파일럿 권장",
+      "en": "Meal-kit subscription — 7.8/10\nDemand: rising single-person households (Statistics Korea)\nCompetition: three majors dominate; local niche open\nTiming: pilot within 3 months"
+    }
+  },
+  "calendar": {
+    "tagline": {
+      "ko": "모델을 13주 실행 계획으로",
+      "en": "Turn a model into a 13-week plan"
+    },
+    "description": {
+      "ko": "실행할 사업 모델을 주 단위 할 일로 쪼개고 마일스톤을 배치합니다. 구글·애플 캘린더(.ics)와 스프레드시트(.csv)로 바로 내보낼 수 있습니다.",
+      "en": "Breaks your model into weekly tasks with milestones, exportable to Google/Apple Calendar (.ics) or a spreadsheet (.csv)."
+    },
+    "features": [
+      {
+        "icon": "calendar-days",
+        "title": {
+          "ko": "주 단위 실행",
+          "en": "Week-by-week"
+        },
+        "body": {
+          "ko": "13주 동안 매주 해야 할 일과 결과물을 정리합니다.",
+          "en": "Every week gets concrete tasks and a deliverable."
+        }
+      },
+      {
+        "icon": "file-down",
+        "title": {
+          "ko": "캘린더로 내보내기",
+          "en": "Export to your calendar"
+        },
+        "body": {
+          "ko": ".ics 파일 한 번이면 일정이 내 캘린더에 들어갑니다.",
+          "en": "One .ics file puts the plan in your calendar."
+        }
+      },
+      {
+        "icon": "link",
+        "title": {
+          "ko": "앞 단계 결과 자동 반영",
+          "en": "Uses earlier results"
+        },
+        "body": {
+          "ko": "수익화 발굴·트렌드 분석 결과를 파일 업로드 없이 이어받습니다.",
+          "en": "Picks up Monetization Finder or Trend results without uploads."
+        }
+      }
+    ],
+    "presets": [
+      {
+        "title": {
+          "ko": "주말 클래스 론칭",
+          "en": "Launch weekend classes"
+        },
+        "tag": {
+          "ko": "교육",
+          "en": "Education"
+        },
+        "values": {
+          "model": "동네 베이커리의 주말 원데이 클래스 (정원 6명, 1회 3시간)",
+          "start_date": "2026-10-05",
+          "milestones": [
+            "첫 모집 공지",
+            "첫 수업",
+            "후기 10건"
+          ]
+        }
+      },
+      {
+        "title": {
+          "ko": "스마트스토어 오픈",
+          "en": "Open an online store"
+        },
+        "tag": {
+          "ko": "커머스",
+          "en": "Commerce"
+        },
+        "values": {
+          "model": "저당 수제 그래놀라 스마트스토어 판매",
+          "start_date": "2026-10-12",
+          "milestones": [
+            "상세페이지 완성",
+            "첫 주문",
+            "월 매출 300만원"
+          ]
+        }
+      }
+    ],
+    "steps": [
+      {
+        "ko": "실행할 모델을 한두 문장으로 적습니다.",
+        "en": "Describe the model in a sentence or two."
+      },
+      {
+        "ko": "시작일과 주요 마일스톤을 정합니다.",
+        "en": "Pick a start date and key milestones."
+      },
+      {
+        "ko": "결과를 .ics로 내보내 캘린더에 넣습니다.",
+        "en": "Export as .ics into your calendar."
+      }
+    ],
+    "tips": [
+      {
+        "ko": "마일스톤은 '첫 매출'처럼 확인 가능한 사건으로 적으세요.",
+        "en": "Write milestones as checkable events, like \"first sale\"."
+      }
+    ],
+    "faq": [
+      {
+        "q": {
+          "ko": "시작일을 바꾸면 다시 실행해야 하나요?",
+          "en": "Do I need to rerun to change the start date?"
+        },
+        "a": {
+          "ko": "네, 날짜가 계획 전체에 반영되므로 다시 실행해 주세요. 이전 결과는 보관함에 남아 있습니다.",
+          "en": "Yes — dates flow through the whole plan. Your earlier result stays in the Library."
+        }
+      }
+    ],
+    "sample": {
+      "ko": "1주차 — 클래스 커리큘럼 확정, 재료 원가 계산\n2주차 — 모집 페이지 제작, 지인 5명 체험 수업\n3주차 — 첫 모집 공지 (마일스톤)",
+      "en": "Week 1 — finalize curriculum, cost ingredients\nWeek 2 — build signup page, trial class with 5 friends\nWeek 3 — first public signup (milestone)"
+    }
+  },
+  "prompt": {
+    "tagline": {
+      "ko": "반복 업무를 재사용 프롬프트로",
+      "en": "Turn repeat work into a reusable prompt"
+    },
+    "description": {
+      "ko": "매번 설명하던 업무를 역할, 입력, 단계, 출력 형식이 갖춰진 프롬프트로 정리합니다. 쓰는 모델에 맞춰 문법을 조정합니다.",
+      "en": "Packages a task you keep re-explaining into a prompt with role, inputs, steps and output format — tuned to the model you use."
+    },
+    "features": [
+      {
+        "icon": "layers",
+        "title": {
+          "ko": "모델별 최적화",
+          "en": "Tuned per model"
+        },
+        "body": {
+          "ko": "GPT, Claude, Gemini 각각의 권장 형식을 따릅니다.",
+          "en": "Follows each model's recommended structure."
+        }
+      },
+      {
+        "icon": "zap",
+        "title": {
+          "ko": "바로 복사",
+          "en": "Copy and go"
+        },
+        "body": {
+          "ko": "변수 자리까지 표시된 완성 프롬프트를 복사해 씁니다.",
+          "en": "Copy a finished prompt with variables marked."
+        }
+      },
+      {
+        "icon": "sparkles",
+        "title": {
+          "ko": "예시로 검증",
+          "en": "Checked with an example"
+        },
+        "body": {
+          "ko": "예시 입력을 넣으면 기대 출력까지 함께 보여 줍니다.",
+          "en": "Add a sample input to see the expected output."
+        }
+      }
+    ],
+    "presets": [
+      {
+        "title": {
+          "ko": "주간 리뷰 요약",
+          "en": "Weekly review digest"
+        },
+        "tag": {
+          "ko": "운영",
+          "en": "Ops"
+        },
+        "values": {
+          "task": "매주 고객 리뷰를 모아 개선점 3가지와 칭찬 포인트로 요약",
+          "target_model": "claude",
+          "output_format": "markdown",
+          "constraints": [
+            "300자 이내",
+            "개인정보 제외"
+          ]
+        }
+      },
+      {
+        "title": {
+          "ko": "상품 설명 JSON",
+          "en": "Product copy as JSON"
+        },
+        "tag": {
+          "ko": "커머스",
+          "en": "Commerce"
+        },
+        "values": {
+          "task": "상품명과 특징을 받아 스마트스토어용 제목·요약·태그를 생성",
+          "target_model": "gpt",
+          "output_format": "json",
+          "constraints": [
+            "제목 50자 이내"
+          ]
+        }
+      }
+    ],
+    "steps": [
+      {
+        "ko": "반복되는 업무를 평소 말하듯 설명합니다.",
+        "en": "Describe the recurring task in plain words."
+      },
+      {
+        "ko": "대상 모델과 출력 형식을 고릅니다.",
+        "en": "Choose the target model and output format."
+      },
+      {
+        "ko": "완성된 프롬프트를 복사해 사용합니다.",
+        "en": "Copy the finished prompt and use it."
+      }
+    ],
+    "tips": [
+      {
+        "ko": "좋았던 결과 예시를 붙이면 품질이 가장 크게 올라갑니다.",
+        "en": "Pasting an example of a good result helps quality most."
+      }
+    ],
+    "faq": [
+      {
+        "q": {
+          "ko": "만든 프롬프트는 어디에 저장되나요?",
+          "en": "Where are my prompts saved?"
+        },
+        "a": {
+          "ko": "모든 실행 결과는 보관함에 저장되고, 프롬프트 라이브러리에서 다시 꺼내 쓸 수 있습니다.",
+          "en": "Every run is saved to the Library, and you can reuse prompts from the Prompt Library."
+        }
+      }
+    ],
+    "sample": {
+      "ko": "# 역할\n당신은 고객 경험 분석가입니다.\n# 입력\n{{이번 주 리뷰 목록}}\n# 출력\n- 개선점 3가지 (근거 리뷰 인용)\n- 칭찬 포인트 2가지",
+      "en": "# Role\nYou are a customer-experience analyst.\n# Input\n{{this week's reviews}}\n# Output\n- 3 improvements (quote the review)\n- 2 things customers praised"
+    }
+  },
+  "blog": {
+    "tagline": {
+      "ko": "검색에 걸리는 블로그 원고, 근거와 함께",
+      "en": "Search-ready blog drafts, with sources"
+    },
+    "description": {
+      "ko": "주제와 플랫폼에 맞춰 제목 5개, 소제목 구성, 본문, 이미지 자리, 해시태그까지 한 번에 작성합니다. 브랜드 톤을 자동으로 읽고, 사실은 출처와 함께 씁니다.",
+      "en": "Writes five titles, an outline, the body, image slots and hashtags for your platform in one go — in your brand tone, with facts sourced."
+    },
+    "features": [
+      {
+        "icon": "search",
+        "title": {
+          "ko": "플랫폼별 SEO",
+          "en": "Platform-aware SEO"
+        },
+        "body": {
+          "ko": "네이버, 티스토리, 브런치, 워드프레스의 구조 차이를 반영합니다.",
+          "en": "Adapts structure for Naver, Tistory, Brunch and WordPress."
+        }
+      },
+      {
+        "icon": "user-round",
+        "title": {
+          "ko": "내 톤 그대로",
+          "en": "Your voice"
+        },
+        "body": {
+          "ko": "비즈니스 프로필의 톤과 예시 문장을 따라 씁니다.",
+          "en": "Follows the tone and sample sentences in your profile."
+        }
+      },
+      {
+        "icon": "image",
+        "title": {
+          "ko": "이미지 자리 제안",
+          "en": "Image slots included"
+        },
+        "body": {
+          "ko": "어느 소제목 뒤에 어떤 이미지가 들어갈지 프롬프트와 함께 제안합니다.",
+          "en": "Suggests where images go, with a prompt for each."
+        }
+      }
+    ],
+    "presets": [
+      {
+        "title": {
+          "ko": "신메뉴 소개",
+          "en": "New menu launch"
+        },
+        "tag": {
+          "ko": "네이버",
+          "en": "Naver"
+        },
+        "values": {
+          "topic": "봄 시즌 딸기 디저트 신메뉴",
+          "audience": "동네 카페를 찾는 20~30대",
+          "platform": "naver",
+          "length": "1500"
+        }
+      },
+      {
+        "title": {
+          "ko": "전문가 칼럼",
+          "en": "Expert column"
+        },
+        "tag": {
+          "ko": "브런치",
+          "en": "Brunch"
+        },
+        "values": {
+          "topic": "1인 사업자가 첫해에 놓치는 세금 일정",
+          "audience": "창업 1년 차 자영업자",
+          "platform": "brunch",
+          "length": "2500"
+        }
+      },
+      {
+        "title": {
+          "ko": "제품 비교 리뷰",
+          "en": "Product comparison"
+        },
+        "tag": {
+          "ko": "티스토리",
+          "en": "Tistory"
+        },
+        "values": {
+          "topic": "가정용 제빵기 고르는 법",
+          "audience": "홈베이킹 입문자",
+          "platform": "tistory",
+          "length": "2500"
+        }
+      }
+    ],
+    "steps": [
+      {
+        "ko": "주제와 타겟 독자를 적습니다. 키워드 전략 결과를 이어받아도 됩니다.",
+        "en": "Enter a topic and audience, or chain from Keyword Strategy."
+      },
+      {
+        "ko": "플랫폼과 글자수를 고릅니다.",
+        "en": "Pick the platform and length."
+      },
+      {
+        "ko": "제목을 고르고 .docx로 내보내거나 복사해 발행합니다.",
+        "en": "Choose a title, then export .docx or copy to publish."
+      }
+    ],
+    "tips": [
+      {
+        "ko": "'포함할 사실'에 가격, 영업시간 같은 확정 정보를 넣으면 지어낸 내용이 들어가지 않습니다.",
+        "en": "Put fixed facts like prices and hours in \"facts to include\" so nothing gets invented."
+      },
+      {
+        "ko": "키워드 전략을 먼저 돌리면 제목의 검색 적중률이 올라갑니다.",
+        "en": "Run Keyword Strategy first for better-targeted titles."
+      }
+    ],
+    "faq": [
+      {
+        "q": {
+          "ko": "체험단·광고 글도 쓸 수 있나요?",
+          "en": "Can it write sponsored posts?"
+        },
+        "a": {
+          "ko": "가능합니다. 다만 광고 표기 문구를 자동으로 포함하며, 가짜 후기는 작성하지 않습니다.",
+          "en": "Yes, with an ad disclosure included automatically. It never writes fake reviews."
+        }
+      }
+    ],
+    "sample": {
+      "ko": "제목 후보\n1. 올봄 딱 한 번, 딸기 생크림 타르트가 나왔어요\n2. 동네 카페에서 만나는 봄 딸기 디저트 3종\n## 이번 시즌 딸기를 고른 이유\n[이미지: 원목 테이블 위 딸기 타르트, 자연광]",
+      "en": "Title options\n1. Our spring strawberry tart is here — for one season only\n2. Three strawberry desserts at your neighborhood café\n## Why we chose this season's berries\n[Image: strawberry tart on a wooden table, natural light]"
+    }
+  },
+  "keyword": {
+    "tagline": {
+      "ko": "메가·미드·마이크로 키워드와 콘텐츠 공백",
+      "en": "Keyword tiers and content gaps"
+    },
+    "description": {
+      "ko": "주력 키워드를 경쟁 강도별 3단계로 나누고, 경쟁자가 아직 다루지 않은 콘텐츠 공백을 찾아냅니다. 결과는 블로그 원고와 플레이스 최적화로 이어집니다.",
+      "en": "Splits your main keyword into three competition tiers and finds content gaps competitors haven't covered. Feeds Blog Draft and Place Optimization."
+    },
+    "features": [
+      {
+        "icon": "layers",
+        "title": {
+          "ko": "3단계 티어",
+          "en": "Three tiers"
+        },
+        "body": {
+          "ko": "지금 공략할 마이크로 키워드부터 장기 목표 메가 키워드까지 나눕니다.",
+          "en": "From micro keywords to target now, to mega keywords for later."
+        }
+      },
+      {
+        "icon": "search",
+        "title": {
+          "ko": "콘텐츠 공백",
+          "en": "Content gaps"
+        },
+        "body": {
+          "ko": "검색은 되는데 좋은 글이 없는 주제를 찾아 줍니다.",
+          "en": "Finds topics people search for but nobody answers well."
+        }
+      },
+      {
+        "icon": "link",
+        "title": {
+          "ko": "원고로 바로",
+          "en": "Straight to drafts"
+        },
+        "body": {
+          "ko": "고른 키워드로 블로그 원고를 바로 시작합니다.",
+          "en": "Start a blog draft from any keyword in one click."
+        }
+      }
+    ],
+    "presets": [
+      {
+        "title": {
+          "ko": "동네 케이크 주문",
+          "en": "Local cake orders"
+        },
+        "tag": {
+          "ko": "지역",
+          "en": "Local"
+        },
+        "values": {
+          "primary_keyword": "수제 케이크 주문",
+          "region": "부산 해운대",
+          "platforms": [
+            "naver",
+            "instagram"
+          ]
+        }
+      },
+      {
+        "title": {
+          "ko": "온라인 강의",
+          "en": "Online course"
+        },
+        "tag": {
+          "ko": "교육",
+          "en": "Education"
+        },
+        "values": {
+          "primary_keyword": "피그마 강의",
+          "platforms": [
+            "google",
+            "youtube"
+          ]
+        }
+      }
+    ],
+    "steps": [
+      {
+        "ko": "가장 팔고 싶은 것을 대표하는 키워드를 넣습니다.",
+        "en": "Enter the keyword that best represents what you sell."
+      },
+      {
+        "ko": "지역과 플랫폼을 고릅니다.",
+        "en": "Choose region and platforms."
+      },
+      {
+        "ko": "마이크로 키워드부터 원고로 이어갑니다.",
+        "en": "Chain micro keywords into drafts first."
+      }
+    ],
+    "tips": [
+      {
+        "ko": "오프라인 매장이라면 지역명을 꼭 넣으세요. 결과가 완전히 달라집니다.",
+        "en": "For physical stores, always add your area — it changes everything."
+      }
+    ],
+    "faq": [
+      {
+        "q": {
+          "ko": "검색량 수치는 정확한가요?",
+          "en": "Are search volumes exact?"
+        },
+        "a": {
+          "ko": "공개 자료로 확인된 수치만 출처와 함께 보여 주고, 나머지는 상대 강도와 추정 배지로 표시합니다.",
+          "en": "Only figures confirmed from public data are shown with sources; the rest appear as relative strength with an estimate badge."
+        }
+      }
+    ],
+    "sample": {
+      "ko": "마이크로: 해운대 레터링 케이크, 해운대 당일 케이크\n미드: 부산 수제 케이크, 부산 생일 케이크\n메가: 케이크 주문\n공백: '반려견 동반 케이크 픽업' 관련 글 부족",
+      "en": "Micro: Haeundae lettering cake, same-day cake Haeundae\nMid: Busan custom cake, Busan birthday cake\nMega: cake order\nGap: few posts on pet-friendly cake pickup"
+    }
+  },
+  "place": {
+    "tagline": {
+      "ko": "지도 검색에서 먼저 보이는 가게로",
+      "en": "Get found first on map search"
+    },
+    "description": {
+      "ko": "플레이스 소개글, 대표 키워드, 메뉴·사진 구성, 주간 운영 체크리스트를 최적화합니다. 가짜 리뷰 요청은 거절하고, 실제 손님 리뷰를 늘리는 방법을 제안합니다.",
+      "en": "Optimizes your place description, keywords, menu and photo layout, plus a weekly checklist. Refuses fake reviews; suggests honest ways to earn real ones."
+    },
+    "features": [
+      {
+        "icon": "map-pin",
+        "title": {
+          "ko": "소개글·키워드",
+          "en": "Description and keywords"
+        },
+        "body": {
+          "ko": "지역 검색에 맞는 소개글과 대표 키워드 5개를 씁니다.",
+          "en": "Writes a local-search description and five core keywords."
+        }
+      },
+      {
+        "icon": "calendar-days",
+        "title": {
+          "ko": "주간 체크리스트",
+          "en": "Weekly checklist"
+        },
+        "body": {
+          "ko": "소식 발행, 사진 교체 등 매주 할 일을 정리합니다.",
+          "en": "Lists weekly tasks like posting news and refreshing photos."
+        }
+      },
+      {
+        "icon": "shield-check",
+        "title": {
+          "ko": "정직한 리뷰 전략",
+          "en": "Honest review strategy"
+        },
+        "body": {
+          "ko": "조작 없이 실제 리뷰를 늘리는 방법만 제안합니다.",
+          "en": "Only suggests ways to grow genuine reviews."
+        }
+      }
+    ],
+    "presets": [
+      {
+        "title": {
+          "ko": "동네 베이커리",
+          "en": "Neighborhood bakery"
+        },
+        "tag": {
+          "ko": "요식업",
+          "en": "F&B"
+        },
+        "values": {
+          "business_name": "해봇 베이커리",
+          "region": "부산 해운대구",
+          "competitors": [
+            "OO제과",
+            "XX베이커리"
+          ]
+        }
+      },
+      {
+        "title": {
+          "ko": "1인 미용실",
+          "en": "Solo hair salon"
+        },
+        "tag": {
+          "ko": "뷰티",
+          "en": "Beauty"
+        },
+        "values": {
+          "business_name": "헤어살롱 봄",
+          "region": "서울 마포구 망원동"
+        }
+      }
+    ],
+    "steps": [
+      {
+        "ko": "상호와 지역을 입력합니다.",
+        "en": "Enter your business name and area."
+      },
+      {
+        "ko": "현재 플레이스 소개글을 붙여 넣으면 개선점을 비교해 줍니다.",
+        "en": "Paste your current listing to compare improvements."
+      },
+      {
+        "ko": "체크리스트를 매주 실행합니다.",
+        "en": "Work through the checklist weekly."
+      }
+    ],
+    "tips": [
+      {
+        "ko": "경쟁업체를 2~3곳 넣으면 차별점을 더 선명하게 잡아 줍니다.",
+        "en": "Adding 2–3 competitors sharpens your differentiators."
+      }
+    ],
+    "faq": [
+      {
+        "q": {
+          "ko": "리뷰를 대신 써 줄 수 있나요?",
+          "en": "Can it write reviews for me?"
+        },
+        "a": {
+          "ko": "아니요. 가짜 리뷰는 플랫폼 정책과 법에 어긋나므로 거절합니다. 대신 리뷰를 요청하는 안내문 문구를 만들어 드립니다.",
+          "en": "No — fake reviews break platform rules and the law. We'll write a polite review-request card instead."
+        }
+      }
+    ],
+    "sample": {
+      "ko": "소개글: 해운대 해변에서 도보 5분, 매일 아침 7시에 굽는 천연발효빵 베이커리…\n대표 키워드: 해운대빵집, 해운대 브런치, 천연발효빵\n이번 주 할 일: 신메뉴 사진 3장 교체, 소식 1건 발행",
+      "en": "Description: 5 minutes' walk from Haeundae Beach, sourdough baked fresh at 7 every morning…\nKeywords: Haeundae bakery, Haeundae brunch, sourdough\nThis week: replace 3 photos with the new menu, post 1 update"
+    }
+  },
+  "image": {
+    "tagline": {
+      "ko": "제품 사진 한 장으로 용도별 4컷",
+      "en": "Four on-purpose shots from one product"
+    },
+    "description": {
+      "ko": "스튜디오컷, 패키지, 3D 렌더, 랜딩 UI, 광고 배너, 배경까지 용도별 프리셋으로 이미지를 4컷 생성합니다. 참조 이미지를 넣으면 제품 형태를 유지합니다.",
+      "en": "Generates four images per run from purpose presets — studio, packaging, 3D render, landing UI, ad banner, background. Add a reference to keep your product's shape."
+    },
+    "features": [
+      {
+        "icon": "layers",
+        "title": {
+          "ko": "용도별 프리셋",
+          "en": "Purpose presets"
+        },
+        "body": {
+          "ko": "쇼핑몰, SNS, 광고 등 쓰임새에 맞는 조명과 구도를 자동 적용합니다.",
+          "en": "Applies lighting and composition for store, social or ads."
+        }
+      },
+      {
+        "icon": "image",
+        "title": {
+          "ko": "참조 이미지 반영",
+          "en": "Reference-aware"
+        },
+        "body": {
+          "ko": "실제 제품 사진을 넣으면 형태와 색을 유지합니다.",
+          "en": "Keeps shape and color from your real product photo."
+        }
+      },
+      {
+        "icon": "link",
+        "title": {
+          "ko": "상세페이지로 연결",
+          "en": "Chains to detail pages"
+        },
+        "body": {
+          "ko": "만든 이미지를 상세페이지 도구로 바로 넘깁니다.",
+          "en": "Send results straight into Product Detail Page."
+        }
+      }
+    ],
+    "presets": [
+      {
+        "title": {
+          "ko": "세라믹 스킨케어 병",
+          "en": "Ceramic skincare bottle"
+        },
+        "tag": {
+          "ko": "스튜디오컷",
+          "en": "Studio"
+        },
+        "values": {
+          "description": "미니멀한 세라믹 세럼 병, 흰 대리석 위, 부드러운 직사광과 야자수 잎 그림자",
+          "preset": "studio",
+          "ratio": "4:5"
+        }
+      },
+      {
+        "title": {
+          "ko": "원두 커피 패키지",
+          "en": "Coffee bean pouch"
+        },
+        "tag": {
+          "ko": "패키지",
+          "en": "Packaging"
+        },
+        "values": {
+          "description": "무광 블랙 크라프트 원두 파우치, 미니멀 타이포, 주변에 로스팅 원두, 따뜻한 아침빛",
+          "preset": "packaging",
+          "ratio": "1:1"
+        }
+      },
+      {
+        "title": {
+          "ko": "스마트워치 3D",
+          "en": "Smartwatch 3D render"
+        },
+        "tag": {
+          "ko": "3D",
+          "en": "3D"
+        },
+        "values": {
+          "description": "흰색 스마트워치, 화면 위 홀로그램 운동 위젯, 정밀 제품 렌더 스튜디오 배경",
+          "preset": "3d_render",
+          "ratio": "16:9"
+        }
+      },
+      {
+        "title": {
+          "ko": "봄 세일 배너",
+          "en": "Spring sale banner"
+        },
+        "tag": {
+          "ko": "광고",
+          "en": "Ad"
+        },
+        "values": {
+          "description": "벚꽃과 파스텔 톤 배경의 봄 시즌 할인 배너, 제품이 들어갈 여백 확보",
+          "preset": "ad_banner",
+          "ratio": "9:16"
+        }
+      }
+    ],
+    "steps": [
+      {
+        "ko": "제품과 원하는 장면을 한 문장으로 설명합니다.",
+        "en": "Describe the product and scene in one sentence."
+      },
+      {
+        "ko": "용도 프리셋과 비율을 고르고, 가능하면 참조 사진을 넣습니다.",
+        "en": "Pick a preset and ratio; add a reference photo if you have one."
+      },
+      {
+        "ko": "4컷 중 고른 이미지를 상세페이지나 블로그로 이어갑니다.",
+        "en": "Take your favorite into a detail page or blog post."
+      }
+    ],
+    "tips": [
+      {
+        "ko": "재질(무광, 유리, 세라믹)과 빛 방향을 적으면 상업 사진 느낌이 강해집니다.",
+        "en": "Naming material (matte, glass, ceramic) and light direction makes shots look commercial."
+      },
+      {
+        "ko": "실존 인물의 얼굴이나 타 브랜드 로고는 생성하지 않습니다.",
+        "en": "Real people's faces and other brands' logos are never generated."
+      }
+    ],
+    "faq": [
+      {
+        "q": {
+          "ko": "상업적으로 써도 되나요?",
+          "en": "Can I use images commercially?"
+        },
+        "a": {
+          "ko": "직접 생성한 이미지는 상업적으로 사용할 수 있습니다. 다만 타사 상표가 들어간 결과물은 사용하지 마세요.",
+          "en": "Yes, images you generate can be used commercially — just don't use any that contain other companies' trademarks."
+        }
+      }
+    ],
+    "sample": {
+      "ko": "4컷 생성 완료 · 4:5 · 스튜디오컷\n#1 정면 · #2 45도 · #3 클로즈업 · #4 여백 배치",
+      "en": "4 shots · 4:5 · Studio\n#1 front · #2 45° · #3 close-up · #4 with copy space"
+    }
+  },
+  "logo": {
+    "tagline": {
+      "ko": "브랜드명과 연상어로 SVG 로고 6종",
+      "en": "Six SVG logos from a name and three words"
+    },
+    "description": {
+      "ko": "워드마크, 심볼+워드마크, 이니셜, 엠블럼 스타일로 벡터(SVG) 로고 6종을 만듭니다. 결과는 검증된 안전한 SVG라서 바로 확대·편집할 수 있습니다.",
+      "en": "Creates six vector (SVG) logos in wordmark, symbol, initial or emblem styles. Output is validated, sanitized SVG — scale and edit freely."
+    },
+    "features": [
+      {
+        "icon": "shapes",
+        "title": {
+          "ko": "진짜 벡터",
+          "en": "Real vectors"
+        },
+        "body": {
+          "ko": "이미지가 아닌 SVG 코드라 어떤 크기로도 깨지지 않습니다.",
+          "en": "SVG code, not pixels — crisp at any size."
+        }
+      },
+      {
+        "icon": "shield-check",
+        "title": {
+          "ko": "안전 검증",
+          "en": "Sanitized"
+        },
+        "body": {
+          "ko": "스크립트 등 위험 요소를 제거하고 렌더링을 확인합니다.",
+          "en": "Scripts and unsafe elements are stripped and rendering is checked."
+        }
+      },
+      {
+        "icon": "user-round",
+        "title": {
+          "ko": "브랜드 컬러 반영",
+          "en": "Uses brand colors"
+        },
+        "body": {
+          "ko": "프로필에 저장한 브랜드 컬러를 선택할 수 있습니다.",
+          "en": "Can use the brand colors saved in your profile."
+        }
+      }
+    ],
+    "presets": [
+      {
+        "title": {
+          "ko": "따뜻한 베이커리",
+          "en": "Warm bakery"
+        },
+        "tag": {
+          "ko": "엠블럼",
+          "en": "Emblem"
+        },
+        "values": {
+          "brand_name": "해봇 베이커리",
+          "keywords": [
+            "밀",
+            "아침",
+            "손맛"
+          ],
+          "style": "emblem",
+          "color_tendency": "pastel"
+        }
+      },
+      {
+        "title": {
+          "ko": "핀테크 스타트업",
+          "en": "Fintech startup"
+        },
+        "tag": {
+          "ko": "심볼",
+          "en": "Symbol"
+        },
+        "values": {
+          "brand_name": "Ledgerly",
+          "keywords": [
+            "신뢰",
+            "성장",
+            "속도"
+          ],
+          "style": "symbol_wordmark",
+          "color_tendency": "vivid"
+        }
+      },
+      {
+        "title": {
+          "ko": "친환경 푸드테크",
+          "en": "Eco food-tech"
+        },
+        "tag": {
+          "ko": "이니셜",
+          "en": "Initial"
+        },
+        "values": {
+          "brand_name": "Greenbite",
+          "keywords": [
+            "잎",
+            "순환",
+            "바이오"
+          ],
+          "style": "initial",
+          "color_tendency": "brand"
+        }
+      }
+    ],
+    "steps": [
+      {
+        "ko": "브랜드명과 떠오르는 단어 3개를 적습니다.",
+        "en": "Enter the brand name and three associated words."
+      },
+      {
+        "ko": "스타일과 컬러 성향을 고릅니다.",
+        "en": "Pick a style and color direction."
+      },
+      {
+        "ko": "마음에 드는 시안을 SVG로 내려받습니다.",
+        "en": "Download your favorite as SVG."
+      }
+    ],
+    "tips": [
+      {
+        "ko": "연상어는 '신뢰'처럼 추상어 하나, '잎'처럼 구체어 하나를 섞으면 좋습니다.",
+        "en": "Mix an abstract word (trust) with a concrete one (leaf)."
+      }
+    ],
+    "faq": [
+      {
+        "q": {
+          "ko": "상표 등록이 가능한가요?",
+          "en": "Can I trademark it?"
+        },
+        "a": {
+          "ko": "생성 결과는 사용자에게 귀속되지만, 등록 전에는 반드시 유사 상표 검색을 하세요.",
+          "en": "The output is yours, but always run a similarity search before filing."
+        }
+      }
+    ],
+    "sample": {
+      "ko": "6개 시안 · SVG · 엠블럼\n시안 3: 밀 이삭을 두른 원형 엠블럼, 크림/브라운 2색",
+      "en": "6 concepts · SVG · Emblem\nConcept 3: round emblem wrapped in wheat, cream and brown"
+    }
+  },
+  "brand-model": {
+    "tagline": {
+      "ko": "제품을 보여 줄 일관된 AI 모델 컷",
+      "en": "Consistent AI model shots for your product"
+    },
+    "description": {
+      "ko": "제품 사진 한 장으로 연령대·분위기·배경을 고른 가상 모델 착용·사용 컷을 만듭니다. 실존 인물을 닮은 얼굴은 자동으로 걸러냅니다.",
+      "en": "From one product photo, generate shots of a virtual model using your product, choosing age, mood and setting. Faces resembling real people are filtered out automatically."
+    },
+    "features": [
+      {
+        "icon": "user-round",
+        "title": {
+          "ko": "가상 모델",
+          "en": "Virtual models"
+        },
+        "body": {
+          "ko": "섭외 없이 타겟 연령대에 맞는 모델 컷을 얻습니다.",
+          "en": "Get on-target model shots without a shoot."
+        }
+      },
+      {
+        "icon": "shield-check",
+        "title": {
+          "ko": "실존 인물 차단",
+          "en": "No real likenesses"
+        },
+        "body": {
+          "ko": "유명인이나 실존 인물과 닮은 결과는 생성 단계에서 막습니다.",
+          "en": "Blocks results resembling celebrities or real people."
+        }
+      },
+      {
+        "icon": "image",
+        "title": {
+          "ko": "제품 형태 유지",
+          "en": "Product stays true"
+        },
+        "body": {
+          "ko": "업로드한 제품의 형태와 색을 그대로 유지합니다.",
+          "en": "Keeps your uploaded product's shape and color."
+        }
+      }
+    ],
+    "presets": [
+      {
+        "title": {
+          "ko": "20대 캐주얼 카페",
+          "en": "Casual café, 20s"
+        },
+        "tag": {
+          "ko": "패션",
+          "en": "Fashion"
+        },
+        "values": {
+          "model_profile": "f20",
+          "mood": "casual",
+          "setting": "cafe",
+          "ratio": "4:5"
+        }
+      },
+      {
+        "title": {
+          "ko": "30대 럭셔리 스튜디오",
+          "en": "Luxury studio, 30s"
+        },
+        "tag": {
+          "ko": "뷰티",
+          "en": "Beauty"
+        },
+        "values": {
+          "model_profile": "f30",
+          "mood": "luxury",
+          "setting": "studio",
+          "ratio": "1:1"
+        }
+      },
+      {
+        "title": {
+          "ko": "야외 내추럴",
+          "en": "Natural outdoors"
+        },
+        "tag": {
+          "ko": "아웃도어",
+          "en": "Outdoor"
+        },
+        "values": {
+          "model_profile": "m30",
+          "mood": "natural",
+          "setting": "outdoor",
+          "ratio": "9:16"
+        }
+      }
+    ],
+    "steps": [
+      {
+        "ko": "배경이 깔끔한 제품 사진을 올립니다.",
+        "en": "Upload a clean product photo."
+      },
+      {
+        "ko": "모델 연령대, 분위기, 배경을 고릅니다.",
+        "en": "Choose model age, mood and setting."
+      },
+      {
+        "ko": "결과를 상세페이지나 SNS에 사용합니다.",
+        "en": "Use results in detail pages or social posts."
+      }
+    ],
+    "tips": [
+      {
+        "ko": "제품이 화면의 절반 이상을 차지하는 사진이 가장 잘 나옵니다.",
+        "en": "Photos where the product fills over half the frame work best."
+      }
+    ],
+    "faq": [
+      {
+        "q": {
+          "ko": "특정 연예인처럼 만들 수 있나요?",
+          "en": "Can it look like a specific celebrity?"
+        },
+        "a": {
+          "ko": "아니요. 초상권 보호를 위해 실존 인물을 닮은 모델은 생성하지 않습니다.",
+          "en": "No. To protect publicity rights, we never generate real-person likenesses."
+        }
+      }
+    ],
+    "sample": {
+      "ko": "4컷 · 4:5 · 20대 · 캐주얼 · 카페\n제품 형태 일치 확인됨",
+      "en": "4 shots · 4:5 · 20s · casual · café\nProduct shape verified"
+    }
+  },
+  "sangsepage": {
+    "tagline": {
+      "ko": "사진과 특징으로 스마트스토어 상세페이지",
+      "en": "A store detail page from photos and features"
+    },
+    "description": {
+      "ko": "제품명, 특징, 가격, 사진을 넣으면 후킹 헤드라인부터 신뢰 섹션까지 갖춘 860px 상세페이지 이미지를 만듭니다. 없는 인증이나 수치는 절대 넣지 않습니다.",
+      "en": "Enter name, features, price and photos to get an 860px detail-page image — from hook headline to trust section. Never adds certifications or numbers you didn't provide."
+    },
+    "features": [
+      {
+        "icon": "layers",
+        "title": {
+          "ko": "완성형 구조",
+          "en": "Complete structure"
+        },
+        "body": {
+          "ko": "후킹, 문제 공감, 특징, 사용법, 신뢰, FAQ 순서를 갖춥니다.",
+          "en": "Hook, pain point, features, how-to, trust and FAQ, in order."
+        }
+      },
+      {
+        "icon": "file-down",
+        "title": {
+          "ko": "바로 올리는 이미지",
+          "en": "Upload-ready image"
+        },
+        "body": {
+          "ko": "스마트스토어 규격 860px 이미지로 렌더링됩니다.",
+          "en": "Rendered at the 860px store standard."
+        }
+      },
+      {
+        "icon": "shield-check",
+        "title": {
+          "ko": "과장 광고 방지",
+          "en": "No false claims"
+        },
+        "body": {
+          "ko": "입력하지 않은 효능이나 인증은 쓰지 않습니다.",
+          "en": "Never claims benefits or certifications you didn't enter."
+        }
+      }
+    ],
+    "presets": [
+      {
+        "title": {
+          "ko": "저당 그래놀라",
+          "en": "Low-sugar granola"
+        },
+        "tag": {
+          "ko": "식품",
+          "en": "Food"
+        },
+        "values": {
+          "product_name": "저당 수제 그래놀라 500g",
+          "features": [
+            "당류 5g 이하",
+            "국산 귀리",
+            "소량 수제"
+          ],
+          "price": 12900,
+          "target_customer": "건강을 챙기는 30대 직장인"
+        }
+      },
+      {
+        "title": {
+          "ko": "세라믹 머그",
+          "en": "Ceramic mug"
+        },
+        "tag": {
+          "ko": "리빙",
+          "en": "Living"
+        },
+        "values": {
+          "product_name": "핸드메이드 세라믹 머그 350ml",
+          "features": [
+            "식기세척기 사용 가능",
+            "도예가 수작업",
+            "무광 유약"
+          ],
+          "price": 28000
+        }
+      }
+    ],
+    "steps": [
+      {
+        "ko": "제품명과 핵심 특징 3~5개를 적습니다.",
+        "en": "Enter the product name and 3–5 key features."
+      },
+      {
+        "ko": "제품 사진을 올리고 가격, 타겟을 입력합니다.",
+        "en": "Upload photos and add price and target customer."
+      },
+      {
+        "ko": "완성된 이미지를 내려받아 스토어에 올립니다.",
+        "en": "Download the image and upload it to your store."
+      }
+    ],
+    "tips": [
+      {
+        "ko": "특징은 '맛있어요'보다 '당류 5g 이하'처럼 확인 가능한 사실로 쓰세요.",
+        "en": "Write features as checkable facts, like \"under 5g sugar\"."
+      }
+    ],
+    "faq": [
+      {
+        "q": {
+          "ko": "쿠팡·자사몰에도 쓸 수 있나요?",
+          "en": "Does it work for other marketplaces?"
+        },
+        "a": {
+          "ko": "네. 860px 폭은 대부분의 국내 마켓 상세페이지 규격과 맞습니다.",
+          "en": "Yes — 860px fits most Korean marketplace detail-page specs."
+        }
+      }
+    ],
+    "sample": {
+      "ko": "헤드라인: 달지 않아도 맛있는 아침, 당류 5g\n섹션 2: 시판 그래놀라, 이런 점 불편하셨죠?\n섹션 4: 국산 귀리를 매주 소량만 굽습니다",
+      "en": "Headline: A breakfast that's good without the sugar — 5g\nSection 2: Tired of store-bought granola?\nSection 4: Korean oats, baked in small weekly batches"
+    }
+  },
+  "homepage": {
+    "tagline": {
+      "ko": "프롬프트가 아니라, 바로 배포되는 홈페이지",
+      "en": "Not a prompt — a site you can deploy"
+    },
+    "description": {
+      "ko": "사이트 목적과 필요한 섹션을 고르면 비즈니스 프로필을 바탕으로 반응형 홈페이지를 만들고, 미리보기와 ZIP 다운로드를 제공합니다. 없는 사업 정보는 지어내지 않습니다.",
+      "en": "Pick a purpose and sections, and get a responsive site built from your Business Profile — with live preview and ZIP download. Never invents business facts."
+    },
+    "features": [
+      {
+        "icon": "globe",
+        "title": {
+          "ko": "실제 작동하는 사이트",
+          "en": "A working site"
+        },
+        "body": {
+          "ko": "복사할 프롬프트가 아니라 배포 가능한 HTML을 드립니다.",
+          "en": "Deployable HTML, not a prompt to paste elsewhere."
+        }
+      },
+      {
+        "icon": "zap",
+        "title": {
+          "ko": "빠르고 가볍게",
+          "en": "Fast and light"
+        },
+        "body": {
+          "ko": "Lighthouse 85점 이상을 목표로 가볍게 만듭니다.",
+          "en": "Built lean, targeting Lighthouse 85+."
+        }
+      },
+      {
+        "icon": "shield-check",
+        "title": {
+          "ko": "사실만",
+          "en": "Facts only"
+        },
+        "body": {
+          "ko": "주소, 가격, 수상 이력 등은 프로필에 있는 것만 씁니다.",
+          "en": "Addresses, prices and awards come only from your profile."
+        }
+      }
+    ],
+    "presets": [
+      {
+        "title": {
+          "ko": "예약형 매장",
+          "en": "Booking-based shop"
+        },
+        "tag": {
+          "ko": "예약",
+          "en": "Booking"
+        },
+        "values": {
+          "purpose": "booking",
+          "sections": [
+            "hero",
+            "services",
+            "pricing",
+            "faq",
+            "contact"
+          ]
+        }
+      },
+      {
+        "title": {
+          "ko": "포트폴리오",
+          "en": "Portfolio"
+        },
+        "tag": {
+          "ko": "개인",
+          "en": "Personal"
+        },
+        "values": {
+          "purpose": "portfolio",
+          "sections": [
+            "hero",
+            "about",
+            "portfolio",
+            "contact"
+          ]
+        }
+      },
+      {
+        "title": {
+          "ko": "제품 랜딩",
+          "en": "Product landing"
+        },
+        "tag": {
+          "ko": "판매",
+          "en": "Sales"
+        },
+        "values": {
+          "purpose": "landing",
+          "sections": [
+            "hero",
+            "services",
+            "testimonials",
+            "pricing",
+            "faq"
+          ]
+        }
+      }
+    ],
+    "steps": [
+      {
+        "ko": "비즈니스 프로필을 먼저 채웁니다.",
+        "en": "Fill in your Business Profile first."
+      },
+      {
+        "ko": "사이트 목적과 섹션을 고릅니다.",
+        "en": "Pick the site purpose and sections."
+      },
+      {
+        "ko": "미리보고 ZIP으로 내려받아 배포합니다.",
+        "en": "Preview, download the ZIP, and deploy."
+      }
+    ],
+    "tips": [
+      {
+        "ko": "'고객 후기' 섹션은 실제 후기가 있을 때만 선택하세요. 없으면 비워 둡니다.",
+        "en": "Only choose testimonials if you have real ones — otherwise the section stays empty."
+      }
+    ],
+    "faq": [
+      {
+        "q": {
+          "ko": "어디에 올리면 되나요?",
+          "en": "Where do I host it?"
+        },
+        "a": {
+          "ko": "ZIP을 Netlify, Vercel, GitHub Pages 같은 무료 호스팅에 끌어다 놓으면 됩니다.",
+          "en": "Drag the ZIP onto free hosting such as Netlify, Vercel or GitHub Pages."
+        }
+      }
+    ],
+    "sample": {
+      "ko": "섹션 5개 · 반응형 · ZIP 12KB\n히어로: 해운대의 아침을 굽는 곳 — [예약하기]",
+      "en": "5 sections · responsive · 12KB ZIP\nHero: Baking Haeundae's mornings — [Book now]"
+    }
+  },
+  "proposal": {
+    "tagline": {
+      "ko": "받는 사람 입장에서 쓰는 제안서 초안",
+      "en": "Proposals written from the client's side"
+    },
+    "description": {
+      "ko": "제안 대상과 내용을 넣으면 배경, 제안, 기대 효과, 조건, 다음 단계를 갖춘 제안서 초안을 씁니다. Word(.docx)로 바로 내보낼 수 있습니다.",
+      "en": "Enter who you're pitching and what, and get a draft with background, offer, benefits, terms and next step — exportable to Word (.docx)."
+    },
+    "features": [
+      {
+        "icon": "user-round",
+        "title": {
+          "ko": "상대방 관점",
+          "en": "Client's perspective"
+        },
+        "body": {
+          "ko": "우리 자랑이 아니라 상대가 얻는 것부터 씁니다.",
+          "en": "Leads with what the client gains, not what you do."
+        }
+      },
+      {
+        "icon": "file-down",
+        "title": {
+          "ko": "Word로 내보내기",
+          "en": "Word export"
+        },
+        "body": {
+          "ko": "서식이 잡힌 .docx로 바로 수정·발송합니다.",
+          "en": "Formatted .docx, ready to edit and send."
+        }
+      },
+      {
+        "icon": "image",
+        "title": {
+          "ko": "첨부 자료 이해",
+          "en": "Reads attachments"
+        },
+        "body": {
+          "ko": "메뉴판, 포트폴리오 사진을 보고 내용에 반영합니다.",
+          "en": "Uses attached menus or portfolio images in the draft."
+        }
+      }
+    ],
+    "presets": [
+      {
+        "title": {
+          "ko": "카페 디저트 납품",
+          "en": "Café dessert supply"
+        },
+        "tag": {
+          "ko": "B2B",
+          "en": "B2B"
+        },
+        "values": {
+          "target": "해운대 지역 카페 3곳",
+          "content": "주 3회 수제 디저트 납품, 시즌 메뉴 공동 개발",
+          "budget": "월 150만원",
+          "duration": "6개월",
+          "differentiators": [
+            "당일 생산",
+            "소량 맞춤"
+          ]
+        }
+      },
+      {
+        "title": {
+          "ko": "기업 교육 제안",
+          "en": "Corporate training"
+        },
+        "tag": {
+          "ko": "교육",
+          "en": "Training"
+        },
+        "values": {
+          "target": "중견 제조사 인사팀",
+          "content": "현장 관리자 대상 품질관리 실무 교육 4회",
+          "duration": "1개월",
+          "differentiators": [
+            "현장 25년 경력",
+            "사례 중심"
+          ]
+        }
+      }
+    ],
+    "steps": [
+      {
+        "ko": "누구에게 무엇을 제안하는지 적습니다.",
+        "en": "Say who you're pitching and what."
+      },
+      {
+        "ko": "예산, 기간, 차별점을 더합니다.",
+        "en": "Add budget, duration and differentiators."
+      },
+      {
+        "ko": ".docx로 내보내 다듬고 보냅니다.",
+        "en": "Export .docx, polish and send."
+      }
+    ],
+    "tips": [
+      {
+        "ko": "상대가 지금 겪는 문제를 한 줄 적으면 설득력이 크게 올라갑니다.",
+        "en": "One line about the client's current problem makes it far more persuasive."
+      }
+    ],
+    "faq": [
+      {
+        "q": {
+          "ko": "견적서도 만들어 주나요?",
+          "en": "Does it create a quote too?"
+        },
+        "a": {
+          "ko": "입력한 예산 범위로 조건 섹션을 쓰고, 상세 견적은 사업계획서 도구의 재무 표를 활용하세요.",
+          "en": "It writes a terms section from your budget; for detailed numbers use Business Plan's financial table."
+        }
+      }
+    ],
+    "sample": {
+      "ko": "1. 배경 — 주말 디저트 품절로 놓치는 매출\n2. 제안 — 주 3회 당일 생산 디저트 납품\n3. 기대 효과 — 품절 감소, 시즌 메뉴 차별화",
+      "en": "1. Background — weekend dessert sell-outs cost sales\n2. Offer — same-day desserts, three times a week\n3. Benefits — fewer sell-outs, seasonal differentiation"
+    }
+  },
+  "business-plan": {
+    "tagline": {
+      "ko": "투자·지원사업용 사업계획서와 재무 가정",
+      "en": "Business plans and financial assumptions"
+    },
+    "description": {
+      "ko": "아이템과 목적(투자, 정부지원, 대출, 내부)에 맞춰 사업계획서 초안과 손익분기 재무 가정을 씁니다. Word와 Excel로 함께 내보냅니다.",
+      "en": "Drafts a plan for investment, grants, loans or internal use, plus break-even financial assumptions. Exports to Word and Excel together."
+    },
+    "features": [
+      {
+        "icon": "layers",
+        "title": {
+          "ko": "목적별 구조",
+          "en": "Structured by purpose"
+        },
+        "body": {
+          "ko": "정부지원 양식과 투자 IR은 강조점이 다릅니다. 목적에 맞게 씁니다.",
+          "en": "Grant forms and investor decks stress different things — it adapts."
+        }
+      },
+      {
+        "icon": "file-down",
+        "title": {
+          "ko": "Word + Excel",
+          "en": "Word + Excel"
+        },
+        "body": {
+          "ko": "본문은 .docx, 재무 가정은 수식이 살아 있는 .xlsx로 드립니다.",
+          "en": "Narrative as .docx, financials as .xlsx with live formulas."
+        }
+      },
+      {
+        "icon": "search",
+        "title": {
+          "ko": "시장 근거 인용",
+          "en": "Market evidence cited"
+        },
+        "body": {
+          "ko": "시장 규모는 출처와 함께, 없으면 추정으로 표시합니다.",
+          "en": "Market size comes with sources, or is marked as an estimate."
+        }
+      }
+    ],
+    "presets": [
+      {
+        "title": {
+          "ko": "비건 디저트 정기배송",
+          "en": "Vegan dessert subscription"
+        },
+        "tag": {
+          "ko": "정부지원",
+          "en": "Grant"
+        },
+        "values": {
+          "item": "비건 디저트 정기배송 서비스, 월 4회 배송",
+          "purpose": "government",
+          "market": "국내 비건 식품 시장",
+          "unit_price": 32000,
+          "monthly_sales_target": 300,
+          "fixed_cost": 4500000,
+          "variable_cost_rate": 45
+        }
+      },
+      {
+        "title": {
+          "ko": "B2B SaaS",
+          "en": "B2B SaaS"
+        },
+        "tag": {
+          "ko": "투자",
+          "en": "Investment"
+        },
+        "values": {
+          "item": "소상공인용 재고·발주 자동화 SaaS",
+          "purpose": "investment",
+          "market": "국내 소상공인 POS 연동 시장",
+          "unit_price": 29000,
+          "monthly_sales_target": 500,
+          "fixed_cost": 18000000,
+          "variable_cost_rate": 15
+        }
+      }
+    ],
+    "steps": [
+      {
+        "ko": "아이템과 목적을 적습니다. 트렌드 분석 결과를 이어받을 수도 있습니다.",
+        "en": "Describe the item and purpose, or chain from Trend Analysis."
+      },
+      {
+        "ko": "단가, 판매 목표, 고정비, 변동비율을 넣습니다.",
+        "en": "Enter unit price, sales target, fixed costs and variable-cost rate."
+      },
+      {
+        "ko": "Word와 Excel로 내보내 다듬습니다.",
+        "en": "Export Word and Excel, then refine."
+      }
+    ],
+    "tips": [
+      {
+        "ko": "숫자를 비워 두면 재무 표도 추정으로 채워집니다. 아는 숫자는 꼭 넣으세요.",
+        "en": "Blank numbers get estimated — enter the ones you know."
+      }
+    ],
+    "faq": [
+      {
+        "q": {
+          "ko": "정부지원사업 양식에 그대로 쓸 수 있나요?",
+          "en": "Can I paste it into a grant form?"
+        },
+        "a": {
+          "ko": "공통 항목(문제, 해결, 시장, 팀, 자금 계획) 순서로 쓰므로 대부분의 양식에 옮기기 쉽습니다. 사업별 필수 항목은 공고문을 확인하세요.",
+          "en": "It follows the common sections (problem, solution, market, team, funding), so it maps to most forms. Check each program's required items."
+        }
+      }
+    ],
+    "sample": {
+      "ko": "손익분기: 월 228건 (추정 아님 — 입력값 기준 계산)\n1. 문제 인식 — 비건 디저트 구매처 부족 [추정]\n2. 해결 방안 — 월 4회 정기배송",
+      "en": "Break-even: 228 orders/month (calculated from your inputs)\n1. Problem — few places to buy vegan desserts [estimate]\n2. Solution — four deliveries a month"
+    }
+  },
+  "grant": {
+    "tagline": {
+      "ko": "내 조건에 맞는 정부지원사업과 서류 체크리스트",
+      "en": "Grants that fit you, with a document checklist"
+    },
+    "description": {
+      "ko": "업력, 지역, 매출, 인원, 기술분야로 지원 가능한 공고 후보와 준비 서류를 찾습니다. 실제 공고 데이터가 연결되지 않으면 없는 공고를 지어내지 않고 '준비 중'으로 알려 드립니다.",
+      "en": "Matches open programs to your years in business, region, revenue, headcount and tech field, with a document checklist. If live listing data isn't connected, it says so — it never invents listings."
+    },
+    "features": [
+      {
+        "icon": "search",
+        "title": {
+          "ko": "조건 매칭",
+          "en": "Eligibility matching"
+        },
+        "body": {
+          "ko": "업력과 지역처럼 자격 요건부터 걸러 냅니다.",
+          "en": "Filters on hard requirements like age and region first."
+        }
+      },
+      {
+        "icon": "calendar-days",
+        "title": {
+          "ko": "서류 체크리스트",
+          "en": "Document checklist"
+        },
+        "body": {
+          "ko": "공고별로 필요한 서류와 준비 순서를 정리합니다.",
+          "en": "Lists required documents and the order to prepare them."
+        }
+      },
+      {
+        "icon": "shield-check",
+        "title": {
+          "ko": "가짜 공고 없음",
+          "en": "No invented listings"
+        },
+        "body": {
+          "ko": "실제 공고 링크가 없으면 결과를 만들지 않습니다.",
+          "en": "No real listing link, no result."
+        }
+      }
+    ],
+    "presets": [
+      {
+        "title": {
+          "ko": "예비창업자",
+          "en": "Pre-founder"
+        },
+        "tag": {
+          "ko": "창업",
+          "en": "Startup"
+        },
+        "values": {
+          "years_in_business": "pre",
+          "region": "gyeongsang",
+          "revenue_band": "u1",
+          "employee_count": 1,
+          "support_types": [
+            "startup"
+          ]
+        }
+      },
+      {
+        "title": {
+          "ko": "3년차 제조 기업",
+          "en": "3-year manufacturer"
+        },
+        "tag": {
+          "ko": "R&D",
+          "en": "R&D"
+        },
+        "values": {
+          "years_in_business": "1_3",
+          "region": "gyeonggi_incheon",
+          "revenue_band": "10_50",
+          "employee_count": 12,
+          "tech_fields": [
+            "스마트팩토리"
+          ],
+          "support_types": [
+            "rnd",
+            "facility"
+          ]
+        }
+      }
+    ],
+    "steps": [
+      {
+        "ko": "업력, 지역, 매출 규모를 고릅니다.",
+        "en": "Choose years in business, region and revenue."
+      },
+      {
+        "ko": "희망 지원 유형과 기술분야를 더합니다.",
+        "en": "Add support types and tech fields."
+      },
+      {
+        "ko": "후보 공고의 원문 링크와 서류 체크리스트를 확인합니다.",
+        "en": "Open each listing's source link and checklist."
+      }
+    ],
+    "tips": [
+      {
+        "ko": "사업계획서 도구를 함께 쓰면 공고 신청서 초안까지 이어집니다.",
+        "en": "Pair with Business Plan to draft the application itself."
+      }
+    ],
+    "faq": [
+      {
+        "q": {
+          "ko": "왜 결과가 비어 있나요?",
+          "en": "Why are there no results?"
+        },
+        "a": {
+          "ko": "공공 공고 데이터 연동이 준비 중일 때는 추측으로 공고를 만들지 않습니다. 연동되면 이 화면에서 바로 알려 드립니다.",
+          "en": "While the public listings feed is being connected, we don't guess. You'll see it here as soon as it's live."
+        }
+      }
+    ],
+    "sample": {
+      "ko": "후보 공고 — 공공 데이터 연동 준비 중\n서류 체크리스트 (공통): 사업자등록증, 부가세 과세표준증명, 사업계획서",
+      "en": "Listings — public data connection in progress\nCommon checklist: business registration, VAT certificate, business plan"
+    }
+  },
+  "strategy": {
+    "tagline": {
+      "ko": "사업 맥락을 포지셔닝과 캠페인 방향으로",
+      "en": "From business context to positioning and campaign routes"
+    },
+    "description": {
+      "ko": "제품과 시장 설명을 넣으면 대상 고객, 경쟁 구도, 핵심 긴장, 약속, 믿을 이유를 정리하고 캠페인 방향 3가지 중 하나를 추천합니다. 경쟁 관련 주장은 웹 검색 출처와 함께 씁니다.",
+      "en": "Describe your product and market to get audience, competitive frame, core tension, promise and reasons to believe — plus three campaign routes with a recommendation. Competitive claims come with web sources."
+    },
+    "features": [
+      {
+        "icon": "search",
+        "title": {
+          "ko": "근거 있는 판단",
+          "en": "Decisions with evidence"
+        },
+        "body": {
+          "ko": "경쟁사 관련 내용은 검색 출처를 붙입니다.",
+          "en": "Competitor claims are backed by search sources."
+        }
+      },
+      {
+        "icon": "layers",
+        "title": {
+          "ko": "방향 3가지 + 추천",
+          "en": "Three routes, one pick"
+        },
+        "body": {
+          "ko": "넓게 펼친 뒤 하나를 골라 이유를 설명합니다.",
+          "en": "Explores widely, then recommends one and says why."
+        }
+      },
+      {
+        "icon": "link",
+        "title": {
+          "ko": "모든 도구의 기준",
+          "en": "Grounding for every tool"
+        },
+        "body": {
+          "ko": "결과를 카피·발표자료로 바로 이어 씁니다.",
+          "en": "Chain straight into Campaign Copy or Presentation."
+        }
+      }
+    ],
+    "presets": [
+      {
+        "title": {
+          "ko": "포지셔닝 스프린트",
+          "en": "Positioning sprint"
+        },
+        "tag": {
+          "ko": "전략",
+          "en": "Strategy"
+        },
+        "values": {
+          "context": "해운대 천연발효빵 베이커리. 아침 7시 오픈, 주말 브런치 수요가 많음. 대형 프랜차이즈 2곳이 근처에 있음.",
+          "competitors": [
+            "파리바게뜨",
+            "뚜레쥬르"
+          ],
+          "goal": "평일 오전 매출 늘리기"
+        }
+      },
+      {
+        "title": {
+          "ko": "신제품 캠페인 방향",
+          "en": "Launch territories"
+        },
+        "tag": {
+          "ko": "크리에이티브",
+          "en": "Creative"
+        },
+        "values": {
+          "context": "저당 수제 그래놀라 신제품. 30대 직장인 대상 온라인 판매.",
+          "goal": "첫 달 재구매율 확보"
+        }
+      }
+    ],
+    "steps": [
+      {
+        "ko": "사업과 제품을 한 문단으로 설명합니다.",
+        "en": "Describe the business and product in a paragraph."
+      },
+      {
+        "ko": "경쟁 브랜드와 이번 목표를 적습니다.",
+        "en": "Add competitors and this round's goal."
+      },
+      {
+        "ko": "추천 방향을 카피나 발표자료로 이어갑니다.",
+        "en": "Continue the recommended route into copy or a deck."
+      }
+    ],
+    "tips": [
+      {
+        "ko": "고객이 실제로 하는 말을 한 줄 넣으면 핵심 긴장이 선명해집니다.",
+        "en": "One real customer quote sharpens the core tension."
+      }
+    ],
+    "faq": [
+      {
+        "q": {
+          "ko": "전략 결과는 다른 도구에서 쓰이나요?",
+          "en": "Do other tools use the strategy?"
+        },
+        "a": {
+          "ko": "네. 결과 아래 '이어서 만들기'로 카피나 발표자료가 그대로 이어받습니다.",
+          "en": "Yes — \"Continue with…\" passes it to Campaign Copy or Presentation."
+        }
+      }
+    ],
+    "sample": {
+      "ko": "핵심 긴장: 빵은 사고 싶지만 아침엔 시간이 없다\n약속: 7시, 문 열자마자 따뜻한 빵\n추천 방향 — '출근길 7분': 매장 픽업 예약 + 커피 세트",
+      "en": "Core tension: people want fresh bread but mornings are rushed\nPromise: warm bread the moment we open at 7\nRecommended route — \"The 7-minute commute\": pre-order pickup + coffee set"
+    }
+  },
+  "copy": {
+    "tagline": {
+      "ko": "하나의 메시지, 채널마다 맞는 카피",
+      "en": "One message, copy for every channel"
+    },
+    "description": {
+      "ko": "알리고 싶은 것을 넣으면 핵심 메시지를 정하고, 고객 동기별 헤드라인·본문·CTA와 채널별 버전을 씁니다. 단어만 바꾼 변형이 아니라 서로 다른 설득 각도를 제안합니다.",
+      "en": "Enter what you want to announce to get a core message, headline/body/CTA per customer motivation, and a version per channel — genuinely different angles, not word swaps."
+    },
+    "features": [
+      {
+        "icon": "user-round",
+        "title": {
+          "ko": "브랜드 목소리 그대로",
+          "en": "Your voice everywhere"
+        },
+        "body": {
+          "ko": "프로필의 톤과 말투 예시를 모든 채널에 적용합니다.",
+          "en": "Profile tone and voice samples apply to every channel."
+        }
+      },
+      {
+        "icon": "layers",
+        "title": {
+          "ko": "동기별 각도",
+          "en": "Angles by motivation"
+        },
+        "body": {
+          "ko": "가격, 품질, 편의 등 서로 다른 이유로 설득합니다.",
+          "en": "Persuades on different reasons — price, quality, convenience."
+        }
+      },
+      {
+        "icon": "shield-check",
+        "title": {
+          "ko": "사실만",
+          "en": "Facts only"
+        },
+        "body": {
+          "ko": "'꼭 넣을 사실' 외의 수치나 효능은 만들지 않습니다.",
+          "en": "No numbers or claims beyond the facts you give."
+        }
+      }
+    ],
+    "presets": [
+      {
+        "title": {
+          "ko": "SNS 광고 세트",
+          "en": "Paid social set"
+        },
+        "tag": {
+          "ko": "광고",
+          "en": "Ads"
+        },
+        "values": {
+          "offer": "봄 딸기 타르트 출시, 4월 한 달 한정",
+          "audience": "동네 카페를 찾는 20~30대",
+          "channels": [
+            "instagram",
+            "paid_social"
+          ],
+          "variants": 3,
+          "must_include": [
+            "4월 한정",
+            "1조각 6,500원"
+          ]
+        }
+      },
+      {
+        "title": {
+          "ko": "런칭 이메일",
+          "en": "Launch email"
+        },
+        "tag": {
+          "ko": "이메일",
+          "en": "Email"
+        },
+        "values": {
+          "offer": "저당 그래놀라 정기배송 시작, 첫 달 20% 할인",
+          "channels": [
+            "email",
+            "sms"
+          ],
+          "variants": 2,
+          "must_include": [
+            "첫 달 20%",
+            "당류 5g 이하"
+          ]
+        }
+      },
+      {
+        "title": {
+          "ko": "랜딩 페이지 문구",
+          "en": "Landing page copy"
+        },
+        "tag": {
+          "ko": "웹",
+          "en": "Web"
+        },
+        "values": {
+          "offer": "1인 미용실 온라인 예약 오픈",
+          "audience": "망원동 30대 직장인",
+          "channels": [
+            "landing"
+          ],
+          "variants": 2
+        }
+      }
+    ],
+    "steps": [
+      {
+        "ko": "알리고 싶은 것을 한두 문장으로 적습니다.",
+        "en": "Write what you're announcing in a sentence or two."
+      },
+      {
+        "ko": "채널과 꼭 넣을 사실을 고릅니다.",
+        "en": "Pick channels and must-include facts."
+      },
+      {
+        "ko": "마음에 드는 각도를 복사해 바로 씁니다.",
+        "en": "Copy the angle you like and use it."
+      }
+    ],
+    "tips": [
+      {
+        "ko": "가격·기간 같은 확정 정보는 '꼭 넣을 사실'에 넣어야 틀리지 않습니다.",
+        "en": "Put fixed facts like price and dates in \"must include\" so they're exact."
+      }
+    ],
+    "faq": [
+      {
+        "q": {
+          "ko": "광고 심의에 걸릴 표현도 쓰나요?",
+          "en": "Will it write risky ad claims?"
+        },
+        "a": {
+          "ko": "'최고', '1위' 같은 근거 없는 최상급 표현은 피하고, 피할 표현 목록도 함께 드립니다.",
+          "en": "It avoids unsupported superlatives and lists words to avoid."
+        }
+      }
+    ],
+    "sample": {
+      "ko": "핵심 메시지: 4월에만 만나는 딸기 타르트\n동기 — 희소성: \"4월이 지나면 내년까지 기다려야 해요\" [지금 맛보기]\n동기 — 품질: \"그날 아침 들어온 딸기만 올립니다\"",
+      "en": "Core message: a strawberry tart for April only\nMotivation — scarcity: \"After April, it's a year's wait\" [Try it now]\nMotivation — quality: \"Only berries delivered that morning\""
+    }
+  },
+  "presentation": {
+    "tagline": {
+      "ko": "이야기 흐름이 먼저인 발표자료",
+      "en": "Decks that start with the story"
+    },
+    "description": {
+      "ko": "주제와 목적을 넣으면 먼저 스토리라인을 세우고, 슬라이드마다 헤드라인·요점·시각 자료 제안·발표 메모를 씁니다. 마지막 장에는 듣는 사람에게 요청할 한 가지를 정리합니다.",
+      "en": "Enter the topic and purpose to get a storyline first, then per-slide headline, points, visual suggestion and speaker notes — ending with one clear ask."
+    },
+    "features": [
+      {
+        "icon": "layers",
+        "title": {
+          "ko": "스토리라인 우선",
+          "en": "Storyline first"
+        },
+        "body": {
+          "ko": "슬라이드를 나열하기 전에 설득 흐름부터 정합니다.",
+          "en": "Sets the persuasive arc before listing slides."
+        }
+      },
+      {
+        "icon": "sparkles",
+        "title": {
+          "ko": "발표 메모 포함",
+          "en": "Speaker notes included"
+        },
+        "body": {
+          "ko": "장마다 무엇을 말할지까지 적어 줍니다.",
+          "en": "Tells you what to say on every slide."
+        }
+      },
+      {
+        "icon": "link",
+        "title": {
+          "ko": "전략·계획서에서 이어받기",
+          "en": "Built on earlier work"
+        },
+        "body": {
+          "ko": "브랜드 전략이나 사업계획서 결과를 그대로 이어받습니다.",
+          "en": "Picks up Brand Strategy or Business Plan results."
+        }
+      }
+    ],
+    "presets": [
+      {
+        "title": {
+          "ko": "런칭 전략 발표",
+          "en": "Launch strategy"
+        },
+        "tag": {
+          "ko": "8장",
+          "en": "8 slides"
+        },
+        "values": {
+          "brief": "봄 시즌 딸기 디저트 런칭 — 기회, 대상 고객, 제안, 채널, 일정",
+          "audience": "매장 직원과 협력 카페 사장님",
+          "slide_count": "8",
+          "purpose": "launch"
+        }
+      },
+      {
+        "title": {
+          "ko": "분기 성과 보고",
+          "en": "Quarterly review"
+        },
+        "tag": {
+          "ko": "10장",
+          "en": "10 slides"
+        },
+        "values": {
+          "brief": "3분기 온라인 판매 성과, 잘된 점과 아쉬운 점, 4분기 계획",
+          "audience": "공동 창업자",
+          "slide_count": "10",
+          "purpose": "report"
+        }
+      },
+      {
+        "title": {
+          "ko": "투자 피칭",
+          "en": "Investor pitch"
+        },
+        "tag": {
+          "ko": "12장",
+          "en": "12 slides"
+        },
+        "values": {
+          "brief": "소상공인 재고·발주 자동화 SaaS 시드 투자 유치",
+          "audience": "초기 투자자",
+          "slide_count": "12",
+          "purpose": "pitch"
+        }
+      }
+    ],
+    "steps": [
+      {
+        "ko": "주제와 발표 목적을 적습니다.",
+        "en": "Write the topic and purpose."
+      },
+      {
+        "ko": "듣는 사람과 슬라이드 수를 고릅니다.",
+        "en": "Choose audience and slide count."
+      },
+      {
+        "ko": "구성과 메모를 슬라이드 도구로 옮겨 다듬습니다.",
+        "en": "Move the outline and notes into your slide tool."
+      }
+    ],
+    "tips": [
+      {
+        "ko": "듣는 사람이 발표 후 해 줬으면 하는 행동 하나를 적으면 마무리가 강해집니다.",
+        "en": "Name the one action you want afterwards for a stronger close."
+      }
+    ],
+    "faq": [
+      {
+        "q": {
+          "ko": "PPT 파일로 받을 수 있나요?",
+          "en": "Can I get a PowerPoint file?"
+        },
+        "a": {
+          "ko": "지금은 슬라이드 구성과 발표 메모를 드립니다. 파일 내보내기는 다음 업데이트에 추가됩니다.",
+          "en": "For now you get the outline and speaker notes; file export is coming next."
+        }
+      }
+    ],
+    "sample": {
+      "ko": "스토리라인: 문제 → 기회 → 우리의 답 → 실행 → 요청\n슬라이드 3 — '주말엔 줄을 서는데, 평일 오전은 비어 있다'\n발표 메모: 지난달 시간대별 매출 그래프로 시작하세요",
+      "en": "Storyline: problem → opportunity → our answer → plan → ask\nSlide 3 — \"Weekend queues, empty weekday mornings\"\nNotes: open with last month's sales-by-hour chart"
+    }
+  }
+}
