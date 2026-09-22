@@ -136,15 +136,18 @@ function ToolRunner({
       : defaultProvider;
   const cost = manifest ? resolveCost(provider, !!hasOwnKey[provider], isStudent, manifest.estimatedCredits) : 0;
 
-  const [values, setValues] = useState<ToolFormValues>(() =>
-    chainedFrom
-      ? seedFromChain(toolId, chainedFrom.toolId, chainedFrom.output)
-      : initialPreset !== undefined && getToolContent(toolId)?.presets[initialPreset]
-        ? { ...getToolContent(toolId)!.presets[initialPreset].values }
-        : manifest
-          ? seedFromBrief(manifest, initialBrief)
-          : {},
-  );
+  const [values, setValues] = useState<ToolFormValues>(() => {
+    if (chainedFrom) return seedFromChain(toolId, chainedFrom.toolId, chainedFrom.output);
+    const preset = initialPreset !== undefined ? getToolContent(toolId)?.presets[initialPreset] : undefined;
+    if (preset) return { ...preset.values };
+    const brief = manifest ? seedFromBrief(manifest, initialBrief) : {};
+    if (Object.keys(brief).length) return brief;
+    // A cold visit (no chain, no ?preset=, no brief) opens with the
+    // tool's first example pre-filled rather than blank fields — same
+    // promise ToolHome's example gallery already makes ("opens with the
+    // form filled in"), just honored on a direct /run visit too.
+    return { ...(getToolContent(toolId)?.presets[0]?.values ?? {}) };
+  });
   const [excludedProfileKeys, setExcludedProfileKeys] = useState<Set<string>>(
     new Set(),
   );
@@ -190,7 +193,7 @@ function ToolRunner({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...serialized,
+          values: serialized,
           provider,
           ...(chainedFrom ? { chainedFromRunId: chainedFrom.runId } : {}),
         }),

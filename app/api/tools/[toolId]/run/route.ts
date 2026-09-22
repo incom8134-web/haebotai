@@ -68,11 +68,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }
 
   const body = await request.json().catch(() => null);
-  const { chainedFromRunId, provider: requestedProvider, ...values } = (body ?? {}) as {
+  const { chainedFromRunId, provider: requestedProvider, values } = (body ?? {}) as {
     chainedFromRunId?: string;
     provider?: unknown;
+    values?: unknown;
   };
-  const parsedInput = buildInputSchema(manifest.inputs).safeParse(values);
+  const parsedInput = buildInputSchema(manifest.inputs).safeParse(values ?? {});
   if (!parsedInput.success) {
     return Response.json(
       { error: parsedInput.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join(", ") },

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowRight, Check, FileText, GraduationCap, Image as ImageIcon, Link2, MessageSquareText, Plus, ShieldCheck, Sparkles, UserRound } from "lucide-react";
 import { listTools, getTool } from "@/lib/tools/registry";
@@ -22,6 +23,11 @@ import { cn } from "@/lib/utils";
 // answers, and one last invitation.
 
 const ORDER: CategoryId[] = ["ideas", "content", "design", "sales", "docs"];
+
+// WebGL — dynamically imported with no SSR (Canvas can't render server-
+// side) and it's purely decorative, so a late mount never blocks anything
+// above the fold from being usable.
+const Hero3D = dynamic(() => import("./hero-3d").then((m) => m.Hero3D), { ssr: false });
 
 const reveal = {
   initial: { opacity: 0, y: 18 },
@@ -128,6 +134,7 @@ function Landing() {
   return (
     <div className="relative min-h-dvh overflow-x-clip">
       <div className="app-backdrop" aria-hidden><span className="orb orb-a" /><span className="orb orb-b" /><span className="orb orb-c" /></div>
+      <Hero3D />
       <Nav />
 
       <main>

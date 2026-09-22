@@ -53,3 +53,9 @@ export const TOOL_CAPABILITIES: Record<string, ToolCapability> = {
 export function getToolCapability(toolId: string): ToolCapability | undefined {
   return TOOL_CAPABILITIES[toolId];
 }
+
+// Tools with no TOOL_CAPABILITIES entry get this — google-only, since
+// that's the one engine that never needs an own key. Shared by the run
+// route (resolve-provider.ts) and the run page so client and server can
+// never disagree about what an uncapped tool offers.
+export const DEFAULT_TOOL_CAPABILITY: ToolCapability = { providers: ["google"], default: "google" };
