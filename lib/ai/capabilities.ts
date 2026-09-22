@@ -30,15 +30,15 @@ export interface ToolCapability {
 // requirements rule out (checked against PROVIDER_CAPS by
 // capabilities.test.ts).
 export const TOOL_CAPABILITIES: Record<string, ToolCapability> = {
-  money: { providers: ["google"], default: "google" },
+  money: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 2
   trend: { providers: ["google"], default: "google" },
   strategy: { providers: ["google", "anthropic"], default: "google" },
-  calendar: { providers: ["google"], default: "google" },
+  calendar: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 2
   prompt: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 1
   blog: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 1
   copy: { providers: ["google", "anthropic"], default: "google" },
-  keyword: { providers: ["google"], default: "google" },
-  place: { providers: ["google"], default: "google" },
+  keyword: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 2
+  place: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 2
   image: { providers: ["google"], default: "google" },
   logo: { providers: ["google"], default: "google" },
   "brand-model": { providers: ["google"], default: "google" },
