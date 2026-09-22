@@ -23,6 +23,8 @@ import { sanitizeSvg } from "./svg.ts";
 export interface PolicyResult {
   ok: boolean;
   reason?: string;
+  /** Present when the output was rewritten (e.g. logo SVGs with unrecognized-but-harmless attributes stripped) — the caller should use this in place of the original. */
+  output?: unknown;
 }
 
 const FAKE_REVIEW_PATTERNS = [
@@ -68,11 +70,15 @@ function checkHomepageSafety(output: unknown): PolicyResult {
 
 export function checkOutputSafety(toolId: string, output: unknown): PolicyResult {
   if (toolId === "logo") {
-    const concepts = (output as { concepts?: { svg: string }[] }).concepts ?? [];
+    const typed = output as { concepts?: Record<string, unknown>[] };
+    const concepts = typed.concepts ?? [];
+    const cleaned: Record<string, unknown>[] = [];
     for (const concept of concepts) {
-      const result = sanitizeSvg(concept.svg);
+      const result = sanitizeSvg(String(concept.svg ?? ""));
       if (!result.ok) return { ok: false, reason: `로고 SVG 검증 실패: ${result.reason}` };
+      cleaned.push({ ...concept, svg: result.svg });
     }
+    return { ok: true, output: { ...typed, concepts: cleaned } };
   }
   if (toolId === "homepage") return checkHomepageSafety(output);
   return { ok: true };

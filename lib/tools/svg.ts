@@ -11,12 +11,16 @@
 // which never contains the literal string a "href=...javascript:" regex
 // would catch. This walks real tags and attributes with a small
 // tokenizer (tracking quotes, so a `>` inside an attribute value can't
-// end a tag early) and rejects anything not explicitly recognized as
-// safe, rather than trying to keep enumerating what's dangerous.
-// Rejects the whole SVG rather than stripping and repairing it — the
-// caller (checkOutputSafety) fails the run and asks the model to try
-// again, which is safer than silently serving a modified version of
-// what the model returned.
+// end a tag early).
+//
+// Two tiers, not one: an attribute we simply don't recognize (some valid
+// SVG attribute the allow-list hasn't caught up to — real logos use a lot
+// of them) is silently stripped, not a reason to fail the whole SVG. A
+// disallowed ELEMENT, or one of the specific dangerous categories below
+// (event handlers, a style/url() external load, a non-fragment href) —
+// still rejects the entire SVG; those are exactly the shapes that let
+// untrusted markup run script or exfiltrate, so there's no safe partial
+// form of them to keep.
 
 export interface SvgSanitizeResult {
   ok: boolean;
@@ -29,28 +33,41 @@ export interface SvgSanitizeResult {
 // need), <a> (no hyperlinks in a logo), <script>, <foreignObject>,
 // <style>, and every SMIL animation element (<animate>, <animateMotion>,
 // <animateTransform>, <set>, <animateColor>) — the last group is exactly
-// the well-known bypass class for regex-based sanitizers.
+// the well-known bypass class for regex-based sanitizers. An element not
+// on this list fails the whole SVG (hard reject) — there's no safe
+// partial form of an unrecognized element the way there is for an
+// unrecognized attribute.
 const ALLOWED_ELEMENTS = new Set([
   "svg", "g", "path", "rect", "circle", "ellipse", "line", "polyline", "polygon",
   "text", "tspan", "defs", "clippath", "mask", "lineargradient", "radialgradient",
   "stop", "pattern", "symbol", "use", "title", "desc", "marker",
 ]);
 
+// Recognized presentation/geometry attributes. Anything NOT on this list
+// (and not href/style/on*, handled separately below) is stripped from
+// the rebuilt output rather than failing the whole SVG — real logo SVGs
+// routinely use attributes this list hasn't been extended to yet
+// (dx/dy on tspan, rotate, textLength, spreadMethod, ...), and none of
+// those are a way to run script or exfiltrate on their own.
 const ALLOWED_ATTRIBUTES = new Set([
   "id", "class", "fill", "stroke", "stroke-width", "stroke-linecap", "stroke-linejoin",
   "stroke-dasharray", "stroke-dashoffset", "stroke-miterlimit", "opacity", "fill-opacity",
   "stroke-opacity", "fill-rule", "clip-rule", "transform", "viewbox", "width", "height",
-  "x", "y", "x1", "y1", "x2", "y2", "cx", "cy", "r", "rx", "ry", "points", "d", "offset",
-  "stop-color", "stop-opacity", "gradientunits", "gradienttransform", "patterntransform",
-  "patternunits", "patterncontentunits", "xmlns", "xmlns:xlink", "version",
-  "preserveaspectratio", "font-family", "font-size", "font-weight", "font-style",
+  "x", "y", "x1", "y1", "x2", "y2", "cx", "cy", "r", "rx", "ry", "dx", "dy", "points", "d",
+  "offset", "stop-color", "stop-opacity", "gradientunits", "gradienttransform",
+  "patterntransform", "patternunits", "patterncontentunits", "xmlns", "xmlns:xlink",
+  "version", "preserveaspectratio", "font-family", "font-size", "font-weight", "font-style",
   "text-anchor", "dominant-baseline", "letter-spacing", "clip-path", "mask", "style",
+  "spreadmethod", "rotate", "textlength", "lengthadjust", "visibility", "overflow",
+  "shape-rendering", "vector-effect", "paint-order",
 ]);
 
 // href only as a same-document fragment reference (<use href="#id">,
 // gradient/pattern targets) — never an external URL, javascript:, or
-// data: URI. This is checked on the attribute VALUE, not pattern-matched
-// against a "javascript:" blocklist, so there's nothing else to bypass.
+// data: URI. Checked on the attribute VALUE, not pattern-matched against
+// a "javascript:" blocklist, so there's nothing else to bypass. A
+// non-fragment href is a hard reject (whole SVG), same tier as an event
+// handler — not something to just strip and move on from.
 const HREF_ATTRIBUTES = new Set(["href", "xlink:href"]);
 const SAFE_FRAGMENT_REF = /^#[\w.:-]+$/;
 const DANGEROUS_STYLE_VALUE = /url\s*\(|expression\s*\(|javascript:|@import/i;
@@ -60,7 +77,7 @@ interface Tag {
   name: string;
   attrs: Record<string, string>;
 }
-type Token = Tag | { type: "text" | "skip" };
+type Token = Tag | { type: "text"; text: string } | { type: "skip" };
 
 // Scans for the tag-ending '>' while tracking quotes, so a literal '>'
 // inside a quoted attribute value doesn't end the tag early.
@@ -95,8 +112,9 @@ function tokenize(svg: string): Token[] {
   while (i < svg.length) {
     if (svg[i] !== "<") {
       const next = svg.indexOf("<", i);
-      tokens.push({ type: "text" });
-      i = next === -1 ? svg.length : next;
+      const end = next === -1 ? svg.length : next;
+      tokens.push({ type: "text", text: svg.slice(i, end) });
+      i = end;
       continue;
     }
     if (svg.startsWith("<!--", i)) {
@@ -146,17 +164,29 @@ function tokenize(svg: string): Token[] {
   return tokens;
 }
 
-function attrsAreSafe(attrs: Record<string, string>): boolean {
+function escapeAttrValue(value: string): string {
+  return value.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
+}
+
+/** Rebuilds the attribute string for one tag, stripping unrecognized-but-harmless attributes; returns a hard-reject reason for the dangerous categories. */
+function sanitizeAttrs(attrs: Record<string, string>): { out: string } | { reject: string } {
+  let out = "";
   for (const [name, value] of Object.entries(attrs)) {
-    if (name.startsWith("on")) return false; // event handlers — never allowed, allow-list or not
+    if (name.startsWith("on")) return { reject: "이벤트 핸들러 속성은 허용되지 않습니다" };
     if (HREF_ATTRIBUTES.has(name)) {
-      if (!SAFE_FRAGMENT_REF.test(value.trim())) return false;
+      if (!SAFE_FRAGMENT_REF.test(value.trim())) return { reject: "href는 문서 내부 참조(#id)만 허용됩니다" };
+      out += ` ${name}="${escapeAttrValue(value)}"`;
       continue;
     }
-    if (!ALLOWED_ATTRIBUTES.has(name)) return false;
-    if (name === "style" && DANGEROUS_STYLE_VALUE.test(value)) return false;
+    if (name === "style") {
+      if (DANGEROUS_STYLE_VALUE.test(value)) return { reject: "style 속성에 외부 참조가 포함되어 있습니다" };
+      out += ` style="${escapeAttrValue(value)}"`;
+      continue;
+    }
+    if (!ALLOWED_ATTRIBUTES.has(name)) continue; // unrecognized but not dangerous — drop silently, don't fail the SVG
+    out += ` ${name}="${escapeAttrValue(value)}"`;
   }
-  return true;
+  return { out };
 }
 
 export function sanitizeSvg(svg: string): SvgSanitizeResult {
@@ -165,15 +195,29 @@ export function sanitizeSvg(svg: string): SvgSanitizeResult {
     return { ok: false, reason: "유효한 SVG가 아닙니다" };
   }
 
+  let out = "";
   for (const token of tokenize(trimmed)) {
-    if (token.type !== "open" && token.type !== "selfclose") continue;
+    if (token.type === "skip") continue;
+    if (token.type === "text") {
+      out += token.text;
+      continue;
+    }
+    if (token.type === "close") {
+      // Reachable only for an element whose matching open already passed
+      // (any rejection above returns immediately), so this always closes
+      // something already emitted.
+      out += `</${token.name}>`;
+      continue;
+    }
     if (!ALLOWED_ELEMENTS.has(token.name)) {
       return { ok: false, reason: `허용되지 않는 태그가 포함되어 있습니다: <${token.name}>` };
     }
-    if (!attrsAreSafe(token.attrs)) {
-      return { ok: false, reason: `허용되지 않는 속성이 포함되어 있습니다 (<${token.name}>)` };
+    const attrs = sanitizeAttrs(token.attrs);
+    if ("reject" in attrs) {
+      return { ok: false, reason: `${attrs.reject} (<${token.name}>)` };
     }
+    out += `<${token.name}${attrs.out}${token.type === "selfclose" ? " />" : ">"}`;
   }
 
-  return { ok: true, svg: trimmed };
+  return { ok: true, svg: out };
 }
