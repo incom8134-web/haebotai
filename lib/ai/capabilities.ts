@@ -18,20 +18,24 @@ export interface ToolCapability {
 }
 
 // One entry per tool id (lib/tools/registry/*.ts). Every tool starts
-// google-only. Phase 3 adds "anthropic" to text tools one at a time:
-// 3a = `copy` (no web search — verifies structured output alone), 3b =
-// `strategy` (adds web search + citations), then the rest once both are
-// verified end to end. Phase 4 does the same for "openai", plus adds it
-// to `image`/`brand-model` once the OpenAI image adapter ships and is
-// verified. Never hand-list a provider a tool's requirements rule out
-// (checked against PROVIDER_CAPS by capabilities.test.ts).
+// google-only. Anthropic was added text-tool by text-tool as each was
+// verified: 3a = `copy` (structured output alone), 3b = `strategy`
+// (+ web search + citations), Stage 2 = every other text tool, in four
+// batches, once both were confirmed working end to end on staging.
+// `image`/`brand-model` stay google-only — Claude has no image API, no
+// fake integrations. `grant` stays google-only too: it's a static
+// placeholder (lib/tools/generate.ts) that never reaches any adapter, so
+// listing another provider for it would be pure decoration. OpenAI joins
+// the same way in Stage 5. Never hand-list a provider a tool's
+// requirements rule out (checked against PROVIDER_CAPS by
+// capabilities.test.ts).
 export const TOOL_CAPABILITIES: Record<string, ToolCapability> = {
   money: { providers: ["google"], default: "google" },
   trend: { providers: ["google"], default: "google" },
   strategy: { providers: ["google", "anthropic"], default: "google" },
   calendar: { providers: ["google"], default: "google" },
-  prompt: { providers: ["google"], default: "google" },
-  blog: { providers: ["google"], default: "google" },
+  prompt: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 1
+  blog: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 1
   copy: { providers: ["google", "anthropic"], default: "google" },
   keyword: { providers: ["google"], default: "google" },
   place: { providers: ["google"], default: "google" },
@@ -40,8 +44,8 @@ export const TOOL_CAPABILITIES: Record<string, ToolCapability> = {
   "brand-model": { providers: ["google"], default: "google" },
   sangsepage: { providers: ["google"], default: "google" },
   homepage: { providers: ["google"], default: "google" },
-  proposal: { providers: ["google"], default: "google" },
-  presentation: { providers: ["google"], default: "google" },
+  proposal: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 1
+  presentation: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 1
   "business-plan": { providers: ["google"], default: "google" },
   grant: { providers: ["google"], default: "google" },
 };
