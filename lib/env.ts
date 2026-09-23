@@ -14,6 +14,12 @@ const envSchema = z.object({
   // Optional: comma-separated staff emails allowed into /admin. Unset
   // means no one can reach it — fails closed, not open.
   ADMIN_EMAILS: z.string().optional(),
+  // Optional: enables Pro checkout (lib/payments.ts). NEXT_PUBLIC_TOSS_CLIENT_KEY
+  // reaches the browser (Toss's own client-side widget key, not a secret);
+  // TOSS_SECRET_KEY never does. Unset means the checkout entry point hides
+  // itself rather than rendering a widget that can't confirm payments.
+  NEXT_PUBLIC_TOSS_CLIENT_KEY: z.string().optional(),
+  TOSS_SECRET_KEY: z.string().optional(),
 });
 
 const parsed = envSchema.safeParse({
@@ -26,6 +32,8 @@ const parsed = envSchema.safeParse({
   NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
   API_KEY_ENCRYPTION_SECRET: process.env.API_KEY_ENCRYPTION_SECRET || undefined,
   ADMIN_EMAILS: process.env.ADMIN_EMAILS || undefined,
+  NEXT_PUBLIC_TOSS_CLIENT_KEY: process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY || undefined,
+  TOSS_SECRET_KEY: process.env.TOSS_SECRET_KEY || undefined,
 });
 
 if (!parsed.success) {
