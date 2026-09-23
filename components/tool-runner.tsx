@@ -164,6 +164,7 @@ function ToolRunner({
   const [errorMsg, setErrorMsg] = useState<ReturnType<typeof mapRunError> | null>(null);
   const [showCancel, setShowCancel] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+  const runIdRef = useRef<string | null>(null);
 
   if (!manifest) return notFound();
 
@@ -185,6 +186,7 @@ function ToolRunner({
 
     const controller = new AbortController();
     abortRef.current = controller;
+    runIdRef.current = null;
     const cancelTimer = setTimeout(() => setShowCancel(true), 5000);
 
     try {
@@ -219,7 +221,8 @@ function ToolRunner({
         for (const line of lines) {
           if (!line) continue;
           const event = JSON.parse(line);
-          if (event.type === "chunk")
+          if (event.type === "status" && event.runId) runIdRef.current = event.runId;
+          else if (event.type === "chunk")
             setStreamedText((prev) => prev + event.text);
           else if (event.type === "done") {
             setPhase("done");
@@ -244,7 +247,17 @@ function ToolRunner({
       clearTimeout(cancelTimer);
       setShowCancel(false);
       abortRef.current = null;
+      runIdRef.current = null;
     }
+  }
+
+  // Record the cancel on the server first (that's what refunds — a
+  // dropped connection alone isn't reliably seen by the run route), then
+  // stop reading the stream.
+  function handleCancel() {
+    const runId = runIdRef.current;
+    if (runId) fetch(`/api/runs/${runId}/cancel`, { method: "POST", keepalive: true }).catch(() => {});
+    abortRef.current?.abort();
   }
 
   const side = (
@@ -402,7 +415,7 @@ function ToolRunner({
           {t("run")}
         </Button>
         {phase === "streaming" && showCancel ? (
-          <Button variant="ghost" onClick={() => abortRef.current?.abort()}>
+          <Button variant="ghost" onClick={handleCancel}>
             {t("cancel")}
           </Button>
         ) : null}

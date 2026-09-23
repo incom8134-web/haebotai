@@ -11,6 +11,9 @@ const envSchema = z.object({
   NEXT_PUBLIC_SITE_URL: z.url(),
   // Optional: enables "bring your own API key". 16+ chars, server-only.
   API_KEY_ENCRYPTION_SECRET: z.string().min(16).optional(),
+  // Optional: enables the Pro checkout (Toss Payments). Server-only; the
+  // widget's client key is NEXT_PUBLIC_TOSS_CLIENT_KEY.
+  TOSS_SECRET_KEY: z.string().min(1).optional(),
 });
 
 const parsed = envSchema.safeParse({
@@ -22,6 +25,7 @@ const parsed = envSchema.safeParse({
   UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
   NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
   API_KEY_ENCRYPTION_SECRET: process.env.API_KEY_ENCRYPTION_SECRET || undefined,
+  TOSS_SECRET_KEY: process.env.TOSS_SECRET_KEY || undefined,
 });
 
 if (!parsed.success) {

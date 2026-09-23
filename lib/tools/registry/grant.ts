@@ -91,4 +91,6 @@ export const grant: ToolManifest<z.infer<typeof outputSchema>> = {
   model: "gemini-3.6-flash",
   estimatedCredits: 35,
   estimatedSeconds: 30,
+  // No K-Startup / bizinfo integration yet — see the note at the top.
+  comingSoon: true,
 };
