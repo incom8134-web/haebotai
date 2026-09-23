@@ -5,6 +5,7 @@ import type { Source } from "./registry/shared";
 import type { AiAdapter, ProviderId, TokenUsage } from "@/lib/ai/types";
 import { geminiAdapter, runWithApiKey as runWithGeminiKey } from "@/lib/ai/gemini";
 import { anthropicAdapter, runWithApiKey as runWithAnthropicKey } from "@/lib/ai/anthropic";
+import { openaiAdapter, runWithApiKey as runWithOpenAIKey } from "@/lib/ai/openai";
 import { renderSangsepage } from "./render/sangsepage";
 
 // HAEBOT_A_TOOLS_SPEC.md §3.2 — real generation for all 15 tools. Thin
@@ -20,12 +21,14 @@ import { renderSangsepage } from "./render/sangsepage";
 const ADAPTERS: Partial<Record<ProviderId, AiAdapter>> = {
   google: geminiAdapter,
   anthropic: anthropicAdapter,
+  openai: openaiAdapter,
 };
 
 /** Wraps a generation call with the given provider's own key-rotation policy. */
 export async function runWithApiKey<T>(provider: ProviderId, userId: string, apiKeys: string[], fn: () => Promise<T>): Promise<T> {
   if (provider === "google") return runWithGeminiKey(apiKeys, fn);
   if (provider === "anthropic") return runWithAnthropicKey(userId, apiKeys, fn);
+  if (provider === "openai") return runWithOpenAIKey(userId, apiKeys, fn);
   throw new Error(`${provider} 엔진은 아직 지원하지 않습니다`);
 }
 

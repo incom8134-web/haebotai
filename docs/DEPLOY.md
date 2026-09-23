@@ -8,8 +8,7 @@ projects, not separate schemas in one project).
 ### 1.1 Run migrations
 
 Migrations live in `supabase/migrations/`, numbered and applied in order.
-None of them have been applied to any live database by this work — apply
-them yourself with the Supabase CLI, pointed at the target project:
+Apply them with the Supabase CLI, pointed at the target project:
 
 ```bash
 supabase link --project-ref <staging-or-prod-project-ref>
@@ -18,6 +17,25 @@ supabase db push
 
 Or, without the CLI, paste each file's contents into the SQL editor in
 project order (0001 → 0011, currently).
+
+**If the project's schema was ever created or edited by hand** (pasted
+into the SQL editor directly, rather than always going through `db push`),
+`supabase migration list` can show every migration as unapplied even
+though the tables already exist — the remote history table is CLI
+bookkeeping, not a reflection of the actual schema. A blind `db push` in
+that state fails on the first migration's `create table` hitting a table
+that's already there. Diagnose which migrations are genuinely missing
+first (§1.3 below), then mark the ones whose effects are already present
+as applied without re-running their SQL, and only push the real
+remainder:
+
+```bash
+supabase migration repair --status applied 0001 0002 0003 0004 0005 --linked
+supabase db push --linked
+```
+
+(Substitute the actual set of already-applied versions you found — this
+is not always 0001-0005; that was specific to one incident, see §1.3.)
 
 | Migration | Purpose |
 |---|---|
@@ -46,7 +64,61 @@ cannot `select`/`insert`/`update`/`delete` `user_api_keys` at all — only
 (all `security definer`, service-role-only) and the `user_api_key_status`
 view should be reachable.
 
-### 1.3 Auth — Google OAuth
+The file is written for `psql` — its `\set`/`\echo` lines are client
+meta-commands, not SQL, so the Supabase dashboard's SQL Editor (which
+just sends the pasted text straight to Postgres) errors on them. Either
+run it with `psql -v owner_id="'<uuid>'" -v other_id="'<uuid>'" -f
+supabase/verify-security.sql`, or strip the `\set`/`\echo` lines and
+replace `:owner_id`/`:other_id` with the literal UUIDs before pasting
+into the SQL Editor.
+
+### 1.3 Detecting schema drift
+
+A project whose schema has drifted from `supabase/migrations/` fails in
+ways that look like application bugs — a raw Postgres error leaking into
+a tool run (`Could not find the function public.reserve_credits(...)`),
+or a real row 404ing in the Library because the query selects a column
+that doesn't exist yet. Check for drift *before* debugging further:
+
+1. **`supabase migration list`** (needs `supabase link` first) — compares
+   local migration files against the remote history table. Empty/blank
+   `remote` values for migrations you expect to be live mean either they
+   were never applied, or they were applied outside the CLI (see the
+   hand-edited-schema case in §1.1) — this command alone can't tell you
+   which.
+2. **Confirm against the actual schema**, not just the history table, since
+   the history table can be wrong in either direction. From `psql` or the
+   SQL Editor:
+   ```sql
+   select to_regclass('public.user_api_keys') as user_api_keys,
+          exists(select 1 from information_schema.columns
+                 where table_schema='public' and table_name='generations'
+                   and column_name='provider') as generations_provider,
+          exists(select 1 from information_schema.columns
+                 where table_schema='public' and table_name='generations'
+                   and column_name='credits_settled') as credits_settled;
+   ```
+   `user_api_keys: NULL` or either `false` means at least 0007/0009/0011
+   haven't landed. Extend the same pattern for any other migration you
+   need to confirm.
+3. **Without database access at all** (no `psql`, no Docker for
+   `supabase db dump`), the same check is possible read-only via
+   PostgREST's own schema cache — useful since it needs only the service
+   role key, already in `.env.local`:
+   ```bash
+   curl -s "$NEXT_PUBLIC_SUPABASE_URL/rest/v1/?apikey=$SUPABASE_SERVICE_ROLE_KEY" \
+     -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+     | node -e 'const s=JSON.parse(require("fs").readFileSync(0,"utf8"));console.log(Object.keys(s.definitions.generations.properties))'
+   ```
+   A table missing from `definitions` entirely (`user_api_keys` in the
+   incident this section documents) means it doesn't exist on this
+   project at all.
+4. **Catch a wrong project before any of the above is needed**: every dev
+   server prints `[env] Supabase project: <ref>` on startup
+   (`lib/env.ts`, dev-only) — if that ref doesn't match the project you
+   think you're pointed at, `.env.local` is the problem, not the schema.
+
+### 1.4 Auth — Google OAuth
 
 In the Supabase dashboard → Authentication → Providers → Google:
 
@@ -109,7 +181,7 @@ are own-key-only by design (product decision), so there is no
 1. Load `/` — landing page renders, no console errors.
 2. `/auth` → sign in with Google → lands on `/brand` (first-time) or
    `/studio` (existing user) — confirms the OAuth redirect URL allowlist
-   (§1.3) is correct.
+   (§1.4) is correct.
 3. Fill out the Business Profile at `/brand`, then load `/studio`.
 4. Run a text tool on Gemini (e.g. `copy`) — confirms `GOOGLE_GENAI_API_KEY`
    and Redis rate limiting are both live, and the `generations` row lands

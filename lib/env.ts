@@ -33,3 +33,15 @@ if (!parsed.success) {
 }
 
 export const env = parsed.data;
+
+// Dev-only: the whole app trusts this project's schema matches
+// supabase/migrations/*.sql, but nothing else here would ever surface a
+// mismatch until a real request fails against a missing column/table
+// (see docs/DEPLOY.md's "Detecting schema drift" section for how that
+// happened once already). Printing which project every dev server talks
+// to makes a wrong/stale .env.local obvious immediately instead of
+// hours into debugging unrelated-looking errors.
+if (process.env.NODE_ENV !== "production") {
+  const ref = /^https:\/\/([^.]+)\.supabase\.co/.exec(env.NEXT_PUBLIC_SUPABASE_URL)?.[1];
+  console.log(`[env] Supabase project: ${ref ?? env.NEXT_PUBLIC_SUPABASE_URL}`);
+}
