@@ -20,3 +20,8 @@ export const ACCOUNT_NAV: SubNavItem[] = [
   { href: "/account/membership", label: { ko: "학생 멤버십", en: "Student membership" }, icon: "crown" },
   { href: "/account/api-key", label: { ko: "내 API 키", en: "My API key" }, icon: "key-round" },
 ];
+
+export const ADMIN_NAV: SubNavItem[] = [
+  { href: "/admin/tickets", label: { ko: "고객 문의", en: "Support tickets" }, icon: "headset" },
+  { href: "/admin/students", label: { ko: "학생 인증", en: "Student verification" }, icon: "graduation-cap" },
+];
