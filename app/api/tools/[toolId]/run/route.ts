@@ -8,6 +8,7 @@ import { checkGrounding } from "@/lib/tools/grounding";
 import { checkToolPolicy, checkOutputSafety } from "@/lib/tools/policy";
 import { generateOutput, runWithApiKey } from "@/lib/tools/generate";
 import { ownKeyRequiredError, resolveCost, resolveRequestedProvider } from "@/lib/ai/resolve-provider";
+import { providerErrorMessage } from "@/lib/ai/provider-errors";
 import type { TokenUsage } from "@/lib/ai/types";
 import { getUserApiKeys } from "@/lib/api-keys";
 import { getMembership } from "@/lib/membership";
@@ -166,20 +167,47 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const runId: string = run.id;
   const profile = await getBusinessProfile();
 
-  let cancelled = false;
-  request.signal.addEventListener("abort", () => {
-    cancelled = true;
-  });
+  // Local cancel: a client disconnect (request.signal, or the response
+  // stream being cancelled) aborts the model call where the runtime
+  // reports it. Vercel doesn't reliably report either, so the
+  // authoritative cancel is the run row itself — see
+  // app/api/runs/[runId]/cancel/route.ts and the conditional `done`
+  // update at the end.
+  const abort = new AbortController();
+  request.signal.addEventListener("abort", () => abort.abort());
+  const isCancelled = () => abort.signal.aborted;
 
+  // Only a still-running row is failed; a row the cancel endpoint already
+  // marked cancelled (and refunded) keeps that status.
   const fail = async (status: string, error: string) => {
-    await admin.from("generations").update({ status, error }).eq("id", runId).eq("user_id", user.id);
+    await admin.from("generations").update({ status, error }).eq("id", runId).eq("user_id", user.id).in("status", ["pending", "streaming"]);
     await settleGenerationCredits(runId, 0); // no output produced — refund the full reservation
   };
 
   const stream = new ReadableStream({
+    cancel() {
+      abort.abort();
+    },
     async start(controller) {
-      await admin.from("generations").update({ status: "streaming" }).eq("id", runId).eq("user_id", user.id);
-      controller.enqueue(encodeEvent({ type: "status", status: "streaming" }));
+      // After a client disconnect the stream is already closed — writing
+      // to it throws, and there's nobody left to read it anyway.
+      const send = (event: unknown) => {
+        try {
+          controller.enqueue(encodeEvent(event));
+        } catch {
+          /* client gone */
+        }
+      };
+      const close = () => {
+        try {
+          controller.close();
+        } catch {
+          /* already closed */
+        }
+      };
+
+      await admin.from("generations").update({ status: "streaming" }).eq("id", runId).eq("user_id", user.id).eq("status", "pending");
+      send({ type: "status", status: "streaming", runId });
 
       let output: unknown;
       let sources: Source[];
@@ -190,7 +218,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
             manifest,
             parsedInput.data,
             profile,
-            request.signal,
+            abort.signal,
             { supabase, userId: user.id, runId },
             provider,
           ),
@@ -199,50 +227,50 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         sources = result.sources;
         usage = result.usage;
       } catch (err) {
-        if (cancelled) {
+        if (isCancelled()) {
           await fail("cancelled", "사용자가 취소했습니다");
-          controller.close();
+          close();
           return;
         }
-        const message = err instanceof Error ? err.message : "생성 중 오류가 발생했습니다";
+        const message = providerErrorMessage(err) ?? (err instanceof Error ? err.message : "생성 중 오류가 발생했습니다");
         await fail("error", message);
-        controller.enqueue(encodeEvent({ type: "error", error: message }));
-        controller.close();
+        send({ type: "error", error: message });
+        close();
         return;
       }
 
-      if (cancelled) {
+      if (isCancelled()) {
         await fail("cancelled", "사용자가 취소했습니다");
-        controller.close();
+        close();
         return;
       }
 
       const text = previewText(output);
       for (let i = 0; i < text.length; i += 12) {
-        if (cancelled) break;
-        controller.enqueue(encodeEvent({ type: "chunk", text: text.slice(i, i + 12) }));
+        if (isCancelled()) break;
+        send({ type: "chunk", text: text.slice(i, i + 12) });
         await new Promise((resolve) => setTimeout(resolve, 25));
       }
 
-      if (cancelled) {
+      if (isCancelled()) {
         await fail("cancelled", "사용자가 취소했습니다");
-        controller.close();
+        close();
         return;
       }
 
       const guard = checkGrounding(manifest, sources);
       if (!guard.ok) {
         await fail("error", guard.reason!);
-        controller.enqueue(encodeEvent({ type: "error", error: guard.reason }));
-        controller.close();
+        send({ type: "error", error: guard.reason });
+        close();
         return;
       }
 
       const outputSafety = checkOutputSafety(manifest.id, output);
       if (!outputSafety.ok) {
         await fail("error", outputSafety.reason!);
-        controller.enqueue(encodeEvent({ type: "error", error: outputSafety.reason }));
-        controller.close();
+        send({ type: "error", error: outputSafety.reason });
+        close();
         return;
       }
       // logo: sanitizeSvg may have stripped unrecognized-but-harmless
@@ -253,12 +281,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       if (outputSafety.output !== undefined) output = outputSafety.output;
 
       const creditsUsed = cost;
-      // Settles the ledger and stamps credits_used/credits_settled on the
-      // run row itself (idempotent — see settle_generation_credits in
-      // supabase/migrations/0011); everything else about the row is a
-      // separate update since it isn't a credits concern.
-      await settleGenerationCredits(runId, creditsUsed);
-      await admin
+      // Finish only a row that is still streaming: if the cancel endpoint
+      // got there first, it already marked the row cancelled and refunded
+      // the reservation, so there is nothing to charge or return.
+      const { data: finished } = await admin
         .from("generations")
         .update({
           status: "done",
@@ -268,10 +294,20 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           output_tokens: usage.outputTokens,
         })
         .eq("id", runId)
-        .eq("user_id", user.id);
+        .eq("user_id", user.id)
+        .eq("status", "streaming")
+        .select("id");
+      if (!finished?.length) {
+        close();
+        return;
+      }
+      // Settles the ledger and stamps credits_used/credits_settled on the
+      // run row itself (idempotent — see settle_generation_credits in
+      // supabase/migrations/0011).
+      await settleGenerationCredits(runId, creditsUsed);
 
-      controller.enqueue(encodeEvent({ type: "done", output, sources, creditsUsed, runId, provider }));
-      controller.close();
+      send({ type: "done", output, sources, creditsUsed, runId, provider });
+      close();
     },
   });
 
