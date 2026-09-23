@@ -43,7 +43,7 @@ lib/
                              numbered sections, control types, live stage (tested against manifests)
   site/                      FAQ, patch notes, plans, flows
   crypto/, api-keys.ts, membership.ts, support.ts, actions/
-supabase/migrations/         0001–0011 (see docs/DEPLOY.md for what each does)
+supabase/migrations/         0001–0012 (see docs/DEPLOY.md for what each does)
 ```
 
 ## Design
@@ -137,8 +137,10 @@ Enable the Google provider in Supabase Auth and add
 - The grant matcher (`grant`) is marked `comingSoon` until a real K-Startup /
   기업마당 data source is wired in: it is listed with a 준비 중 badge, and
   its run page and run route refuse it before any credits are reserved.
-- Pro plan billing is not implemented: the membership page links to a
-  contact form, and nothing resets Pro credits monthly.
+- Pro is a one-time 30-day pass (₩19,900, +2,000 credits) bought through
+  the Toss Payments 결제위젯 at `/account/membership/checkout`; buying again
+  stacks 30 days. No auto-renewal (자동결제 needs a separate Toss
+  contract) and no in-app refunds yet — cancel in the Toss merchant admin.
 - Tool field labels and summaries are Korean-only for now; the app shell,
   landing, Studio, library, and profile are fully bilingual.
 - The brand accent outside the Studio is still groundwork's forest green

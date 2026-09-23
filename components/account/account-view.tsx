@@ -135,8 +135,13 @@ function MembershipPanel({ membership }: { membership: Membership }) {
                 <ul className="mt-3 space-y-1.5 text-sm text-fg-muted">
                   {p.features.slice(0, 3).map((f) => <li key={f.en} className="flex gap-2"><Check size={14} className="mt-0.5 shrink-0 text-studio-success" aria-hidden /> {L(f)}</li>)}
                 </ul>
-                {p.id === "pro" && !current ? (
-                  <Link href="/help/contact?kind=billing" className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-studio-cyan">{L({ ko: "프로 문의", en: "Ask about Pro" })} <ArrowRight size={13} aria-hidden /></Link>
+                {p.id === "pro" && membership.plan !== "student" ? (
+                  <>
+                    {current && membership.daysLeft ? <p className="mt-3 text-sm text-fg-muted">{L({ ko: `${membership.daysLeft}일 남음`, en: `${membership.daysLeft} days left` })}</p> : null}
+                    <Link href="/account/membership/checkout" className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-studio-cyan">
+                      {current ? L({ ko: "30일 연장하기", en: "Extend 30 days" }) : L({ ko: "프로 시작하기", en: "Get Pro" })} <ArrowRight size={13} aria-hidden />
+                    </Link>
+                  </>
                 ) : null}
               </div>
             );
