@@ -112,13 +112,31 @@ function AccountOverview({ email, balance, membership, apiKey, brandName, signOu
   );
 }
 
-function MembershipPanel({ membership }: { membership: Membership }) {
+const PAID_NOTICE: Record<"success" | "fail", { ko: string; en: string }> = {
+  success: { ko: "프로 결제가 완료됐어요. 이제 프로 혜택을 모두 쓸 수 있어요.", en: "Payment complete — you now have full Pro access." },
+  fail: { ko: "결제가 완료되지 않았어요. 다시 시도해 주세요.", en: "Payment didn't go through. Please try again." },
+};
+
+function MembershipPanel({
+  membership,
+  paymentsEnabled,
+  paidNotice,
+}: {
+  membership: Membership;
+  paymentsEnabled: boolean;
+  paidNotice: "success" | "fail" | null;
+}) {
   const L = useBi();
   const [studentState, studentAction, studentPending] = useActionState<StudentRequestState, FormData>(requestStudentVerification, null);
   const request = studentState?.ok ? "pending" : membership.studentRequest;
   return (
     <>
       <PageHeader title={L({ ko: "학생 멤버십", en: "Student membership" })} lead={L({ ko: "모든 플랜에서 모든 도구를 똑같이 써요. 다른 건 크레딧뿐이에요. 학생은 인증하면 무제한이에요.", en: "Every plan gets every tool; only credits differ. Verified students get unlimited use." })} />
+      {paidNotice ? (
+        <p className={cn("mb-4 rounded-xl p-3 text-sm", paidNotice === "success" ? "bg-studio-success/10 text-studio-success" : "bg-danger/10 text-danger")}>
+          {L(PAID_NOTICE[paidNotice])}
+        </p>
+      ) : null}
       {/* Plan */}
       <section>
         <div className="grid gap-3 md:grid-cols-3">
@@ -136,7 +154,11 @@ function MembershipPanel({ membership }: { membership: Membership }) {
                   {p.features.slice(0, 3).map((f) => <li key={f.en} className="flex gap-2"><Check size={14} className="mt-0.5 shrink-0 text-studio-success" aria-hidden /> {L(f)}</li>)}
                 </ul>
                 {p.id === "pro" && !current ? (
-                  <Link href="/help/contact?kind=billing" className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-studio-cyan">{L({ ko: "프로 문의", en: "Ask about Pro" })} <ArrowRight size={13} aria-hidden /></Link>
+                  paymentsEnabled ? (
+                    <Link href="/account/membership/checkout" className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-studio-cyan">{L({ ko: "프로 결제하기", en: "Upgrade to Pro" })} <ArrowRight size={13} aria-hidden /></Link>
+                  ) : (
+                    <Link href="/help/contact?kind=billing" className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-studio-cyan">{L({ ko: "프로 문의", en: "Ask about Pro" })} <ArrowRight size={13} aria-hidden /></Link>
+                  )
                 ) : null}
               </div>
             );

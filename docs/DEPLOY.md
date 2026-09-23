@@ -51,6 +51,8 @@ is not always 0001-0005; that was specific to one incident, see §1.3.)
 | `0010_api_key_broken_flag.sql` | Adds `broken` flag to a key slot the rotation classifier invalidated |
 | `0011_lock_down_credits_and_keys.sql` | **Security fix.** Revokes direct authenticated write access to `user_credits`, `generations`, `user_api_keys`; moves credit reserve/settle to `security definer` RPCs callable only by the service role; adds `user_api_key_status` view |
 | `0012_grant_service_role.sql` | **Grants only, safety-net.** Explicitly grants `service_role` full access to every table/sequence/function in `public`, plus default privileges for future ones. Needed because a project can end up without the baseline `service_role` grants Supabase normally sets up automatically — see the "Missing service_role grants" bullet in §1.3, this is what fixes it. Never run this against a project you haven't confirmed actually has the problem (§1.3 first) — grants are safe to re-apply, but there's no reason to touch a project that's already fine. |
+| `0013_audit_log.sql` | Adds `audit_log` — one row per `/admin` staff action (reply a ticket, approve/reject a student), service-role-only |
+| `0014_payments.sql` | Adds `payments` — one row per Toss Payments checkout attempt, service-role-only (see §1.5) |
 
 Storage buckets (`inputs`, `exports`, `logos`) and their RLS policies are
 created by `0001_init.sql` — no manual bucket setup needed.
@@ -159,6 +161,35 @@ same-site relative path — anything else falls back to `/studio`), or to
 builds the `redirectTo` from `window.location.origin`, so no per-environment
 code change is needed — only the Supabase-side redirect URL allowlist above.
 
+### 1.5 Payments (Toss Payments)
+
+Pro is a **one-time charge per period, not automatic recurring billing**.
+True 자동결제 (auto-billing via a stored billing key) needs a separate risk
+review and additional contract with Toss beyond a standard merchant
+account — it isn't something you can just turn on. Until that contract is
+in place, a user pays ₩19,900 each time their Pro period expires; nothing
+charges them silently.
+
+1. Sign up free at [developers.tosspayments.com](https://developers.tosspayments.com)
+   — no business registration needed for this step. Every account gets its
+   own `test_ck_.../test_sk_...` pair from the dashboard; there is no
+   universal public test key to copy from docs.
+2. Set `NEXT_PUBLIC_TOSS_CLIENT_KEY` / `TOSS_SECRET_KEY` to that pair for
+   development. The checkout entry point (`/account/membership` → "프로
+   결제하기") hides itself entirely when either is unset — no fake
+   "coming soon" button.
+3. When you have a live merchant contract, switch both to the
+   `live_ck_.../live_sk_...` pair from the same dashboard. Test and live
+   keys must always be used as a matched pair — mixing them is a hard
+   `INVALID_API_KEY` error, not a soft failure.
+4. **Known gap, not yet built**: confirmation only happens on the
+   `successUrl` redirect (`app/api/payments/toss/success/route.ts`). If a
+   buyer's browser dies between Toss approving the charge and that
+   redirect landing, Toss has the money and our `payments` row stays
+   `pending` forever — the membership never updates. Toss's own docs
+   recommend a webhook as the real fix for this; add one before this
+   goes live for real money at any volume.
+
 ## 2. Environment variables
 
 Copy `.env.example` to `.env.local` (dev) or set these in the host's
@@ -176,6 +207,8 @@ broken pages.
 | `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | yes | Rate limiting (`lib/rate-limit.ts`) |
 | `NEXT_PUBLIC_SITE_URL` | yes | This deployment's own origin |
 | `API_KEY_ENCRYPTION_SECRET` | optional | Enables BYOK (Claude/OpenAI/own-Gemini keys). Random 32+ byte value — `openssl rand -base64 32`. **Losing this after users have stored keys means every stored key is unrecoverable and must be re-entered.** Omitting it entirely disables BYOK; Claude/OpenAI tools then show no usable engine. |
+| `ADMIN_EMAILS` | optional | Comma-separated staff emails allowed into `/admin`. Omitting it makes `/admin` unreachable by anyone — fails closed. |
+| `NEXT_PUBLIC_TOSS_CLIENT_KEY` / `TOSS_SECRET_KEY` | optional | Enables Pro checkout (§1.5). Get a matched test or live pair from developers.tosspayments.com. Omitting either hides the checkout entry point entirely. |
 
 Anthropic and OpenAI keys are never platform-wide env vars — Claude/ChatGPT
 are own-key-only by design (product decision), so there is no
@@ -219,6 +252,14 @@ are own-key-only by design (product decision), so there is no
    from the result — confirms `app/api/export/[runId]` works under the
    deployed Node runtime (exercises `docx`/`exceljs`, not just the AI
    call).
+9. Run `presentation` and download the `.pptx` — same as above for
+   `pptxgenjs`, and confirms the deck actually opens (real OOXML, not a
+   renamed HTML file).
+10. If Toss keys are set: go to `/account/membership` → "프로 결제하기",
+    complete a test-mode payment, and confirm you land back on
+    `/account/membership?paid=success` with the Pro plan showing as
+    current — this exercises the full redirect round trip
+    (`app/api/payments/toss/success`), not just the widget rendering.
 
 ## 5. Error-path behavior (for reference during the smoke test)
 
