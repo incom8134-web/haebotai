@@ -2,22 +2,25 @@ import type { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { buildProposalDocx, buildBusinessPlanDocx } from "@/lib/tools/export/docx";
 import { buildBusinessPlanXlsx } from "@/lib/tools/export/xlsx";
+import { buildPresentationPptx } from "@/lib/tools/export/pptx";
 import { exportLimiter, checkRateLimit } from "@/lib/rate-limit";
 
 // HAEBOT_A_TOOLS_SPEC.md §5.1 / §5.2 — proposal -> .docx, business-plan
-// -> .docx + .xlsx. Generated server-side (docx/exceljs stay out of the
-// client bundle) from the already-persisted run row, keyed by runId so
-// this works identically for a just-finished run and one from history.
+// -> .docx + .xlsx, presentation -> .pptx. Generated server-side
+// (docx/exceljs/pptxgenjs stay out of the client bundle) from the
+// already-persisted run row, keyed by runId so this works identically
+// for a just-finished run and one from history.
 
 const CONTENT_TYPES = {
   docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
 } as const;
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ runId: string }> }) {
   const { runId } = await params;
   const format = new URL(request.url).searchParams.get("format");
-  if (format !== "docx" && format !== "xlsx") {
+  if (format !== "docx" && format !== "xlsx" && format !== "pptx") {
     return Response.json({ error: "지원하지 않는 내보내기 형식입니다" }, { status: 400 });
   }
 
@@ -58,6 +61,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   } else if (run.tool_id === "business-plan" && format === "xlsx") {
     buffer = await buildBusinessPlanXlsx(run.output, run.input ?? {});
     filename = "business-plan.xlsx";
+  } else if (run.tool_id === "presentation" && format === "pptx") {
+    buffer = await buildPresentationPptx(run.output);
+    filename = "presentation.pptx";
   } else {
     return Response.json({ error: "이 도구는 해당 형식으로 내보낼 수 없습니다" }, { status: 400 });
   }

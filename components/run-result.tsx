@@ -66,12 +66,13 @@ function DownloadLink({ label, onClick }: { label: string; onClick: () => void }
 // app/api/export/[runId]) since docx/exceljs are Node-oriented libraries
 // that don't belong in the client bundle — a plain link to that route is
 // enough, Content-Disposition handles the actual download.
-const SERVER_EXPORTS: Partial<Record<string, { format: "docx" | "xlsx"; label: string }[]>> = {
+const SERVER_EXPORTS: Partial<Record<string, { format: "docx" | "xlsx" | "pptx"; label: string }[]>> = {
   proposal: [{ format: "docx", label: "DOCX 다운로드" }],
   "business-plan": [
     { format: "docx", label: "DOCX 다운로드" },
     { format: "xlsx", label: "재무 XLSX 다운로드" },
   ],
+  presentation: [{ format: "pptx", label: "PPTX 다운로드" }],
 };
 
 // HAEBOT_A_TOOLS_SPEC.md §3.1 — "no per-tool bespoke code except the
