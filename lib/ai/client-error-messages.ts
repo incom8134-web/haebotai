@@ -62,6 +62,20 @@ const PATTERNS: { test: (msg: string) => boolean; map: (msg: string) => MappedEr
     }),
   },
   {
+    test: (m) => m.includes("AI 엔진 사용 한도를 초과했습니다"),
+    map: () => ({
+      ko: "AI 엔진 사용 한도를 초과했습니다 — 잠시 후 다시 시도해주세요. 크레딧은 차감되지 않았습니다.",
+      en: "The AI engine's usage limit was reached — please try again shortly. No credits were charged.",
+    }),
+  },
+  {
+    test: (m) => m.includes("AI 엔진 요청이 많아"),
+    map: () => ({
+      ko: "AI 엔진 요청이 많아 지금은 응답할 수 없습니다 — 잠시 후 다시 시도해주세요. 크레딧은 차감되지 않았습니다.",
+      en: "The AI engine is busy right now — please try again shortly. No credits were charged.",
+    }),
+  },
+  {
     test: (m) => m.includes("크레딧이 부족합니다"),
     map: () => ({ ko: "크레딧이 부족합니다.", en: "Not enough credits." }),
   },
