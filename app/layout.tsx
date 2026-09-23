@@ -37,12 +37,20 @@ export const metadata: Metadata = {
   title: "해봇 AI",
   description:
     "Grounded AI marketing and business tools — every claim cites the fact it was built from.",
+  // The app already has its own ko/en toggle (lib/i18n) — Chrome's page
+  // translator rewrites text nodes directly, which races with React's own
+  // DOM updates and throws (NotFoundError: removeChild/insertBefore) on
+  // any page that re-renders while translated. `notranslate` + translate="no"
+  // below tell Chrome to leave this page alone instead of offering to
+  // translate it.
+  other: { google: "notranslate" },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="ko"
+      translate="no"
       className={`${pretendard.variable} ${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} h-full antialiased`}
       suppressHydrationWarning
     >
