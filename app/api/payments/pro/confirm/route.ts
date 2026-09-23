@@ -35,14 +35,14 @@ export async function POST(request: NextRequest) {
     // A refresh of the success page after it already worked.
     if (check.reason === "already_done") return Response.json({ ok: true, alreadyDone: true });
     if (check.reason === "amount_mismatch") {
-      await admin.from("payments").update({ status: "failed", failure: "amount_mismatch" }).eq("order_id", orderId).eq("status", "pending");
+      await admin.from("payments").update({ status: "failed", fail_reason: "amount_mismatch" }).eq("order_id", orderId).eq("status", "pending");
     }
     return Response.json({ error: "결제 금액이 주문과 다릅니다" }, { status: 400 });
   }
 
   const toss = await confirmTossPayment({ paymentKey, orderId, amount });
   if (!toss.ok) {
-    await admin.from("payments").update({ status: "failed", failure: `${toss.code}: ${toss.message}` }).eq("order_id", orderId).eq("status", "pending");
+    await admin.from("payments").update({ status: "failed", fail_reason: `${toss.code}: ${toss.message}`, raw: toss.raw }).eq("order_id", orderId).eq("status", "pending");
     return Response.json({ error: toss.message, code: toss.code }, { status: 400 });
   }
 
@@ -51,6 +51,7 @@ export async function POST(request: NextRequest) {
     p_payment_key: toss.paymentKey,
     p_method: toss.method,
     p_approved_at: toss.approvedAt,
+    p_raw: toss.raw,
     p_days: PRO_ORDER.days,
     p_credits: PRO_ORDER.credits,
   });

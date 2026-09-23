@@ -6,41 +6,56 @@
 -- amount). Users can read their own rows; every write goes through the
 -- service role, same posture as 0011.
 --
--- activate_pro() finishes an order in one transaction: pending → done,
--- Pro membership extended by p_days, p_credits added to the balance.
--- It only acts on a still-pending row, so a replayed success redirect or
--- a double-submitted confirm can't grant twice.
+-- Written to be safe on a database that already has an earlier
+-- `payments` table of the same shape (order_id / payment_key / amount /
+-- plan / status / fail_reason / raw): everything is create-if-missing,
+-- and existing rows are left untouched.
 
-create table payments (
+create table if not exists payments (
   id            uuid primary key default gen_random_uuid(),
   user_id       uuid not null references auth.users(id) on delete cascade,
-  order_id      text not null unique check (order_id ~ '^[A-Za-z0-9_-]{6,64}$'),
-  plan          text not null check (plan in ('pro')),
-  amount        int not null check (amount > 0),
-  status        text not null default 'pending' check (status in ('pending', 'done', 'failed')),
+  order_id      text not null unique,
   payment_key   text,
-  method        text,
-  failure       text,
-  approved_at   timestamptz,
+  amount        int not null,
+  plan          text not null check (plan = 'pro'),
+  status        text not null default 'pending' check (status in ('pending', 'done', 'failed', 'canceled')),
+  fail_reason   text,
+  raw           jsonb,
   created_at    timestamptz not null default now(),
   updated_at    timestamptz not null default now()
 );
 
-create index payments_user_created on payments (user_id, created_at desc);
+alter table payments add column if not exists method text;
+alter table payments add column if not exists approved_at timestamptz;
+
+create index if not exists payments_user_created on payments (user_id, created_at desc);
 
 alter table payments enable row level security;
+revoke insert, update, delete on payments from authenticated, anon;
 grant select on payments to authenticated;
-create policy "payments_select_own" on payments for select using (user_id = auth.uid());
 
-create trigger payments_set_updated_at
+do $$
+begin
+  if not exists (select 1 from pg_policies where tablename = 'payments' and policyname = 'payments_select_own') then
+    create policy "payments_select_own" on payments for select using (user_id = auth.uid());
+  end if;
+end;
+$$;
+
+create or replace trigger payments_set_updated_at
   before update on payments
   for each row execute function set_updated_at();
 
+-- Finishes an order in one transaction: pending → done, Pro membership
+-- extended by p_days (stacking on a running Pro period), p_credits added.
+-- Only a still-pending order is touched, so a replayed success redirect
+-- or a double-submitted confirm can't grant twice.
 create or replace function activate_pro(
   p_order_id text,
   p_payment_key text,
   p_method text,
   p_approved_at timestamptz,
+  p_raw jsonb,
   p_days int,
   p_credits int
 )
@@ -53,7 +68,7 @@ declare
   v_user_id uuid;
 begin
   update payments
-    set status = 'done', payment_key = p_payment_key, method = p_method, approved_at = p_approved_at
+    set status = 'done', payment_key = p_payment_key, method = p_method, approved_at = p_approved_at, raw = p_raw
     where order_id = p_order_id and status = 'pending'
     returning user_id into v_user_id;
 
@@ -61,8 +76,6 @@ begin
     return false; -- unknown or already finished order: nothing granted
   end if;
 
-  -- Extend from the later of now and a still-running Pro period, so
-  -- renewing early never loses days.
   insert into memberships (user_id, plan, expires_at)
   values (v_user_id, 'pro', now() + make_interval(days => p_days))
   on conflict (user_id) do update
@@ -80,5 +93,5 @@ begin
 end;
 $$;
 
-revoke all on function activate_pro(text, text, text, timestamptz, int, int) from public, authenticated, anon;
-grant execute on function activate_pro(text, text, text, timestamptz, int, int) to service_role;
+revoke all on function activate_pro(text, text, text, timestamptz, jsonb, int, int) from public, authenticated, anon;
+grant execute on function activate_pro(text, text, text, timestamptz, jsonb, int, int) to service_role;
