@@ -50,6 +50,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   if (!manifest) {
     return Response.json({ error: `알 수 없는 도구: ${toolId}` }, { status: 404 });
   }
+  if (manifest.comingSoon) {
+    return Response.json({ error: "준비 중인 도구입니다" }, { status: 400 });
+  }
 
   const supabase = await createClient();
   const {

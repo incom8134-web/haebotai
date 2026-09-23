@@ -88,7 +88,8 @@ function StudioWorkspace({
   const [isOpening, startOpening] = useTransition();
 
   const favorites = useFavorites();
-  const allTools = useMemo(() => listTools(), []);
+  // Coming-soon tools can't run, so a brief has nowhere to go — leave them out.
+  const allTools = useMemo(() => listTools().filter((tool) => !tool.comingSoon), []);
   // Pinned tools (★ on /tools or a tool page) float to the front.
   const tools = useMemo(() => [...allTools].sort((a, b) => Number(favorites.list.includes(b.id)) - Number(favorites.list.includes(a.id))), [allTools, favorites.list]);
   const [category, setCategory] = useState<CategoryId | "all">("all");
