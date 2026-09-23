@@ -18,9 +18,9 @@ export const PLANS: { id: PlanId; name: Bilingual; price: Bilingual; note: Bilin
   {
     id: "pro",
     name: { ko: "프로", en: "Pro" },
-    price: { ko: "₩19,900/월", en: "₩19,900/mo" },
-    note: { ko: "언제든 해지", en: "Cancel anytime" },
-    credits: { ko: "매월 2,000 크레딧", en: "2,000 credits monthly" },
+    price: { ko: "₩19,900/30일", en: "₩19,900 / 30 days" },
+    note: { ko: "자동 결제 없음", en: "No auto-renewal" },
+    credits: { ko: "결제마다 2,000 크레딧", en: "2,000 credits per purchase" },
     features: [
       { ko: "무료 플랜의 모든 기능", en: "Everything in Free" },
       { ko: "모든 형식 내보내기 (docx·xlsx·ics·SVG·ZIP)", en: "All exports (docx, xlsx, ics, SVG, ZIP)" },

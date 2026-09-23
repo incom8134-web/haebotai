@@ -17,7 +17,7 @@ supabase db push
 ```
 
 Or, without the CLI, paste each file's contents into the SQL editor in
-project order (0001 → 0011, currently).
+project order (0001 → 0012, currently).
 
 | Migration | Purpose |
 |---|---|
@@ -32,6 +32,7 @@ project order (0001 → 0011, currently).
 | `0009_generation_provider.sql` | Records which engine actually ran each generation |
 | `0010_api_key_broken_flag.sql` | Adds `broken` flag to a key slot the rotation classifier invalidated |
 | `0011_lock_down_credits_and_keys.sql` | **Security fix.** Revokes direct authenticated write access to `user_credits`, `generations`, `user_api_keys`; moves credit reserve/settle to `security definer` RPCs callable only by the service role; adds `user_api_key_status` view |
+| `0012_pro_payments.sql` | Pro checkout: `payments` order ledger (read-own, service-role writes) and `activate_pro` (service-role only) — marks a pending order done, extends Pro 30 days, adds 2,000 credits, in one transaction |
 
 Storage buckets (`inputs`, `exports`, `logos`) and their RLS policies are
 created by `0001_init.sql` — no manual bucket setup needed.
@@ -84,6 +85,7 @@ broken pages.
 | `GOOGLE_GENAI_API_KEY` | yes | Platform Gemini key — from ai.google.dev. Used for every user's Gemini runs (unless they've registered their own) |
 | `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | yes | Rate limiting (`lib/rate-limit.ts`) |
 | `NEXT_PUBLIC_SITE_URL` | yes | This deployment's own origin |
+| `NEXT_PUBLIC_TOSS_CLIENT_KEY` / `TOSS_SECRET_KEY` | optional | Toss Payments 결제위젯 client key (`test_gck_…`/`live_gck_…`) and its secret key (`…_gsk_…`, **server-only**). Both set → the Pro checkout at `/account/membership/checkout` works; either missing → it shows "not set up". The client key is inlined at build time, so redeploy after changing it. |
 | `API_KEY_ENCRYPTION_SECRET` | optional | Enables BYOK (Claude/OpenAI/own-Gemini keys). Random 32+ byte value — `openssl rand -base64 32`. **Losing this after users have stored keys means every stored key is unrecoverable and must be re-entered.** Omitting it entirely disables BYOK; Claude/OpenAI tools then show no usable engine. |
 
 Anthropic and OpenAI keys are never platform-wide env vars — Claude/ChatGPT
