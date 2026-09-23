@@ -16,7 +16,7 @@ supabase db push
 ```
 
 Or, without the CLI, paste each file's contents into the SQL editor in
-project order (0001 → 0011, currently).
+project order (0001 → 0012, currently).
 
 **If the project's schema was ever created or edited by hand** (pasted
 into the SQL editor directly, rather than always going through `db push`),
@@ -50,6 +50,7 @@ is not always 0001-0005; that was specific to one incident, see §1.3.)
 | `0009_generation_provider.sql` | Records which engine actually ran each generation |
 | `0010_api_key_broken_flag.sql` | Adds `broken` flag to a key slot the rotation classifier invalidated |
 | `0011_lock_down_credits_and_keys.sql` | **Security fix.** Revokes direct authenticated write access to `user_credits`, `generations`, `user_api_keys`; moves credit reserve/settle to `security definer` RPCs callable only by the service role; adds `user_api_key_status` view |
+| `0012_grant_service_role.sql` | **Grants only, safety-net.** Explicitly grants `service_role` full access to every table/sequence/function in `public`, plus default privileges for future ones. Needed because a project can end up without the baseline `service_role` grants Supabase normally sets up automatically — see the "Missing service_role grants" bullet in §1.3, this is what fixes it. Never run this against a project you haven't confirmed actually has the problem (§1.3 first) — grants are safe to re-apply, but there's no reason to touch a project that's already fine. |
 
 Storage buckets (`inputs`, `exports`, `logos`) and their RLS policies are
 created by `0001_init.sql` — no manual bucket setup needed.
@@ -117,6 +118,24 @@ that doesn't exist yet. Check for drift *before* debugging further:
    server prints `[env] Supabase project: <ref>` on startup
    (`lib/env.ts`, dev-only) — if that ref doesn't match the project you
    think you're pointed at, `.env.local` is the problem, not the schema.
+5. **Missing service_role grants** — a distinct failure mode from
+   migration drift, on a *fully* migrated project: every table exists
+   with the right columns, but every service-role call still fails with
+   `permission denied for table X`, because this project never got the
+   baseline `service_role` grants Supabase normally sets up
+   automatically. Since 0011 routes every write through the
+   service-role client, this failure is total — nothing can write
+   anything, not just the one table whose error you happened to see
+   first. Check with the same curl-and-node one-liner as above, but with
+   the service role actually attempting a read:
+   ```bash
+   curl -s "$NEXT_PUBLIC_SUPABASE_URL/rest/v1/generations?select=id&limit=1" \
+     -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY"
+   ```
+   `{"code":"42501","message":"permission denied for table generations"}`
+   means this project has the problem — apply `0012_grant_service_role.sql`
+   (§1.1). A normal row array (even `[]`) means it's fine; don't apply
+   0012 to a project that isn't actually missing these grants.
 
 ### 1.4 Auth — Google OAuth
 
