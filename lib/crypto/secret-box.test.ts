@@ -23,6 +23,7 @@ test("rejects tampering and wrong secrets", () => {
 test("refuses short secrets and validates key shape", () => {
   assert.throws(() => seal("x", "short"));
   assert.ok(looksLikeGoogleKey("AIza" + "a".repeat(35)));
+  assert.ok(looksLikeGoogleKey("AQ." + "a".repeat(20)), "AQ.-prefixed keys (this project's own platform key shape) must pass");
   assert.ok(!looksLikeGoogleKey("sk-not-a-google-key"));
   assert.ok(looksLikeAnthropicKey("sk-ant-" + "a".repeat(20)));
   assert.ok(!looksLikeAnthropicKey("sk-" + "a".repeat(20)));

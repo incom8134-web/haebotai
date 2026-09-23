@@ -25,9 +25,16 @@ export function open(sealed: string, secret: string): string {
   return Buffer.concat([decipher.update(ciphertext), decipher.final()]).toString("utf8");
 }
 
-/** Google AI Studio keys start with "AIza" and are 39 characters. */
+// Google AI Studio issues two live key shapes: the classic "AIza" + 35
+// chars (39 total), and a newer "AQ." prefix some accounts/projects get
+// instead — confirmed live in this project's own platform key
+// (GOOGLE_GENAI_API_KEY in .env.local starts with "AQ."), and reported
+// independently on the Google AI Developers forum (accounts that only
+// ever generate "AQ."-prefixed keys, no "AIza" option). Rejecting the
+// second shape would have refused this project's own key.
 export function looksLikeGoogleKey(key: string) {
-  return /^AIza[0-9A-Za-z_-]{35}$/.test(key.trim());
+  const trimmed = key.trim();
+  return /^AIza[0-9A-Za-z_-]{35}$/.test(trimmed) || /^AQ\.[0-9A-Za-z_-]{20,}$/.test(trimmed);
 }
 
 /** Anthropic keys start with "sk-ant-". */
