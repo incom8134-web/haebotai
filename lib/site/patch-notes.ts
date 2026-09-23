@@ -4,6 +4,16 @@ export type NoteKind = "new" | "improved" | "fixed";
 
 export const PATCH_NOTES: { version: string; date: string; title: Bilingual; items: { kind: NoteKind; text: Bilingual }[] }[] = [
   {
+    version: "1.8.0",
+    date: "2026-09-23",
+    title: { ko: "이제 ChatGPT 엔진도 선택 가능", en: "ChatGPT joins as a third engine" },
+    items: [
+      { kind: "new", text: { ko: "모든 도구에서 Gemini·Claude에 이어 내 ChatGPT 키로도 실행 가능", en: "Every tool now runs on your own ChatGPT key too, alongside Gemini and Claude" } },
+      { kind: "new", text: { ko: "이미지 생성기·브랜드 모델컷: ChatGPT의 이미지 생성으로도 제작 가능", en: "Image Generator and Brand Model can now also generate with ChatGPT's image model" } },
+      { kind: "improved", text: { ko: "API 키 화면의 ChatGPT 카드가 실제로 지원하는 도구 목록을 실시간으로 안내", en: "The ChatGPT key card now lists the tools it actually powers, live" } },
+    ],
+  },
+  {
     version: "1.7.0",
     date: "2026-09-22",
     title: { ko: "15개 도구에서 Claude 선택, 키 상태 한눈에", en: "Choose Claude on 15 tools, key status at a glance" },

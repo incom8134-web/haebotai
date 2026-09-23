@@ -7,7 +7,7 @@ import type { Source } from "@/lib/tools/registry/shared";
 import { markApiKeySlotBroken, type ApiKeyPriority } from "@/lib/api-keys";
 import { runWithRotation, type KeyRotationState } from "@/lib/tools/quota-rotation";
 import { buildContext, buildSystemInstruction, collectInputImages } from "@/lib/tools/generate-prompt";
-import { ANTHROPIC_MODEL, anthropicMaxTokens } from "./models";
+import { ANTHROPIC_MODEL, maxTokensForTool } from "./models";
 import {
   anthropicRetryDelayMs,
   classifyAnthropicError,
@@ -71,7 +71,7 @@ async function generateOnce(
   return client.messages.create(
     {
       model: ANTHROPIC_MODEL,
-      max_tokens: anthropicMaxTokens(manifest.id),
+      max_tokens: maxTokensForTool(manifest.id),
       system,
       messages: [{ role: "user", content }],
       output_config: { format: zodOutputFormat(manifest.outputSchema) },

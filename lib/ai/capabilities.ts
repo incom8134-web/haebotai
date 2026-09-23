@@ -22,31 +22,33 @@ export interface ToolCapability {
 // verified: 3a = `copy` (structured output alone), 3b = `strategy`
 // (+ web search + citations), Stage 2 = every other text tool, in four
 // batches, once both were confirmed working end to end on staging.
-// `image`/`brand-model` stay google-only — Claude has no image API, no
-// fake integrations. `grant` stays google-only too: it's a static
-// placeholder (lib/tools/generate.ts) that never reaches any adapter, so
-// listing another provider for it would be pure decoration. OpenAI joins
-// the same way in Stage 5. Never hand-list a provider a tool's
+// OpenAI joined every text tool plus `image`/`brand-model` in Stage 5,
+// all at once, once lib/ai/openai.ts was verified end to end (unlike
+// Claude, OpenAI genuinely has an image API — gpt-image-1.5 via
+// images.generate/edit — so no fake-integration concern there). `grant`
+// stays google-only: it's a static placeholder (lib/tools/generate.ts)
+// that never reaches any adapter, so listing another provider for it
+// would be pure decoration. Never hand-list a provider a tool's
 // requirements rule out (checked against PROVIDER_CAPS by
 // capabilities.test.ts).
 export const TOOL_CAPABILITIES: Record<string, ToolCapability> = {
-  money: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 2
-  trend: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 4
-  strategy: { providers: ["google", "anthropic"], default: "google" },
-  calendar: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 2
-  prompt: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 1
-  blog: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 1
-  copy: { providers: ["google", "anthropic"], default: "google" },
-  keyword: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 2
-  place: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 2
-  image: { providers: ["google"], default: "google" },
-  logo: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 3
-  "brand-model": { providers: ["google"], default: "google" },
-  sangsepage: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 3
-  homepage: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 3
-  proposal: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 1
-  presentation: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 1
-  "business-plan": { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 4
+  money: { providers: ["google", "anthropic", "openai"], default: "google" }, // Stage 2 batch 2 / Stage 5
+  trend: { providers: ["google", "anthropic", "openai"], default: "google" }, // Stage 2 batch 4 / Stage 5
+  strategy: { providers: ["google", "anthropic", "openai"], default: "google" }, // Stage 5
+  calendar: { providers: ["google", "anthropic", "openai"], default: "google" }, // Stage 2 batch 2 / Stage 5
+  prompt: { providers: ["google", "anthropic", "openai"], default: "google" }, // Stage 2 batch 1 / Stage 5
+  blog: { providers: ["google", "anthropic", "openai"], default: "google" }, // Stage 2 batch 1 / Stage 5
+  copy: { providers: ["google", "anthropic", "openai"], default: "google" }, // Stage 5
+  keyword: { providers: ["google", "anthropic", "openai"], default: "google" }, // Stage 2 batch 2 / Stage 5
+  place: { providers: ["google", "anthropic", "openai"], default: "google" }, // Stage 2 batch 2 / Stage 5
+  image: { providers: ["google", "openai"], default: "google" }, // Stage 5
+  logo: { providers: ["google", "anthropic", "openai"], default: "google" }, // Stage 2 batch 3 / Stage 5
+  "brand-model": { providers: ["google", "openai"], default: "google" }, // Stage 5
+  sangsepage: { providers: ["google", "anthropic", "openai"], default: "google" }, // Stage 2 batch 3 / Stage 5
+  homepage: { providers: ["google", "anthropic", "openai"], default: "google" }, // Stage 2 batch 3 / Stage 5
+  proposal: { providers: ["google", "anthropic", "openai"], default: "google" }, // Stage 2 batch 1 / Stage 5
+  presentation: { providers: ["google", "anthropic", "openai"], default: "google" }, // Stage 2 batch 1 / Stage 5
+  "business-plan": { providers: ["google", "anthropic", "openai"], default: "google" }, // Stage 2 batch 4 / Stage 5
   grant: { providers: ["google"], default: "google" },
 };
 
