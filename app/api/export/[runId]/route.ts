@@ -30,25 +30,36 @@ const CONTENT_TYPES = {
 type Format = keyof typeof CONTENT_TYPES;
 const isFormat = (f: string | null): f is Format => f !== null && f in CONTENT_TYPES;
 
+// The download buttons are plain links, so a failure lands on a page
+// the user sees: answer those with a short readable page (and a way
+// back) instead of raw JSON. fetch() callers still get JSON.
+function fail(request: NextRequest, status: number, message: string, headers: HeadersInit = {}, detail?: string): Response {
+  if (request.headers.get("sec-fetch-dest") !== "document") {
+    return Response.json(detail ? { error: message, detail } : { error: message }, { status, headers });
+  }
+  const escape = (t: string) => t.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
+  const html = `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>다운로드 실패 · 해봇 AI</title>
+<style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0e1116;color:#e8eaed;font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}main{max-width:420px;padding:32px 24px;text-align:center}h1{font-size:20px;margin:0 0 8px}p{color:#aeb4bb;line-height:1.6;margin:0 0 24px}a{display:inline-block;padding:12px 20px;border-radius:12px;background:#16b364;color:#fff;text-decoration:none;font-weight:600}</style></head>
+<body><main><h1>${escape(message)}</h1><p>${status === 401 ? "로그인한 뒤 다시 받아 주세요." : "잠시 후 다시 시도해 주세요. 계속 안 되면 다른 형식(PDF·Word)으로 받아 보세요."}</p><a href="javascript:history.back()">결과로 돌아가기</a></main></body></html>`;
+  return new Response(html, { status, headers: { ...headers, "Content-Type": "text/html; charset=utf-8" } });
+}
+
 export async function GET(request: NextRequest, { params }: { params: Promise<{ runId: string }> }) {
   const { runId } = await params;
   const format = new URL(request.url).searchParams.get("format");
   if (!isFormat(format)) {
-    return Response.json({ error: "지원하지 않는 내보내기 형식입니다" }, { status: 400 });
+    return fail(request, 400, "지원하지 않는 내보내기 형식입니다");
   }
 
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return Response.json({ error: "로그인이 필요합니다" }, { status: 401 });
+  if (!user) return fail(request, 401, "로그인이 필요합니다");
 
   const rate = await checkRateLimit(exportLimiter, user.id);
   if (!rate.ok) {
-    return Response.json(
-      { error: "요청이 너무 잦습니다. 잠시 후 다시 시도해주세요." },
-      { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } },
-    );
+    return fail(request, 429, "요청이 너무 잦습니다. 잠시 후 다시 시도해주세요.", { "Retry-After": String(rate.retryAfterSeconds) });
   }
 
   const { data: run } = await supabase
@@ -59,7 +70,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     .maybeSingle();
 
   if (!run || run.status !== "done" || !run.output) {
-    return Response.json({ error: "결과를 찾을 수 없습니다" }, { status: 404 });
+    return fail(request, 404, "결과를 찾을 수 없습니다");
   }
 
   const manifest = getTool(run.tool_id);
@@ -73,7 +84,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   } else if (run.tool_id === "business-plan" && format === "docx") {
     buffer = await buildBusinessPlanDocx(run.output);
   } else if (format === "xlsx") {
-    if (run.tool_id !== "business-plan") return Response.json({ error: "이 도구는 해당 형식으로 내보낼 수 없습니다" }, { status: 400 });
+    if (run.tool_id !== "business-plan") return fail(request, 400, "이 도구는 해당 형식으로 내보낼 수 없습니다");
     buffer = await buildBusinessPlanXlsx(run.output, run.input ?? {});
   } else {
     const profile = await getBusinessProfile();
@@ -96,7 +107,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         : await buildGenericDocx(doc);
     } catch (err) {
       console.error(`export ${format} failed`, err);
-      return Response.json({ error: `${format.toUpperCase()} 파일을 만들지 못했습니다`, detail: err instanceof Error ? err.message.slice(0, 300) : String(err) }, { status: 500 });
+      return fail(request, 500, `${format.toUpperCase()} 파일을 만들지 못했습니다`, {}, err instanceof Error ? err.message.slice(0, 300) : String(err));
     }
   }
 

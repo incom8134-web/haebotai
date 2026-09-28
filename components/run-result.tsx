@@ -136,26 +136,25 @@ function extraDownloads(output: unknown, input?: Record<string, unknown>): Extra
   return extras;
 }
 
-function filenameFrom(disposition: string | null): string | null {
-  const star = disposition ? /filename\*=UTF-8''([^;]+)/i.exec(disposition) : null;
-  if (star) return decodeURIComponent(star[1]);
-  const plain = disposition ? /filename="([^"]+)"/i.exec(disposition) : null;
-  return plain ? plain[1] : null;
-}
-
 function FormatIcon({ format, busy, className }: { format: ExportFormat; busy: boolean; className: string }) {
   const Icon = FORMATS[format].icon;
   return busy ? <Loader2 className={`${className} animate-spin`} aria-hidden /> : <Icon className={className} aria-hidden />;
 }
 
 const chip =
-  "inline-flex items-center gap-1 rounded-full border border-hairline px-2.5 py-1 text-xs text-fg-muted transition-colors hover:border-accent/50 hover:text-fg disabled:opacity-60";
+  "inline-flex items-center gap-1 rounded-full border border-hairline px-2.5 py-1 text-xs text-fg-muted transition-colors hover:border-accent/50 hover:text-fg";
 const tile =
-  "flex min-h-14 items-center gap-2.5 rounded-xl border border-hairline bg-surface-2/40 px-3 py-2 text-left transition-colors hover:border-accent/50 hover:bg-surface-2 disabled:opacity-60";
+  "flex min-h-14 items-center gap-2.5 rounded-xl border border-hairline bg-surface-2/40 px-3 py-2 text-left transition-colors hover:border-accent/50 hover:bg-surface-2";
 
 /**
  * The full panel sits above the result; a compact row repeats it below,
  * so a long result never needs scrolling back up to download.
+ *
+ * Each format is a plain link to the export route, which answers with
+ * the file as an attachment: the browser downloads it itself, so it
+ * works before scripts load and in phone in-app browsers (KakaoTalk,
+ * Instagram) where script-made blob downloads fail. The spinner is a
+ * hint only — the server takes a few seconds to build a deck.
  */
 function DownloadPanel({
   runId,
@@ -171,38 +170,22 @@ function DownloadPanel({
   const { locale } = useLocale();
   const en = locale === "en";
   const [busy, setBusy] = useState<ExportFormat | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const formats = formatsFor(toolId);
-
-  // Fetched rather than a plain link so the button can show progress
-  // (a deck takes a few seconds) and a failure shows up here.
-  async function download(format: ExportFormat) {
-    setBusy(format);
-    setError(null);
-    try {
-      const res = await fetch(`/api/export/${runId}?format=${format}`);
-      if (!res.ok) {
-        const body = (await res.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(body?.error ?? (en ? "Download failed. Please try again." : "파일을 만들지 못했습니다. 다시 시도해 주세요."));
-      }
-      downloadBlob(filenameFrom(res.headers.get("Content-Disposition")) ?? `haebot-${toolId}.${format}`, await res.blob());
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setBusy(null);
-    }
-  }
-
+  const href = (f: ExportFormat) => `/api/export/${runId}?format=${f}`;
+  const start = (f: ExportFormat) => {
+    setBusy(f);
+    setTimeout(() => setBusy((b) => (b === f ? null : b)), 6000);
+  };
 
   if (compact) {
     return (
       <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-hairline pt-3">
         <span className="text-2xs text-fg-subtle">{en ? "Download" : "다운로드"}</span>
         {formats.map((f) => (
-          <button key={f} type="button" disabled={busy !== null} onClick={() => download(f)} className={chip}>
+          <a key={f} href={href(f)} onClick={() => start(f)} className={chip}>
             <FormatIcon format={f} busy={busy === f} className="size-3" />
             {FORMATS[f].label}
-          </button>
+          </a>
         ))}
         {extras.map((x) => (
           <button key={x.key} type="button" onClick={x.run} className={chip}>
@@ -210,7 +193,6 @@ function DownloadPanel({
             {x.label}
           </button>
         ))}
-        {error ? <span className="text-xs text-danger">{error}</span> : null}
       </div>
     );
   }
@@ -226,11 +208,10 @@ function DownloadPanel({
         <p className="text-2xs text-fg-subtle">{en ? "Ready to edit, present or share" : "편집·발표·공유에 바로 쓰는 파일"}</p>
       </div>
       <div className="mt-2.5 grid grid-cols-2 gap-2 sm:grid-cols-[repeat(auto-fit,minmax(150px,1fr))]">
-        <button
-          type="button"
-          disabled={busy !== null}
-          onClick={() => download(primary)}
-          className="col-span-full flex min-h-14 items-center gap-3 rounded-xl bg-primary px-4 py-2.5 text-left text-primary-foreground transition-colors hover:bg-accent-hover disabled:opacity-70"
+        <a
+          href={href(primary)}
+          onClick={() => start(primary)}
+          className="col-span-full flex min-h-14 items-center gap-3 rounded-xl bg-primary px-4 py-2.5 text-left text-primary-foreground transition-colors hover:bg-accent-hover"
         >
           <FormatIcon format={primary} busy={busy === primary} className="size-5 shrink-0" />
           <span className="flex min-w-0 flex-col">
@@ -239,13 +220,13 @@ function DownloadPanel({
             </span>
             <span className="text-2xs opacity-85">
               {busy === primary
-                ? en ? "Preparing…" : "파일 만드는 중…"
+                ? en ? "Preparing your file…" : "파일 만드는 중… 잠시만 기다려 주세요"
                 : `${en ? "Recommended" : "추천"} · ${en ? FORMATS[primary].hintEn : FORMATS[primary].hint}`}
             </span>
           </span>
-        </button>
+        </a>
         {rest.map((f) => (
-          <button key={f} type="button" disabled={busy !== null} onClick={() => download(f)} className={tile}>
+          <a key={f} href={href(f)} onClick={() => start(f)} className={tile}>
             <FormatIcon format={f} busy={busy === f} className="size-4 shrink-0 text-accent" />
             <span className="flex min-w-0 flex-col">
               <span className="text-sm font-medium text-fg">{FORMATS[f].label}</span>
@@ -253,7 +234,7 @@ function DownloadPanel({
                 {busy === f ? (en ? "Preparing…" : "만드는 중…") : en ? FORMATS[f].hintEn : FORMATS[f].hint}
               </span>
             </span>
-          </button>
+          </a>
         ))}
         {extras.map((x) => (
           <button key={x.key} type="button" onClick={x.run} className={tile}>
@@ -265,7 +246,6 @@ function DownloadPanel({
           </button>
         ))}
       </div>
-      {error ? <p className="mt-2 text-xs text-danger">{error}</p> : null}
     </section>
   );
 }
