@@ -1,5 +1,4 @@
 import { Shapes } from "lucide-react";
-import { z } from "zod";
 import type { ToolManifest } from "../types";
 
 // Four logo concepts. A text model plans them (idea, symbol, palette,
@@ -9,27 +8,7 @@ import type { ToolManifest } from "../types";
 // crude. Earlier runs stored `svg` concepts; the renderer still shows them.
 // Reject anything resembling an existing trademark (GUARDS in generate-prompt.ts).
 
-const imageRef = z.object({ url: z.string(), asset_id: z.string() });
-
-const outputSchema = z.object({
-  concepts: z
-    .array(
-      z.object({
-        name: z.string(),
-        concept_rationale: z.string(),
-        symbol: z.string(),
-        color_spec: z.object({ hex: z.array(z.string()) }),
-        type_spec: z.object({ family: z.string(), weight: z.string(), tracking: z.string() }),
-        usage_notes: z.string(),
-        image: imageRef,
-        symbol_image: imageRef,
-      }),
-    )
-    .length(4),
-  mockups: z.array(z.string()),
-});
-
-export const logo: ToolManifest<z.infer<typeof outputSchema>> = {
+export const logo: ToolManifest = {
   id: "logo",
   category: "design",
   name_ko: "해봇 로고",
@@ -64,7 +43,6 @@ export const logo: ToolManifest<z.infer<typeof outputSchema>> = {
   ],
   usesProfile: ["brand_name", "industry", "target_customer", "tone", "brand_colors"],
   acceptsChainFrom: [],
-  outputSchema,
   outputRenderer: "images",
   grounding: { requireSources: false, webSearch: false, estimateBadge: false },
   model: "gemini-3.1-flash-image",

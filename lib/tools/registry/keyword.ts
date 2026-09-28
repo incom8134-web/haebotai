@@ -1,29 +1,10 @@
 import { Hash } from "lucide-react";
-import { z } from "zod";
 import type { ToolManifest } from "../types";
 
 // HAEBOT_A_TOOLS_SPEC.md §4.6 — v1 estimates MUST render with a 추정
 // badge; v1.1 swaps in 네이버 검색광고 API without a refactor.
 
-const keywordSchema = z.object({
-  term: z.string(),
-  volume_band: z.string(),
-  competition: z.string(),
-  best_use: z.string(),
-  data_source: z.enum(["measured", "estimated"]),
-});
-
-const outputSchema = z.object({
-  tiers: z.object({
-    mega: z.array(keywordSchema),
-    mid: z.array(keywordSchema),
-    micro: z.array(keywordSchema),
-  }),
-  combinations: z.array(z.string()),
-  content_gaps: z.array(z.object({ gap: z.string(), suggested_topic: z.string() })),
-});
-
-export const keyword: ToolManifest<z.infer<typeof outputSchema>> = {
+export const keyword: ToolManifest = {
   id: "keyword",
   category: "content",
   name_ko: "해봇 키워드 전략",
@@ -57,7 +38,6 @@ export const keyword: ToolManifest<z.infer<typeof outputSchema>> = {
   ],
   usesProfile: ["industry"],
   acceptsChainFrom: [],
-  outputSchema,
   outputRenderer: "table",
   grounding: { requireSources: false, webSearch: true, estimateBadge: true },
   model: "gemini-3.8-flash",

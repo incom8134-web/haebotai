@@ -270,7 +270,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         return;
       }
 
-      const outputSafety = checkOutputSafety(manifest.id, output);
+      const outputSafety = checkOutputSafety(manifest.id, output, parsedInput.data);
       if (!outputSafety.ok) {
         await fail("error", outputSafety.reason!);
         send({ type: "error", error: outputSafety.reason });

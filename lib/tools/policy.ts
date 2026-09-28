@@ -54,21 +54,29 @@ export function checkToolPolicy(toolId: string, input: Record<string, unknown>):
   return { ok: true };
 }
 
-const INVENTED_PHONE_PATTERN = /\b0\d{1,2}-\d{3,4}-\d{4}\b/;
-const INVENTED_ADDRESS_PATTERN = /(서울|경기|부산|대구|인천|광주|대전|울산)[가-힣0-9\s]{2,}(로|길|동)\s?\d+/;
+const PHONE_PATTERN = /\b0\d{1,2}-\d{3,4}-\d{4}\b/g;
+const ADDRESS_PATTERN = /(서울|경기|부산|대구|인천|광주|대전|울산)[가-힣0-9\s]{2,}(로|길|동)\s?\d+/g;
 
-function checkHomepageSafety(output: unknown): PolicyResult {
-  const html = (output as { html?: string }).html ?? "";
-  if (INVENTED_PHONE_PATTERN.test(html)) {
-    return { ok: false, reason: "실제 전화번호는 생성할 수 없습니다. [입력 필요]로 표시하세요." };
-  }
-  if (INVENTED_ADDRESS_PATTERN.test(html)) {
-    return { ok: false, reason: "실제 주소는 생성할 수 없습니다. [입력 필요]로 표시하세요." };
-  }
-  return { ok: true };
+const digits = (s: string) => s.replace(/\D/g, "");
+const squash = (s: string) => s.replace(/\s+/g, "");
+
+// A phone number or street address on the page is fine when the user
+// typed it (homepage's "연락처·주소·영업시간·가격" field). One they didn't
+// type is invented: it's replaced with [입력 필요] rather than failing a
+// finished, paid-for page over one line.
+function checkHomepageSafety(output: unknown, input: Record<string, unknown>): PolicyResult {
+  const page = output as { html?: string };
+  const html = page.html ?? "";
+  const given = Object.values(input).filter((v): v is string => typeof v === "string").join("\n");
+  const givenDigits = digits(given);
+  const givenText = squash(given);
+  const cleaned = html
+    .replace(PHONE_PATTERN, (m) => (givenDigits.includes(digits(m)) ? m : "[입력 필요]"))
+    .replace(ADDRESS_PATTERN, (m) => (givenText.includes(squash(m)) ? m : "[입력 필요]"));
+  return cleaned === html ? { ok: true } : { ok: true, output: { ...page, html: cleaned } };
 }
 
-export function checkOutputSafety(toolId: string, output: unknown): PolicyResult {
+export function checkOutputSafety(toolId: string, output: unknown, input: Record<string, unknown> = {}): PolicyResult {
   if (toolId === "logo") {
     const typed = output as { concepts?: Record<string, unknown>[] };
     const concepts = typed.concepts ?? [];
@@ -83,6 +91,6 @@ export function checkOutputSafety(toolId: string, output: unknown): PolicyResult
     }
     return { ok: true, output: { ...typed, concepts: cleaned } };
   }
-  if (toolId === "homepage") return checkHomepageSafety(output);
+  if (toolId === "homepage") return checkHomepageSafety(output, input);
   return { ok: true };
 }

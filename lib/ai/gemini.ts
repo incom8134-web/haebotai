@@ -18,6 +18,7 @@ import { getPlaybook } from "@/lib/tools/playbooks";
 import { zodToJsonSchema } from "./schema";
 import { renderLogoLockup, type LogoTracking, type LogoWeight } from "@/lib/tools/render/logo";
 import type { AiAdapter, AiStreamEvent, GenerationResult, ImageStorageContext, TokenUsage } from "./types";
+import { outputSchemaFor } from "@/lib/tools/schemas";
 
 // Moved from lib/tools/generate.ts verbatim (rotation, search grounding,
 // image generation) — this is the Gemini half of the provider-neutral
@@ -516,7 +517,7 @@ async function* generateStructured(
     }`;
   }
 
-  const jsonSchema = zodToJsonSchema(manifest.outputSchema);
+  const jsonSchema = zodToJsonSchema(outputSchemaFor(manifest.id));
 
   const parts: ({ text: string } | { inlineData: ImagePart })[] = [
     { text: `다음 정보를 바탕으로 결과를 생성하세요.\n\n${contextText}${groundingBlock}` },
@@ -549,7 +550,7 @@ async function* generateStructured(
     throw new Error("모델 응답을 JSON으로 해석하지 못했습니다");
   }
 
-  const parsed = manifest.outputSchema.safeParse(output);
+  const parsed = outputSchemaFor(manifest.id).safeParse(output);
   if (!parsed.success) {
     throw new Error(`모델 응답이 예상한 형식과 다릅니다: ${parsed.error.issues[0]?.message ?? "unknown"}`);
   }
@@ -580,7 +581,7 @@ async function* generateStructured(
         },
       });
       usage = addUsage(usage, revised.usageMetadata);
-      const again = manifest.outputSchema.safeParse(JSON.parse(revised.text ?? ""));
+      const again = outputSchemaFor(manifest.id).safeParse(JSON.parse(revised.text ?? ""));
       if (again.success) final = again.data;
     } catch (err) {
       if (abortSignal?.aborted) throw err;

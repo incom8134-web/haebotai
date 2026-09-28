@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Space_Grotesk } from "next/font/google";
-import localFont from "next/font/local";
 import { MotionConfig } from "motion/react";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LocaleProvider } from "@/lib/i18n/context";
+// Korean UI text needs a Korean-native face — Geist has no Hangul glyphs.
+// The dynamic subset splits Pretendard into ~90 unicode-range chunks, so
+// a page downloads only the glyphs it shows instead of preloading the
+// whole 2MB font (which made every page slow on phones).
+import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -24,14 +28,6 @@ const spaceGrotesk = Space_Grotesk({
   weight: ["500", "600", "700"],
 });
 
-// Korean UI text needs a Korean-native face — Geist has no Hangul glyphs
-// and silently falls back to the OS system font otherwise.
-const pretendard = localFont({
-  src: "../node_modules/pretendard/dist/web/variable/woff2/PretendardVariable.woff2",
-  variable: "--font-pretendard",
-  weight: "45 920",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "해봇 AI",
@@ -43,7 +39,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="ko"
-      className={`${pretendard.variable} ${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">

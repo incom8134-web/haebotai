@@ -1,32 +1,11 @@
 import { Briefcase } from "lucide-react";
-import { z } from "zod";
 import type { ToolManifest } from "../types";
-import { sourceSchema } from "./shared";
 
 // HAEBOT_A_TOOLS_SPEC.md §5.2 — requireSources on every market figure.
 // Export to .docx + .xlsx (live formulas) lands with the xlsx skill
 // pattern, not here.
 
-const outputSchema = z.object({
-  sections: z.object({
-    summary: z.string(),
-    team: z.string(),
-    product: z.string(),
-  }),
-  market_analysis: z.object({
-    size: z.string(),
-    growth: z.string(),
-    sources: z.array(sourceSchema),
-  }),
-  competitor_matrix: z.array(z.array(z.string())),
-  financials: z.object({
-    pl_3yr: z.array(z.array(z.number())),
-    assumptions: z.array(z.string()),
-    breakeven_month: z.number(),
-  }),
-});
-
-export const businessPlan: ToolManifest<z.infer<typeof outputSchema>> = {
+export const businessPlan: ToolManifest = {
   id: "business-plan",
   category: "docs",
   name_ko: "해봇 사업계획서",
@@ -55,7 +34,6 @@ export const businessPlan: ToolManifest<z.infer<typeof outputSchema>> = {
   ],
   usesProfile: ["brand_name", "industry"],
   acceptsChainFrom: ["trend"],
-  outputSchema,
   outputRenderer: "document",
   grounding: { requireSources: true, webSearch: true, estimateBadge: true },
   model: "gemini-3.8-flash",

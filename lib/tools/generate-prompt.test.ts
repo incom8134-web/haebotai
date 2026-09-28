@@ -29,7 +29,6 @@ function fakeManifest(overrides: Partial<ToolManifest> = {}): ToolManifest {
       { kind: "number", id: "budget", label: "예산" },
     ],
     usesProfile: [],
-    outputSchema: {} as ToolManifest["outputSchema"],
     outputRenderer: "document",
     grounding: { requireSources: false, webSearch: false, estimateBadge: false },
     model: "gemini-3.8-flash",

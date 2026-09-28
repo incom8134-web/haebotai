@@ -1,28 +1,9 @@
 import { Lightbulb } from "lucide-react";
-import { z } from "zod";
 import type { ToolManifest } from "../types";
 
 // HAEBOT_A_TOOLS_SPEC.md §4.1
 
-const outputSchema = z.object({
-  models: z
-    .array(
-      z.object({
-        rank: z.number(),
-        name: z.string(),
-        fit_reason: z.string(),
-        fit_cites: z.array(z.string()),
-        first_30_days: z.array(z.object({ day: z.number(), title: z.string() })),
-        startup_cost_krw: z.number(),
-        breakeven_months: z.number(),
-        difficulty: z.number().min(1).max(5),
-        skill_gaps: z.array(z.string()),
-      }),
-    )
-    .length(3),
-});
-
-export const money: ToolManifest<z.infer<typeof outputSchema>> = {
+export const money: ToolManifest = {
   id: "money",
   category: "ideas",
   name_ko: "해봇 수익화 발굴",
@@ -58,7 +39,6 @@ export const money: ToolManifest<z.infer<typeof outputSchema>> = {
   ],
   usesProfile: ["industry", "business_stage"],
   acceptsChainFrom: [],
-  outputSchema,
   outputRenderer: "cards",
   grounding: { requireSources: false, webSearch: true, estimateBadge: false },
   model: "gemini-3.8-flash",
