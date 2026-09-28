@@ -12,9 +12,17 @@ import { getPlaybook, HOUSE_RULES } from "./playbooks.ts";
 // Prompt-level enforcement for the hard guards documented in policy.ts —
 // that file's checks are the pre-flight/output-safety backstop; this is
 // the primary enforcement now that real generation exists.
+// Links, phone numbers and handles the user didn't give are invented by
+// definition — a made-up bit.ly in a customer-facing SMS is worse than a
+// visible blank.
+const NO_INVENTED_CONTACTS = '입력에 없는 URL·단축 링크·전화번호·계정명은 지어내지 말고 "[예약 링크]", "[전화번호]"처럼 대괄호 자리 표시로 쓰세요.';
+
 export const GUARDS: Partial<Record<string, string>> = {
+  copy: NO_INVENTED_CONTACTS,
+  blog: NO_INVENTED_CONTACTS,
+  proposal: NO_INVENTED_CONTACTS,
   place:
-    "이 도구는 가짜 리뷰를 생성하거나 고객인 척 리뷰를 쓰지 않습니다. review_response_templates에는 사업자가 실제 리뷰에 답하는 답글만 작성하세요.",
+    "이 도구는 가짜 리뷰를 생성하거나 고객인 척 리뷰를 쓰지 않습니다. review_response_templates에는 사업자가 실제 리뷰에 답하는 답글만 작성하세요. " + NO_INVENTED_CONTACTS,
   logo: "실제 존재하는 브랜드의 로고, 워드마크, 마스코트와 유사하게 보일 수 있는 디자인은 생성하지 마세요.",
   "brand-model":
     "이름이 언급되었거나 사진이 첨부된, 실제로 식별 가능한 특정 인물의 얼굴을 닮은 인물은 생성하지 마세요.",
@@ -160,6 +168,7 @@ export function buildReviseInstruction(manifest: ToolManifest): string {
     "1. 업종 이름만 바꾸면 다른 가게에도 통하는 일반적인 문장 → 이 사업의 이름·제품·지역·고객·숫자를 넣어 다시 쓰기",
     "2. 방향만 있고 행동이 없는 조언 → 무엇을·언제·어디서·얼마로 할지 쓰기",
     "3. 근거 없는 수치나 사실 → 검색 근거에 있는 것만 쓰고, 없으면 '추정'이라고 밝히거나 빼기",
+    "3-1. 입력·프로필에 없는 이 사업 자체의 사실(메뉴 이름, 영업시간, 재료, 위치, 제조 과정, 인증) → 지우거나 '[확인 필요: …]'로 바꾸기. 제안은 제안이라고 쓰기",
     "4. 서로 비슷해서 선택지가 되지 않는 항목들 → 확실히 다른 방향으로 바꾸기",
     "5. 빈 형용사('최고의', '특별한', '프리미엄')와 광고 문구 같은 과장 → 구체적인 장면·사실로 바꾸기",
     "6. 입력이나 프로필에 있는데 반영되지 않은 정보 → 반영하기",
