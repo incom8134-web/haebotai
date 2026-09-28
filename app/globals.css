@@ -399,3 +399,9 @@ p { text-wrap: pretty; }
   /* With the lighter blur, page text showed through the tab bar. */
   .tab-bar { background: color-mix(in oklch, var(--color-bg) 92%, transparent); }
 }
+
+/* Page transition (app/(app)/template.tsx). Only transform animates, so
+   content is fully visible from the first paint even without JS. */
+@keyframes page-enter { from { transform: translateY(8px); } to { transform: none; } }
+.page-enter { animation: page-enter 0.25s cubic-bezier(0.22, 1, 0.36, 1); }
+@media (prefers-reduced-motion: reduce) { .page-enter { animation: none; } }
