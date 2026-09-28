@@ -90,9 +90,15 @@ function ToolHome({ toolId }: { toolId: string }) {
           </div>
 
           <div className="mt-4 flex gap-2">
-            <Link href={`/tools/${tool.id}/run`} className={cn(primaryButton, "flex-1")}>
-              <Play size={14} fill="currentColor" aria-hidden /> {L({ ko: "시작하기", en: "Start" })}
-            </Link>
+            {tool.comingSoon ? (
+              <span aria-disabled className={cn(primaryButton, "flex-1 cursor-not-allowed opacity-60")}>
+                {L({ ko: "준비 중", en: "Coming soon" })}
+              </span>
+            ) : (
+              <Link href={`/tools/${tool.id}/run`} className={cn(primaryButton, "flex-1")}>
+                <Play size={14} fill="currentColor" aria-hidden /> {L({ ko: "시작하기", en: "Start" })}
+              </Link>
+            )}
             <button type="button" onClick={() => favorites.toggle(tool.id)} aria-pressed={fav} aria-label={fav ? L({ ko: "고정 해제", en: "Unpin" }) : L({ ko: "스튜디오에 고정", en: "Pin to Studio" })} className={cn(secondaryButton, "w-11 px-0", fav && "text-studio-warning")}>
               <Star size={16} fill={fav ? "currentColor" : "none"} aria-hidden />
             </button>
@@ -145,10 +151,12 @@ function ToolHome({ toolId }: { toolId: string }) {
                   <ul className="mt-2 flex-1 space-y-1 text-sm text-fg-muted">
                     {presetLines(tool, p).slice(0, 3).map((line) => <li key={line} className="truncate" title={line}>{line}</li>)}
                   </ul>
-                  <Link href={`/tools/${tool.id}/run?preset=${i}`} className="mt-4 inline-flex items-center gap-1.5 self-start text-sm font-medium text-studio-cyan">
-                    {L({ ko: "이 예시로 열기", en: "Open with this" })}
-                    <ArrowRight size={14} className="transition-transform duration-500 ease-[var(--spring)] group-hover:translate-x-1" aria-hidden />
-                  </Link>
+                  {tool.comingSoon ? null : (
+                    <Link href={`/tools/${tool.id}/run?preset=${i}`} className="mt-4 inline-flex items-center gap-1.5 self-start text-sm font-medium text-studio-cyan">
+                      {L({ ko: "이 예시로 열기", en: "Open with this" })}
+                      <ArrowRight size={14} className="transition-transform duration-500 ease-[var(--spring)] group-hover:translate-x-1" aria-hidden />
+                    </Link>
+                  )}
                 </motion.article>
               ))}
             </div>
