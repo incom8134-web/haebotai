@@ -75,8 +75,9 @@ function LibraryRunDetail({
         <h1 className="font-display text-[clamp(2rem,4vw,3rem)] leading-[1.05] font-bold tracking-[-0.02em] break-keep text-fg">
           {locale === "en" ? manifest.name_en : manifest.name_ko}
         </h1>
-        <span className="shrink-0 font-mono text-2xs text-fg-subtle">
-          {new Date(createdAt).toLocaleString(locale === "en" ? "en-US" : "ko-KR")}
+        {/* Fixed to Korea time so the server (UTC) and the browser render the same text. */}
+        <span className="shrink-0 font-mono text-2xs text-fg-subtle" suppressHydrationWarning>
+          {new Date(createdAt).toLocaleString(locale === "en" ? "en-US" : "ko-KR", { timeZone: "Asia/Seoul" })}
         </span>
       </div>
 

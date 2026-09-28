@@ -25,6 +25,24 @@ export function seedFromChain(targetId: string, sourceId: string, sourceOutput: 
     return { model: output.ideas?.[0]?.name ?? "" };
   }
 
+  if (targetId === "copy" && sourceId === "strategy") {
+    const strategy = sourceOutput as {
+      positioning_statement?: string;
+      recommended_territory?: string;
+      offers?: { name: string; what: string }[];
+      segments?: { name: string }[];
+      reasons_to_believe?: string[];
+    };
+    const offer = strategy.offers?.[0];
+    return {
+      offer: [offer ? `${offer.name}: ${offer.what}` : strategy.positioning_statement, strategy.recommended_territory && `방향: ${strategy.recommended_territory}`]
+        .filter(Boolean)
+        .join("\n"),
+      audience: strategy.segments?.[0]?.name ?? "",
+      must_include: (strategy.reasons_to_believe ?? []).slice(0, 3),
+    };
+  }
+
   if (targetId === "blog" && sourceId === "keyword") {
     return { topic: output.combinations?.[0] ?? "" };
   }

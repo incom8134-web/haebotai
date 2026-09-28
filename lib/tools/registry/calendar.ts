@@ -1,31 +1,10 @@
 import { CalendarDays } from "lucide-react";
-import { z } from "zod";
 import type { ToolManifest } from "../types";
 
 // HAEBOT_A_TOOLS_SPEC.md §4.3 — chains from `money`/`trend` automatically,
 // no file export/upload (their documented failure mode).
 
-const outputSchema = z.object({
-  weeks: z
-    .array(
-      z.object({
-        week_no: z.number(),
-        milestone: z.string(),
-        tasks: z.array(
-          z.object({
-            day: z.number(),
-            title: z.string(),
-            est_minutes: z.number(),
-            done_criteria: z.string(),
-            depends_on: z.string().optional(),
-          }),
-        ),
-      }),
-    )
-    .length(13),
-});
-
-export const calendar: ToolManifest<z.infer<typeof outputSchema>> = {
+export const calendar: ToolManifest = {
   id: "calendar",
   category: "ideas",
   name_ko: "해봇 90일 실행 캘린더",
@@ -48,10 +27,9 @@ export const calendar: ToolManifest<z.infer<typeof outputSchema>> = {
   ],
   usesProfile: ["weekly_hours"],
   acceptsChainFrom: ["money", "trend"],
-  outputSchema,
   outputRenderer: "calendar",
   grounding: { requireSources: false, webSearch: false, estimateBadge: false },
-  model: "gemini-3.6-flash",
+  model: "gemini-3.8-flash",
   estimatedCredits: 25,
   estimatedSeconds: 30,
 };

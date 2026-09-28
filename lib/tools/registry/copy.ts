@@ -1,26 +1,11 @@
 import { MessageSquareText } from "lucide-react";
-import { z } from "zod";
 import type { ToolManifest } from "../types";
 
 // From the aimarketingstudio prototype's "Campaign Copy AI": one idea,
 // adapted per channel and per audience motivation — real angles, not
 // word swaps. Text-only, no web search; profile tone drives the voice.
 
-const outputSchema = z.object({
-  core_message: z.string(),
-  angles: z.array(
-    z.object({
-      motivation: z.string(),
-      headline: z.string(),
-      body: z.string(),
-      cta: z.string(),
-    }),
-  ),
-  channel_versions: z.array(z.object({ channel: z.string(), copy: z.string(), note: z.string() })),
-  words_to_avoid: z.array(z.string()),
-});
-
-export const copy: ToolManifest<z.infer<typeof outputSchema>> = {
+export const copy: ToolManifest = {
   id: "copy",
   category: "content",
   name_ko: "해봇 캠페인 카피",
@@ -57,10 +42,9 @@ export const copy: ToolManifest<z.infer<typeof outputSchema>> = {
   ],
   usesProfile: ["brand_name", "tone", "voice_examples", "target_customer"],
   acceptsChainFrom: ["strategy", "keyword"],
-  outputSchema,
   outputRenderer: "cards",
-  grounding: { requireSources: false, webSearch: false, estimateBadge: true },
-  model: "gemini-3.6-flash",
+  grounding: { requireSources: false, webSearch: true, estimateBadge: true },
+  model: "gemini-3.8-flash",
   estimatedCredits: 15,
   estimatedSeconds: 20,
 };

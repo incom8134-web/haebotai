@@ -1,22 +1,9 @@
 import { Newspaper } from "lucide-react";
-import { z } from "zod";
 import type { ToolManifest } from "../types";
-import { sourceSchema } from "./shared";
 
 // HAEBOT_A_TOOLS_SPEC.md §4.5
 
-const outputSchema = z.object({
-  titles: z.array(z.string()).length(5),
-  meta_description: z.string(),
-  body_markdown: z.string(),
-  h2_outline: z.array(z.string()),
-  image_slots: z.array(z.object({ after_section: z.string(), purpose: z.string(), prompt: z.string() })),
-  hashtags: z.array(z.string()),
-  char_count: z.number(),
-  sources: z.array(sourceSchema),
-});
-
-export const blog: ToolManifest<z.infer<typeof outputSchema>> = {
+export const blog: ToolManifest = {
   id: "blog",
   category: "content",
   name_ko: "해봇 블로그 원고",
@@ -61,12 +48,11 @@ export const blog: ToolManifest<z.infer<typeof outputSchema>> = {
     },
     { kind: "textarea", id: "must_include_facts", label: "포함할 사실", rows: 2 },
   ],
-  usesProfile: ["tone"],
+  usesProfile: ["brand_name", "industry", "region", "tone", "voice_examples", "target_customer"],
   acceptsChainFrom: ["keyword"],
-  outputSchema,
   outputRenderer: "document",
-  grounding: { requireSources: true, webSearch: false, estimateBadge: true },
-  model: "gemini-3.6-flash",
+  grounding: { requireSources: true, webSearch: true, estimateBadge: true },
+  model: "gemini-3.8-flash",
   estimatedCredits: 20,
   estimatedSeconds: 30,
 };

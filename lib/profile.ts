@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import type { BusinessProfile } from "@/lib/tools/types";
+import { getCurrentUser } from "@/lib/supabase/user";
 
 // HAEBOT_A_TOOLS_SPEC.md §3.3 — set once, read by every tool. `brands` is
 // already the one-per-user profile row (BUILD_SPEC §5); §0002 migration
@@ -41,9 +42,7 @@ function toProfile(row: BrandRow): BusinessProfile {
 
 export async function getBusinessProfile(): Promise<BusinessProfile | null> {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) return null;
 
   const { data } = await supabase.from("brands").select("*").eq("user_id", user.id).maybeSingle();
@@ -52,9 +51,7 @@ export async function getBusinessProfile(): Promise<BusinessProfile | null> {
 
 export async function upsertBusinessProfile(patch: Partial<BusinessProfile>) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) return { ok: false as const, error: "로그인이 필요합니다" };
 
   const row: Record<string, unknown> = {};

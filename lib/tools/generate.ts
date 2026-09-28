@@ -3,9 +3,12 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { BusinessProfile, ToolManifest } from "./types";
 import type { Source } from "./registry/shared";
 import type { AiAdapter, ProviderId, TokenUsage } from "@/lib/ai/types";
-import { geminiAdapter, runWithApiKey as runWithGeminiKey } from "@/lib/ai/gemini";
+import { generateHeroImage, generateProductPhotos, geminiAdapter, runWithApiKey as runWithGeminiKey } from "@/lib/ai/gemini";
+import { collectInputImages } from "./generate-prompt";
 import { anthropicAdapter, runWithApiKey as runWithAnthropicKey } from "@/lib/ai/anthropic";
 import { renderSangsepage } from "./render/sangsepage";
+import { orderLike } from "./output-order";
+import { outputSchemaFor } from "./schemas";
 
 // HAEBOT_A_TOOLS_SPEC.md §3.2 — real generation for all 15 tools. Thin
 // dispatcher: provider-specific logic (search grounding, image
@@ -57,8 +60,9 @@ export async function generateOutput(
   const adapter = ADAPTERS[provider];
   if (!adapter) throw new Error(`${provider} 엔진은 아직 지원하지 않습니다`);
 
-  if (manifest.id === "image" || manifest.id === "brand-model") {
-    return adapter.generateImages(manifest, input, profile, abortSignal, storage);
+  if (manifest.id === "image" || manifest.id === "brand-model" || manifest.id === "logo") {
+    const images = await adapter.generateImages(manifest, input, profile, abortSignal, storage);
+    return { ...images, output: orderLike(outputSchemaFor(manifest.id), images.output) };
   }
 
   let result: { output: unknown; sources: Source[]; usage: TokenUsage } | undefined;
@@ -70,11 +74,76 @@ export async function generateOutput(
   let output = result.output;
   // Real image rendering, not the model's job — satori/resvg already do
   // this for real (§4.11); the model only supplies the section copy.
+  let extraUsage: TokenUsage = { inputTokens: 0, outputTokens: 0 };
   if (manifest.id === "sangsepage") {
-    const sections = (output as { sections: { order: number; headline: string; body: string }[] }).sections;
-    const rendered = await renderSangsepage(sections);
-    output = { ...(output as Record<string, unknown>), rendered_images: [rendered] };
+    const page = output as {
+      pain_points: string[];
+      usps: string[];
+      sections: { order: number; type?: string; headline: string; body: string; image_instruction?: string }[];
+      faq: { q: string; a: string }[];
+      shipping_template: string;
+    };
+    // Photos only on Gemini (Claude has no image API; a Claude run on the
+    // user's own key shouldn't spend platform image quota).
+    let photos: string[] = [];
+    if (provider === "google") {
+      const name = String(input.product_name ?? "");
+      const shotOf = (i: number) => page.sections[i]?.image_instruction || page.sections[i]?.headline || name;
+      const result = await generateProductPhotos(
+        [
+          { prompt: `Hero shot of "${name}". ${shotOf(0)}`, ratio: "1:1" },
+          { prompt: `Detail shot of "${name}". ${shotOf(2)}`, ratio: "4:5" },
+          { prompt: `In-use / lifestyle shot of "${name}". ${shotOf(4)}`, ratio: "4:5" },
+        ],
+        collectInputImages(manifest, input),
+        abortSignal,
+      );
+      photos = result.photos.filter((p): p is string => p !== null);
+      extraUsage = result.usage;
+    }
+    const png = await renderSangsepage({
+      productName: String(input.product_name ?? ""),
+      price: typeof input.price === "number" ? input.price : null,
+      painPoints: page.pain_points ?? [],
+      usps: page.usps ?? [],
+      sections: page.sections ?? [],
+      faq: page.faq ?? [],
+      shipping: page.shipping_template ?? "",
+      accent: profile?.brand_colors?.[0] ?? "#E84A5F",
+      photos,
+    });
+    // A multi-MB PNG belongs in storage, not in the run row.
+    const path = `${storage.userId}/sangsepage/${storage.runId}/page.png`;
+    const { error } = await storage.supabase.storage.from("exports").upload(path, png, { contentType: "image/png", upsert: true });
+    if (error) throw new Error(`상세페이지 저장 실패: ${error.message}`);
+    const { data: signed } = await storage.supabase.storage.from("exports").createSignedUrl(path, 60 * 60 * 24 * 365);
+    output = { ...page, rendered_images: signed ? [signed.signedUrl] : [] };
   }
 
-  return { output, sources: result.sources, usage: result.usage };
+  let usage = {
+    inputTokens: (result.usage.inputTokens ?? 0) + (extraUsage.inputTokens ?? 0),
+    outputTokens: (result.usage.outputTokens ?? 0) + (extraUsage.outputTokens ?? 0),
+  };
+  // Real hero photo for the generated site. Gemini only — Claude has no
+  // image API, and a Claude run on the user's own key shouldn't spend the
+  // platform's image quota; those pages keep their CSS fallback colour.
+  if (manifest.id === "homepage") {
+    const page = output as { html: string; hero_image_prompt?: string };
+    let heroUrl = "";
+    if (provider === "google" && page.html.includes("{{HERO_IMAGE_URL}}") && page.hero_image_prompt) {
+      try {
+        const hero = await generateHeroImage(page.hero_image_prompt, abortSignal);
+        heroUrl = hero.dataUrl;
+        usage = {
+          inputTokens: (usage.inputTokens ?? 0) + (hero.usage.inputTokens ?? 0),
+          outputTokens: (usage.outputTokens ?? 0) + (hero.usage.outputTokens ?? 0),
+        };
+      } catch {
+        // A failed photo shouldn't fail a finished page.
+      }
+    }
+    output = { ...page, html: page.html.replaceAll("{{HERO_IMAGE_URL}}", heroUrl) };
+  }
+
+  return { output: orderLike(outputSchemaFor(manifest.id), output), sources: result.sources, usage };
 }

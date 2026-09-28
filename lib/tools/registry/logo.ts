@@ -1,32 +1,19 @@
 import { Shapes } from "lucide-react";
-import { z } from "zod";
 import type { ToolManifest } from "../types";
 
-// HAEBOT_A_TOOLS_SPEC.md §4.9 — output is real SVG (validated + sanitized
-// server-side in the runner), not a raster model. Reject anything
-// resembling an existing trademark.
+// Four logo concepts. A text model plans them (idea, symbol, palette,
+// type), the image model draws each symbol, and the brand name is
+// typeset in Pretendard beside it (lib/tools/render/logo.ts) — image
+// models misspell Hangul, and hand-written SVG from a text model came out
+// crude. Earlier runs stored `svg` concepts; the renderer still shows them.
+// Reject anything resembling an existing trademark (GUARDS in generate-prompt.ts).
 
-const outputSchema = z.object({
-  concepts: z
-    .array(
-      z.object({
-        svg: z.string(),
-        concept_rationale: z.string(),
-        color_spec: z.object({ hex: z.array(z.string()) }),
-        type_spec: z.object({ family: z.string(), weight: z.string(), tracking: z.string() }),
-        usage_notes: z.string(),
-      }),
-    )
-    .length(6),
-  mockups: z.array(z.string()),
-});
-
-export const logo: ToolManifest<z.infer<typeof outputSchema>> = {
+export const logo: ToolManifest = {
   id: "logo",
   category: "design",
   name_ko: "해봇 로고",
   name_en: "Logo Generator",
-  summary: "브랜드명과 연상 키워드로 SVG 로고 6종을 생성합니다.",
+  summary: "브랜드명과 연상 키워드로 서로 다른 방향의 로고 콘셉트 4종(심볼 + 브랜드명 조합)을 디자인합니다.",
   icon: Shapes,
   inputs: [
     { kind: "text", id: "brand_name", label: "브랜드명", required: true },
@@ -54,12 +41,11 @@ export const logo: ToolManifest<z.infer<typeof outputSchema>> = {
       ],
     },
   ],
-  usesProfile: ["industry"],
+  usesProfile: ["brand_name", "industry", "target_customer", "tone", "brand_colors"],
   acceptsChainFrom: [],
-  outputSchema,
   outputRenderer: "images",
   grounding: { requireSources: false, webSearch: false, estimateBadge: false },
-  model: "gemini-3.6-flash",
-  estimatedCredits: 30,
-  estimatedSeconds: 25,
+  model: "gemini-3.1-flash-image",
+  estimatedCredits: 40,
+  estimatedSeconds: 40,
 };

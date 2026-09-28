@@ -1,22 +1,10 @@
 import { FileSignature } from "lucide-react";
-import { z } from "zod";
 import type { ToolManifest } from "../types";
 
 // HAEBOT_A_TOOLS_SPEC.md §5.1 — export to .docx + .pdf lands with the
 // docx skill pattern (real styles, TOC, page numbers), not here.
 
-const outputSchema = z.object({
-  cover: z.string(),
-  executive_summary: z.string(),
-  problem: z.string(),
-  solution: z.string(),
-  execution_plan: z.array(z.string()),
-  timeline: z.array(z.object({ phase: z.string(), weeks: z.number(), deliverable: z.string() })),
-  pricing_table: z.array(z.object({ item: z.string(), amount_krw: z.number() })),
-  company_intro: z.string(),
-});
-
-export const proposal: ToolManifest<z.infer<typeof outputSchema>> = {
+export const proposal: ToolManifest = {
   id: "proposal",
   category: "docs",
   name_ko: "해봇 제안서",
@@ -33,10 +21,9 @@ export const proposal: ToolManifest<z.infer<typeof outputSchema>> = {
   ],
   usesProfile: ["brand_name"],
   acceptsChainFrom: [],
-  outputSchema,
   outputRenderer: "document",
-  grounding: { requireSources: false, webSearch: false, estimateBadge: false },
-  model: "gemini-3.6-flash",
+  grounding: { requireSources: false, webSearch: true, estimateBadge: false },
+  model: "gemini-3.8-flash",
   estimatedCredits: 30,
   estimatedSeconds: 40,
 };

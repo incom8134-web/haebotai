@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { env } from "@/lib/env";
 import { open } from "@/lib/crypto/secret-box";
+import { getCurrentUser } from "@/lib/supabase/user";
 
 // Server-only reads for "bring your own API key". Never import from a
 // client component and never return the plaintext to the browser —
@@ -51,9 +52,7 @@ export async function getApiKeyStatus(): Promise<ApiKeyStatus> {
   const enabled = !!env.API_KEY_ENCRYPTION_SECRET;
   const providers = Object.fromEntries(API_KEY_PROVIDERS.map((p) => [p, emptySlots()])) as Record<ApiKeyProvider, ApiKeySlot[]>;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) return { enabled, connected: false, providers };
 
   // The view is already scoped to auth.uid() — no extra filter needed,
@@ -75,10 +74,7 @@ export async function getApiKeyStatus(): Promise<ApiKeyStatus> {
 export async function getUserApiKeys(provider: ApiKeyProvider, options?: { excludeBroken?: boolean }): Promise<string[]> {
   const secret = env.API_KEY_ENCRYPTION_SECRET;
   if (!secret) return [];
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) return [];
   const admin = createAdminClient();
   const { data } = await admin
@@ -104,10 +100,7 @@ export async function getUserApiKeys(provider: ApiKeyProvider, options?: { exclu
 export async function getUserApiKeySlot(provider: ApiKeyProvider, priority: ApiKeyPriority): Promise<string | null> {
   const secret = env.API_KEY_ENCRYPTION_SECRET;
   if (!secret) return null;
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) return null;
   const admin = createAdminClient();
   const { data } = await admin

@@ -26,7 +26,15 @@ assert.equal(checkToolPolicy("money", { skills: "가짜 리뷰 작성 대행업"
 // homepage: [입력 필요] placeholders are fine; a real-looking invented
 // phone number or address is not.
 assert.equal(checkOutputSafety("homepage", { html: "<p>전화: [입력 필요]</p>" }).ok, true);
-assert.equal(checkOutputSafety("homepage", { html: "<p>전화: 02-1234-5678</p>" }).ok, false);
-assert.equal(checkOutputSafety("homepage", { html: "<p>서울 강남구 테헤란로 123</p>" }).ok, false);
+// An invented number or address is replaced, not fatal...
+const html = (r: ReturnType<typeof checkOutputSafety>) => (r.output as { html: string } | undefined)?.html;
+assert.equal(html(checkOutputSafety("homepage", { html: "<p>전화: 02-1234-5678</p>" })), "<p>전화: [입력 필요]</p>");
+assert.equal(html(checkOutputSafety("homepage", { html: "<p>서울 강남구 테헤란로 123</p>" })), "<p>[입력 필요]</p>");
+// ...but the user's own number and address, typed into the form, stay.
+const facts = { facts: "서울 강남구 테헤란로 123 / 010 1234 5678" };
+const own = checkOutputSafety("homepage", { html: "<p>010-1234-5678 · 서울 강남구 테헤란로 123</p>" }, facts);
+assert.equal(own.ok, true);
+assert.equal(own.output, undefined);
+assert.equal(html(checkOutputSafety("homepage", { html: "<p>010-9999-0000</p>" }, facts)), "<p>[입력 필요]</p>");
 
 console.log("place + homepage policy guards: all checks passed");

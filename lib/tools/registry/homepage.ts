@@ -1,5 +1,4 @@
 import { Globe } from "lucide-react";
-import { z } from "zod";
 import type { ToolManifest } from "../types";
 
 // HAEBOT_A_TOOLS_SPEC.md §4.12 — outputs a working single-file site, not
@@ -7,14 +6,7 @@ import type { ToolManifest } from "../types";
 // GUARD (T7 prompt): no fabricated business facts — every phone number,
 // address, price, or testimonial slot renders as [입력 필요], never invented.
 
-const outputSchema = z.object({
-  html: z.string(),
-  sections: z.array(z.string()),
-  preview_url: z.string(),
-  zip_asset_id: z.string(),
-});
-
-export const homepage: ToolManifest<z.infer<typeof outputSchema>> = {
+export const homepage: ToolManifest = {
   id: "homepage",
   category: "sales",
   name_ko: "해봇 홈페이지",
@@ -22,6 +14,10 @@ export const homepage: ToolManifest<z.infer<typeof outputSchema>> = {
   summary: "업종과 목적에 맞는 배포 가능한 홈페이지를 생성합니다.",
   icon: Globe,
   inputs: [
+    // Free text is what makes the page this business's page: without it
+    // the model only had a purpose, section toggles and the profile.
+    { kind: "textarea", id: "content", label: "사이트에 담을 내용", rows: 5, max: 2000 },
+    { kind: "textarea", id: "facts", label: "연락처·주소·영업시간·가격", rows: 3, max: 800 },
     {
       kind: "select",
       id: "purpose",
@@ -51,12 +47,11 @@ export const homepage: ToolManifest<z.infer<typeof outputSchema>> = {
     },
     { kind: "url", id: "reference_site", label: "참고 사이트" },
   ],
-  usesProfile: ["industry", "brand_name", "brand_colors"],
+  usesProfile: ["industry", "brand_name", "brand_colors", "tone", "voice_examples", "target_customer", "region"],
   acceptsChainFrom: [],
-  outputSchema,
   outputRenderer: "code",
-  grounding: { requireSources: false, webSearch: false, estimateBadge: false },
-  model: "gemini-3.6-flash",
-  estimatedCredits: 40,
-  estimatedSeconds: 45,
+  grounding: { requireSources: false, webSearch: true, estimateBadge: false },
+  model: "gemini-3.8-flash",
+  estimatedCredits: 50,
+  estimatedSeconds: 70,
 };

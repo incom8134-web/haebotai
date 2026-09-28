@@ -20,6 +20,7 @@ const MAX_TOKENS_BY_TOOL: Record<string, number> = {
   logo: 10000, // 6 full SVG documents plus specs per concept
   calendar: 10000, // 13 weeks x ~5 tasks — many small repeated objects
   trend: 10000, // up to 8 ideas, each with 8 scores + sources
+  strategy: 12000, // market, segments, competitors, offers, 90-day plan, KPIs
 };
 const MAX_TOKENS_DEFAULT = 8000;
 

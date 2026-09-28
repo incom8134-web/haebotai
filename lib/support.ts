@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/supabase/user";
 
 export type TicketKind = "question" | "bug" | "billing" | "feature" | "remote";
 
@@ -16,9 +17,7 @@ export interface Ticket {
 
 export async function listTickets(): Promise<Ticket[]> {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) return [];
   const { data } = await supabase
     .from("support_tickets")
