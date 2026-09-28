@@ -1,19 +1,10 @@
 import { Terminal } from "lucide-react";
-import { z } from "zod";
 import type { ToolManifest } from "../types";
 
 // HAEBOT_A_TOOLS_SPEC.md §4.4 — "테스트 실행" runs the generated prompt
 // in-app; their version only hands you text to paste elsewhere.
 
-const outputSchema = z.object({
-  system_prompt: z.string(),
-  user_template: z.string(),
-  variables: z.array(z.object({ name: z.string(), description: z.string(), example: z.string() })),
-  sample_runs: z.array(z.object({ input: z.string(), expected_output: z.string() })).length(3),
-  failure_modes: z.array(z.object({ mode: z.string(), mitigation: z.string() })),
-});
-
-export const prompt: ToolManifest<z.infer<typeof outputSchema>> = {
+export const prompt: ToolManifest = {
   id: "prompt",
   category: "ideas",
   name_ko: "해봇 프롬프트 빌더",
@@ -72,10 +63,9 @@ export const prompt: ToolManifest<z.infer<typeof outputSchema>> = {
   ],
   usesProfile: [],
   acceptsChainFrom: [],
-  outputSchema,
   outputRenderer: "code",
   grounding: { requireSources: false, webSearch: false, estimateBadge: false },
-  model: "gemini-3.6-flash",
+  model: "gemini-3.8-flash",
   estimatedCredits: 10,
   estimatedSeconds: 15,
 };

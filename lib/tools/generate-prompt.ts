@@ -7,18 +7,27 @@
 // with tests rather than trusting manual spot-checks.
 
 import type { BusinessProfile, ToolManifest } from "./types";
+import { getPlaybook, HOUSE_RULES } from "./playbooks.ts";
 
 // Prompt-level enforcement for the hard guards documented in policy.ts —
 // that file's checks are the pre-flight/output-safety backstop; this is
 // the primary enforcement now that real generation exists.
+// Links, phone numbers and handles the user didn't give are invented by
+// definition — a made-up bit.ly in a customer-facing SMS is worse than a
+// visible blank.
+const NO_INVENTED_CONTACTS = '입력에 없는 URL·단축 링크·전화번호·계정명은 지어내지 말고 "[예약 링크]", "[전화번호]"처럼 대괄호 자리 표시로 쓰세요.';
+
 export const GUARDS: Partial<Record<string, string>> = {
+  copy: NO_INVENTED_CONTACTS,
+  blog: NO_INVENTED_CONTACTS,
+  proposal: NO_INVENTED_CONTACTS,
   place:
-    "이 도구는 가짜 리뷰를 생성하거나 고객인 척 리뷰를 쓰지 않습니다. review_response_templates에는 사업자가 실제 리뷰에 답하는 답글만 작성하세요.",
+    "이 도구는 가짜 리뷰를 생성하거나 고객인 척 리뷰를 쓰지 않습니다. review_response_templates에는 사업자가 실제 리뷰에 답하는 답글만 작성하세요. " + NO_INVENTED_CONTACTS,
   logo: "실제 존재하는 브랜드의 로고, 워드마크, 마스코트와 유사하게 보일 수 있는 디자인은 생성하지 마세요.",
   "brand-model":
     "이름이 언급되었거나 사진이 첨부된, 실제로 식별 가능한 특정 인물의 얼굴을 닮은 인물은 생성하지 마세요.",
   homepage:
-    '실제 전화번호, 주소, 가격, 고객 후기를 절대 지어내지 마세요. 입력값에 없는 정보는 반드시 "[입력 필요]"로 표시하세요.',
+    '"연락처·주소·영업시간·가격"과 "사이트에 담을 내용"에 적힌 정보는 그대로 정확히 쓰세요. 실제 전화번호, 주소, 가격, 고객 후기를 절대 지어내지 마세요. 입력값에 없는 정보는 반드시 "[입력 필요]"로 표시하세요. 입력이나 프로필에 없는 수치·인증·원산지·성분 주장(예: 당도 12Brix, 100% 동물성, 무첨가)도 지어내지 말고, 사실 대신 가게의 태도와 경험으로 쓰세요.',
   sangsepage:
     "사용자가 입력하지 않은 효능·의료 효과, 또는 근거 없는 최상급 표현(예: 업계 1위, 완치, 최고)은 추가하지 마세요.",
 };
@@ -91,11 +100,25 @@ export function buildContext(
   return lines.join("\n");
 }
 
-export function buildBaseInstruction(manifest: ToolManifest): string[] {
+export function buildBaseInstruction(manifest: ToolManifest, opts: { houseRules?: boolean } = {}): string[] {
+  const playbook = getPlaybook(manifest.id);
   const parts = [
-    `당신은 해봇 AI의 "${manifest.name_ko}" 도구입니다. ${manifest.summary}`,
+    playbook
+      ? `당신은 ${playbook.role}입니다. 지금 해봇 AI의 "${manifest.name_ko}" 도구로서 일합니다: ${manifest.summary}`
+      : `당신은 해봇 AI의 "${manifest.name_ko}" 도구입니다. ${manifest.summary}`,
     "이 사용자의 상황에 실제로 맞는 구체적인 내용을 만드세요. 누구에게나 해당하는 뻔하고 일반적인 결과는 피하세요.",
   ];
+  if (opts.houseRules !== false) parts.push("[작업 원칙]", ...HOUSE_RULES.map((r) => `- ${r}`));
+  if (playbook) {
+    parts.push("[작업 방식]", ...playbook.method.map((m, i) => `${i + 1}. ${m}`));
+    parts.push("[완성 기준]", ...playbook.bar.map((b) => `- ${b}`));
+    if (playbook.examples?.length) {
+      parts.push(
+        "[수준 예시] 이런 문장은 쓰지 말고(나쁜 예), 이 정도로 구체적으로 쓰세요(좋은 예). 예시 문장을 그대로 베끼지 말고 이 사용자의 사업에 맞게 새로 쓰세요.",
+        ...playbook.examples.map((e) => `- 나쁜 예: ${e.bad}\n  좋은 예: ${e.good}`),
+      );
+    }
+  }
   const guard = GUARDS[manifest.id];
   if (guard) parts.push(guard);
   return parts;
@@ -114,10 +137,51 @@ export function buildSystemInstruction(manifest: ToolManifest): string {
 }
 
 export function buildImageSystemInstruction(manifest: ToolManifest): string {
-  const parts = buildBaseInstruction(manifest);
+  const parts = buildBaseInstruction(manifest, { houseRules: false });
   parts.push(
     "텍스트로 설명하지 말고, 요청받은 실제 이미지를 생성해서 응답에 포함하세요. 이미지 없이 설명만 반환하는 것은 실패입니다.",
-    "정확히 한 장의 완성된 사진만 생성하세요. 여러 컷을 하나의 이미지 안에 콜라주나 그리드로 합치거나, 번호나 라벨을 붙이거나, 분할 화면으로 만들지 마세요.",
+    "정확히 한 장의 완성된 이미지만 생성하세요. 여러 컷을 하나의 이미지 안에 콜라주나 그리드로 합치거나, 번호나 라벨을 붙이거나, 분할 화면으로 만들지 마세요.",
   );
+  return parts.join("\n");
+}
+
+/** What the web search step looks for: the tool's research brief, else a generic fact search. */
+export function buildResearchPrompt(manifest: ToolManifest, contextText: string): string {
+  const research = getPlaybook(manifest.id)?.research;
+  return research
+    ? `"${manifest.name_ko}" 작업 전에 웹 검색으로 다음을 조사하세요: ${research}. 찾은 사실은 수치·이름·날짜를 살려 출처와 함께 한국어로 정리하고, 찾지 못한 것은 찾지 못했다고 쓰세요.\n\n${contextText}`
+    : `"${manifest.name_ko}" 요청에 필요한 최신 사실 정보를 웹 검색으로 조사하세요. 찾은 핵심 사실과 수치를 근거와 함께 한국어로 요약하세요.\n\n${contextText}`;
+}
+
+/**
+ * The editor pass: a second call that reviews the draft against the
+ * tool's bar and returns a rewritten result in the same schema. One
+ * call — the model critiques in its reasoning, so only the final JSON
+ * comes back.
+ */
+export function buildReviseInstruction(manifest: ToolManifest): string {
+  const playbook = getPlaybook(manifest.id);
+  const parts = [
+    `당신은 까다로운 시니어 에디터입니다. 아래 [초안]은 ${playbook ? playbook.role : "전문가"}가 해봇 AI의 "${manifest.name_ko}" 결과로 쓴 것입니다. 소상공인 고객이 돈을 내고 받는 결과물이라는 기준으로 검토하고 더 좋게 고쳐 쓰세요.`,
+    "반드시 한국어로 작성하세요.",
+    "[검토할 점]",
+    "1. 업종 이름만 바꾸면 다른 가게에도 통하는 일반적인 문장 → 이 사업의 이름·제품·지역·고객·숫자를 넣어 다시 쓰기",
+    "2. 방향만 있고 행동이 없는 조언 → 무엇을·언제·어디서·얼마로 할지 쓰기",
+    "3. 근거 없는 수치나 사실 → 검색 근거에 있는 것만 쓰고, 없으면 '추정'이라고 밝히거나 빼기",
+    "3-1. 입력·프로필에 없는 이 사업 자체의 사실(메뉴 이름, 영업시간, 재료, 위치, 제조 과정, 인증) → 지우거나 '[확인 필요: …]'로 바꾸기. 제안은 제안이라고 쓰기",
+    "4. 서로 비슷해서 선택지가 되지 않는 항목들 → 확실히 다른 방향으로 바꾸기",
+    "5. 빈 형용사('최고의', '특별한', '프리미엄')와 광고 문구 같은 과장 → 구체적인 장면·사실로 바꾸기",
+    "6. 입력이나 프로필에 있는데 반영되지 않은 정보 → 반영하기",
+  ];
+  if (playbook) parts.push("[이 도구의 완성 기준]", ...playbook.bar.map((b) => `- ${b}`));
+  const guard = GUARDS[manifest.id];
+  if (guard) parts.push(guard);
+  parts.push(
+    "좋은 부분은 그대로 두고 약한 부분만 고치세요. 항목 수와 구조는 스키마를 따르되, 내용은 초안보다 더 구체적이고 독창적이어야 합니다.",
+    "응답은 오직 지정된 JSON 스키마 구조의 최종본이어야 합니다. 검토 메모나 설명은 쓰지 마세요.",
+  );
+  if (manifest.grounding.requireSources) {
+    parts.push("사실 주장에는 [검색 근거]의 내용과 그 출처 URL만 사용하세요. 출처를 지어내지 마세요.");
+  }
   return parts.join("\n");
 }

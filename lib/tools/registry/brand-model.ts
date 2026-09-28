@@ -1,5 +1,4 @@
 import { UserRound } from "lucide-react";
-import { z } from "zod";
 import type { ToolManifest } from "../types";
 
 // HAEBOT_A_TOOLS_SPEC.md §4.10
@@ -12,13 +11,7 @@ import type { ToolManifest } from "../types";
 // defense in depth. `disclosure` below is already structurally enforced
 // via z.literal — no generation path can omit it.
 
-const outputSchema = z.object({
-  shots: z.array(z.object({ asset_id: z.string(), url: z.string() })).length(4),
-  model_seed: z.string(),
-  disclosure: z.literal("AI 생성 이미지"),
-});
-
-export const brandModel: ToolManifest<z.infer<typeof outputSchema>> = {
+export const brandModel: ToolManifest = {
   id: "brand-model",
   category: "design",
   name_ko: "해봇 브랜드 모델",
@@ -74,7 +67,6 @@ export const brandModel: ToolManifest<z.infer<typeof outputSchema>> = {
   ],
   usesProfile: [],
   acceptsChainFrom: [],
-  outputSchema,
   outputRenderer: "images",
   grounding: { requireSources: false, webSearch: false, estimateBadge: false },
   model: "gemini-3.1-flash-image",

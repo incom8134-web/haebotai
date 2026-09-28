@@ -22,7 +22,7 @@ export interface ToolCapability {
 // verified: 3a = `copy` (structured output alone), 3b = `strategy`
 // (+ web search + citations), Stage 2 = every other text tool, in four
 // batches, once both were confirmed working end to end on staging.
-// `image`/`brand-model` stay google-only — Claude has no image API, no
+// `image`/`brand-model`/`logo` stay google-only — Claude has no image API, no
 // fake integrations. `grant` stays google-only too: it's a static
 // placeholder (lib/tools/generate.ts) that never reaches any adapter, so
 // listing another provider for it would be pure decoration. OpenAI joins
@@ -40,7 +40,7 @@ export const TOOL_CAPABILITIES: Record<string, ToolCapability> = {
   keyword: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 2
   place: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 2
   image: { providers: ["google"], default: "google" },
-  logo: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 3
+  logo: { providers: ["google"], default: "google" }, // symbols are drawn by the image model
   "brand-model": { providers: ["google"], default: "google" },
   sangsepage: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 3
   homepage: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 3

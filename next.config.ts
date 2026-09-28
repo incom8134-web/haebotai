@@ -5,7 +5,16 @@ const nextConfig: NextConfig = {
   // harfbuzzjs dependency loads a .wasm file by relative path — bundling
   // either breaks that asset resolution, so both stay plain runtime
   // requires instead (lib/tools/render/sangsepage.ts).
-  serverExternalPackages: ["@resvg/resvg-js", "satori"],
+  // pptxgenjs is bundled, not external: as an external, Vercel loaded its
+  // ESM entry with require() and it failed to load.
+  serverExternalPackages: ["@resvg/resvg-js", "satori", "pdfkit"],
+  // Files read from disk at runtime that the tracer can't see: the
+  // Pretendard fonts (sangsepage render + PDF export) and pdfkit's
+  // built-in font metrics.
+  outputFileTracingIncludes: {
+    "/api/export/\\[runId\\]": ["./node_modules/pretendard/dist/public/static/Pretendard-{Regular,Bold}.otf", "./node_modules/pdfkit/js/data/**/*"],
+    "/api/tools/\\[toolId\\]/run": ["./node_modules/pretendard/dist/public/static/Pretendard-{Regular,Bold,ExtraBold,Black}.otf"],
+  },
   // Older URLs from the first shell pass, folded into Help / Account / Tools.
   async redirects() {
     return [

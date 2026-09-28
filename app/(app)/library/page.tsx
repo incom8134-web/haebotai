@@ -1,15 +1,14 @@
 import { LibraryList } from "@/components/library-list";
 import { getTool } from "@/lib/tools/registry";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/supabase/user";
 
 // HAEBOT_A_TOOLS_SPEC.md T2 — run history. The row is persisted before
 // generation starts, so even a run killed mid-stream shows up here.
 
 export default async function LibraryPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
 
   const { data: runs } = await supabase
     .from("generations")

@@ -1,36 +1,10 @@
 import { TrendingUp } from "lucide-react";
-import { z } from "zod";
 import type { ToolManifest } from "../types";
-import { sourceSchema } from "./shared";
 
 // HAEBOT_A_TOOLS_SPEC.md §4.2 — the tool where we most visibly beat them.
 // Every numeric claim carries a source URL or an estimated flag.
 
-const scoreSchema = z.object({
-  market_size: z.number(),
-  growth: z.number(),
-  entry_barrier: z.number(),
-  competition: z.number(),
-  margin: z.number(),
-  execution_difficulty: z.number(),
-  capital_need: z.number(),
-  personal_fit: z.number(),
-});
-
-const outputSchema = z.object({
-  ideas: z.array(
-    z.object({
-      name: z.string(),
-      scores: scoreSchema,
-      composite: z.number(),
-      price_gap: z.object({ band: z.string(), evidence: z.string() }),
-      differentiation_angles: z.array(z.string()).length(3),
-      sources: z.array(sourceSchema),
-    }),
-  ),
-});
-
-export const trend: ToolManifest<z.infer<typeof outputSchema>> = {
+export const trend: ToolManifest = {
   id: "trend",
   category: "ideas",
   name_ko: "해봇 트렌드 분석",
@@ -64,10 +38,9 @@ export const trend: ToolManifest<z.infer<typeof outputSchema>> = {
   ],
   usesProfile: ["industry"],
   acceptsChainFrom: ["money"],
-  outputSchema,
   outputRenderer: "cards",
   grounding: { requireSources: true, webSearch: true, estimateBadge: true },
-  model: "gemini-3.6-flash",
+  model: "gemini-3.8-flash",
   estimatedCredits: 40,
   estimatedSeconds: 45,
 };

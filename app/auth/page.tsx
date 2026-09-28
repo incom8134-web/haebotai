@@ -1,5 +1,6 @@
 "use client";
 
+import { BrandMark } from "@/components/brand-mark";
 import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -48,7 +49,7 @@ function AuthCard() {
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       className="glass-strong w-full max-w-[420px] rounded-[32px] p-7 sm:p-9"
     >
-      <span className="studio-gradient-bg grid size-12 place-items-center rounded-2xl font-display text-xl font-bold text-white shadow-[inset_0_1px_0_oklch(1_0_0/35%),0_16px_40px_-16px_var(--studio-violet)]">H</span>
+      <BrandMark size={48} priority />
       <h1 className="mt-6 font-display text-[28px] leading-tight font-bold tracking-[-0.02em] break-keep">{L({ ko: "해봇 AI 시작하기", en: "Start with Haebot AI" })}</h1>
       <p className="mt-2 text-sm leading-relaxed break-keep text-fg-muted">
         {next !== "/studio"

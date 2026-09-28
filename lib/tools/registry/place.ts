@@ -1,5 +1,4 @@
 import { MapPin } from "lucide-react";
-import { z } from "zod";
 import type { ToolManifest } from "../types";
 
 // HAEBOT_A_TOOLS_SPEC.md §4.7
@@ -8,17 +7,7 @@ import type { ToolManifest } from "../types";
 // advise on review manipulation. Reply templates (business replying to a
 // real review) are fine and are the only "review" output this tool makes.
 
-const outputSchema = z.object({
-  business_name_suggestions: z.array(z.string()).length(3),
-  description_optimized: z.string(),
-  primary_keywords: z.array(z.string()),
-  menu_recommendations: z.array(z.string()),
-  photo_checklist: z.array(z.object({ shot: z.string(), why: z.string(), priority: z.number() })),
-  review_response_templates: z.array(z.string()),
-  weekly_ops_checklist: z.array(z.string()),
-});
-
-export const place: ToolManifest<z.infer<typeof outputSchema>> = {
+export const place: ToolManifest = {
   id: "place",
   category: "content",
   name_ko: "해봇 플레이스 최적화",
@@ -31,12 +20,11 @@ export const place: ToolManifest<z.infer<typeof outputSchema>> = {
     { kind: "textarea", id: "current_info", label: "현재 플레이스 정보", rows: 3 },
     { kind: "chips", id: "competitors", label: "경쟁업체", max: 3 },
   ],
-  usesProfile: ["industry"],
+  usesProfile: ["brand_name", "industry", "region", "target_customer", "tone"],
   acceptsChainFrom: ["keyword"],
-  outputSchema,
   outputRenderer: "document",
-  grounding: { requireSources: false, webSearch: false, estimateBadge: false },
-  model: "gemini-3.6-flash",
+  grounding: { requireSources: false, webSearch: true, estimateBadge: false },
+  model: "gemini-3.8-flash",
   estimatedCredits: 15,
   estimatedSeconds: 20,
 };

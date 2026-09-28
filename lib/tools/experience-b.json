@@ -31,7 +31,7 @@
   },
   "logo": {
     "layout": "canvas", "visual": "logo",
-    "hero": { "title": { "ko": "이름에 얼굴을 입히는 일", "en": "Giving your name a face" }, "story": { "ko": "브랜드명과 떠오르는 단어 세 개면 충분합니다. 여섯 가지 시안을 확대해도 깨지지 않는 벡터로 만들어 드려요.", "en": "A name and three words is enough. Six concepts, as vectors that stay sharp at any size." } },
+    "hero": { "title": { "ko": "이름에 얼굴을 입히는 일", "en": "Giving your name a face" }, "story": { "ko": "브랜드명과 떠오르는 단어 세 개면 충분합니다. 서로 다른 방향의 로고 시안 네 가지를 디자인해 드려요.", "en": "A name and three words is enough. Four logo concepts in clearly different directions." } },
     "sections": [
       { "title": { "ko": "이름과 느낌", "en": "Name and feeling" }, "hint": { "ko": "추상어 하나, 구체어 하나를 섞으면 좋아요", "en": "Mix an abstract word with a concrete one" }, "fields": ["brand_name", "keywords"] },
       { "title": { "ko": "형태", "en": "Form" }, "hint": { "ko": "어디에 쓰일지 생각해 보세요 — 간판, 앱 아이콘, 도장", "en": "Think where it lives — sign, app icon, stamp" }, "fields": ["style"] },
@@ -43,7 +43,7 @@
       "style": { "display": "cards", "options": { "wordmark": { "icon": "type", "desc": { "ko": "글자만으로", "en": "Letters only" } }, "symbol_wordmark": { "icon": "shapes", "desc": { "ko": "심볼 + 글자", "en": "Symbol + name" } }, "initial": { "icon": "square-dashed", "desc": { "ko": "첫 글자 모노그램", "en": "Monogram" } }, "emblem": { "icon": "badge", "desc": { "ko": "원형·배지형", "en": "Seal or badge" } } } },
       "color_tendency": { "display": "swatches" }
     },
-    "stage": { "headline": { "ko": "여섯 개의 얼굴", "en": "Six faces" }, "story": { "ko": "각 시안의 아이디어와 쓰임새를 함께 설명합니다. 스크립트 같은 위험 요소는 걸러낸 안전한 SVG예요.", "en": "Each concept comes with its idea and use. Sanitized SVG, scripts stripped." }, "promises": [ { "icon": "shapes", "text": { "ko": "시안 6개", "en": "6 concepts" } }, { "icon": "vector-square", "text": { "ko": "SVG 벡터", "en": "SVG vectors" } }, { "icon": "shield-check", "text": { "ko": "안전 검증", "en": "Sanitized" } } ] }
+    "stage": { "headline": { "ko": "네 가지 방향", "en": "Four directions" }, "story": { "ko": "각 시안의 아이디어, 색상, 서체와 쓰임새를 함께 설명합니다. 브랜드명은 정확한 한글 서체로 조판해요.", "en": "Each concept comes with its idea, colors, type and use. The brand name is typeset in a real Korean font." }, "promises": [ { "icon": "shapes", "text": { "ko": "시안 4개", "en": "6 concepts" } }, { "icon": "vector-square", "text": { "ko": "로고 + 심볼 PNG", "en": "Logo + symbol PNG" } }, { "icon": "shield-check", "text": { "ko": "안전 검증", "en": "Sanitized" } } ] }
   },
   "brand-model": {
     "layout": "canvas", "visual": "model",
@@ -80,11 +80,14 @@
     "layout": "split", "visual": "site",
     "hero": { "title": { "ko": "고르는 대로 쌓이는 홈페이지", "en": "A website that builds as you choose" }, "story": { "ko": "목적과 필요한 섹션만 고르세요. 오른쪽 미리보기에 사이트 뼈대가 바로 쌓이고, 실행하면 프로필 정보로 채운 반응형 사이트를 ZIP으로 드려요.", "en": "Just pick a purpose and sections. The preview builds the skeleton as you go; run it and get a responsive site filled from your profile, as a ZIP." } },
     "sections": [
+      { "title": { "ko": "무엇을 보여 줄까요", "en": "What the site should say" }, "hint": { "ko": "소개, 대표 메뉴·서비스, 강점을 자유롭게 적어 주세요. 여기 적은 것만 사실로 씁니다", "en": "Write your intro, main products or services and strengths. Only what you write here is stated as fact" }, "fields": ["content", "facts"] },
       { "title": { "ko": "사이트의 목적", "en": "What the site is for" }, "hint": { "ko": "목적에 따라 첫 화면 행동 버튼이 달라져요", "en": "Changes the main call to action" }, "fields": ["purpose"] },
       { "title": { "ko": "필요한 섹션", "en": "Sections you need" }, "hint": { "ko": "후기는 실제 후기가 있을 때만 고르세요", "en": "Only pick testimonials if you have real ones" }, "fields": ["sections"] },
       { "title": { "ko": "참고 사이트 (선택)", "en": "Reference site (optional)" }, "hint": { "ko": "분위기만 참고하고 베끼지 않아요", "en": "For mood only — never copied" }, "fields": ["reference_site"] }
     ],
     "ui": {
+      "content": { "placeholder": { "ko": "예: 성수동 수제 딸기 디저트 공방. 매일 아침 들어온 딸기로만 굽고, 대표 메뉴는 생딸기 타르트와 쇼트케이크. 기념일 홀케이크 예약과 퇴근길 픽업을 받아요.", "en": "e.g. A strawberry dessert studio in Seongsu. We bake only with strawberries delivered that morning; signatures are the fresh strawberry tart and shortcake. We take celebration-cake bookings and after-work pickups." } },
+      "facts": { "placeholder": { "ko": "예: 서울 성동구 ○○로 12 / 11:00~21:00, 월 휴무 / 010-0000-0000 / 타르트 조각 7,500원", "en": "e.g. 12 ○○-ro, Seongdong-gu / 11:00–21:00, closed Mon / 010-0000-0000 / tart slice ₩7,500" } },
       "purpose": { "display": "cards", "options": { "intro": { "icon": "store", "desc": { "ko": "가게·회사 소개", "en": "About the business" } }, "booking": { "icon": "calendar-check", "desc": { "ko": "예약 받기", "en": "Take bookings" } }, "sales": { "icon": "shopping-cart", "desc": { "ko": "상품 판매", "en": "Sell products" } }, "portfolio": { "icon": "gallery-horizontal", "desc": { "ko": "작업물 보여 주기", "en": "Show work" } }, "landing": { "icon": "rocket", "desc": { "ko": "하나의 제품·이벤트", "en": "One product or event" } } } },
       "sections": { "display": "toggles" },
       "reference_site": { "placeholder": { "ko": "https://", "en": "https://" } }

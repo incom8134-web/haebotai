@@ -1,26 +1,11 @@
 import { Presentation } from "lucide-react";
-import { z } from "zod";
 import type { ToolManifest } from "../types";
 
 // From the aimarketingstudio prototype's "Presentation AI": narrative
 // first — a storyline, then slides that each earn their place, with
 // speaker notes. Exported as a structured outline (see run-result).
 
-const outputSchema = z.object({
-  title: z.string(),
-  storyline: z.string(),
-  slides: z.array(
-    z.object({
-      headline: z.string(),
-      points: z.array(z.string()),
-      visual: z.string(),
-      speaker_notes: z.string(),
-    }),
-  ),
-  closing_ask: z.string(),
-});
-
-export const presentation: ToolManifest<z.infer<typeof outputSchema>> = {
+export const presentation: ToolManifest = {
   id: "presentation",
   category: "docs",
   name_ko: "해봇 발표자료",
@@ -65,10 +50,9 @@ export const presentation: ToolManifest<z.infer<typeof outputSchema>> = {
   ],
   usesProfile: ["brand_name", "tone", "industry"],
   acceptsChainFrom: ["strategy", "trend", "business-plan"],
-  outputSchema,
   outputRenderer: "document",
   grounding: { requireSources: false, webSearch: false, estimateBadge: true },
-  model: "gemini-3.6-flash",
+  model: "gemini-3.8-flash",
   estimatedCredits: 30,
   estimatedSeconds: 40,
 };

@@ -1,5 +1,6 @@
 "use client";
 
+import { BrandMark } from "@/components/brand-mark";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -27,7 +28,22 @@ const ORDER: CategoryId[] = ["ideas", "content", "design", "sales", "docs"];
 // WebGL — dynamically imported with no SSR (Canvas can't render server-
 // side) and it's purely decorative, so a late mount never blocks anything
 // above the fold from being usable.
-const Hero3D = dynamic(() => import("./hero-3d").then((m) => m.Hero3D), { ssr: false });
+const Hero3DScene = dynamic(() => import("./hero-3d").then((m) => m.Hero3D), { ssr: false });
+
+// three.js is ~1MB of JS and a constant GPU load — on phones it made the
+// landing page slow for a purely decorative effect. Only mount (and so
+// only download) it on large screens without reduced motion.
+function Hero3D() {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px) and (prefers-reduced-motion: no-preference)");
+    const update = () => setShow(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+  return show ? <Hero3DScene /> : null;
+}
 
 const reveal = {
   initial: { opacity: 0, y: 18 },
@@ -42,7 +58,7 @@ function Nav() {
     <header className="sticky top-0 z-40 px-3 pt-[max(12px,env(safe-area-inset-top))] md:px-6">
       <div className="mx-auto flex max-w-[1200px] items-center gap-2">
         <Link href="/" className="glass flex h-11 items-center gap-2.5 rounded-2xl pr-4 pl-1.5">
-          <span className="studio-gradient-bg grid size-8 place-items-center rounded-xl font-display text-base font-bold text-white">H</span>
+          <BrandMark size={32} priority />
           <span className="text-sm font-bold tracking-[-0.02em]">해봇 AI</span>
         </Link>
         <nav className="glass mx-auto hidden h-11 items-center gap-1 rounded-2xl px-1.5 md:flex" aria-label={L({ ko: "페이지 안내", en: "Page" })}>
@@ -58,7 +74,7 @@ function Nav() {
           ))}
         </nav>
         <div className="ml-auto flex items-center gap-2 md:ml-0">
-          <div className="glass hidden rounded-2xl p-0.5 sm:flex"><ThemeLangControls /></div>
+          <div className="glass flex rounded-2xl p-0.5"><ThemeLangControls /></div>
           <Link href="/auth" className="glass hidden h-11 items-center rounded-2xl px-4 text-sm font-medium sm:flex">{L({ ko: "로그인", en: "Sign in" })}</Link>
           <Link href="/auth" className={cn(primaryButton, "h-11")}>{L({ ko: "무료로 시작", en: "Start free" })}</Link>
         </div>
@@ -141,6 +157,10 @@ function Landing() {
         {/* Hero */}
         <section className="mx-auto grid max-w-[1200px] gap-12 px-4 pt-16 pb-20 md:px-6 md:pt-24 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}>
+            <div className="mb-6 flex items-center gap-4">
+              <BrandMark size={72} priority className="drop-shadow-[0_18px_40px_rgba(77,124,254,0.35)]" />
+              <span className="font-display text-4xl font-bold tracking-[-0.03em]">해봇 AI</span>
+            </div>
             <p className="glass inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-medium text-studio-cyan"><Sparkles size={13} aria-hidden /> {L({ ko: "소상공인·1인 사업자를 위한 AI 마케팅 스튜디오", en: "An AI marketing studio for small businesses" })}</p>
             <h1 className="mt-6 font-display text-[clamp(2.5rem,5.2vw,4rem)] leading-[1.05] font-bold tracking-[-0.03em] break-keep">
               {L({ ko: "마케팅 팀이 없어도,", en: "No marketing team?" })}
@@ -285,7 +305,7 @@ function Landing() {
 
       <footer className="border-t border-hairline px-4 py-10 md:px-6">
         <div className="mx-auto flex max-w-[1200px] flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <p className="flex items-center gap-2 text-sm font-semibold"><span className="studio-gradient-bg grid size-7 place-items-center rounded-lg font-display text-sm text-white">H</span> 해봇 AI</p>
+          <p className="flex items-center gap-2 text-sm font-semibold"><BrandMark size={28} /> 해봇 AI</p>
           <nav className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-fg-muted" aria-label={L({ ko: "바닥글", en: "Footer" })}>
             {[
               ["/tools", { ko: "도구", en: "Tools" }],

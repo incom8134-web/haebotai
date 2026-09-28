@@ -87,12 +87,12 @@
  * through automatically instead of needing to be restated per-slot.
  */
 @theme inline {
-  --font-sans: var(--font-pretendard), var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-sans: "Pretendard Variable", var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
   --font-heading: var(--font-sans);
   /* Studio display face (from the Haebot AI Studio design) — Latin only,
      so Hangul falls through to Pretendard. */
-  --font-display: var(--font-space-grotesk), var(--font-pretendard), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-space-grotesk), "Pretendard Variable", ui-sans-serif, system-ui, sans-serif;
 
   --color-studio-cyan: var(--studio-cyan);
   --color-studio-violet: var(--studio-violet);
@@ -387,3 +387,21 @@ p { text-wrap: pretty; }
   .glass-hover:hover { transform: none; }
   [style*="auth-marquee"] { animation: none !important; }
 }
+
+/* Phones: the drifting 500px blurred orbs and heavy backdrop blur on every
+   glass panel kept the GPU busy and made scrolling janky. Hold the orbs
+   still and use a lighter blur below the desktop breakpoint. */
+@media (max-width: 1023px) {
+  .app-backdrop .orb, .studio-ambient { animation: none; filter: blur(64px); }
+  .glass { backdrop-filter: blur(12px) saturate(150%); -webkit-backdrop-filter: blur(12px) saturate(150%); }
+  .glass-strong { backdrop-filter: blur(16px) saturate(160%); -webkit-backdrop-filter: blur(16px) saturate(160%); }
+  .studio-glass, .studio-panel { backdrop-filter: blur(12px); }
+  /* With the lighter blur, page text showed through the tab bar. */
+  .tab-bar { background: color-mix(in oklch, var(--color-bg) 92%, transparent); }
+}
+
+/* Page transition (app/(app)/template.tsx). Only transform animates, so
+   content is fully visible from the first paint even without JS. */
+@keyframes page-enter { from { transform: translateY(8px); } to { transform: none; } }
+.page-enter { animation: page-enter 0.25s cubic-bezier(0.22, 1, 0.36, 1); }
+@media (prefers-reduced-motion: reduce) { .page-enter { animation: none; } }
