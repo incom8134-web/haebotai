@@ -13,7 +13,7 @@ import { ThemeLangControls } from "@/components/shell/app-shell";
 
 // Sign-in. One screen, two halves: on the left, why it's worth it (told
 // with the real tool set drifting past); on the right, one glass card with
-// one action. Honest terms — 100 credits on sign-up, no card, students
+// one action. Honest terms — 500 credits on sign-up, no card, students
 // unlimited after verification (lib/site/plans.ts).
 
 function safeNext(raw: string | null) {
@@ -84,7 +84,7 @@ function AuthCard() {
 
       <ul className="mt-7 space-y-3 border-t border-hairline pt-6 text-sm">
         {[
-          { icon: Check, text: { ko: "가입하면 100 크레딧, 카드 등록 없음", en: "100 credits on sign-up, no card needed" } },
+          { icon: Check, text: { ko: "가입하면 500 크레딧, 카드 등록 없음", en: "500 credits on sign-up, no card needed" } },
           { icon: GraduationCap, text: { ko: "학생은 재학 인증 후 무제한", en: "Students: unlimited after verification" } },
           { icon: KeyRound, text: { ko: "내 API 키를 넣으면 크레딧 없이 실행", en: "Bring your own API key and runs are free" } },
         ].map((item) => (

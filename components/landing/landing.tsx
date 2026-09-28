@@ -176,7 +176,7 @@ function Landing() {
             </div>
             <ul className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-sm text-fg-muted">
               {[
-                { ko: "가입하면 100 크레딧", en: "100 credits on sign-up" },
+                { ko: "가입하면 500 크레딧", en: "500 credits on sign-up" },
                 { ko: "카드 등록 없음", en: "No card needed" },
                 { ko: "학생은 무제한", en: "Unlimited for students" },
               ].map((t) => <li key={t.en} className="flex items-center gap-1.5 break-keep"><Check size={15} className="text-studio-success" aria-hidden /> {L(t)}</li>)}
