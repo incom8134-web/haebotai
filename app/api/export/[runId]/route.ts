@@ -5,8 +5,6 @@ import { buildBusinessPlanXlsx } from "@/lib/tools/export/xlsx";
 import { buildExportDoc } from "@/lib/tools/export/document";
 import { buildGenericDocx } from "@/lib/tools/export/generic-docx";
 import { buildMarkdown } from "@/lib/tools/export/markdown";
-import { buildPdf } from "@/lib/tools/export/pdf";
-import { buildPptx } from "@/lib/tools/export/pptx";
 import { getTool } from "@/lib/tools/registry";
 import { getBusinessProfile } from "@/lib/profile";
 import { orderLike } from "@/lib/tools/output-order";
@@ -86,11 +84,18 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       brandName: profile?.brand_name ?? null,
       createdAt: run.created_at,
     });
-    buffer =
-      format === "md" ? Buffer.from(buildMarkdown(doc), "utf8")
-      : format === "pdf" ? await buildPdf(doc)
-      : format === "pptx" ? await buildPptx(doc)
-      : await buildGenericDocx(doc);
+    // pdfkit and pptxgenjs load only for their own format, so a problem
+    // loading one of them can't take down every other export.
+    try {
+      buffer =
+        format === "md" ? Buffer.from(buildMarkdown(doc), "utf8")
+        : format === "pdf" ? await (await import("@/lib/tools/export/pdf")).buildPdf(doc)
+        : format === "pptx" ? await (await import("@/lib/tools/export/pptx")).buildPptx(doc)
+        : await buildGenericDocx(doc);
+    } catch (err) {
+      console.error(`export ${format} failed`, err);
+      return Response.json({ error: `${format.toUpperCase()} 파일을 만들지 못했습니다`, detail: err instanceof Error ? err.message.slice(0, 300) : String(err) }, { status: 500 });
+    }
   }
 
   return new Response(new Uint8Array(buffer), {
