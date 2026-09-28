@@ -36,7 +36,7 @@ import { outputSchemaFor } from "@/lib/tools/schemas";
 // retry to.
 // Planning, research, safety checks and the editor pass. Manifests name
 // their own model for the main generation.
-const TEXT_MODEL = "gemini-3.8-flash";
+export const TEXT_MODEL = "gemini-3.8-flash";
 
 let client: GoogleGenAI | undefined;
 const userKeyStore = new AsyncLocalStorage<KeyRotationState>();
@@ -52,7 +52,7 @@ export async function runWithApiKey<T>(apiKeys: string[], fn: () => Promise<T>):
   return userKeyStore.run(state, () => runWithRotation(state, classifyGeminiError, fn, RETRY_OPTIONS));
 }
 
-function getClient(): GoogleGenAI {
+export function getClient(): GoogleGenAI {
   const state = userKeyStore.getStore();
   if (state) return new GoogleGenAI({ apiKey: state.keys[state.index] });
   if (!client) {
@@ -63,14 +63,14 @@ function getClient(): GoogleGenAI {
   return client;
 }
 
-function addUsage(a: TokenUsage, b: { promptTokenCount?: number; candidatesTokenCount?: number } | undefined): TokenUsage {
+export function addUsage(a: TokenUsage, b: { promptTokenCount?: number; candidatesTokenCount?: number } | undefined): TokenUsage {
   return {
     inputTokens: (a.inputTokens ?? 0) + (b?.promptTokenCount ?? 0),
     outputTokens: (a.outputTokens ?? 0) + (b?.candidatesTokenCount ?? 0),
   };
 }
 
-async function searchGrounding(
+export async function searchGrounding(
   manifest: ToolManifest,
   contextText: string,
   abortSignal: AbortSignal | undefined,
@@ -149,7 +149,7 @@ async function containsRealPersonFace(
   }
 }
 
-async function generateOneImage(
+export async function generateOneImage(
   manifest: ToolManifest,
   parts: ({ text: string } | { inlineData: ImagePart })[],
   seed: number,
@@ -218,7 +218,7 @@ export async function generateHeroImage(prompt: string, abortSignal: AbortSignal
   return { dataUrl: `data:${image.mimeType};base64,${image.data}`, usage };
 }
 
-type AspectRatio = "1:1" | "4:5" | "16:9" | "9:16" | "3:4";
+export type AspectRatio = "1:1" | "4:5" | "16:9" | "9:16" | "3:4" | "4:3";
 
 // What each image preset is for — the shot planner's art direction.
 const PRESET_GUIDE: Record<string, string> = {

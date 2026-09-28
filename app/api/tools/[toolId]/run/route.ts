@@ -38,17 +38,6 @@ function encodeEvent(event: unknown) {
   return new TextEncoder().encode(JSON.stringify(event) + "\n");
 }
 
-// The streamed "typing" preview is cosmetic — a multi-hundred-KB base64
-// image/HTML data URI (sangsepage, homepage, image, logo, brand-model)
-// would take forever to stream 12 chars at a time. Collapse those for
-// the preview only; the `done` event still carries the real output.
-function previewText(output: unknown): string {
-  return JSON.stringify(output, null, 2).replace(
-    /data:[a-z0-9.+-]+\/[a-z0-9.+-]+;base64,[A-Za-z0-9+/=]+/gi,
-    (m) => `data:...(${Math.round(m.length / 1024)}KB)`,
-  );
-}
-
 export async function POST(request: NextRequest, { params }: { params: Promise<{ toolId: string }> }) {
   const { toolId } = await params;
   const manifest = getTool(toolId);
@@ -241,19 +230,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         send({ type: "error", error: message });
         close();
         return;
-      }
-
-      if (isCancelled()) {
-        await fail("cancelled", "사용자가 취소했습니다");
-        close();
-        return;
-      }
-
-      const text = previewText(output);
-      for (let i = 0; i < text.length; i += 12) {
-        if (isCancelled()) break;
-        send({ type: "chunk", text: text.slice(i, i + 12) });
-        await new Promise((resolve) => setTimeout(resolve, 25));
       }
 
       if (isCancelled()) {

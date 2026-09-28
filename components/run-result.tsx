@@ -25,6 +25,8 @@ import {
 import { listTools } from "@/lib/tools/registry";
 import { buildCalendarIcs, buildCalendarCsv, type CalendarWeek } from "@/lib/tools/export/calendar";
 import { StructuredResult } from "@/components/structured-result";
+import { SitePreview } from "@/components/results/site-preview";
+import { SlideDeck, type DeckOutput } from "@/components/results/slide-deck";
 import { useLocale, useT } from "@/lib/i18n/context";
 import type { Source } from "@/lib/tools/registry/shared";
 import type { ToolManifest } from "@/lib/tools/types";
@@ -198,6 +200,12 @@ function DownloadPanel({
   }
 
   const [primary, ...rest] = formats;
+  // A tool whose real deliverable is its own file (the homepage's HTML)
+  // leads with that file; the document formats follow.
+  const lead = extras.find((x) => x.key === "html");
+  const others = lead ? extras.filter((x) => x !== lead) : extras;
+  const leadClass =
+    "col-span-full flex min-h-14 items-center gap-3 rounded-xl bg-primary px-4 py-2.5 text-left text-primary-foreground transition-colors hover:bg-accent-hover";
   return (
     <section className="mt-3 rounded-2xl border border-hairline p-3" aria-label={en ? "Download" : "다운로드"}>
       <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5">
@@ -208,24 +216,35 @@ function DownloadPanel({
         <p className="text-2xs text-fg-subtle">{en ? "Ready to edit, present or share" : "편집·발표·공유에 바로 쓰는 파일"}</p>
       </div>
       <div className="mt-2.5 grid grid-cols-2 gap-2 sm:grid-cols-[repeat(auto-fit,minmax(150px,1fr))]">
-        <a
-          href={href(primary)}
-          onClick={() => start(primary)}
-          className="col-span-full flex min-h-14 items-center gap-3 rounded-xl bg-primary px-4 py-2.5 text-left text-primary-foreground transition-colors hover:bg-accent-hover"
-        >
-          <FormatIcon format={primary} busy={busy === primary} className="size-5 shrink-0" />
-          <span className="flex min-w-0 flex-col">
-            <span className="text-sm font-semibold">
-              {FORMATS[primary].label} {en ? "download" : "다운로드"}
+        {lead ? (
+          <button type="button" onClick={lead.run} className={leadClass}>
+            <lead.icon className="size-5 shrink-0" aria-hidden />
+            <span className="flex min-w-0 flex-col">
+              <span className="text-sm font-semibold">{lead.label} {en ? "download" : "다운로드"}</span>
+              <span className="text-2xs opacity-85">{en ? "Recommended · ready to upload" : "추천 · 바로 올리는 홈페이지 파일"}</span>
             </span>
-            <span className="text-2xs opacity-85">
-              {busy === primary
-                ? en ? "Preparing your file…" : "파일 만드는 중… 잠시만 기다려 주세요"
-                : `${en ? "Recommended" : "추천"} · ${en ? FORMATS[primary].hintEn : FORMATS[primary].hint}`}
+          </button>
+        ) : null}
+        {lead ? null : (
+          <a
+            href={href(primary)}
+            onClick={() => start(primary)}
+            className={leadClass}
+          >
+            <FormatIcon format={primary} busy={busy === primary} className="size-5 shrink-0" />
+            <span className="flex min-w-0 flex-col">
+              <span className="text-sm font-semibold">
+                {FORMATS[primary].label} {en ? "download" : "다운로드"}
+              </span>
+              <span className="text-2xs opacity-85">
+                {busy === primary
+                  ? en ? "Preparing your file…" : "파일 만드는 중… 잠시만 기다려 주세요"
+                  : `${en ? "Recommended" : "추천"} · ${en ? FORMATS[primary].hintEn : FORMATS[primary].hint}`}
+              </span>
             </span>
-          </span>
-        </a>
-        {rest.map((f) => (
+          </a>
+        )}
+        {(lead ? formats : rest).map((f) => (
           <a key={f} href={href(f)} onClick={() => start(f)} className={tile}>
             <FormatIcon format={f} busy={busy === f} className="size-4 shrink-0 text-accent" />
             <span className="flex min-w-0 flex-col">
@@ -236,7 +255,7 @@ function DownloadPanel({
             </span>
           </a>
         ))}
-        {extras.map((x) => (
+        {others.map((x) => (
           <button key={x.key} type="button" onClick={x.run} className={tile}>
             <x.icon className="size-4 shrink-0 text-accent" aria-hidden />
             <span className="flex min-w-0 flex-col">
@@ -270,16 +289,11 @@ function OutputPreview({ output }: { output: unknown }) {
   const o = output as Record<string, unknown>;
 
   if (typeof o.html === "string") {
-    return (
-      <>
-        <iframe
-          srcDoc={o.html}
-          sandbox=""
-          className="mt-2 h-96 w-full rounded-xl border border-hairline bg-white"
-        />
-        <StructuredResult output={output} />
-      </>
-    );
+    return <SitePreview html={o.html} design={o.design as Parameters<typeof SitePreview>[0]["design"]} />;
+  }
+
+  if (Array.isArray(o.slides) && (o.slides as { headline?: unknown }[]).some((sl) => typeof sl?.headline === "string")) {
+    return <SlideDeck deck={o as unknown as DeckOutput} />;
   }
 
   const imageList = (o.rendered_images ?? o.images ?? o.shots) as unknown;

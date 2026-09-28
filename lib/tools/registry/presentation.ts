@@ -52,7 +52,7 @@ export const presentation: ToolManifest = {
   acceptsChainFrom: ["strategy", "trend", "business-plan"],
   outputRenderer: "document",
   grounding: { requireSources: false, webSearch: false, estimateBadge: true },
-  model: "gemini-3.8-flash",
-  estimatedCredits: 30,
-  estimatedSeconds: 40,
+  model: "gemini-3.1-pro-preview",
+  estimatedCredits: 60,
+  estimatedSeconds: 95,
 };

@@ -172,6 +172,8 @@ export const LABELS: Record<string, string> = {
   titles: "제목 후보",
   meta_description: "메타 설명",
   h2_outline: "소제목 구성",
+  cover_image_url: "표지 사진",
+  image_url: "사진",
   body_markdown: "본문",
   char_count: "글자 수",
   hashtags: "해시태그",
