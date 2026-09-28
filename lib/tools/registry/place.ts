@@ -31,7 +31,7 @@ export const place: ToolManifest<z.infer<typeof outputSchema>> = {
     { kind: "textarea", id: "current_info", label: "현재 플레이스 정보", rows: 3 },
     { kind: "chips", id: "competitors", label: "경쟁업체", max: 3 },
   ],
-  usesProfile: ["industry"],
+  usesProfile: ["brand_name", "industry", "region", "target_customer", "tone"],
   acceptsChainFrom: ["keyword"],
   outputSchema,
   outputRenderer: "document",

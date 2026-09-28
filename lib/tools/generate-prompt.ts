@@ -7,6 +7,7 @@
 // with tests rather than trusting manual spot-checks.
 
 import type { BusinessProfile, ToolManifest } from "./types";
+import { getPlaybook, HOUSE_RULES } from "./playbooks.ts";
 
 // Prompt-level enforcement for the hard guards documented in policy.ts —
 // that file's checks are the pre-flight/output-safety backstop; this is
@@ -91,11 +92,19 @@ export function buildContext(
   return lines.join("\n");
 }
 
-export function buildBaseInstruction(manifest: ToolManifest): string[] {
+export function buildBaseInstruction(manifest: ToolManifest, opts: { houseRules?: boolean } = {}): string[] {
+  const playbook = getPlaybook(manifest.id);
   const parts = [
-    `당신은 해봇 AI의 "${manifest.name_ko}" 도구입니다. ${manifest.summary}`,
+    playbook
+      ? `당신은 ${playbook.role}입니다. 지금 해봇 AI의 "${manifest.name_ko}" 도구로서 일합니다: ${manifest.summary}`
+      : `당신은 해봇 AI의 "${manifest.name_ko}" 도구입니다. ${manifest.summary}`,
     "이 사용자의 상황에 실제로 맞는 구체적인 내용을 만드세요. 누구에게나 해당하는 뻔하고 일반적인 결과는 피하세요.",
   ];
+  if (opts.houseRules !== false) parts.push("[작업 원칙]", ...HOUSE_RULES.map((r) => `- ${r}`));
+  if (playbook) {
+    parts.push("[작업 방식]", ...playbook.method.map((m, i) => `${i + 1}. ${m}`));
+    parts.push("[완성 기준]", ...playbook.bar.map((b) => `- ${b}`));
+  }
   const guard = GUARDS[manifest.id];
   if (guard) parts.push(guard);
   return parts;
@@ -114,10 +123,10 @@ export function buildSystemInstruction(manifest: ToolManifest): string {
 }
 
 export function buildImageSystemInstruction(manifest: ToolManifest): string {
-  const parts = buildBaseInstruction(manifest);
+  const parts = buildBaseInstruction(manifest, { houseRules: false });
   parts.push(
     "텍스트로 설명하지 말고, 요청받은 실제 이미지를 생성해서 응답에 포함하세요. 이미지 없이 설명만 반환하는 것은 실패입니다.",
-    "정확히 한 장의 완성된 사진만 생성하세요. 여러 컷을 하나의 이미지 안에 콜라주나 그리드로 합치거나, 번호나 라벨을 붙이거나, 분할 화면으로 만들지 마세요.",
+    "정확히 한 장의 완성된 이미지만 생성하세요. 여러 컷을 하나의 이미지 안에 콜라주나 그리드로 합치거나, 번호나 라벨을 붙이거나, 분할 화면으로 만들지 마세요.",
   );
   return parts.join("\n");
 }

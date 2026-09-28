@@ -61,7 +61,7 @@ export const blog: ToolManifest<z.infer<typeof outputSchema>> = {
     },
     { kind: "textarea", id: "must_include_facts", label: "포함할 사실", rows: 2 },
   ],
-  usesProfile: ["tone"],
+  usesProfile: ["brand_name", "industry", "region", "tone", "voice_examples", "target_customer"],
   acceptsChainFrom: ["keyword"],
   outputSchema,
   outputRenderer: "document",

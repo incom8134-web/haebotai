@@ -52,7 +52,7 @@ export const sangsepage: ToolManifest<z.infer<typeof outputSchema>> = {
     { kind: "image", id: "product_photos", label: "제품 사진", maxFiles: 5 },
     { kind: "text", id: "competitor", label: "경쟁 제품" },
   ],
-  usesProfile: [],
+  usesProfile: ["brand_name", "tone", "target_customer", "brand_colors"],
   acceptsChainFrom: ["keyword", "image"],
   outputSchema,
   outputRenderer: "document",

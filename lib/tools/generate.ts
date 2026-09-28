@@ -3,7 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { BusinessProfile, ToolManifest } from "./types";
 import type { Source } from "./registry/shared";
 import type { AiAdapter, ProviderId, TokenUsage } from "@/lib/ai/types";
-import { geminiAdapter, runWithApiKey as runWithGeminiKey } from "@/lib/ai/gemini";
+import { generateHeroImage, geminiAdapter, runWithApiKey as runWithGeminiKey } from "@/lib/ai/gemini";
 import { anthropicAdapter, runWithApiKey as runWithAnthropicKey } from "@/lib/ai/anthropic";
 import { renderSangsepage } from "./render/sangsepage";
 
@@ -57,7 +57,7 @@ export async function generateOutput(
   const adapter = ADAPTERS[provider];
   if (!adapter) throw new Error(`${provider} 엔진은 아직 지원하지 않습니다`);
 
-  if (manifest.id === "image" || manifest.id === "brand-model") {
+  if (manifest.id === "image" || manifest.id === "brand-model" || manifest.id === "logo") {
     return adapter.generateImages(manifest, input, profile, abortSignal, storage);
   }
 
@@ -76,5 +76,27 @@ export async function generateOutput(
     output = { ...(output as Record<string, unknown>), rendered_images: [rendered] };
   }
 
-  return { output, sources: result.sources, usage: result.usage };
+  let usage = result.usage;
+  // Real hero photo for the generated site. Gemini only — Claude has no
+  // image API, and a Claude run on the user's own key shouldn't spend the
+  // platform's image quota; those pages keep their CSS fallback colour.
+  if (manifest.id === "homepage") {
+    const page = output as { html: string; hero_image_prompt?: string };
+    let heroUrl = "";
+    if (provider === "google" && page.html.includes("{{HERO_IMAGE_URL}}") && page.hero_image_prompt) {
+      try {
+        const hero = await generateHeroImage(page.hero_image_prompt, abortSignal);
+        heroUrl = hero.dataUrl;
+        usage = {
+          inputTokens: (usage.inputTokens ?? 0) + (hero.usage.inputTokens ?? 0),
+          outputTokens: (usage.outputTokens ?? 0) + (hero.usage.outputTokens ?? 0),
+        };
+      } catch {
+        // A failed photo shouldn't fail a finished page.
+      }
+    }
+    output = { ...page, html: page.html.replaceAll("{{HERO_IMAGE_URL}}", heroUrl) };
+  }
+
+  return { output, sources: result.sources, usage };
 }
