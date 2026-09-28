@@ -34,7 +34,7 @@ export interface ExportDoc {
 }
 
 // Machine fields that mean nothing in a document.
-export const SKIP_KEYS = new Set(["asset_id", "seed", "zip_asset_id", "preview_url", "svg", "html", "negative_prompt", "refined_prompt", "data_source", "model_seed", "hero_image_prompt"]);
+export const SKIP_KEYS = new Set(["asset_id", "seed", "zip_asset_id", "preview_url", "svg", "html", "negative_prompt", "refined_prompt", "data_source", "model_seed", "hero_image_prompt", "accent_color", "design"]);
 // A string this short with no line break reads best as "label: value".
 const INLINE_MAX = 80;
 
