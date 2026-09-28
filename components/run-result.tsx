@@ -27,6 +27,9 @@ import { buildCalendarIcs, buildCalendarCsv, type CalendarWeek } from "@/lib/too
 import { StructuredResult } from "@/components/structured-result";
 import { SitePreview } from "@/components/results/site-preview";
 import { SlideDeck, type DeckOutput } from "@/components/results/slide-deck";
+import { BlogArticle, type BlogOutput } from "@/components/results/blog-article";
+import { AdCreatives, type CopyOutput } from "@/components/results/ad-creatives";
+import { MoodBoard } from "@/components/results/mood-board";
 import { useLocale, useT } from "@/lib/i18n/context";
 import type { Source } from "@/lib/tools/registry/shared";
 import type { ToolManifest } from "@/lib/tools/types";
@@ -294,6 +297,24 @@ function OutputPreview({ output }: { output: unknown }) {
 
   if (Array.isArray(o.slides) && (o.slides as { headline?: unknown }[]).some((sl) => typeof sl?.headline === "string")) {
     return <SlideDeck deck={o as unknown as DeckOutput} />;
+  }
+
+  if (typeof o.body_markdown === "string") {
+    return <BlogArticle post={o as BlogOutput} />;
+  }
+
+  if (Array.isArray(o.angles) && (o.angles as { headline?: unknown }[]).some((x) => typeof x?.headline === "string")) {
+    return <AdCreatives copy={o as CopyOutput} />;
+  }
+
+  if (Array.isArray(o.mood_board)) {
+    const { mood_board, ...rest } = o;
+    return (
+      <>
+        <MoodBoard images={mood_board as { url: string; caption?: string }[]} />
+        <StructuredResult output={rest} />
+      </>
+    );
   }
 
   const imageList = (o.rendered_images ?? o.images ?? o.shots) as unknown;

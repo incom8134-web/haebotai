@@ -65,7 +65,7 @@ export const prompt: ToolManifest = {
   acceptsChainFrom: [],
   outputRenderer: "code",
   grounding: { requireSources: false, webSearch: false, estimateBadge: false },
-  model: "gemini-3.8-flash",
-  estimatedCredits: 10,
-  estimatedSeconds: 15,
+  model: "gemini-3.1-pro-preview",
+  estimatedCredits: 15,
+  estimatedSeconds: 65,
 };

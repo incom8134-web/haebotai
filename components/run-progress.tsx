@@ -22,6 +22,27 @@ const RESEARCH_STEPS: Step[] = [
 ];
 
 const STEPS: Record<string, Step[]> = {
+  strategy: [
+    { ko: "시장·경쟁 리서치", en: "Market and competitor research" },
+    { ko: "고객 세그먼트와 핵심 긴장 찾기", en: "Segments and core tension" },
+    { ko: "포지셔닝·오퍼·실행 계획 작성", en: "Positioning, offers, plan" },
+    { ko: "편집자 검토", en: "Editor pass" },
+    { ko: "추천 방향 무드보드 촬영", en: "Shooting the mood board" },
+  ],
+  blog: [
+    { ko: "검색 의도와 상위 글 빈틈 조사", en: "Search intent and content gaps" },
+    { ko: "제목 후보와 구성 설계", en: "Titles and outline" },
+    { ko: "본문 작성과 편집자 검토", en: "Writing and editor pass" },
+    { ko: "표지·본문 사진 촬영", en: "Shooting cover and body photos" },
+    { ko: "글 완성", en: "Finishing the post" },
+  ],
+  copy: [
+    { ko: "경쟁 광고 문구 조사", en: "Studying competitor ads" },
+    { ko: "구매 동기별 광고 각도 설계", en: "Angles per buying motive" },
+    { ko: "헤드라인·본문·CTA 작성", en: "Headlines, body, CTAs" },
+    { ko: "각도별 광고 사진 촬영", en: "Shooting an ad visual per angle" },
+    { ko: "채널별 버전 정리", en: "Channel versions" },
+  ],
   homepage: [
     { ko: "브랜드 콘셉트·색·서체 기획", en: "Concept, palette and type" },
     { ko: "섹션 구성과 촬영 목록 작성", en: "Sections and shot list" },

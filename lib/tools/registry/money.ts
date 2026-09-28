@@ -41,7 +41,7 @@ export const money: ToolManifest = {
   acceptsChainFrom: [],
   outputRenderer: "cards",
   grounding: { requireSources: false, webSearch: true, estimateBadge: false },
-  model: "gemini-3.8-flash",
-  estimatedCredits: 15,
-  estimatedSeconds: 20,
+  model: "gemini-3.1-pro-preview",
+  estimatedCredits: 25,
+  estimatedSeconds: 95,
 };

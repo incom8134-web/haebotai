@@ -173,6 +173,8 @@ export const LABELS: Record<string, string> = {
   meta_description: "메타 설명",
   h2_outline: "소제목 구성",
   cover_image_url: "표지 사진",
+  mood_board: "무드보드",
+  caption: "설명",
   image_url: "사진",
   body_markdown: "본문",
   char_count: "글자 수",

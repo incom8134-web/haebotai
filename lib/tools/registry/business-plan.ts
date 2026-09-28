@@ -36,7 +36,7 @@ export const businessPlan: ToolManifest = {
   acceptsChainFrom: ["trend"],
   outputRenderer: "document",
   grounding: { requireSources: true, webSearch: true, estimateBadge: true },
-  model: "gemini-3.8-flash",
-  estimatedCredits: 60,
-  estimatedSeconds: 75,
+  model: "gemini-3.1-pro-preview",
+  estimatedCredits: 80,
+  estimatedSeconds: 115,
 };
