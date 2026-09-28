@@ -3,8 +3,9 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { BusinessProfile, ToolManifest } from "./types";
 import type { Source } from "./registry/shared";
 import type { AiAdapter, ProviderId, TokenUsage } from "@/lib/ai/types";
-import { generateHeroImage, generateProductPhotos, geminiAdapter, runWithApiKey as runWithGeminiKey } from "@/lib/ai/gemini";
-import { collectInputImages } from "./generate-prompt";
+import { generateProductPhotos, geminiAdapter, runWithApiKey as runWithGeminiKey } from "@/lib/ai/gemini";
+import { addPresentationVisuals, addToolVisuals, fillMissingImages, generateHomepage } from "@/lib/ai/gemini-studio";
+import { buildContext, collectInputImages } from "./generate-prompt";
 import { anthropicAdapter, runWithApiKey as runWithAnthropicKey } from "@/lib/ai/anthropic";
 import { renderSangsepage } from "./render/sangsepage";
 import { orderLike } from "./output-order";
@@ -63,6 +64,13 @@ export async function generateOutput(
   if (manifest.id === "image" || manifest.id === "brand-model" || manifest.id === "logo") {
     const images = await adapter.generateImages(manifest, input, profile, abortSignal, storage);
     return { ...images, output: orderLike(outputSchemaFor(manifest.id), images.output) };
+  }
+
+  // Homepage on Gemini is a full studio pipeline (art direction → Pro
+  // model page + Pro image model photos), not one structured call.
+  if (manifest.id === "homepage" && provider === "google") {
+    const site = await generateHomepage(manifest, input, profile, abortSignal, storage);
+    return { ...site, output: orderLike(outputSchemaFor(manifest.id), site.output) };
   }
 
   let result: { output: unknown; sources: Source[]; usage: TokenUsage } | undefined;
@@ -124,25 +132,37 @@ export async function generateOutput(
     inputTokens: (result.usage.inputTokens ?? 0) + (extraUsage.inputTokens ?? 0),
     outputTokens: (result.usage.outputTokens ?? 0) + (extraUsage.outputTokens ?? 0),
   };
-  // Real hero photo for the generated site. Gemini only — Claude has no
-  // image API, and a Claude run on the user's own key shouldn't spend the
-  // platform's image quota; those pages keep their CSS fallback colour.
+  // Homepage from another engine: no photos, so its image slots get a
+  // brand-colored gradient instead of broken images.
   if (manifest.id === "homepage") {
-    const page = output as { html: string; hero_image_prompt?: string };
-    let heroUrl = "";
-    if (provider === "google" && page.html.includes("{{HERO_IMAGE_URL}}") && page.hero_image_prompt) {
-      try {
-        const hero = await generateHeroImage(page.hero_image_prompt, abortSignal);
-        heroUrl = hero.dataUrl;
-        usage = {
-          inputTokens: (usage.inputTokens ?? 0) + (hero.usage.inputTokens ?? 0),
-          outputTokens: (usage.outputTokens ?? 0) + (hero.usage.outputTokens ?? 0),
-        };
-      } catch {
-        // A failed photo shouldn't fail a finished page.
-      }
-    }
-    output = { ...page, html: page.html.replaceAll("{{HERO_IMAGE_URL}}", heroUrl) };
+    const page = output as { html: string };
+    output = { ...page, html: fillMissingImages(page.html) };
+  }
+
+  // A written deck gets its cover and slide photos and a brand accent
+  // (Gemini only, like every other platform-paid image).
+  if (manifest.id === "presentation" && provider === "google") {
+    const visuals = await addPresentationVisuals(
+      output as Parameters<typeof addPresentationVisuals>[0],
+      buildContext(manifest, input, profile),
+      abortSignal,
+      storage,
+    );
+    output = visuals.output;
+    usage = {
+      inputTokens: (usage.inputTokens ?? 0) + (visuals.usage.inputTokens ?? 0),
+      outputTokens: (usage.outputTokens ?? 0) + (visuals.usage.outputTokens ?? 0),
+    };
+  }
+
+  // Blog photos, campaign ad visuals, strategy mood board (Gemini only).
+  if (provider === "google" && (manifest.id === "blog" || manifest.id === "copy" || manifest.id === "strategy")) {
+    const visuals = await addToolVisuals(manifest.id, output, buildContext(manifest, input, profile), abortSignal, storage);
+    output = visuals.output;
+    usage = {
+      inputTokens: (usage.inputTokens ?? 0) + (visuals.usage.inputTokens ?? 0),
+      outputTokens: (usage.outputTokens ?? 0) + (visuals.usage.outputTokens ?? 0),
+    };
   }
 
   return { output: orderLike(outputSchemaFor(manifest.id), output), sources: result.sources, usage };

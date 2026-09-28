@@ -52,7 +52,7 @@ export const blog: ToolManifest = {
   acceptsChainFrom: ["keyword"],
   outputRenderer: "document",
   grounding: { requireSources: true, webSearch: true, estimateBadge: true },
-  model: "gemini-3.8-flash",
-  estimatedCredits: 20,
-  estimatedSeconds: 30,
+  model: "gemini-3.1-pro-preview",
+  estimatedCredits: 40,
+  estimatedSeconds: 130,
 };

@@ -34,7 +34,7 @@ export interface ExportDoc {
 }
 
 // Machine fields that mean nothing in a document.
-export const SKIP_KEYS = new Set(["asset_id", "seed", "zip_asset_id", "preview_url", "svg", "html", "negative_prompt", "refined_prompt", "data_source", "model_seed", "hero_image_prompt"]);
+export const SKIP_KEYS = new Set(["asset_id", "seed", "zip_asset_id", "preview_url", "svg", "html", "negative_prompt", "refined_prompt", "data_source", "model_seed", "hero_image_prompt", "accent_color", "design"]);
 // A string this short with no line break reads best as "label: value".
 const INLINE_MAX = 80;
 
@@ -62,6 +62,13 @@ function walkField(key: string, value: unknown, level: 1 | 2 | 3, out: Block[], 
     return;
   }
   const label = humanize(key);
+
+  // A photo URL (cover_image_url, a slot's image_url) is a picture, not text.
+  const photo = typeof value === "string" ? imageUrl(value) : null;
+  if (photo) {
+    out.push({ type: "image", url: photo, caption: label });
+    return;
+  }
 
   const scalar = text(key, value);
   if (scalar !== null) {
@@ -122,7 +129,7 @@ function walkItem(obj: Record<string, unknown>, fallbackTitle: string, level: 2 
   const childLevel = 3 as const;
   for (const [k, v] of Object.entries(obj)) {
     if (k === titleKey) continue;
-    const url = k === "image" || k === "url" ? imageUrl(k === "url" ? obj : v) : null;
+    const url = k === "image" || k === "url" || k.endsWith("image_url") ? imageUrl(k === "url" ? obj : v) : null;
     if (url) {
       out.push({ type: "image", url, caption: titleKey ? String(obj[titleKey]) : fallbackTitle });
       continue;

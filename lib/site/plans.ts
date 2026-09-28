@@ -8,7 +8,7 @@ export const PLANS: { id: PlanId; name: Bilingual; price: Bilingual; note: Bilin
     name: { ko: "무료", en: "Free" },
     price: { ko: "₩0", en: "₩0" },
     note: { ko: "가입 즉시", en: "On sign-up" },
-    credits: { ko: "100 크레딧 (1회)", en: "100 credits (one-time)" },
+    credits: { ko: "500 크레딧 (1회)", en: "500 credits (one-time)" },
     features: [
       { ko: "18개 도구 모두 사용", en: "All 18 tools" },
       { ko: "비즈니스 프로필·보관함", en: "Business Profile and Library" },
