@@ -175,6 +175,33 @@ async function generateOneImage(
   };
 }
 
+// Product-page photos (hero + section shots). Failed shots come back as
+// null so the page still renders with whatever did succeed.
+export async function generateProductPhotos(
+  prompts: { prompt: string; ratio: AspectRatio }[],
+  references: ImagePart[],
+  abortSignal: AbortSignal | undefined,
+): Promise<{ photos: (string | null)[]; usage: TokenUsage }> {
+  const photoManifest = { id: "image", name_ko: "해봇 상세페이지", summary: "상세페이지 제품 사진", model: "gemini-3.1-flash-image" } as ToolManifest;
+  let usage: TokenUsage = { inputTokens: 0, outputTokens: 0 };
+  const photos = await Promise.all(
+    prompts.map(async ({ prompt, ratio }) => {
+      try {
+        const parts: ({ text: string } | { inlineData: ImagePart })[] = [
+          { text: `Commercial product photography for a Korean online-store detail page. ${prompt} Photorealistic, natural soft light, clean styling, appetizing and premium. No text, no logos, no watermark, and no lettering or writing on the product itself.${references.length ? " Keep the product exactly as in the attached reference photo." : ""}` },
+          ...references.map((img) => ({ inlineData: img })),
+        ];
+        const { image, usage: u } = await generateOneImage(photoManifest, parts, Math.floor(Math.random() * 2 ** 31), abortSignal, ratio);
+        usage = addUsage(usage, { promptTokenCount: u.inputTokens ?? 0, candidatesTokenCount: u.outputTokens ?? 0 });
+        return `data:${image.mimeType};base64,${image.data}`;
+      } catch {
+        return null;
+      }
+    }),
+  );
+  return { photos, usage };
+}
+
 // Homepage hero photo, embedded as a data URL so the downloaded HTML is
 // self-contained (no signed URL that expires). Called from generate.ts
 // after the page itself is written.
