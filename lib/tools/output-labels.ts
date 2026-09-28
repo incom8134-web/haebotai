@@ -237,14 +237,18 @@ export function isSourceArray(value: unknown): value is Source[] {
 }
 
 // A day/order + short-text pair (money's first_30_days, etc.) reads far
-// better as one line than as two stacked labeled blocks.
-export function asCompactPair(obj: Record<string, unknown>): { order: unknown; text: string } | null {
+// better as one line than as two stacked labeled blocks. Only an
+// ordering number counts — {item, amount_krw} is a price row, not a step.
+const ORDER_KEYS = new Set(["day", "order", "step", "week", "week_no", "no", "priority"]);
+
+export function asCompactPair(obj: Record<string, unknown>): { order: number; label: string; text: string } | null {
   const keys = Object.keys(obj);
   if (keys.length !== 2) return null;
-  const orderKey = keys.find((k) => typeof obj[k] === "number");
+  const orderKey = keys.find((k) => typeof obj[k] === "number" && ORDER_KEYS.has(k));
   const textKey = keys.find((k) => typeof obj[k] === "string");
-  if (!orderKey || !textKey || orderKey === textKey) return null;
-  return { order: obj[orderKey], text: obj[textKey] as string };
+  if (!orderKey || !textKey) return null;
+  const order = obj[orderKey] as number;
+  return { order, label: formatPrimitive(orderKey, order), text: obj[textKey] as string };
 }
 
 // The field that names a repeated item (a competitor, a phase, a

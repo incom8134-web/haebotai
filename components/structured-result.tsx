@@ -146,7 +146,7 @@ function StructuredField({
               const pair = asCompactPair(item)!;
               return (
                 <li key={i} className="flex gap-1.5 text-sm text-fg">
-                  <span className="shrink-0 font-mono text-fg-subtle">{formatPrimitive("day", pair.order as number)}</span>
+                  <span className="shrink-0 font-mono text-fg-subtle">{pair.label}</span>
                   {pair.text}
                 </li>
               );

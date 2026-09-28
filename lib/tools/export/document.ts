@@ -29,10 +29,12 @@ export interface ExportDoc {
   sources: Source[];
   /** Presentation tool only: its own slide list, used as-is for .pptx. */
   slides?: ExportSlide[];
+  /** The run's structured output, for writers that lay out tables and cards. */
+  output?: unknown;
 }
 
 // Machine fields that mean nothing in a document.
-const SKIP_KEYS = new Set(["asset_id", "seed", "zip_asset_id", "preview_url", "svg", "html", "negative_prompt", "refined_prompt", "data_source", "model_seed", "hero_image_prompt"]);
+export const SKIP_KEYS = new Set(["asset_id", "seed", "zip_asset_id", "preview_url", "svg", "html", "negative_prompt", "refined_prompt", "data_source", "model_seed", "hero_image_prompt"]);
 // A string this short with no line break reads best as "label: value".
 const INLINE_MAX = 80;
 
@@ -43,7 +45,7 @@ function text(key: string, value: unknown): string | null {
   return null;
 }
 
-function imageUrl(value: unknown): string | null {
+export function imageUrl(value: unknown): string | null {
   if (typeof value === "string" && /^https?:\/\//.test(value) && /\.(png|jpe?g|webp)(\?|$)/i.test(value)) return value;
   if (value && typeof value === "object" && typeof (value as { url?: unknown }).url === "string") {
     const url = (value as { url: string }).url;
@@ -91,7 +93,7 @@ function walkField(key: string, value: unknown, level: 1 | 2 | 3, out: Block[], 
         type: "bullets",
         items: objects.map((o) => {
           const pair = asCompactPair(o)!;
-          return `${formatPrimitive("day", pair.order as number)} ${pair.text}`;
+          return `${pair.label} ${pair.text}`;
         }),
       });
       return;
@@ -160,13 +162,13 @@ export function buildExportDoc(params: {
   let slides: ExportSlide[] | undefined;
   if (toolId === "presentation" && Array.isArray(o.slides)) {
     slides = (o.slides as Record<string, unknown>[]).map((s, i) => ({
-      title: typeof s.title === "string" ? s.title : `슬라이드 ${i + 1}`,
+      title: typeof s.headline === "string" ? s.headline : typeof s.title === "string" ? s.title : `슬라이드 ${i + 1}`,
       points: Array.isArray(s.points) ? s.points.map(String) : [],
       notes: typeof s.speaker_notes === "string" ? s.speaker_notes : undefined,
     }));
   }
 
-  return { title: toolName, subtitle, blocks, sources: allSources, slides };
+  return { title: toolName, subtitle, blocks, sources: allSources, slides, output };
 }
 
 /** Section = a level-1 heading and everything under it (for slides). */
