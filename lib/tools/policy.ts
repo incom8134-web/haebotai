@@ -73,6 +73,9 @@ export function checkOutputSafety(toolId: string, output: unknown): PolicyResult
     const typed = output as { concepts?: Record<string, unknown>[] };
     const concepts = typed.concepts ?? [];
     const cleaned: Record<string, unknown>[] = [];
+    // Only pre-image-model runs carry hand-written SVG; image concepts
+    // are PNGs from our own renderer and need no sanitizing.
+    if (!concepts.some((c) => typeof c.svg === "string")) return { ok: true };
     for (const concept of concepts) {
       const result = sanitizeSvg(String(concept.svg ?? ""));
       if (!result.ok) return { ok: false, reason: `로고 SVG 검증 실패: ${result.reason}` };

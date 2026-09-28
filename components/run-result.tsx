@@ -61,18 +61,17 @@ function DownloadLink({ label, onClick }: { label: string; onClick: () => void }
   );
 }
 
-// HAEBOT_A_TOOLS_SPEC.md §5.1 / §5.2 — proposal -> .docx, business-plan
-// -> .docx + .xlsx. Generated server-side (lib/tools/export/*.ts via
-// app/api/export/[runId]) since docx/exceljs are Node-oriented libraries
-// that don't belong in the client bundle — a plain link to that route is
-// enough, Content-Disposition handles the actual download.
-const SERVER_EXPORTS: Partial<Record<string, { format: "docx" | "xlsx"; label: string }[]>> = {
-  proposal: [{ format: "docx", label: "DOCX 다운로드" }],
-  "business-plan": [
-    { format: "docx", label: "DOCX 다운로드" },
-    { format: "xlsx", label: "재무 XLSX 다운로드" },
-  ],
-};
+// Every finished run downloads as PDF / Word / PowerPoint / Markdown,
+// generated server-side from the stored run (app/api/export/[runId],
+// lib/tools/export/*) — plain links, Content-Disposition does the rest.
+// business-plan adds its financial spreadsheet.
+const EXPORTS: { format: "pdf" | "docx" | "pptx" | "md" | "xlsx"; label: string; only?: string }[] = [
+  { format: "pdf", label: "PDF" },
+  { format: "docx", label: "Word" },
+  { format: "pptx", label: "PowerPoint" },
+  { format: "md", label: "Markdown" },
+  { format: "xlsx", label: "재무 Excel", only: "business-plan" },
+];
 
 // HAEBOT_A_TOOLS_SPEC.md §3.1 — "no per-tool bespoke code except the
 // renderer for unusual output types." Dumping a multi-KB base64 image or
@@ -80,6 +79,16 @@ const SERVER_EXPORTS: Partial<Record<string, { format: "docx" | "xlsx"; label: s
 // renders the few output shapes that need it specially — and gives each
 // a real download, not just an on-screen preview. Everything else still
 // falls through to the plain JSON dump below it.
+interface LogoConcept {
+  name: string;
+  concept_rationale: string;
+  usage_notes?: string;
+  color_spec?: { hex: string[] };
+  type_spec?: { family: string; weight: string };
+  image: { url: string };
+  symbol_image?: { url: string };
+}
+
 function OutputPreview({ output, input }: { output: unknown; input?: Record<string, unknown> }) {
   const o = output as Record<string, unknown>;
 
@@ -122,6 +131,41 @@ function OutputPreview({ output, input }: { output: unknown; input?: Record<stri
         </div>
       );
     }
+  }
+
+  // Image-model logo concepts: lockup (symbol + typeset name) and the
+  // bare symbol, with the reasoning and specs a designer would hand over.
+  if (Array.isArray(o.concepts) && (o.concepts as { image?: { url?: string } }[])[0]?.image?.url) {
+    const concepts = o.concepts as LogoConcept[];
+    return (
+      <div className="mt-2 grid gap-3 md:grid-cols-2">
+        {concepts.map((c, i) => (
+          <article key={i} className="flex flex-col gap-2 rounded-2xl border border-hairline p-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={c.image.url} alt={c.name} className="w-full rounded-xl border border-hairline bg-white" />
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-sm font-semibold">{c.name}</p>
+              <span className="flex gap-1">
+                {(c.color_spec?.hex ?? []).map((hex) => (
+                  <span key={hex} title={hex} className="size-4 rounded-full border border-hairline" style={{ backgroundColor: hex }} />
+                ))}
+              </span>
+            </div>
+            <p className="text-sm leading-relaxed text-fg-muted">{c.concept_rationale}</p>
+            {c.usage_notes ? <p className="text-xs leading-relaxed text-fg-subtle">{c.usage_notes}</p> : null}
+            <p className="font-mono text-2xs text-fg-subtle">
+              {(c.color_spec?.hex ?? []).join(" · ")} · {c.type_spec?.family} {c.type_spec?.weight}
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <DownloadLink label="로고 PNG" onClick={() => downloadFromUrl(`logo-${i + 1}.png`, c.image.url)} />
+              {c.symbol_image?.url ? (
+                <DownloadLink label="심볼만" onClick={() => downloadFromUrl(`logo-${i + 1}-symbol.${guessImageExt(c.symbol_image!.url)}`, c.symbol_image!.url)} />
+              ) : null}
+            </div>
+          </article>
+        ))}
+      </div>
+    );
   }
 
   if (Array.isArray(o.concepts)) {
@@ -223,20 +267,19 @@ function RunResult({
 
       <OutputPreview output={output} input={input} />
 
-      {SERVER_EXPORTS[manifest.id] ? (
-        <div className="mt-2 flex flex-wrap gap-3">
-          {SERVER_EXPORTS[manifest.id]!.map((e) => (
-            <a
-              key={e.format}
-              href={`/api/export/${runId}?format=${e.format}`}
-              className="inline-flex items-center gap-1 text-xs text-accent hover:underline"
-            >
-              <Download className="size-3" aria-hidden />
-              {e.label}
-            </a>
-          ))}
-        </div>
-      ) : null}
+      <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-hairline pt-3">
+        <span className="text-2xs text-fg-subtle">{locale === "en" ? "Download" : "다운로드"}</span>
+        {EXPORTS.filter((e) => !e.only || e.only === manifest.id).map((e) => (
+          <a
+            key={e.format}
+            href={`/api/export/${runId}?format=${e.format}`}
+            className="inline-flex items-center gap-1 rounded-full border border-hairline px-2.5 py-1 text-xs text-fg-muted transition-colors hover:border-studio-cyan/50 hover:text-fg"
+          >
+            <Download className="size-3" aria-hidden />
+            {e.label}
+          </a>
+        ))}
+      </div>
 
       <Collapsible className="mt-4 border-t border-hairline pt-3">
         <CollapsibleTrigger className="group/collapsible flex cursor-pointer items-center gap-1 font-mono text-2xs text-fg-subtle select-none">

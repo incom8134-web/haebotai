@@ -2,22 +2,37 @@ import type { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { buildProposalDocx, buildBusinessPlanDocx } from "@/lib/tools/export/docx";
 import { buildBusinessPlanXlsx } from "@/lib/tools/export/xlsx";
+import { buildExportDoc } from "@/lib/tools/export/document";
+import { buildGenericDocx } from "@/lib/tools/export/generic-docx";
+import { buildMarkdown } from "@/lib/tools/export/markdown";
+import { buildPdf } from "@/lib/tools/export/pdf";
+import { buildPptx } from "@/lib/tools/export/pptx";
+import { getTool } from "@/lib/tools/registry";
+import { getBusinessProfile } from "@/lib/profile";
+import type { Source } from "@/lib/tools/registry/shared";
 import { exportLimiter, checkRateLimit } from "@/lib/rate-limit";
 
-// HAEBOT_A_TOOLS_SPEC.md §5.1 / §5.2 — proposal -> .docx, business-plan
-// -> .docx + .xlsx. Generated server-side (docx/exceljs stay out of the
+// Every finished run exports to .md / .docx / .pdf / .pptx through one
+// document model (lib/tools/export/document.ts); proposal and
+// business-plan keep their bespoke .docx layouts, and business-plan adds
+// the financial .xlsx (HAEBOT_A_TOOLS_SPEC.md §5.1 / §5.2). Generated server-side (docx/exceljs stay out of the
 // client bundle) from the already-persisted run row, keyed by runId so
 // this works identically for a just-finished run and one from history.
 
 const CONTENT_TYPES = {
   docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  pdf: "application/pdf",
+  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  md: "text/markdown; charset=utf-8",
 } as const;
+type Format = keyof typeof CONTENT_TYPES;
+const isFormat = (f: string | null): f is Format => f !== null && f in CONTENT_TYPES;
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ runId: string }> }) {
   const { runId } = await params;
   const format = new URL(request.url).searchParams.get("format");
-  if (format !== "docx" && format !== "xlsx") {
+  if (!isFormat(format)) {
     return Response.json({ error: "지원하지 않는 내보내기 형식입니다" }, { status: 400 });
   }
 
@@ -37,7 +52,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
   const { data: run } = await supabase
     .from("generations")
-    .select("tool_id, input, output, status")
+    .select("tool_id, input, output, status, sources, created_at")
     .eq("id", runId)
     .eq("user_id", user.id)
     .maybeSingle();
@@ -46,26 +61,42 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return Response.json({ error: "결과를 찾을 수 없습니다" }, { status: 404 });
   }
 
-  let buffer: Buffer;
-  let filename: string;
+  const manifest = getTool(run.tool_id);
+  const toolName = manifest?.name_ko ?? run.tool_id;
+  const date = new Date(run.created_at ?? Date.now()).toISOString().slice(0, 10);
+  const filename = `${toolName}-${date}.${format}`;
 
+  let buffer: Buffer;
   if (run.tool_id === "proposal" && format === "docx") {
     buffer = await buildProposalDocx(run.output);
-    filename = "proposal.docx";
   } else if (run.tool_id === "business-plan" && format === "docx") {
     buffer = await buildBusinessPlanDocx(run.output);
-    filename = "business-plan.docx";
-  } else if (run.tool_id === "business-plan" && format === "xlsx") {
+  } else if (format === "xlsx") {
+    if (run.tool_id !== "business-plan") return Response.json({ error: "이 도구는 해당 형식으로 내보낼 수 없습니다" }, { status: 400 });
     buffer = await buildBusinessPlanXlsx(run.output, run.input ?? {});
-    filename = "business-plan.xlsx";
   } else {
-    return Response.json({ error: "이 도구는 해당 형식으로 내보낼 수 없습니다" }, { status: 400 });
+    const profile = await getBusinessProfile();
+    const doc = buildExportDoc({
+      toolName,
+      toolId: run.tool_id,
+      output: run.output,
+      sources: (run.sources as Source[] | null) ?? [],
+      brandName: profile?.brand_name ?? null,
+      createdAt: run.created_at,
+    });
+    buffer =
+      format === "md" ? Buffer.from(buildMarkdown(doc), "utf8")
+      : format === "pdf" ? await buildPdf(doc)
+      : format === "pptx" ? await buildPptx(doc)
+      : await buildGenericDocx(doc);
   }
 
   return new Response(new Uint8Array(buffer), {
     headers: {
       "Content-Type": CONTENT_TYPES[format],
-      "Content-Disposition": `attachment; filename="${filename}"`,
+      // RFC 5987: the Korean tool name needs the UTF-8 form; the plain
+      // `filename` is an ASCII fallback for old clients.
+      "Content-Disposition": `attachment; filename="haebot-${run.tool_id}-${date}.${format}"; filename*=UTF-8''${encodeURIComponent(filename)}`,
     },
   });
 }

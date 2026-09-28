@@ -7,7 +7,7 @@ import { PROVIDER_CAPS, TOOL_CAPABILITIES } from "./capabilities.ts";
 // experience.test.ts) so this runs without the app's module graph
 // (lucide, zod path aliases) — plain `node --test` can't resolve those.
 const dir = new URL("../tools/registry/", import.meta.url);
-const IMAGE_TOOLS = new Set(["image", "brand-model"]);
+const IMAGE_TOOLS = new Set(["image", "brand-model", "logo"]);
 
 interface ManifestFacts {
   id: string;

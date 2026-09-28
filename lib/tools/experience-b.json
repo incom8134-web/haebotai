@@ -31,7 +31,7 @@
   },
   "logo": {
     "layout": "canvas", "visual": "logo",
-    "hero": { "title": { "ko": "이름에 얼굴을 입히는 일", "en": "Giving your name a face" }, "story": { "ko": "브랜드명과 떠오르는 단어 세 개면 충분합니다. 여섯 가지 시안을 확대해도 깨지지 않는 벡터로 만들어 드려요.", "en": "A name and three words is enough. Six concepts, as vectors that stay sharp at any size." } },
+    "hero": { "title": { "ko": "이름에 얼굴을 입히는 일", "en": "Giving your name a face" }, "story": { "ko": "브랜드명과 떠오르는 단어 세 개면 충분합니다. 서로 다른 방향의 로고 시안 네 가지를 디자인해 드려요.", "en": "A name and three words is enough. Four logo concepts in clearly different directions." } },
     "sections": [
       { "title": { "ko": "이름과 느낌", "en": "Name and feeling" }, "hint": { "ko": "추상어 하나, 구체어 하나를 섞으면 좋아요", "en": "Mix an abstract word with a concrete one" }, "fields": ["brand_name", "keywords"] },
       { "title": { "ko": "형태", "en": "Form" }, "hint": { "ko": "어디에 쓰일지 생각해 보세요 — 간판, 앱 아이콘, 도장", "en": "Think where it lives — sign, app icon, stamp" }, "fields": ["style"] },
@@ -43,7 +43,7 @@
       "style": { "display": "cards", "options": { "wordmark": { "icon": "type", "desc": { "ko": "글자만으로", "en": "Letters only" } }, "symbol_wordmark": { "icon": "shapes", "desc": { "ko": "심볼 + 글자", "en": "Symbol + name" } }, "initial": { "icon": "square-dashed", "desc": { "ko": "첫 글자 모노그램", "en": "Monogram" } }, "emblem": { "icon": "badge", "desc": { "ko": "원형·배지형", "en": "Seal or badge" } } } },
       "color_tendency": { "display": "swatches" }
     },
-    "stage": { "headline": { "ko": "여섯 개의 얼굴", "en": "Six faces" }, "story": { "ko": "각 시안의 아이디어와 쓰임새를 함께 설명합니다. 스크립트 같은 위험 요소는 걸러낸 안전한 SVG예요.", "en": "Each concept comes with its idea and use. Sanitized SVG, scripts stripped." }, "promises": [ { "icon": "shapes", "text": { "ko": "시안 6개", "en": "6 concepts" } }, { "icon": "vector-square", "text": { "ko": "SVG 벡터", "en": "SVG vectors" } }, { "icon": "shield-check", "text": { "ko": "안전 검증", "en": "Sanitized" } } ] }
+    "stage": { "headline": { "ko": "네 가지 방향", "en": "Four directions" }, "story": { "ko": "각 시안의 아이디어, 색상, 서체와 쓰임새를 함께 설명합니다. 브랜드명은 정확한 한글 서체로 조판해요.", "en": "Each concept comes with its idea, colors, type and use. The brand name is typeset in a real Korean font." }, "promises": [ { "icon": "shapes", "text": { "ko": "시안 4개", "en": "6 concepts" } }, { "icon": "vector-square", "text": { "ko": "로고 + 심볼 PNG", "en": "Logo + symbol PNG" } }, { "icon": "shield-check", "text": { "ko": "안전 검증", "en": "Sanitized" } } ] }
   },
   "brand-model": {
     "layout": "canvas", "visual": "model",

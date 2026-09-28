@@ -1048,23 +1048,23 @@
   },
   "logo": {
     "tagline": {
-      "ko": "브랜드명과 연상어로 SVG 로고 6종",
-      "en": "Six SVG logos from a name and three words"
+      "ko": "브랜드명과 연상어로 로고 콘셉트 4종",
+      "en": "Four logo concepts from a name and three words"
     },
     "description": {
-      "ko": "워드마크, 심볼+워드마크, 이니셜, 엠블럼 스타일로 벡터(SVG) 로고 6종을 만듭니다. 결과는 검증된 안전한 SVG라서 바로 확대·편집할 수 있습니다.",
-      "en": "Creates six vector (SVG) logos in wordmark, symbol, initial or emblem styles. Output is validated, sanitized SVG — scale and edit freely."
+      "ko": "아트 디렉터처럼 서로 다른 방향 4가지를 기획하고, 각 콘셉트의 심볼을 이미지 모델로 그린 뒤 브랜드명을 정확한 한글 서체로 조판해 로고로 완성합니다. 콘셉트 설명, 색상 HEX, 서체, 사용 팁을 함께 드립니다.",
+      "en": "Plans four distinct directions like an art director, draws each symbol with the image model, and typesets the brand name in a real Korean font. Comes with the idea, HEX colors, type and usage tips for each."
     },
     "features": [
       {
         "icon": "shapes",
         "title": {
-          "ko": "진짜 벡터",
-          "en": "Real vectors"
+          "ko": "한글 이름은 정확하게",
+          "en": "Korean names spelled right"
         },
         "body": {
-          "ko": "이미지가 아닌 SVG 코드라 어떤 크기로도 깨지지 않습니다.",
-          "en": "SVG code, not pixels — crisp at any size."
+          "ko": "브랜드명은 AI가 그리지 않고 Pretendard 서체로 조판해 오타가 없습니다.",
+          "en": "The name is typeset in Pretendard, never drawn by AI — no typos."
         }
       },
       {
@@ -1162,8 +1162,8 @@
         "en": "Pick a style and color direction."
       },
       {
-        "ko": "마음에 드는 시안을 SVG로 내려받습니다.",
-        "en": "Download your favorite as SVG."
+        "ko": "마음에 드는 시안을 로고 PNG와 심볼 PNG로 내려받습니다.",
+        "en": "Download your favorite as a logo PNG and a symbol PNG."
       }
     ],
     "tips": [
@@ -1185,8 +1185,8 @@
       }
     ],
     "sample": {
-      "ko": "6개 시안 · SVG · 엠블럼\n시안 3: 밀 이삭을 두른 원형 엠블럼, 크림/브라운 2색",
-      "en": "6 concepts · SVG · Emblem\nConcept 3: round emblem wrapped in wheat, cream and brown"
+      "ko": "4개 콘셉트 · 로고 PNG + 심볼 PNG\n시안 2: 초승달이 딸기를 감싼 심볼 + ‘달빛 딸기공방’ 엑스트라볼드, #E84A5F / #3B2A26",
+      "en": "4 concepts · logo PNG + symbol PNG\nConcept 2: a crescent moon cradling a strawberry + the name in ExtraBold, #E84A5F / #3B2A26"
     }
   },
   "brand-model": {
@@ -1954,12 +1954,12 @@
   },
   "strategy": {
     "tagline": {
-      "ko": "사업 맥락을 포지셔닝과 캠페인 방향으로",
-      "en": "From business context to positioning and campaign routes"
+      "ko": "시장 분석부터 90일 실행 계획까지",
+      "en": "From market read to a 90-day plan"
     },
     "description": {
-      "ko": "제품과 시장 설명을 넣으면 대상 고객, 경쟁 구도, 핵심 긴장, 약속, 믿을 이유를 정리하고 캠페인 방향 3가지 중 하나를 추천합니다. 경쟁 관련 주장은 웹 검색 출처와 함께 씁니다.",
-      "en": "Describe your product and market to get audience, competitive frame, core tension, promise and reasons to believe — plus three campaign routes with a recommendation. Competitive claims come with web sources."
+      "ko": "제품과 시장 설명을 넣으면 시장 인사이트, 고객 세그먼트, 경쟁사별 약점과 우리가 이길 틈, 포지셔닝, 상품·가격 제안, 캠페인 방향 3가지, 30/60/90일 실행 계획과 성과 지표를 만듭니다. 시장·경쟁 관련 주장은 웹 검색 출처와 함께 씁니다.",
+      "en": "Describe your product and market to get market insights, customer segments, each competitor's weak spot and your opening, positioning, offer and pricing ideas, three campaign routes, a 30/60/90-day plan and KPIs. Market and competitor claims come with web sources."
     },
     "features": [
       {
@@ -1976,12 +1976,12 @@
       {
         "icon": "layers",
         "title": {
-          "ko": "방향 3가지 + 추천",
-          "en": "Three routes, one pick"
+          "ko": "바로 실행하는 계획",
+          "en": "A plan you can start today"
         },
         "body": {
-          "ko": "넓게 펼친 뒤 하나를 골라 이유를 설명합니다.",
-          "en": "Explores widely, then recommends one and says why."
+          "ko": "상품·가격 제안과 기간별 할 일, 목표 숫자까지 씁니다.",
+          "en": "Offers, pricing, dated tasks and target numbers."
         }
       },
       {
@@ -2063,8 +2063,8 @@
       }
     ],
     "sample": {
-      "ko": "핵심 긴장: 빵은 사고 싶지만 아침엔 시간이 없다\n약속: 7시, 문 열자마자 따뜻한 빵\n추천 방향 — '출근길 7분': 매장 픽업 예약 + 커피 세트",
-      "en": "Core tension: people want fresh bread but mornings are rushed\nPromise: warm bread the moment we open at 7\nRecommended route — \"The 7-minute commute\": pre-order pickup + coffee set"
+      "ko": "포지셔닝: 아침 시간이 없는 성수동 직장인에게, 편의점 빵 대신 7시 갓 구운 빵을 7분 만에 건네는 동네 베이커리\n경쟁 지도 — 프랜차이즈 카페: 빠르지만 빵이 전날 것 → 우리가 이길 틈: '오늘 아침 구운 빵'\n오퍼: 출근길 픽업 세트(빵+커피) 6,500원\n0~30일: 네이버 예약 픽업 오픈, 릴스 3편 촬영 · KPI: 평일 7~9시 픽업 하루 40건",
+      "en": "Positioning: for Seongsu commuters with no time in the morning, the neighborhood bakery that hands over bread baked at 7 in seven minutes — instead of convenience-store bread\nCompetitor map — franchise café: fast but yesterday's bread → our opening: \"baked this morning\"\nOffer: commute pickup set (bread + coffee) ₩6,500\nDays 0–30: open Naver pre-order pickup, shoot 3 reels · KPI: 40 weekday 7–9am pickups a day"
     }
   },
   "copy": {

@@ -7,9 +7,14 @@ import type { ToolManifest } from "../types";
 // GUARD (T7 prompt): no fabricated business facts — every phone number,
 // address, price, or testimonial slot renders as [입력 필요], never invented.
 
+// `hero_image_prompt` feeds a real hero photo from the image model,
+// embedded into the HTML in place of {{HERO_IMAGE_URL}} (generate.ts),
+// so the downloaded file is self-contained. preview_url/zip_asset_id are
+// kept for older runs; the model leaves them empty.
 const outputSchema = z.object({
   html: z.string(),
   sections: z.array(z.string()),
+  hero_image_prompt: z.string(),
   preview_url: z.string(),
   zip_asset_id: z.string(),
 });
@@ -51,12 +56,12 @@ export const homepage: ToolManifest<z.infer<typeof outputSchema>> = {
     },
     { kind: "url", id: "reference_site", label: "참고 사이트" },
   ],
-  usesProfile: ["industry", "brand_name", "brand_colors"],
+  usesProfile: ["industry", "brand_name", "brand_colors", "tone", "voice_examples", "target_customer", "region"],
   acceptsChainFrom: [],
   outputSchema,
   outputRenderer: "code",
   grounding: { requireSources: false, webSearch: false, estimateBadge: false },
   model: "gemini-3.6-flash",
-  estimatedCredits: 40,
-  estimatedSeconds: 45,
+  estimatedCredits: 50,
+  estimatedSeconds: 70,
 };

@@ -13,6 +13,7 @@ import {
 } from "@/lib/tools/generate-prompt";
 import { classifyGeminiError } from "./provider-errors";
 import { zodToJsonSchema } from "./schema";
+import { renderLogoLockup, type LogoTracking, type LogoWeight } from "@/lib/tools/render/logo";
 import type { AiAdapter, AiStreamEvent, GenerationResult, ImageStorageContext, TokenUsage } from "./types";
 
 // Moved from lib/tools/generate.ts verbatim (rotation, search grounding,
@@ -145,12 +146,13 @@ async function generateOneImage(
   parts: ({ text: string } | { inlineData: ImagePart })[],
   seed: number,
   abortSignal: AbortSignal | undefined,
+  aspectRatio?: "1:1" | "16:9",
 ): Promise<{ image: ImagePart; usage: TokenUsage }> {
   const ai = getClient();
   const res = await ai.models.generateContent({
     model: manifest.model,
     contents: [{ role: "user", parts }],
-    config: { systemInstruction: buildImageSystemInstruction(manifest), seed, abortSignal },
+    config: { systemInstruction: buildImageSystemInstruction(manifest), seed, abortSignal, ...(aspectRatio ? { imageConfig: { aspectRatio } } : {}) },
   });
 
   const imagePart = (res.candidates?.[0]?.content?.parts ?? []).find((p) => p.inlineData?.data);
@@ -166,6 +168,145 @@ async function generateOneImage(
   };
 }
 
+// Homepage hero photo, embedded as a data URL so the downloaded HTML is
+// self-contained (no signed URL that expires). Called from generate.ts
+// after the page itself is written.
+export async function generateHeroImage(prompt: string, abortSignal: AbortSignal | undefined): Promise<{ dataUrl: string; usage: TokenUsage }> {
+  const heroManifest = { id: "image", name_ko: "해봇 홈페이지", summary: "홈페이지 히어로 사진", model: "gemini-3.1-flash-image" } as ToolManifest;
+  const { image, usage } = await generateOneImage(
+    heroManifest,
+    [{ text: `Website hero photograph, wide banner composition with calm negative space on one side for a headline. ${prompt} Photorealistic, natural light, high detail. No text, no logos, no watermark.` }],
+    Math.floor(Math.random() * 2 ** 31),
+    abortSignal,
+    "16:9",
+  );
+  return { dataUrl: `data:${image.mimeType};base64,${image.data}`, usage };
+}
+
+const LOGO_PLAN_SCHEMA = {
+  type: "object",
+  properties: {
+    concepts: {
+      type: "array",
+      minItems: 4,
+      maxItems: 4,
+      items: {
+        type: "object",
+        properties: {
+          name: { type: "string", description: "콘셉트 이름 (예: 달빛 한 조각)" },
+          concept_rationale: { type: "string", description: "이 로고가 브랜드의 무엇을, 왜 이렇게 표현하는지 3~4문장" },
+          symbol: { type: "string", description: "심볼의 형태를 한국어로 구체적으로 설명" },
+          image_prompt: {
+            type: "string",
+            description:
+              "Image-model prompt in English describing ONLY the symbol mark: subject, shapes, composition, style, colors. Never ask for any text, letters or words, except a single Latin initial when the style is an initial monogram.",
+          },
+          color_hex: { type: "array", items: { type: "string" }, minItems: 2, maxItems: 3 },
+          font_weight: { type: "string", enum: ["regular", "bold", "extrabold", "black"] },
+          letter_spacing: { type: "string", enum: ["tight", "normal", "wide"] },
+          usage_notes: { type: "string", description: "간판, 포장, SNS 프로필 등 실제 사용 시 주의점과 팁" },
+        },
+        required: ["name", "concept_rationale", "symbol", "image_prompt", "color_hex", "font_weight", "letter_spacing", "usage_notes"],
+      },
+    },
+  },
+  required: ["concepts"],
+} as const;
+
+interface LogoPlan {
+  name: string;
+  concept_rationale: string;
+  symbol: string;
+  image_prompt: string;
+  color_hex: string[];
+  font_weight: LogoWeight;
+  letter_spacing: LogoTracking;
+  usage_notes: string;
+}
+
+// Plan four distinct directions with the text model, draw each symbol
+// with the image model, typeset the name beside it (render/logo.ts).
+async function generateLogo(
+  manifest: ToolManifest,
+  input: Record<string, unknown>,
+  profile: BusinessProfile | null,
+  abortSignal: AbortSignal | undefined,
+  storage: ImageStorageContext,
+): Promise<GenerationResult> {
+  const ai = getClient();
+  const brandName = String(input.brand_name ?? profile?.brand_name ?? "").trim();
+  if (!brandName) throw new Error("브랜드명을 입력해주세요");
+  const contextText = buildContext(manifest, input, profile);
+
+  const planRes = await ai.models.generateContent({
+    model: "gemini-3.6-flash",
+    contents: `다음 브랜드의 로고 콘셉트 4가지를 기획하세요. 네 가지는 조형 방식이 서로 확실히 달라야 합니다(예: 구상 심볼, 기하학 추상 마크, 엠블럼/배지, 이니셜 모노그램 — 선택한 스타일을 중심으로 변주). 브랜드명 글자는 서버가 따로 조판하므로, 심볼 이미지에는 글자를 넣지 않습니다.\n\n${contextText}`,
+    config: {
+      systemInstruction: buildSystemInstruction(manifest),
+      responseMimeType: "application/json",
+      responseJsonSchema: LOGO_PLAN_SCHEMA,
+      abortSignal,
+    },
+  });
+  let usage = addUsage({ inputTokens: 0, outputTokens: 0 }, planRes.usageMetadata);
+  let plans: LogoPlan[];
+  try {
+    plans = (JSON.parse(planRes.text ?? "") as { concepts: LogoPlan[] }).concepts.slice(0, 4);
+  } catch {
+    throw new Error("로고 콘셉트를 만들지 못했습니다");
+  }
+  if (plans.length < 4) throw new Error("로고 콘셉트를 만들지 못했습니다");
+
+  const upload = async (path: string, bytes: Buffer, contentType = "image/png") => {
+    const { error } = await storage.supabase.storage.from("exports").upload(path, bytes, { contentType, upsert: true });
+    if (error) throw new Error(`이미지 저장 실패: ${error.message}`);
+    const { data: signed, error: signError } = await storage.supabase.storage.from("exports").createSignedUrl(path, 60 * 60 * 24 * 365);
+    if (signError || !signed) throw new Error(`이미지 URL 생성 실패: ${signError?.message ?? "알 수 없는 오류"}`);
+    return { url: signed.signedUrl, asset_id: path };
+  };
+
+  const concepts = await Promise.all(
+    plans.map(async (plan, i) => {
+      const colors = plan.color_hex.filter((c) => /^#[0-9a-f]{6}$/i.test(c));
+      const prompt = [
+        `Professional brand logo symbol for "${brandName}" (${String(profile?.industry ?? "")}).`,
+        plan.image_prompt,
+        `Flat vector logo mark, bold simple shapes, crisp edges, ${colors.length ? `solid colors ${colors.join(", ")}` : "2-3 solid colors"}, centered on a pure white background with generous padding.`,
+        "Must read clearly at 32px as an app icon. The mark fills about 70% of the square canvas. No faces or eyes on objects unless the concept is a mascot. No text, no words, no letters (except a single Latin initial if the concept is a monogram), no mockup, no photo, no 3D render, no drop shadow, no gradient background, no border frame.",
+      ].join(" ");
+      const seed = Math.floor(Math.random() * 2 ** 31);
+      // Square, so the mark fills the lockup instead of floating in a 16:9 frame.
+      const { image, usage: shotUsage } = await generateOneImage(manifest, [{ text: prompt }], seed, abortSignal, "1:1");
+      usage = addUsage(usage, { promptTokenCount: shotUsage.inputTokens ?? 0, candidatesTokenCount: shotUsage.outputTokens ?? 0 });
+
+      const lockup = await renderLogoLockup({
+        symbol: image,
+        brandName,
+        color: colors[0] ?? "#16181A",
+        weight: plan.font_weight,
+        tracking: plan.letter_spacing,
+      });
+      const base = `${storage.userId}/${manifest.id}/${storage.runId}/${i}`;
+      const [lockupRef, symbolRef] = await Promise.all([
+        upload(`${base}-lockup.png`, lockup),
+        upload(`${base}-symbol.${image.mimeType.includes("png") ? "png" : "jpg"}`, Buffer.from(image.data, "base64"), image.mimeType),
+      ]);
+      return {
+        name: plan.name,
+        concept_rationale: plan.concept_rationale,
+        symbol: plan.symbol,
+        color_spec: { hex: colors },
+        type_spec: { family: "Pretendard", weight: plan.font_weight, tracking: plan.letter_spacing },
+        usage_notes: plan.usage_notes,
+        image: lockupRef,
+        symbol_image: symbolRef,
+      };
+    }),
+  );
+
+  return { output: { concepts, mockups: [] }, sources: [], usage };
+}
+
 async function generateImages(
   manifest: ToolManifest,
   input: Record<string, unknown>,
@@ -173,6 +314,8 @@ async function generateImages(
   abortSignal: AbortSignal | undefined,
   storage: ImageStorageContext,
 ): Promise<GenerationResult> {
+  if (manifest.id === "logo") return generateLogo(manifest, input, profile, abortSignal, storage);
+
   let usage: TokenUsage = { inputTokens: 0, outputTokens: 0 };
   const inputImages = collectInputImages(manifest, input);
   if (manifest.id === "brand-model") {
@@ -277,6 +420,9 @@ async function* generateStructured(
       systemInstruction: buildSystemInstruction(manifest),
       responseMimeType: "application/json",
       responseJsonSchema: jsonSchema,
+      // Long documents (a full homepage, a 90-day strategy) must not be
+      // cut off mid-JSON; the model stops well before this when done.
+      maxOutputTokens: 32_768,
       abortSignal,
     },
   });
