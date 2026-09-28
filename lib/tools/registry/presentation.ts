@@ -68,7 +68,7 @@ export const presentation: ToolManifest<z.infer<typeof outputSchema>> = {
   outputSchema,
   outputRenderer: "document",
   grounding: { requireSources: false, webSearch: false, estimateBadge: true },
-  model: "gemini-3.6-flash",
+  model: "gemini-3.8-flash",
   estimatedCredits: 30,
   estimatedSeconds: 40,
 };

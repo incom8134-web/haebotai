@@ -35,8 +35,8 @@ export const proposal: ToolManifest<z.infer<typeof outputSchema>> = {
   acceptsChainFrom: [],
   outputSchema,
   outputRenderer: "document",
-  grounding: { requireSources: false, webSearch: false, estimateBadge: false },
-  model: "gemini-3.6-flash",
+  grounding: { requireSources: false, webSearch: true, estimateBadge: false },
+  model: "gemini-3.8-flash",
   estimatedCredits: 30,
   estimatedSeconds: 40,
 };

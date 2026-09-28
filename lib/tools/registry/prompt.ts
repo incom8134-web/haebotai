@@ -75,7 +75,7 @@ export const prompt: ToolManifest<z.infer<typeof outputSchema>> = {
   outputSchema,
   outputRenderer: "code",
   grounding: { requireSources: false, webSearch: false, estimateBadge: false },
-  model: "gemini-3.6-flash",
+  model: "gemini-3.8-flash",
   estimatedCredits: 10,
   estimatedSeconds: 15,
 };

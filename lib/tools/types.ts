@@ -56,7 +56,7 @@ export interface ToolManifest<TOutput = unknown> {
     estimateBadge: boolean;
   };
 
-  model: "gemini-3.6-flash" | "gemini-3.1-flash-image";
+  model: "gemini-3.8-flash" | "gemini-3.1-flash-image" | "gemini-3-pro-image";
   estimatedCredits: number;
   estimatedSeconds: number;
 

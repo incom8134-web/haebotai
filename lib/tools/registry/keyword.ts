@@ -59,8 +59,8 @@ export const keyword: ToolManifest<z.infer<typeof outputSchema>> = {
   acceptsChainFrom: [],
   outputSchema,
   outputRenderer: "table",
-  grounding: { requireSources: false, webSearch: false, estimateBadge: true },
-  model: "gemini-3.6-flash",
+  grounding: { requireSources: false, webSearch: true, estimateBadge: true },
+  model: "gemini-3.8-flash",
   estimatedCredits: 12,
   estimatedSeconds: 20,
 };

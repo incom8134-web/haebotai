@@ -6,7 +6,11 @@ import type { ToolManifest } from "../types";
 // user, not just the images; that's part of the trust surface too.
 
 const outputSchema = z.object({
-  images: z.array(z.object({ asset_id: z.string(), url: z.string(), seed: z.string() })).length(4),
+  // name/purpose come from the shot planner (a photo director's plan per
+  // cut); older runs don't have them.
+  images: z
+    .array(z.object({ name: z.string().optional(), purpose: z.string().optional(), asset_id: z.string(), url: z.string(), seed: z.string() }))
+    .length(4),
   refined_prompt: z.string(),
   negative_prompt: z.string(),
 });
