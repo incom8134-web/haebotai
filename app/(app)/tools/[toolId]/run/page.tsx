@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { ToolRunner } from "@/components/tool-runner";
 import { getTool } from "@/lib/tools/registry";
 import { DEFAULT_TOOL_CAPABILITY, getToolCapability } from "@/lib/ai/capabilities";
@@ -24,7 +24,11 @@ export default async function ToolPage({
   searchParams: Promise<{ fromRun?: string; brief?: string; preset?: string }>;
 }) {
   const { toolId } = await params;
-  if (!getTool(toolId)) notFound();
+  const tool = getTool(toolId);
+  if (!tool) notFound();
+  // Not runnable yet — the overview page explains, so send pinned links,
+  // flows and old bookmarks there instead of a form that can only fail.
+  if (tool.comingSoon) redirect(`/tools/${toolId}`);
 
   const [profile, { fromRun, brief, preset }, keyStatus, membership] = await Promise.all([
     getBusinessProfile(),

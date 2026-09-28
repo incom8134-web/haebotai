@@ -47,7 +47,11 @@ function ToolTile({ tool }: { tool: ToolManifest }) {
       <h3 className="mt-5 font-semibold tracking-[-0.01em]">{locale === "en" ? tool.name_en : tool.name_ko}</h3>
       <p className="mt-1 flex-1 text-sm leading-relaxed text-fg-muted">{L(getToolContent(tool.id)!.tagline)}</p>
       <div className="mt-4 flex items-center justify-between">
-        <span className="font-mono text-2xs text-fg-subtle">{tool.estimatedCredits} cr · ~{tool.estimatedSeconds}s</span>
+        {tool.comingSoon ? (
+          <span className="rounded-full border border-hairline px-2 py-0.5 text-2xs text-fg-muted">{L({ ko: "준비 중", en: "Coming soon" })}</span>
+        ) : (
+          <span className="font-mono text-2xs text-fg-subtle">{tool.estimatedCredits} cr · ~{tool.estimatedSeconds}s</span>
+        )}
         <Link href={`/tools/${tool.id}`} aria-label={locale === "en" ? tool.name_en : tool.name_ko} className="grid size-8 place-items-center rounded-full text-fg-muted transition-all duration-500 ease-[var(--spring)] group-hover:rotate-45 group-hover:bg-studio-cyan/15 group-hover:text-studio-cyan after:absolute after:inset-0 after:rounded-[24px]">
           <ArrowUpRight size={16} aria-hidden />
         </Link>

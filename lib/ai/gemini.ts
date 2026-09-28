@@ -1,6 +1,6 @@
 import "server-only";
 import { AsyncLocalStorage } from "node:async_hooks";
-import { ApiError, GoogleGenAI } from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
 import type { BusinessProfile, ToolManifest } from "@/lib/tools/types";
 import type { Source } from "@/lib/tools/registry/shared";
 import { runWithRotation, type KeyRotationState } from "@/lib/tools/quota-rotation";
@@ -11,6 +11,7 @@ import {
   buildImageSystemInstruction,
   collectInputImages,
 } from "@/lib/tools/generate-prompt";
+import { classifyGeminiError } from "./provider-errors";
 import { zodToJsonSchema } from "./schema";
 import type { AiAdapter, AiStreamEvent, GenerationResult, ImageStorageContext, TokenUsage } from "./types";
 
@@ -31,12 +32,15 @@ import type { AiAdapter, AiStreamEvent, GenerationResult, ImageStorageContext, T
 let client: GoogleGenAI | undefined;
 const userKeyStore = new AsyncLocalStorage<KeyRotationState>();
 
+// A 503 ("high demand") is transient — retry the same key once after a
+// short wait. The platform key (no user keys) gets that retry too, as a
+// one-key rotation outside userKeyStore so getClient() still uses it.
+const RETRY_OPTIONS = { getRetryDelayMs: () => 2000 };
+
 export async function runWithApiKey<T>(apiKeys: string[], fn: () => Promise<T>): Promise<T> {
-  if (apiKeys.length === 0) return fn();
+  if (apiKeys.length === 0) return runWithRotation({ keys: ["platform"], index: 0 }, classifyGeminiError, fn, RETRY_OPTIONS);
   const state: KeyRotationState = { keys: apiKeys, index: 0 };
-  return userKeyStore.run(state, () =>
-    runWithRotation(state, (err) => (err instanceof ApiError && err.status === 429 ? "next-key" : "fail"), fn),
-  );
+  return userKeyStore.run(state, () => runWithRotation(state, classifyGeminiError, fn, RETRY_OPTIONS));
 }
 
 function getClient(): GoogleGenAI {

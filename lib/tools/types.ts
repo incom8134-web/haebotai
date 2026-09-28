@@ -59,4 +59,8 @@ export interface ToolManifest<TOutput = unknown> {
   model: "gemini-3.6-flash" | "gemini-3.1-flash-image";
   estimatedCredits: number;
   estimatedSeconds: number;
+
+  /** Listed but not runnable yet — cards show 준비 중, the run page and run
+   *  route refuse it before any credits are reserved. */
+  comingSoon?: boolean;
 }
