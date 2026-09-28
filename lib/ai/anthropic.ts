@@ -20,6 +20,7 @@ import {
   toAnthropicImageBlock,
 } from "./anthropic-response";
 import type { AiAdapter, AiStreamEvent, GenerationResult, TokenUsage } from "./types";
+import { outputSchemaFor } from "@/lib/tools/schemas";
 
 // Claude is own-key only (product decision) — there is no platform
 // Anthropic key, so unlike Gemini's getClient() there is no fallback
@@ -74,7 +75,7 @@ async function generateOnce(
       max_tokens: anthropicMaxTokens(manifest.id),
       system,
       messages: [{ role: "user", content }],
-      output_config: { format: zodOutputFormat(manifest.outputSchema) },
+      output_config: { format: zodOutputFormat(outputSchemaFor(manifest.id)) },
     },
     { signal: abortSignal },
   );
@@ -156,13 +157,13 @@ async function* generateStructured(
 
   let response = await generateOnce(manifest, system, content, abortSignal);
   usage = sumUsage(usage, response.usage);
-  let result = finalizeStructuredResponse(response, manifest.outputSchema);
+  let result = finalizeStructuredResponse(response, outputSchemaFor(manifest.id));
 
   if (!result) {
     content.push({ type: "text", text: RETRY_NOTE });
     response = await generateOnce(manifest, system, content, abortSignal);
     usage = sumUsage(usage, response.usage);
-    result = finalizeStructuredResponse(response, manifest.outputSchema);
+    result = finalizeStructuredResponse(response, outputSchemaFor(manifest.id));
     if (!result) throw new Error("모델 응답이 예상한 형식과 다릅니다");
   }
 

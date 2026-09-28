@@ -1,5 +1,4 @@
 import { LayoutTemplate } from "lucide-react";
-import { z } from "zod";
 import type { ToolManifest } from "../types";
 
 // HAEBOT_A_TOOLS_SPEC.md §4.11 — rendered at 860px 네이버 스마트스토어
@@ -7,27 +6,7 @@ import type { ToolManifest } from "../types";
 // GUARD (T7 prompt): no efficacy, medical, or superlative claims not
 // present in the user's own input — 표시광고법 territory.
 
-const outputSchema = z.object({
-  pain_points: z.array(z.string()),
-  usps: z.array(z.string()).length(3),
-  sections: z
-    .array(
-      z.object({
-        order: z.number(),
-        type: z.string(),
-        headline: z.string(),
-        body: z.string(),
-        image_instruction: z.string(),
-      }),
-    )
-    .min(8)
-    .max(10),
-  rendered_images: z.array(z.string()),
-  faq: z.array(z.object({ q: z.string(), a: z.string() })).length(5),
-  shipping_template: z.string(),
-});
-
-export const sangsepage: ToolManifest<z.infer<typeof outputSchema>> = {
+export const sangsepage: ToolManifest = {
   id: "sangsepage",
   category: "sales",
   name_ko: "해봇 상세페이지",
@@ -54,7 +33,6 @@ export const sangsepage: ToolManifest<z.infer<typeof outputSchema>> = {
   ],
   usesProfile: ["brand_name", "tone", "target_customer", "brand_colors"],
   acceptsChainFrom: ["keyword", "image"],
-  outputSchema,
   outputRenderer: "document",
   grounding: { requireSources: false, webSearch: true, estimateBadge: false },
   model: "gemini-3.8-flash",

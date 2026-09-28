@@ -10,6 +10,8 @@ import { getBusinessProfile } from "@/lib/profile";
 import { orderLike } from "@/lib/tools/output-order";
 import type { Source } from "@/lib/tools/registry/shared";
 import { exportLimiter, checkRateLimit } from "@/lib/rate-limit";
+import { getOutputSchema } from "@/lib/tools/schemas";
+import { z } from "zod";
 
 // Every finished run exports to .md / .docx / .pdf / .pptx through one
 // document model (lib/tools/export/document.ts); proposal and
@@ -79,7 +81,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       toolName,
       toolId: run.tool_id,
       // Older runs were stored in whatever key order the model returned.
-      output: manifest ? orderLike(manifest.outputSchema, run.output) : run.output,
+      output: orderLike(getOutputSchema(run.tool_id) ?? z.unknown(), run.output),
       sources: (run.sources as Source[] | null) ?? [],
       brandName: profile?.brand_name ?? null,
       createdAt: run.created_at,

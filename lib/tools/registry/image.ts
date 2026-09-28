@@ -1,21 +1,10 @@
 import { Image as ImageIcon } from "lucide-react";
-import { z } from "zod";
 import type { ToolManifest } from "../types";
 
 // HAEBOT_A_TOOLS_SPEC.md §4.8 (3.1) — the refined prompt is shown to the
 // user, not just the images; that's part of the trust surface too.
 
-const outputSchema = z.object({
-  // name/purpose come from the shot planner (a photo director's plan per
-  // cut); older runs don't have them.
-  images: z
-    .array(z.object({ name: z.string().optional(), purpose: z.string().optional(), asset_id: z.string(), url: z.string(), seed: z.string() }))
-    .length(4),
-  refined_prompt: z.string(),
-  negative_prompt: z.string(),
-});
-
-export const image: ToolManifest<z.infer<typeof outputSchema>> = {
+export const image: ToolManifest = {
   id: "image",
   category: "design",
   name_ko: "해봇 이미지 생성",
@@ -52,7 +41,6 @@ export const image: ToolManifest<z.infer<typeof outputSchema>> = {
   ],
   usesProfile: ["brand_colors"],
   acceptsChainFrom: [],
-  outputSchema,
   outputRenderer: "images",
   grounding: { requireSources: false, webSearch: false, estimateBadge: false },
   model: "gemini-3.1-flash-image",

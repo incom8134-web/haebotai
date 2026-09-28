@@ -8,6 +8,7 @@ import { collectInputImages } from "./generate-prompt";
 import { anthropicAdapter, runWithApiKey as runWithAnthropicKey } from "@/lib/ai/anthropic";
 import { renderSangsepage } from "./render/sangsepage";
 import { orderLike } from "./output-order";
+import { outputSchemaFor } from "./schemas";
 
 // HAEBOT_A_TOOLS_SPEC.md §3.2 — real generation for all 15 tools. Thin
 // dispatcher: provider-specific logic (search grounding, image
@@ -61,7 +62,7 @@ export async function generateOutput(
 
   if (manifest.id === "image" || manifest.id === "brand-model" || manifest.id === "logo") {
     const images = await adapter.generateImages(manifest, input, profile, abortSignal, storage);
-    return { ...images, output: orderLike(manifest.outputSchema, images.output) };
+    return { ...images, output: orderLike(outputSchemaFor(manifest.id), images.output) };
   }
 
   let result: { output: unknown; sources: Source[]; usage: TokenUsage } | undefined;
@@ -144,5 +145,5 @@ export async function generateOutput(
     output = { ...page, html: page.html.replaceAll("{{HERO_IMAGE_URL}}", heroUrl) };
   }
 
-  return { output: orderLike(manifest.outputSchema, output), sources: result.sources, usage };
+  return { output: orderLike(outputSchemaFor(manifest.id), output), sources: result.sources, usage };
 }

@@ -12,7 +12,6 @@ import {
 import { listTools } from "@/lib/tools/registry";
 import { buildCalendarIcs, buildCalendarCsv, type CalendarWeek } from "@/lib/tools/export/calendar";
 import { StructuredResult } from "@/components/structured-result";
-import { orderLike } from "@/lib/tools/output-order";
 import { useLocale, useT } from "@/lib/i18n/context";
 import type { Source } from "@/lib/tools/registry/shared";
 import type { ToolManifest } from "@/lib/tools/types";
@@ -273,7 +272,7 @@ function RunResult({
         ) : null}
       </div>
 
-      <OutputPreview output={orderLike(manifest.outputSchema, output)} input={input} />
+      <OutputPreview output={output} input={input} />
 
       <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-hairline pt-3">
         <span className="text-2xs text-fg-subtle">{locale === "en" ? "Download" : "다운로드"}</span>

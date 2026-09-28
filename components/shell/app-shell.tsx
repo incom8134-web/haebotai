@@ -1,5 +1,6 @@
 "use client";
 
+import { BrandMark } from "@/components/brand-mark";
 import { useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -154,8 +155,8 @@ function AppShell({ user, balance, plan, answeredTickets, children }: ShellProps
         <div aria-hidden className="absolute inset-x-0 top-0 -z-10 h-[88px] bg-gradient-to-b from-bg via-bg/80 to-transparent" />
         <div className="mx-auto flex max-w-[1240px] items-center gap-2">
           <Link href="/studio" className="glass pointer-events-auto flex h-11 items-center gap-2.5 rounded-2xl pr-4 pl-1.5">
-            <span className="studio-gradient-bg grid size-8 place-items-center rounded-xl font-display text-base font-bold text-white">H</span>
-            <span className="text-sm font-bold tracking-[-0.02em]">해봇 AI</span>
+            <BrandMark size={32} priority />
+            <span className="hidden text-sm font-bold tracking-[-0.02em] min-[380px]:inline">해봇 AI</span>
           </Link>
           <button
             type="button"
@@ -169,6 +170,15 @@ function AppShell({ user, balance, plan, answeredTickets, children }: ShellProps
           <Link href="/account/credits" className="glass pointer-events-auto flex h-11 items-center gap-2 rounded-2xl px-3.5 font-mono text-xs lg:hidden" aria-label={L({ ko: "크레딧", en: "Credits" })}>
             <Coins size={14} className="text-studio-cyan" aria-hidden /> {credits}
           </Link>
+          {/* Phones have no side dock, so theme/language live up here. */}
+          <div className="glass pointer-events-auto flex h-11 items-center rounded-2xl px-0.5 lg:hidden">
+            <ThemeLangControls />
+          </div>
+          {!user ? (
+            <Link href="/auth" className="studio-gradient-bg pointer-events-auto flex h-11 items-center rounded-2xl px-3.5 text-xs font-semibold text-white lg:hidden">
+              {L({ ko: "로그인", en: "Sign in" })}
+            </Link>
+          ) : null}
         </div>
       </div>
 
@@ -201,7 +211,7 @@ function AppShell({ user, balance, plan, answeredTickets, children }: ShellProps
       {/* Bottom tab bar (phones/tablets). */}
       <nav
         aria-label={L({ ko: "주 메뉴", en: "Main" })}
-        className="glass-strong fixed inset-x-3 bottom-[max(12px,env(safe-area-inset-bottom))] z-40 flex items-center justify-around rounded-[26px] p-1.5 lg:hidden"
+        className="glass-strong tab-bar fixed inset-x-3 bottom-[max(12px,env(safe-area-inset-bottom))] z-40 flex items-center justify-around rounded-[26px] p-1.5 lg:hidden"
       >
         {ITEMS.filter((i) => MOBILE.includes(i.href)).map((item) => {
           const active = item.match(pathname);

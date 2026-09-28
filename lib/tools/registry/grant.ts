@@ -1,5 +1,4 @@
 import { Landmark } from "lucide-react";
-import { z } from "zod";
 import type { ToolManifest } from "../types";
 
 // HAEBOT_A_TOOLS_SPEC.md §5.3 — only honest with real data. Requires live
@@ -8,23 +7,7 @@ import type { ToolManifest } from "../types";
 // an explicit "현재 공고 데이터를 불러올 수 없습니다" state — never a
 // model-generated program name. Ship as 준비 중 if the API isn't wired.
 
-const outputSchema = z.object({
-  matches: z.array(
-    z.object({
-      program_name: z.string(),
-      agency: z.string(),
-      deadline: z.string(),
-      funding_scale: z.string(),
-      eligibility: z.array(z.object({ requirement: z.string(), user_meets: z.boolean(), note: z.string() })),
-      document_checklist: z.array(z.string()),
-      difficulty: z.number().min(1).max(5),
-      source_url: z.string(),
-    }),
-  ),
-  unmatched_reasons: z.array(z.string()),
-});
-
-export const grant: ToolManifest<z.infer<typeof outputSchema>> = {
+export const grant: ToolManifest = {
   id: "grant",
   category: "docs",
   name_ko: "해봇 지원사업 매칭",
@@ -85,7 +68,6 @@ export const grant: ToolManifest<z.infer<typeof outputSchema>> = {
   ],
   usesProfile: ["industry"],
   acceptsChainFrom: [],
-  outputSchema,
   outputRenderer: "table",
   grounding: { requireSources: true, webSearch: true, estimateBadge: false },
   model: "gemini-3.8-flash",

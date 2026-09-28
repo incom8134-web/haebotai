@@ -3,6 +3,9 @@ import { createClient } from "@/lib/supabase/server";
 import { LibraryRunDetail } from "@/components/library-run-detail";
 import type { Source } from "@/lib/tools/registry/shared";
 import type { ProviderId } from "@/lib/ai/types";
+import { getOutputSchema } from "@/lib/tools/schemas";
+import { orderLike } from "@/lib/tools/output-order";
+import { z } from "zod";
 
 // HAEBOT_A_TOOLS_SPEC.md T2 — run history is only real if a past run's
 // actual output is reachable, not just its row in the list. Reuses the
@@ -31,7 +34,8 @@ export default async function LibraryRunPage({ params }: { params: Promise<{ run
       runId={run.id}
       status={run.status}
       input={run.input ?? undefined}
-      output={run.output}
+      // Older runs were stored in whatever key order the model returned.
+      output={orderLike(getOutputSchema(run.tool_id) ?? z.unknown(), run.output)}
       sources={(run.sources ?? []) as Source[]}
       creditsUsed={run.credits_used}
       provider={run.provider as ProviderId | null}

@@ -80,11 +80,14 @@
     "layout": "split", "visual": "site",
     "hero": { "title": { "ko": "고르는 대로 쌓이는 홈페이지", "en": "A website that builds as you choose" }, "story": { "ko": "목적과 필요한 섹션만 고르세요. 오른쪽 미리보기에 사이트 뼈대가 바로 쌓이고, 실행하면 프로필 정보로 채운 반응형 사이트를 ZIP으로 드려요.", "en": "Just pick a purpose and sections. The preview builds the skeleton as you go; run it and get a responsive site filled from your profile, as a ZIP." } },
     "sections": [
+      { "title": { "ko": "무엇을 보여 줄까요", "en": "What the site should say" }, "hint": { "ko": "소개, 대표 메뉴·서비스, 강점을 자유롭게 적어 주세요. 여기 적은 것만 사실로 씁니다", "en": "Write your intro, main products or services and strengths. Only what you write here is stated as fact" }, "fields": ["content", "facts"] },
       { "title": { "ko": "사이트의 목적", "en": "What the site is for" }, "hint": { "ko": "목적에 따라 첫 화면 행동 버튼이 달라져요", "en": "Changes the main call to action" }, "fields": ["purpose"] },
       { "title": { "ko": "필요한 섹션", "en": "Sections you need" }, "hint": { "ko": "후기는 실제 후기가 있을 때만 고르세요", "en": "Only pick testimonials if you have real ones" }, "fields": ["sections"] },
       { "title": { "ko": "참고 사이트 (선택)", "en": "Reference site (optional)" }, "hint": { "ko": "분위기만 참고하고 베끼지 않아요", "en": "For mood only — never copied" }, "fields": ["reference_site"] }
     ],
     "ui": {
+      "content": { "placeholder": { "ko": "예: 성수동 수제 딸기 디저트 공방. 매일 아침 들어온 딸기로만 굽고, 대표 메뉴는 생딸기 타르트와 쇼트케이크. 기념일 홀케이크 예약과 퇴근길 픽업을 받아요.", "en": "e.g. A strawberry dessert studio in Seongsu. We bake only with strawberries delivered that morning; signatures are the fresh strawberry tart and shortcake. We take celebration-cake bookings and after-work pickups." } },
+      "facts": { "placeholder": { "ko": "예: 서울 성동구 ○○로 12 / 11:00~21:00, 월 휴무 / 010-0000-0000 / 타르트 조각 7,500원", "en": "e.g. 12 ○○-ro, Seongdong-gu / 11:00–21:00, closed Mon / 010-0000-0000 / tart slice ₩7,500" } },
       "purpose": { "display": "cards", "options": { "intro": { "icon": "store", "desc": { "ko": "가게·회사 소개", "en": "About the business" } }, "booking": { "icon": "calendar-check", "desc": { "ko": "예약 받기", "en": "Take bookings" } }, "sales": { "icon": "shopping-cart", "desc": { "ko": "상품 판매", "en": "Sell products" } }, "portfolio": { "icon": "gallery-horizontal", "desc": { "ko": "작업물 보여 주기", "en": "Show work" } }, "landing": { "icon": "rocket", "desc": { "ko": "하나의 제품·이벤트", "en": "One product or event" } } } },
       "sections": { "display": "toggles" },
       "reference_site": { "placeholder": { "ko": "https://", "en": "https://" } }
