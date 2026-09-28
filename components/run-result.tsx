@@ -1,7 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronDown, Download } from "lucide-react";
+import { useState } from "react";
+import {
+  CalendarDays,
+  ChevronDown,
+  Code2,
+  Download,
+  FileCode,
+  FileSpreadsheet,
+  FileText,
+  FileType,
+  Loader2,
+  Presentation,
+  type LucideIcon,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,8 +39,11 @@ function downloadBlob(filename: string, blob: Blob) {
   const a = document.createElement("a");
   a.href = url;
   a.download = filename;
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(url);
+  a.remove();
+  // Safari starts the download asynchronously; revoking at once can cancel it.
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
 
 function downloadText(filename: string, text: string, mimeType: string) {
@@ -53,7 +69,7 @@ function DownloadLink({ label, onClick }: { label: string; onClick: () => void }
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex items-center gap-1 text-xs text-accent hover:underline"
+      className="inline-flex items-center gap-1 rounded-full border border-hairline px-2.5 py-1 text-xs text-fg-muted transition-colors hover:border-accent/50 hover:text-fg"
     >
       <Download className="size-3" aria-hidden />
       {label}
@@ -63,15 +79,196 @@ function DownloadLink({ label, onClick }: { label: string; onClick: () => void }
 
 // Every finished run downloads as PDF / Word / PowerPoint / Markdown,
 // generated server-side from the stored run (app/api/export/[runId],
-// lib/tools/export/*) — plain links, Content-Disposition does the rest.
-// business-plan adds its financial spreadsheet.
-const EXPORTS: { format: "pdf" | "docx" | "pptx" | "md" | "xlsx"; label: string; only?: string }[] = [
-  { format: "pdf", label: "PDF" },
-  { format: "docx", label: "Word" },
-  { format: "pptx", label: "PowerPoint" },
-  { format: "md", label: "Markdown" },
-  { format: "xlsx", label: "재무 Excel", only: "business-plan" },
-];
+// lib/tools/export/*); business-plan adds its financial spreadsheet.
+// Each tool leads with the format its result is most used in, and adds
+// its own files (homepage HTML, calendar .ics) to the same panel.
+type ExportFormat = "pdf" | "docx" | "pptx" | "md" | "xlsx";
+
+const FORMATS: Record<ExportFormat, { label: string; hint: string; hintEn: string; icon: LucideIcon }> = {
+  pdf: { label: "PDF", hint: "인쇄·공유", hintEn: "Print & share", icon: FileText },
+  docx: { label: "Word", hint: "편집용 문서", hintEn: "Editable doc", icon: FileType },
+  pptx: { label: "PowerPoint", hint: "발표 슬라이드", hintEn: "Slides", icon: Presentation },
+  md: { label: "Markdown", hint: "노션·블로그", hintEn: "Notion & blogs", icon: FileCode },
+  xlsx: { label: "Excel", hint: "재무 계산표", hintEn: "Financials", icon: FileSpreadsheet },
+};
+
+const PRIMARY_FORMAT: Record<string, ExportFormat> = {
+  presentation: "pptx",
+  proposal: "docx",
+  "business-plan": "docx",
+  blog: "md",
+};
+
+function formatsFor(toolId: string): ExportFormat[] {
+  const primary = PRIMARY_FORMAT[toolId] ?? "pdf";
+  const all: ExportFormat[] = ["pdf", "pptx", "docx", "md", ...(toolId === "business-plan" ? (["xlsx"] as const) : [])];
+  return [primary, ...all.filter((f) => f !== primary)];
+}
+
+interface ExtraDownload {
+  key: string;
+  label: string;
+  hint: string;
+  icon: LucideIcon;
+  run: () => void;
+}
+
+/** Files a tool produces besides the document exports. */
+function extraDownloads(output: unknown, input?: Record<string, unknown>): ExtraDownload[] {
+  const o = (output ?? {}) as Record<string, unknown>;
+  const extras: ExtraDownload[] = [];
+  if (typeof o.html === "string") {
+    const html = o.html;
+    extras.push({ key: "html", label: "HTML", hint: "홈페이지 파일", icon: Code2, run: () => downloadText("homepage.html", html, "text/html") });
+  }
+  if (typeof o.body_markdown === "string") {
+    const md = o.body_markdown;
+    extras.push({ key: "post", label: "블로그 본문", hint: "본문만 .md", icon: FileCode, run: () => downloadText("blog-post.md", md, "text/markdown") });
+  }
+  if (Array.isArray(o.weeks)) {
+    const weeks = o.weeks as CalendarWeek[];
+    const ics = typeof input?.start_date === "string" ? buildCalendarIcs(weeks, input.start_date) : null;
+    if (ics) {
+      extras.push({ key: "ics", label: "캘린더", hint: "구글·애플 캘린더", icon: CalendarDays, run: () => downloadText("90일-실행-캘린더.ics", ics, "text/calendar") });
+    }
+    extras.push({ key: "csv", label: "CSV", hint: "엑셀·시트", icon: FileSpreadsheet, run: () => downloadText("90일-실행-캘린더.csv", buildCalendarCsv(weeks), "text/csv") });
+  }
+  return extras;
+}
+
+function filenameFrom(disposition: string | null): string | null {
+  const star = disposition ? /filename\*=UTF-8''([^;]+)/i.exec(disposition) : null;
+  if (star) return decodeURIComponent(star[1]);
+  const plain = disposition ? /filename="([^"]+)"/i.exec(disposition) : null;
+  return plain ? plain[1] : null;
+}
+
+function FormatIcon({ format, busy, className }: { format: ExportFormat; busy: boolean; className: string }) {
+  const Icon = FORMATS[format].icon;
+  return busy ? <Loader2 className={`${className} animate-spin`} aria-hidden /> : <Icon className={className} aria-hidden />;
+}
+
+const chip =
+  "inline-flex items-center gap-1 rounded-full border border-hairline px-2.5 py-1 text-xs text-fg-muted transition-colors hover:border-accent/50 hover:text-fg disabled:opacity-60";
+const tile =
+  "flex min-h-14 items-center gap-2.5 rounded-xl border border-hairline bg-surface-2/40 px-3 py-2 text-left transition-colors hover:border-accent/50 hover:bg-surface-2 disabled:opacity-60";
+
+/**
+ * The full panel sits above the result; a compact row repeats it below,
+ * so a long result never needs scrolling back up to download.
+ */
+function DownloadPanel({
+  runId,
+  toolId,
+  extras,
+  compact = false,
+}: {
+  runId: string;
+  toolId: string;
+  extras: ExtraDownload[];
+  compact?: boolean;
+}) {
+  const { locale } = useLocale();
+  const en = locale === "en";
+  const [busy, setBusy] = useState<ExportFormat | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const formats = formatsFor(toolId);
+
+  // Fetched rather than a plain link so the button can show progress
+  // (a deck takes a few seconds) and a failure shows up here.
+  async function download(format: ExportFormat) {
+    setBusy(format);
+    setError(null);
+    try {
+      const res = await fetch(`/api/export/${runId}?format=${format}`);
+      if (!res.ok) {
+        const body = (await res.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(body?.error ?? (en ? "Download failed. Please try again." : "파일을 만들지 못했습니다. 다시 시도해 주세요."));
+      }
+      downloadBlob(filenameFrom(res.headers.get("Content-Disposition")) ?? `haebot-${toolId}.${format}`, await res.blob());
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setBusy(null);
+    }
+  }
+
+
+  if (compact) {
+    return (
+      <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-hairline pt-3">
+        <span className="text-2xs text-fg-subtle">{en ? "Download" : "다운로드"}</span>
+        {formats.map((f) => (
+          <button key={f} type="button" disabled={busy !== null} onClick={() => download(f)} className={chip}>
+            <FormatIcon format={f} busy={busy === f} className="size-3" />
+            {FORMATS[f].label}
+          </button>
+        ))}
+        {extras.map((x) => (
+          <button key={x.key} type="button" onClick={x.run} className={chip}>
+            <x.icon className="size-3" aria-hidden />
+            {x.label}
+          </button>
+        ))}
+        {error ? <span className="text-xs text-danger">{error}</span> : null}
+      </div>
+    );
+  }
+
+  const [primary, ...rest] = formats;
+  return (
+    <section className="mt-3 rounded-2xl border border-hairline p-3" aria-label={en ? "Download" : "다운로드"}>
+      <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5">
+        <p className="flex items-center gap-1.5 text-sm font-semibold text-fg">
+          <Download className="size-4 text-accent" aria-hidden />
+          {en ? "Download your result" : "결과 파일 받기"}
+        </p>
+        <p className="text-2xs text-fg-subtle">{en ? "Ready to edit, present or share" : "편집·발표·공유에 바로 쓰는 파일"}</p>
+      </div>
+      <div className="mt-2.5 grid grid-cols-2 gap-2 sm:grid-cols-[repeat(auto-fit,minmax(150px,1fr))]">
+        <button
+          type="button"
+          disabled={busy !== null}
+          onClick={() => download(primary)}
+          className="col-span-full flex min-h-14 items-center gap-3 rounded-xl bg-primary px-4 py-2.5 text-left text-primary-foreground transition-colors hover:bg-accent-hover disabled:opacity-70"
+        >
+          <FormatIcon format={primary} busy={busy === primary} className="size-5 shrink-0" />
+          <span className="flex min-w-0 flex-col">
+            <span className="text-sm font-semibold">
+              {FORMATS[primary].label} {en ? "download" : "다운로드"}
+            </span>
+            <span className="text-2xs opacity-85">
+              {busy === primary
+                ? en ? "Preparing…" : "파일 만드는 중…"
+                : `${en ? "Recommended" : "추천"} · ${en ? FORMATS[primary].hintEn : FORMATS[primary].hint}`}
+            </span>
+          </span>
+        </button>
+        {rest.map((f) => (
+          <button key={f} type="button" disabled={busy !== null} onClick={() => download(f)} className={tile}>
+            <FormatIcon format={f} busy={busy === f} className="size-4 shrink-0 text-accent" />
+            <span className="flex min-w-0 flex-col">
+              <span className="text-sm font-medium text-fg">{FORMATS[f].label}</span>
+              <span className="truncate text-2xs text-fg-subtle">
+                {busy === f ? (en ? "Preparing…" : "만드는 중…") : en ? FORMATS[f].hintEn : FORMATS[f].hint}
+              </span>
+            </span>
+          </button>
+        ))}
+        {extras.map((x) => (
+          <button key={x.key} type="button" onClick={x.run} className={tile}>
+            <x.icon className="size-4 shrink-0 text-accent" aria-hidden />
+            <span className="flex min-w-0 flex-col">
+              <span className="text-sm font-medium text-fg">{x.label}</span>
+              <span className="truncate text-2xs text-fg-subtle">{x.hint}</span>
+            </span>
+          </button>
+        ))}
+      </div>
+      {error ? <p className="mt-2 text-xs text-danger">{error}</p> : null}
+    </section>
+  );
+}
 
 // HAEBOT_A_TOOLS_SPEC.md §3.1 — "no per-tool bespoke code except the
 // renderer for unusual output types." Dumping a multi-KB base64 image or
@@ -89,7 +286,7 @@ interface LogoConcept {
   symbol_image?: { url: string };
 }
 
-function OutputPreview({ output, input }: { output: unknown; input?: Record<string, unknown> }) {
+function OutputPreview({ output }: { output: unknown }) {
   const o = output as Record<string, unknown>;
 
   if (typeof o.html === "string") {
@@ -100,12 +297,7 @@ function OutputPreview({ output, input }: { output: unknown; input?: Record<stri
           sandbox=""
           className="mt-2 h-96 w-full rounded-xl border border-hairline bg-white"
         />
-        <div className="mt-2">
-          <DownloadLink
-            label="HTML 다운로드"
-            onClick={() => downloadText("homepage.html", o.html as string, "text/html")}
-          />
-        </div>
+        <StructuredResult output={output} />
       </>
     );
   }
@@ -199,37 +391,6 @@ function OutputPreview({ output, input }: { output: unknown; input?: Record<stri
     }
   }
 
-  if (typeof o.body_markdown === "string") {
-    return (
-      <div className="mt-2">
-        <DownloadLink
-          label="마크다운 다운로드"
-          onClick={() => downloadText("blog-post.md", o.body_markdown as string, "text/markdown")}
-        />
-      </div>
-    );
-  }
-
-  if (Array.isArray(o.weeks)) {
-    const weeks = o.weeks as CalendarWeek[];
-    const startDate = typeof input?.start_date === "string" ? input.start_date : null;
-    const ics = startDate ? buildCalendarIcs(weeks, startDate) : null;
-    return (
-      <div className="mt-2 flex flex-wrap gap-3">
-        {ics ? (
-          <DownloadLink
-            label=".ics 다운로드"
-            onClick={() => downloadText("90일-실행-캘린더.ics", ics, "text/calendar")}
-          />
-        ) : null}
-        <DownloadLink
-          label=".csv 다운로드"
-          onClick={() => downloadText("90일-실행-캘린더.csv", buildCalendarCsv(weeks), "text/csv")}
-        />
-      </div>
-    );
-  }
-
   return <StructuredResult output={output} />;
 }
 
@@ -252,6 +413,7 @@ function RunResult({
 }) {
   const { locale } = useLocale();
   const t = useT();
+  const extras = extraDownloads(output, input);
   const chainTargets = listTools().filter((tool) => tool.acceptsChainFrom?.includes(manifest.id));
 
   return (
@@ -272,21 +434,11 @@ function RunResult({
         ) : null}
       </div>
 
-      <OutputPreview output={output} input={input} />
+      <DownloadPanel runId={runId} toolId={manifest.id} extras={extras} />
 
-      <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-hairline pt-3">
-        <span className="text-2xs text-fg-subtle">{locale === "en" ? "Download" : "다운로드"}</span>
-        {EXPORTS.filter((e) => !e.only || e.only === manifest.id).map((e) => (
-          <a
-            key={e.format}
-            href={`/api/export/${runId}?format=${e.format}`}
-            className="inline-flex items-center gap-1 rounded-full border border-hairline px-2.5 py-1 text-xs text-fg-muted transition-colors hover:border-studio-cyan/50 hover:text-fg"
-          >
-            <Download className="size-3" aria-hidden />
-            {e.label}
-          </a>
-        ))}
-      </div>
+      <OutputPreview output={output} />
+
+      <DownloadPanel runId={runId} toolId={manifest.id} extras={extras} compact />
 
       <Collapsible className="mt-4 border-t border-hairline pt-3">
         <CollapsibleTrigger className="group/collapsible flex cursor-pointer items-center gap-1 font-mono text-2xs text-fg-subtle select-none">
