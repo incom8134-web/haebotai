@@ -9,9 +9,12 @@ import {
   buildContext,
   buildSystemInstruction,
   buildImageSystemInstruction,
+  buildResearchPrompt,
+  buildReviseInstruction,
   collectInputImages,
 } from "@/lib/tools/generate-prompt";
 import { classifyGeminiError } from "./provider-errors";
+import { getPlaybook } from "@/lib/tools/playbooks";
 import { zodToJsonSchema } from "./schema";
 import { renderLogoLockup, type LogoTracking, type LogoWeight } from "@/lib/tools/render/logo";
 import type { AiAdapter, AiStreamEvent, GenerationResult, ImageStorageContext, TokenUsage } from "./types";
@@ -30,6 +33,10 @@ import type { AiAdapter, AiStreamEvent, GenerationResult, ImageStorageContext, T
 // in priority order — simplest thing that works given generation is a
 // handful of sequential/parallel calls, not a single request to pin a
 // retry to.
+// Planning, research, safety checks and the editor pass. Manifests name
+// their own model for the main generation.
+const TEXT_MODEL = "gemini-3.8-flash";
+
 let client: GoogleGenAI | undefined;
 const userKeyStore = new AsyncLocalStorage<KeyRotationState>();
 
@@ -69,8 +76,8 @@ async function searchGrounding(
 ): Promise<{ findings: string; sources: Source[]; usage: TokenUsage }> {
   const ai = getClient();
   const res = await ai.models.generateContent({
-    model: "gemini-3.6-flash",
-    contents: `"${manifest.name_ko}" 요청에 필요한 최신 사실 정보를 웹 검색으로 조사하세요. 찾은 핵심 사실과 수치를 근거와 함께 한국어로 요약하세요.\n\n${contextText}`,
+    model: TEXT_MODEL,
+    contents: buildResearchPrompt(manifest, contextText),
     config: { tools: [{ googleSearch: {} }], abortSignal },
   });
 
@@ -110,7 +117,7 @@ async function containsRealPersonFace(
 ): Promise<{ isRealPerson: boolean; reasoning: string; usage: TokenUsage }> {
   const ai = getClient();
   const res = await ai.models.generateContent({
-    model: "gemini-3.6-flash",
+    model: TEXT_MODEL,
     contents: [
       {
         role: "user",
@@ -146,7 +153,7 @@ async function generateOneImage(
   parts: ({ text: string } | { inlineData: ImagePart })[],
   seed: number,
   abortSignal: AbortSignal | undefined,
-  aspectRatio?: "1:1" | "16:9",
+  aspectRatio?: AspectRatio,
 ): Promise<{ image: ImagePart; usage: TokenUsage }> {
   const ai = getClient();
   const res = await ai.models.generateContent({
@@ -181,6 +188,80 @@ export async function generateHeroImage(prompt: string, abortSignal: AbortSignal
     "16:9",
   );
   return { dataUrl: `data:${image.mimeType};base64,${image.data}`, usage };
+}
+
+type AspectRatio = "1:1" | "4:5" | "16:9" | "9:16" | "3:4";
+
+// What each image preset is for — the shot planner's art direction.
+const PRESET_GUIDE: Record<string, string> = {
+  studio: "쇼핑몰 대표 이미지용 제품 스튜디오컷. 깔끔한 배경, 제품이 주인공, 질감과 디테일이 선명하게.",
+  packaging: "포장·패키지를 보여주는 컷. 선물 받는 순간, 포장을 여는 장면, 패키지 디테일.",
+  "3d_render": "제품을 스타일라이즈드 3D 렌더로 표현한 광고 비주얼. 부드러운 조명, 미니멀한 무대.",
+  landing_ui: "홈페이지 히어로 배너용. 한쪽에 헤드라인을 올릴 여백이 넉넉한 와이드 구도.",
+  ad_banner: "SNS·배너 광고 소재. 스크롤을 멈추게 하는 강한 구도와 색, 카피를 올릴 여백(글자는 넣지 않음).",
+  background: "상세페이지·SNS 배경으로 쓸 분위기 컷. 제품 없이 브랜드 무드, 질감, 공간.",
+};
+
+const SHOT_PLAN_SCHEMA = {
+  type: "object",
+  properties: {
+    shots: {
+      type: "array",
+      minItems: 4,
+      maxItems: 4,
+      items: {
+        type: "object",
+        properties: {
+          name: { type: "string", description: "컷 이름 (예: 45도 대표컷)" },
+          purpose: { type: "string", description: "이 컷을 어디에 어떻게 쓰면 좋은지 한 문장" },
+          prompt: {
+            type: "string",
+            description:
+              "Image-model prompt in English: subject, camera angle and lens, lighting direction and quality, background and surface, props, color palette, mood, composition. Photorealistic unless the preset says otherwise. No text, logos or watermarks.",
+          },
+        },
+        required: ["name", "purpose", "prompt"],
+      },
+    },
+    model_description: { type: "string", description: "brand-model only: one consistent English description of the model (age range, style, hair, outfit) used in every shot" },
+  },
+  required: ["shots"],
+} as const;
+
+// Plan four clearly different shots like a photo director (angle, light,
+// props, use) instead of sending the same one-line request four times.
+async function planShots(
+  manifest: ToolManifest,
+  contextText: string,
+  inputImages: ImagePart[],
+  abortSignal: AbortSignal | undefined,
+): Promise<{ shots: { name: string; purpose: string; prompt: string }[]; modelDescription: string; usage: TokenUsage }> {
+  const ai = getClient();
+  const preset = /용도 프리셋: (\S+)/.exec(contextText)?.[1];
+  const guide = manifest.id === "brand-model"
+    ? "브랜드 룩북·광고용 모델 컷 4장. 네 컷 모두 같은 모델(같은 얼굴·헤어·의상 톤)이 제품을 들고, 착용하고, 사용하는 서로 다른 장면. 제품이 항상 또렷하게 보여야 합니다."
+    : (preset && PRESET_GUIDE[preset]) || PRESET_GUIDE.studio;
+  const res = await ai.models.generateContent({
+    model: TEXT_MODEL,
+    contents: [
+      {
+        role: "user",
+        parts: [
+          { text: `다음 요청으로 광고 사진 4컷을 기획하세요. 용도: ${guide}\n네 컷은 앵글·거리·조명·배경·소품 중 최소 두 가지가 서로 달라야 하며, 모두 실제 광고에 쓸 수 있는 완성도여야 합니다. 첨부 이미지가 있으면 그 제품의 모양·색·라벨을 그대로 유지하세요.\n\n${contextText}` },
+          ...inputImages.map((img) => ({ inlineData: img })),
+        ],
+      },
+    ],
+    config: {
+      systemInstruction: buildImageSystemInstruction(manifest).split("\n")[0] + "\n당신은 촬영 콘티를 짜는 포토 디렉터입니다. 응답은 지정된 JSON만.",
+      responseMimeType: "application/json",
+      responseJsonSchema: SHOT_PLAN_SCHEMA,
+      abortSignal,
+    },
+  });
+  const plan = JSON.parse(res.text ?? "") as { shots: { name: string; purpose: string; prompt: string }[]; model_description?: string };
+  if (!plan.shots?.length) throw new Error("촬영 계획을 만들지 못했습니다");
+  return { shots: plan.shots.slice(0, 4), modelDescription: plan.model_description ?? "", usage: addUsage({ inputTokens: 0, outputTokens: 0 }, res.usageMetadata) };
 }
 
 const LOGO_PLAN_SCHEMA = {
@@ -239,7 +320,7 @@ async function generateLogo(
   const contextText = buildContext(manifest, input, profile);
 
   const planRes = await ai.models.generateContent({
-    model: "gemini-3.6-flash",
+    model: TEXT_MODEL,
     contents: `다음 브랜드의 로고 콘셉트 4가지를 기획하세요. 네 가지는 조형 방식이 서로 확실히 달라야 합니다(예: 구상 심볼, 기하학 추상 마크, 엠블럼/배지, 이니셜 모노그램 — 선택한 스타일을 중심으로 변주). 브랜드명 글자는 서버가 따로 조판하므로, 심볼 이미지에는 글자를 넣지 않습니다.\n\n${contextText}`,
     config: {
       systemInstruction: buildSystemInstruction(manifest),
@@ -330,16 +411,18 @@ async function generateImages(
   }
 
   const contextText = buildContext(manifest, input, profile);
-  const basePrompt = `다음 요청에 맞는 이미지를 생성하세요.\n\n${contextText}`;
-  const parts: ({ text: string } | { inlineData: ImagePart })[] = [
-    { text: basePrompt },
-    ...inputImages.map((img) => ({ inlineData: img })),
-  ];
+  const plan = await planShots(manifest, contextText, inputImages, abortSignal);
+  usage = addUsage(usage, { promptTokenCount: plan.usage.inputTokens ?? 0, candidatesTokenCount: plan.usage.outputTokens ?? 0 });
+  const ratio = (["1:1", "4:5", "16:9", "9:16"] as const).find((r) => r === input.ratio) ?? (manifest.id === "brand-model" ? "3:4" : "1:1");
 
   const shots = await Promise.all(
-    Array.from({ length: 4 }, async (_, i) => {
+    plan.shots.map(async (shot, i) => {
       const seed = Math.floor(Math.random() * 2 ** 31);
-      const { image, usage: shotUsage } = await generateOneImage(manifest, parts, seed, abortSignal);
+      const text = [shot.prompt, plan.modelDescription && `Model (same person in every shot): ${plan.modelDescription}.`, inputImages.length ? "Keep the product exactly as in the attached reference photo." : ""]
+        .filter(Boolean)
+        .join(" ");
+      const parts: ({ text: string } | { inlineData: ImagePart })[] = [{ text }, ...inputImages.map((img) => ({ inlineData: img }))];
+      const { image, usage: shotUsage } = await generateOneImage(manifest, parts, seed, abortSignal, ratio);
       usage = addUsage(usage, { promptTokenCount: shotUsage.inputTokens ?? 0, candidatesTokenCount: shotUsage.outputTokens ?? 0 });
       const ext = image.mimeType.includes("png") ? "png" : image.mimeType.includes("webp") ? "webp" : "jpg";
       const path = `${storage.userId}/${manifest.id}/${storage.runId}/${i}.${ext}`;
@@ -357,7 +440,7 @@ async function generateImages(
         .createSignedUrl(path, 60 * 60 * 24 * 365);
       if (signError || !signed) throw new Error(`이미지 URL 생성 실패: ${signError?.message ?? "알 수 없는 오류"}`);
 
-      return { path, url: signed.signedUrl, seed };
+      return { path, url: signed.signedUrl, seed, name: shot.name, purpose: shot.purpose, prompt: shot.prompt };
     }),
   );
 
@@ -375,8 +458,8 @@ async function generateImages(
 
   return {
     output: {
-      images: shots.map((s) => ({ asset_id: s.path, url: s.url, seed: String(s.seed) })),
-      refined_prompt: basePrompt,
+      images: shots.map((s) => ({ asset_id: s.path, url: s.url, seed: String(s.seed), name: s.name, purpose: s.purpose })),
+      refined_prompt: shots.map((s, i) => `${i + 1}. ${s.prompt}`).join("\n"),
       negative_prompt: "blurry, low quality, watermark, text artifacts",
     },
     sources: [],
@@ -443,8 +526,41 @@ async function* generateStructured(
   if (!parsed.success) {
     throw new Error(`모델 응답이 예상한 형식과 다릅니다: ${parsed.error.issues[0]?.message ?? "unknown"}`);
   }
+  let final: unknown = parsed.data;
 
-  yield { type: "done", result: { output: parsed.data, sources, usage } };
+  // Editor pass: a strict reviewer rewrites the weak parts of the draft
+  // against the tool's bar. Drafts read fine but generic; this is where
+  // they get specific. Best effort — the draft stands if it fails.
+  if (getPlaybook(manifest.id)?.revise) {
+    try {
+      const revised = await ai.models.generateContent({
+        model: TEXT_MODEL,
+        contents: [
+          {
+            role: "user",
+            parts: [
+              { text: `[입력과 프로필]\n${contextText}${groundingBlock}\n\n[초안]\n${JSON.stringify(parsed.data)}` },
+              ...inputImages.map((img) => ({ inlineData: img })),
+            ],
+          },
+        ],
+        config: {
+          systemInstruction: buildReviseInstruction(manifest),
+          responseMimeType: "application/json",
+          responseJsonSchema: jsonSchema,
+          maxOutputTokens: 32_768,
+          abortSignal,
+        },
+      });
+      usage = addUsage(usage, revised.usageMetadata);
+      const again = manifest.outputSchema.safeParse(JSON.parse(revised.text ?? ""));
+      if (again.success) final = again.data;
+    } catch (err) {
+      if (abortSignal?.aborted) throw err;
+    }
+  }
+
+  yield { type: "done", result: { output: final, sources, usage } };
 }
 
 export const geminiAdapter: AiAdapter = {

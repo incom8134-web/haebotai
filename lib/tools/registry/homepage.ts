@@ -60,8 +60,8 @@ export const homepage: ToolManifest<z.infer<typeof outputSchema>> = {
   acceptsChainFrom: [],
   outputSchema,
   outputRenderer: "code",
-  grounding: { requireSources: false, webSearch: false, estimateBadge: false },
-  model: "gemini-3.6-flash",
+  grounding: { requireSources: false, webSearch: true, estimateBadge: false },
+  model: "gemini-3.8-flash",
   estimatedCredits: 50,
   estimatedSeconds: 70,
 };

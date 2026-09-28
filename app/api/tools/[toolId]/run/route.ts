@@ -22,6 +22,10 @@ import { runLimiter, checkRateLimit } from "@/lib/rate-limit";
 // bypasses RLS entirely; that ownership check no longer happens for free.
 const admin = createAdminClient();
 
+// Research + draft + editor pass (+ images for some tools) can run past
+// a minute; allow up to the Vercel plan maximum.
+export const maxDuration = 300;
+
 // HAEBOT_A_TOOLS_SPEC.md §3.2 / T2 — one code path for every tool:
 // validate → reserve credits → persist the run row → stream → settle.
 // The run row is written before generation starts, so a dropped

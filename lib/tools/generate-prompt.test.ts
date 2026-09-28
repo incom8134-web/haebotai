@@ -32,7 +32,7 @@ function fakeManifest(overrides: Partial<ToolManifest> = {}): ToolManifest {
     outputSchema: {} as ToolManifest["outputSchema"],
     outputRenderer: "document",
     grounding: { requireSources: false, webSearch: false, estimateBadge: false },
-    model: "gemini-3.6-flash",
+    model: "gemini-3.8-flash",
     estimatedCredits: 10,
     estimatedSeconds: 10,
     ...overrides,

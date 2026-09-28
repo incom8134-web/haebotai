@@ -12,6 +12,12 @@ export interface Playbook {
   method: string[];
   /** What a finished, usable result must contain. */
   bar: string[];
+  /** What to look up on the web before writing (tools with webSearch). */
+  research?: string;
+  /** Weak line → strong line pairs: shows the bar instead of describing it. */
+  examples?: { bad: string; good: string }[];
+  /** Run the editor pass (draft → critique → rewrite). Default true. */
+  revise?: boolean;
 }
 
 // Applies to every text tool, before the tool's own playbook.
@@ -160,6 +166,66 @@ export const PLAYBOOKS: Record<string, Playbook> = {
   },
 };
 
+// What each tool researches before writing. Generic "find the latest
+// facts" searches returned generic facts; these name what an expert
+// would actually check first.
+const RESEARCH: Record<string, string> = {
+  strategy: "이 지역·업종의 최근 소비 트렌드와 수치, 입력된 경쟁 브랜드 각각의 현재 대표 메뉴·가격대·최근 캠페인·고객 불만(리뷰에서 반복되는 말), 이 고객층이 요즘 쓰는 채널",
+  copy: "이 업종 경쟁 브랜드들이 지금 쓰는 광고 문구와 프로모션(피해야 할 뻔한 표현을 찾기 위해), 이 고객층이 리뷰·SNS에서 실제로 쓰는 표현",
+  blog: "이 주제로 네이버에서 상위에 노출된 글들이 다루는 질문과 구성, 빠진 정보, 이 지역·주제의 최신 사실(가격, 운영 정보, 시즌 이슈)",
+  homepage: "이 업종 잘 만든 브랜드 사이트들의 섹션 구성과 예약·주문 흐름, 이 고객층이 방문 전에 확인하는 정보",
+  place: "이 지역에서 이 업종을 찾을 때 쓰는 실제 검색어, 상위 노출된 경쟁 가게들의 소개글·사진·메뉴 구성과 리뷰에서 반복되는 칭찬·불만",
+  sangsepage: "같은 제품군의 스마트스토어·쿠팡 상위 상품 상세페이지 구성, 구매 리뷰에서 반복되는 의심과 불만, 가격대",
+  keyword: "이 업종·지역 관련 네이버·구글 연관 검색어와 검색 의도, 계절성, 경쟁이 적은 롱테일 질문형 키워드",
+  money: "이 사람의 기술로 실제 돈을 버는 국내 사례와 가격대, 플랫폼 수수료, 초기 비용",
+  proposal: "제안 대상 조직의 업종 현황과 비슷한 제안의 일반적인 가격·기간",
+  "business-plan": "시장 규모·성장률 공식 통계, 경쟁사 현황, 해당 지원사업·투자 심사에서 보는 기준",
+  trend: "각 아이디어의 검색 추이, 시장 규모, 경쟁 강도, 실제 판매 가격대",
+};
+
+const EXAMPLES: Record<string, { bad: string; good: string }[]> = {
+  strategy: [
+    { bad: "SNS 마케팅을 강화해 인지도를 높입니다.", good: "개업 3주 차까지 인스타 릴스 9편(딸기 손질 3·굽는 과정 3·단골 한마디 3)을 화·목·토 저녁 7시에 올리고, 저장 수 50 이상인 편만 3만 원씩 동네 광고로 돌립니다." },
+    { bad: "품질과 신선함으로 차별화합니다.", good: "'오늘 아침 딸기 소진 시 마감'을 매일 5시에 카카오 채널로 알려, 신선함을 주장이 아니라 매일 보이는 사실로 만듭니다." },
+    { bad: "타겟: 20~30대 여성", good: "평일 저녁 7시, 야근 후 '오늘 고생했다'는 핑계가 필요한 성수동 IT 회사 직장인 — 편의점 디저트 대신 쓸 8천 원이 있다." },
+  ],
+  copy: [
+    { bad: "최고의 맛, 특별한 딸기 타르트를 만나보세요!", good: "오늘 아침 7시에 들어온 딸기 42알. 저녁 8시면 없습니다." },
+    { bad: "지금 바로 방문하세요!", good: "퇴근길 카카오톡으로 '딸기'만 보내면 7시 반에 포장해 둘게요." },
+  ],
+  blog: [
+    { bad: "성수동에는 맛있는 디저트 카페가 많습니다. 오늘은 그중 한 곳을 소개합니다.", good: "성수역 4번 출구에서 걸어서 6분, 오후 5시쯤 가면 딸기 타르트가 두세 개 남아 있을 때가 많아요. 8시 전에 거의 다 나가서요." },
+  ],
+  homepage: [
+    { bad: "최고의 품질로 고객 만족을 실현합니다", good: "딸기가 들어온 날만 굽습니다. 오늘 수량은 매일 아침 9시 여기 올려요." },
+    { bad: "문의하기", good: "오늘 7시 픽업 예약하기" },
+  ],
+  place: [
+    { bad: "맛있는 디저트 카페입니다. 많은 방문 부탁드립니다.", good: "성수동 수제 딸기 디저트 | 당일 들어온 딸기로만 굽는 타르트·쇼트케이크, 퇴근길 포장 7시 예약 가능, 홀케이크 레터링 무료" },
+  ],
+  sangsepage: [
+    { bad: "신선한 딸기를 사용한 프리미엄 타르트", good: "배송 전날 밤에 구워, 아이스팩 2개와 함께 보냅니다 — 받은 날 저녁까지가 가장 맛있어요." },
+  ],
+  logo: [
+    { bad: "딸기 모양 아이콘 + 브랜드명", good: "초승달의 안쪽 곡선이 딸기의 윤곽이 되는 하나의 형태 — 이름의 '달빛'과 제품의 '딸기'를 한 번에 읽히게 하고, 32px 파비콘에서도 실루엣이 남는다." },
+  ],
+  presentation: [
+    { bad: "슬라이드 제목: 시장 현황", good: "슬라이드 제목: 평일 저녁 디저트 수요는 늘었는데, 동네엔 사 갈 곳이 없다" },
+  ],
+  proposal: [
+    { bad: "귀사의 발전에 기여하겠습니다.", good: "주 2회 오후 3시 간식 납품으로, 현재 편의점 간식 구매에 드는 월 약 60만 원(추정)을 같은 예산 안에서 대체합니다." },
+  ],
+  money: [
+    { bad: "온라인 강의를 판매해 보세요.", good: "지금 쓰는 엑셀 재고표를 템플릿으로 정리해 크몽에 1만 9천 원에 올리고, 첫 주에 스마트스토어 셀러 카페 3곳에 사용 후기를 올립니다." },
+  ],
+};
+
+// A second pass over a single long HTML page would double an already
+// slow run for little gain; prompt output is short and literal.
+const NO_REVISE = new Set(["homepage", "prompt"]);
+
 export function getPlaybook(toolId: string): Playbook | undefined {
-  return PLAYBOOKS[toolId];
+  const base = PLAYBOOKS[toolId];
+  if (!base) return undefined;
+  return { ...base, research: RESEARCH[toolId], examples: EXAMPLES[toolId], revise: !NO_REVISE.has(toolId) };
 }

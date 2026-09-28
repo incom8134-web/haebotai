@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readdirSync } from "node:fs";
 import { PLAYBOOKS } from "./playbooks.ts";
-import { buildImageSystemInstruction, buildSystemInstruction } from "./generate-prompt.ts";
+import { buildImageSystemInstruction, buildResearchPrompt, buildReviseInstruction, buildSystemInstruction } from "./generate-prompt.ts";
 import type { ToolManifest } from "./types.ts";
 
 // Registry files are tool ids (lib/tools/registry/<id>.ts); grant is a
@@ -35,4 +35,20 @@ test("image prompts skip the text-only house rules", () => {
   const s = buildImageSystemInstruction(manifest("image"));
   assert.match(s, /커머셜 포토그래퍼/);
   assert.doesNotMatch(s, /\[작업 원칙\]/);
+});
+
+test("text prompts show weak-vs-strong examples where a tool has them", () => {
+  assert.match(buildSystemInstruction(manifest("copy")), /\[수준 예시\][\s\S]*나쁜 예: [\s\S]*좋은 예: /);
+});
+
+test("research step uses the tool's research brief", () => {
+  assert.match(buildResearchPrompt(manifest("strategy"), "- 업종: 카페"), /경쟁 브랜드 각각의 현재 대표 메뉴/);
+  assert.match(buildResearchPrompt(manifest("calendar"), "- x"), /최신 사실 정보/);
+});
+
+test("editor pass reviews against the tool's bar and returns only JSON", () => {
+  const s = buildReviseInstruction(manifest("strategy"));
+  assert.match(s, /까다로운 시니어 에디터/);
+  assert.match(s, /\[이 도구의 완성 기준\]/);
+  assert.match(s, /오직 지정된 JSON 스키마/);
 });

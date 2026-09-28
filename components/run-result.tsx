@@ -113,16 +113,23 @@ function OutputPreview({ output, input }: { output: unknown; input?: Record<stri
 
   const imageList = (o.rendered_images ?? o.images ?? o.shots) as unknown;
   if (Array.isArray(imageList) && imageList.length > 0) {
-    const urls = imageList
-      .map((item) => (typeof item === "string" ? item : (item as { url?: string })?.url))
-      .filter((u): u is string => typeof u === "string");
+    const items = imageList
+      .map((item) => (typeof item === "string" ? { url: item } : (item as { url?: string; name?: string; purpose?: string })))
+      .filter((it): it is { url: string; name?: string; purpose?: string } => typeof it?.url === "string");
+    const urls = items.map((it) => it.url);
     if (urls.length > 0) {
       return (
         <div className="mt-2 grid grid-cols-2 gap-2">
           {urls.map((url, i) => (
             <div key={i} className="flex flex-col gap-1.5">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={url} alt="" className="w-full rounded-xl border border-hairline" />
+              <img src={url} alt={items[i].name ?? ""} className="w-full rounded-xl border border-hairline" />
+              {items[i].name ? (
+                <p className="text-xs">
+                  <span className="font-medium">{items[i].name}</span>
+                  {items[i].purpose ? <span className="text-fg-muted"> — {items[i].purpose}</span> : null}
+                </p>
+              ) : null}
               <DownloadLink
                 label="다운로드"
                 onClick={() => downloadFromUrl(`image-${i + 1}.${guessImageExt(url)}`, url)}

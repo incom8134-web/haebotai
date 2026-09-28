@@ -51,7 +51,7 @@ export const calendar: ToolManifest<z.infer<typeof outputSchema>> = {
   outputSchema,
   outputRenderer: "calendar",
   grounding: { requireSources: false, webSearch: false, estimateBadge: false },
-  model: "gemini-3.6-flash",
+  model: "gemini-3.8-flash",
   estimatedCredits: 25,
   estimatedSeconds: 30,
 };
