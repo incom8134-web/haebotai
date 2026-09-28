@@ -1,6 +1,7 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type { PlanId } from "@/lib/site/plans";
+import { getCurrentUser } from "@/lib/supabase/user";
 
 export interface Membership {
   plan: PlanId;
@@ -11,9 +12,7 @@ export interface Membership {
 
 export async function getMembership(): Promise<Membership> {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   const empty: Membership = { plan: "free", expiresAt: null, daysLeft: null, studentRequest: null };
   if (!user) return empty;
 

@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getCurrentUser } from "@/lib/supabase/user";
 
 // HAEBOT_A_TOOLS_SPEC.md §3.4 — visible, honest credits. Reserve before
 // the model call, settle against actual usage after.
@@ -17,9 +18,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function getBalance(): Promise<number | null> {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) return null;
 
   const { data } = await supabase.from("user_credits").select("balance").eq("user_id", user.id).maybeSingle();

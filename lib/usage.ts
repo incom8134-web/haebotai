@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/supabase/user";
 
 export interface ToolUsage {
   toolId: string;
@@ -10,9 +11,7 @@ export interface ToolUsage {
 /** This calendar month's finished runs, grouped by tool, for /account/credits. */
 export async function getMonthlyUsage(): Promise<{ totalRuns: number; totalCredits: number; byTool: ToolUsage[] }> {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) return { totalRuns: 0, totalCredits: 0, byTool: [] };
   const monthStart = new Date();
   monthStart.setDate(1);
