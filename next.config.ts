@@ -10,7 +10,13 @@ const nextConfig: NextConfig = {
   // Pretendard fonts (sangsepage render + PDF export) and pdfkit's
   // built-in font metrics.
   outputFileTracingIncludes: {
-    "/api/export/\\[runId\\]": ["./node_modules/pretendard/dist/public/static/Pretendard-{Regular,Bold}.otf", "./node_modules/pdfkit/js/data/**/*"],
+    // pptxgenjs's require("image-size") isn't picked up by the tracer.
+    "/api/export/\\[runId\\]": [
+      "./node_modules/pretendard/dist/public/static/Pretendard-{Regular,Bold}.otf",
+      "./node_modules/pdfkit/js/data/**/*",
+      "./node_modules/image-size/**/*",
+      "./node_modules/queue/**/*",
+    ],
     "/api/tools/\\[toolId\\]/run": ["./node_modules/pretendard/dist/public/static/Pretendard-{Regular,Bold,ExtraBold,Black}.otf"],
   },
   // Older URLs from the first shell pass, folded into Help / Account / Tools.

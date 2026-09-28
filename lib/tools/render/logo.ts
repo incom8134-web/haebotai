@@ -45,9 +45,9 @@ export async function renderLogoLockup(params: {
   const tree = {
     type: "div",
     props: {
-      style: { width: WIDTH, height: HEIGHT, display: "flex", alignItems: "center", justifyContent: "center", gap: 48, backgroundColor: "#FFFFFF", padding: 60 },
+      style: { width: WIDTH, height: HEIGHT, display: "flex", alignItems: "center", justifyContent: "center", gap: 36, backgroundColor: "#FFFFFF", padding: 60 },
       children: [
-        { type: "img", props: { src: `data:${symbol.mimeType};base64,${symbol.data}`, width: 300, height: 300, style: { objectFit: "contain" } } },
+        { type: "img", props: { src: `data:${symbol.mimeType};base64,${symbol.data}`, width: 360, height: 360, style: { objectFit: "contain" } } },
         {
           type: "span",
           props: {

@@ -9,6 +9,7 @@ import { buildPdf } from "@/lib/tools/export/pdf";
 import { buildPptx } from "@/lib/tools/export/pptx";
 import { getTool } from "@/lib/tools/registry";
 import { getBusinessProfile } from "@/lib/profile";
+import { orderLike } from "@/lib/tools/output-order";
 import type { Source } from "@/lib/tools/registry/shared";
 import { exportLimiter, checkRateLimit } from "@/lib/rate-limit";
 
@@ -79,7 +80,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const doc = buildExportDoc({
       toolName,
       toolId: run.tool_id,
-      output: run.output,
+      // Older runs were stored in whatever key order the model returned.
+      output: manifest ? orderLike(manifest.outputSchema, run.output) : run.output,
       sources: (run.sources as Source[] | null) ?? [],
       brandName: profile?.brand_name ?? null,
       createdAt: run.created_at,

@@ -6,6 +6,7 @@ import type { AiAdapter, ProviderId, TokenUsage } from "@/lib/ai/types";
 import { generateHeroImage, geminiAdapter, runWithApiKey as runWithGeminiKey } from "@/lib/ai/gemini";
 import { anthropicAdapter, runWithApiKey as runWithAnthropicKey } from "@/lib/ai/anthropic";
 import { renderSangsepage } from "./render/sangsepage";
+import { orderLike } from "./output-order";
 
 // HAEBOT_A_TOOLS_SPEC.md §3.2 — real generation for all 15 tools. Thin
 // dispatcher: provider-specific logic (search grounding, image
@@ -58,7 +59,8 @@ export async function generateOutput(
   if (!adapter) throw new Error(`${provider} 엔진은 아직 지원하지 않습니다`);
 
   if (manifest.id === "image" || manifest.id === "brand-model" || manifest.id === "logo") {
-    return adapter.generateImages(manifest, input, profile, abortSignal, storage);
+    const images = await adapter.generateImages(manifest, input, profile, abortSignal, storage);
+    return { ...images, output: orderLike(manifest.outputSchema, images.output) };
   }
 
   let result: { output: unknown; sources: Source[]; usage: TokenUsage } | undefined;
@@ -98,5 +100,5 @@ export async function generateOutput(
     output = { ...page, html: page.html.replaceAll("{{HERO_IMAGE_URL}}", heroUrl) };
   }
 
-  return { output, sources: result.sources, usage };
+  return { output: orderLike(manifest.outputSchema, output), sources: result.sources, usage };
 }
