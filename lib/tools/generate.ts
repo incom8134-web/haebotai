@@ -4,7 +4,7 @@ import type { BusinessProfile, ToolManifest } from "./types";
 import type { Source } from "./registry/shared";
 import type { AiAdapter, ProviderId, TokenUsage } from "@/lib/ai/types";
 import { generateProductPhotos, geminiAdapter, runWithApiKey as runWithGeminiKey } from "@/lib/ai/gemini";
-import { addPresentationVisuals, fillMissingImages, generateHomepage } from "@/lib/ai/gemini-studio";
+import { addPresentationVisuals, addToolVisuals, fillMissingImages, generateHomepage } from "@/lib/ai/gemini-studio";
 import { buildContext, collectInputImages } from "./generate-prompt";
 import { anthropicAdapter, runWithApiKey as runWithAnthropicKey } from "@/lib/ai/anthropic";
 import { renderSangsepage } from "./render/sangsepage";
@@ -148,6 +148,16 @@ export async function generateOutput(
       abortSignal,
       storage,
     );
+    output = visuals.output;
+    usage = {
+      inputTokens: (usage.inputTokens ?? 0) + (visuals.usage.inputTokens ?? 0),
+      outputTokens: (usage.outputTokens ?? 0) + (visuals.usage.outputTokens ?? 0),
+    };
+  }
+
+  // Blog photos, campaign ad visuals, strategy mood board (Gemini only).
+  if (provider === "google" && (manifest.id === "blog" || manifest.id === "copy" || manifest.id === "strategy")) {
+    const visuals = await addToolVisuals(manifest.id, output, buildContext(manifest, input, profile), abortSignal, storage);
     output = visuals.output;
     usage = {
       inputTokens: (usage.inputTokens ?? 0) + (visuals.usage.inputTokens ?? 0),

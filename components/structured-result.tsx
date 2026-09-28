@@ -73,6 +73,16 @@ function StructuredField({
   if (Array.isArray(value) && value.length === 0) return null;
   const label = humanize(fieldKey);
 
+  if (typeof value === "string" && /^https?:\/\/\S+\.(png|jpe?g|webp)(\?|$)/i.test(value)) {
+    return (
+      <div>
+        <p className="font-mono text-2xs tracking-wide text-fg-subtle uppercase">{label}</p>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={value} alt={label} loading="lazy" className="mt-1.5 w-full max-w-md rounded-xl border border-hairline" />
+      </div>
+    );
+  }
+
   if (typeof value === "string") {
     return (
       <div>

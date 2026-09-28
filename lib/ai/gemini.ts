@@ -1,6 +1,6 @@
 import "server-only";
 import { AsyncLocalStorage } from "node:async_hooks";
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, ThinkingLevel } from "@google/genai";
 import type { BusinessProfile, ToolManifest } from "@/lib/tools/types";
 import type { Source } from "@/lib/tools/registry/shared";
 import { runWithRotation, type KeyRotationState } from "@/lib/tools/quota-rotation";
@@ -156,9 +156,30 @@ export async function generateOneImage(
   abortSignal: AbortSignal | undefined,
   aspectRatio?: AspectRatio,
 ): Promise<{ image: ImagePart; usage: TokenUsage }> {
+  try {
+    return await generateImageWith(manifest.model, manifest, parts, seed, abortSignal, aspectRatio);
+  } catch (err) {
+    // The Pro image model is the default; a refusal or overload there
+    // falls back to the fast model once rather than failing the shot.
+    if (abortSignal?.aborted || manifest.model === FAST_IMAGE_MODEL) throw err;
+    return generateImageWith(FAST_IMAGE_MODEL, manifest, parts, seed, abortSignal, aspectRatio);
+  }
+}
+
+const FAST_IMAGE_MODEL = "gemini-3.1-flash-image";
+export const PRO_IMAGE_MODEL = "gemini-3-pro-image";
+
+async function generateImageWith(
+  model: string,
+  manifest: ToolManifest,
+  parts: ({ text: string } | { inlineData: ImagePart })[],
+  seed: number,
+  abortSignal: AbortSignal | undefined,
+  aspectRatio?: AspectRatio,
+): Promise<{ image: ImagePart; usage: TokenUsage }> {
   const ai = getClient();
   const res = await ai.models.generateContent({
-    model: manifest.model,
+    model,
     contents: [{ role: "user", parts }],
     config: { systemInstruction: buildImageSystemInstruction(manifest), seed, abortSignal, ...(aspectRatio ? { imageConfig: { aspectRatio } } : {}) },
   });
@@ -183,7 +204,7 @@ export async function generateProductPhotos(
   references: ImagePart[],
   abortSignal: AbortSignal | undefined,
 ): Promise<{ photos: (string | null)[]; usage: TokenUsage }> {
-  const photoManifest = { id: "image", name_ko: "해봇 상세페이지", summary: "상세페이지 제품 사진", model: "gemini-3.1-flash-image" } as ToolManifest;
+  const photoManifest = { id: "image", name_ko: "해봇 상세페이지", summary: "상세페이지 제품 사진", model: PRO_IMAGE_MODEL } as ToolManifest;
   let usage: TokenUsage = { inputTokens: 0, outputTokens: 0 };
   const photos = await Promise.all(
     prompts.map(async ({ prompt, ratio }) => {
@@ -207,7 +228,7 @@ export async function generateProductPhotos(
 // self-contained (no signed URL that expires). Called from generate.ts
 // after the page itself is written.
 export async function generateHeroImage(prompt: string, abortSignal: AbortSignal | undefined): Promise<{ dataUrl: string; usage: TokenUsage }> {
-  const heroManifest = { id: "image", name_ko: "해봇 홈페이지", summary: "홈페이지 히어로 사진", model: "gemini-3.1-flash-image" } as ToolManifest;
+  const heroManifest = { id: "image", name_ko: "해봇 홈페이지", summary: "홈페이지 히어로 사진", model: PRO_IMAGE_MODEL } as ToolManifest;
   const { image, usage } = await generateOneImage(
     heroManifest,
     [{ text: `Website hero photograph, wide banner composition with calm negative space on one side for a headline. ${prompt} Photorealistic, natural light, high detail. No text, no logos, no watermark.` }],
@@ -561,8 +582,10 @@ async function* generateStructured(
   // they get specific. Best effort — the draft stands if it fails.
   if (getPlaybook(manifest.id)?.revise) {
     try {
+      // Same model as the draft, so the editor never writes below it;
+      // light thinking, since the draft already did the reasoning.
       const revised = await ai.models.generateContent({
-        model: TEXT_MODEL,
+        model: manifest.model,
         contents: [
           {
             role: "user",
@@ -577,6 +600,7 @@ async function* generateStructured(
           responseMimeType: "application/json",
           responseJsonSchema: jsonSchema,
           maxOutputTokens: 32_768,
+          ...(manifest.model.includes("pro") ? { thinkingConfig: { thinkingLevel: ThinkingLevel.LOW } } : {}),
           abortSignal,
         },
       });

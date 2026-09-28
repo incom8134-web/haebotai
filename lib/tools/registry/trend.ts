@@ -40,7 +40,7 @@ export const trend: ToolManifest = {
   acceptsChainFrom: ["money"],
   outputRenderer: "cards",
   grounding: { requireSources: true, webSearch: true, estimateBadge: true },
-  model: "gemini-3.8-flash",
-  estimatedCredits: 40,
-  estimatedSeconds: 45,
+  model: "gemini-3.1-pro-preview",
+  estimatedCredits: 50,
+  estimatedSeconds: 115,
 };

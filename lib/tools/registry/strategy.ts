@@ -22,7 +22,7 @@ export const strategy: ToolManifest = {
   acceptsChainFrom: ["trend", "money"],
   outputRenderer: "document",
   grounding: { requireSources: true, webSearch: true, estimateBadge: true },
-  model: "gemini-3.8-flash",
-  estimatedCredits: 30,
-  estimatedSeconds: 60,
+  model: "gemini-3.1-pro-preview",
+  estimatedCredits: 50,
+  estimatedSeconds: 150,
 };

@@ -725,6 +725,11 @@ function renderValue(ctx: Ctx, key: string, value: unknown, title: string, kicke
     return;
   }
 
+  if (typeof value === "string" && imageUrl(value)) {
+    const img = ctx.images.get(imageUrl(value)!);
+    if (img) deck.image(kicker, title, [{ img }], color);
+    return;
+  }
   if (typeof value === "string") {
     const t = value.trim();
     if (key === "body_markdown") return renderMarkdown(ctx, t, title, kicker, color);
@@ -832,7 +837,7 @@ function renderObjects(ctx: Ctx, key: string, objs: Obj[], title: string, kicker
   }
 
   // Items that carry their own picture (logo concepts, product shots)
-  const imgKey = ["image", "url"].find((k) => objs.every((o) => imageUrl(k === "url" ? o : o[k])));
+  const imgKey = ["image", "image_url", "url"].find((k) => objs.filter((o) => imageUrl(k === "url" ? o : o[k])).length >= Math.ceil(objs.length / 2));
   if (imgKey) {
     const textual = objs.some((o) => fieldsOf(o, []).some(([k, v]) => k !== imgKey && typeof v === "string" && v.length > 40));
     if (textual) {

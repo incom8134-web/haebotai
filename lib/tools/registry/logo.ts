@@ -45,7 +45,7 @@ export const logo: ToolManifest = {
   acceptsChainFrom: [],
   outputRenderer: "images",
   grounding: { requireSources: false, webSearch: false, estimateBadge: false },
-  model: "gemini-3.1-flash-image",
-  estimatedCredits: 40,
-  estimatedSeconds: 40,
+  model: "gemini-3-pro-image",
+  estimatedCredits: 45,
+  estimatedSeconds: 45,
 };
