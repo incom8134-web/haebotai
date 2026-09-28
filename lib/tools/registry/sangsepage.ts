@@ -35,7 +35,7 @@ export const sangsepage: ToolManifest = {
   acceptsChainFrom: ["keyword", "image"],
   outputRenderer: "document",
   grounding: { requireSources: false, webSearch: true, estimateBadge: false },
-  model: "gemini-3.8-flash",
-  estimatedCredits: 50,
-  estimatedSeconds: 60,
+  model: "gemini-3.1-pro-preview",
+  estimatedCredits: 70,
+  estimatedSeconds: 110,
 };

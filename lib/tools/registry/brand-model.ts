@@ -69,7 +69,7 @@ export const brandModel: ToolManifest = {
   acceptsChainFrom: [],
   outputRenderer: "images",
   grounding: { requireSources: false, webSearch: false, estimateBadge: false },
-  model: "gemini-3.1-flash-image",
-  estimatedCredits: 45,
-  estimatedSeconds: 30,
+  model: "gemini-3-pro-image",
+  estimatedCredits: 50,
+  estimatedSeconds: 35,
 };

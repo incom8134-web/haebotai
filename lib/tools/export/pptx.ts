@@ -39,6 +39,21 @@ const PALETTE = [
 ] as const;
 type Color = (typeof PALETTE)[number];
 const colorAt = (i: number): Color => PALETTE[((i % PALETTE.length) + PALETTE.length) % PALETTE.length];
+
+/** Blend a hex color toward another (t = 0 keeps a, 1 gives b). */
+function mix(a: string, b: string, t: number): string {
+  const pa = [0, 2, 4].map((i) => parseInt(a.slice(i, i + 2), 16));
+  const pb = [0, 2, 4].map((i) => parseInt(b.slice(i, i + 2), 16));
+  return pa.map((v, i) => Math.round(v + (pb[i] - v) * t).toString(16).padStart(2, "0")).join("").toUpperCase();
+}
+
+/** A deck palette from one brand accent: the accent, a deeper shade and a lifted tint. */
+function accentPalette(hex: string): Color[] {
+  const c = hex.replace("#", "").toUpperCase();
+  return [c, mix(c, "0E1116", 0.35), mix(c, "7A828A", 0.35)].map((x) => ({ c: x, soft: mix(x, "FFFFFF", 0.9) })) as unknown as Color[];
+}
+
+const dataUri = (img: FetchedImage) => `data:image/${img.type === "png" ? "png" : "jpeg"};base64,${img.data.toString("base64")}`;
 const pad2 = (n: number) => String(n).padStart(2, "0");
 
 // ---------------------------------------------------------------- text fit
@@ -216,6 +231,30 @@ class Deck {
     this.text(s, title, { x: M, y: 0.74, w: CW, h: 0.85, fontSize: pt, bold: true, color: INK });
     if (notes) s.addNotes(notes);
     return s;
+  }
+
+  /** Full-bleed photo, cropped to cover the box. */
+  photo(slide: Slide, img: FetchedImage, x: number, y: number, w: number, h: number) {
+    const size = imageSize(img);
+    const scale = Math.max(w / size.width, h / size.height);
+    slide.addImage({ data: dataUri(img), x, y, w: size.width * scale, h: size.height * scale, sizing: { type: "cover", w, h } });
+  }
+
+  /** Dark photo slide: the picture, a scrim for legible white type, and the accent bar. */
+  photoCover(img: FetchedImage, accent: Color, title: string, subtitle: string, kicker: string, centered = false) {
+    const s = this.pptx.addSlide();
+    s.background = { color: DARK };
+    this.page++;
+    this.photo(s, img, 0, 0, W, H);
+    this.rect(s, 0, 0, W, H, DARK, 0, { fill: { color: DARK, transparency: 45 } });
+    if (!centered) this.rect(s, 0, 0, W * 0.62, H, DARK, 0, { fill: { color: DARK, transparency: 30 } });
+    this.rect(s, 0, H - 0.14, W, 0.14, accent.c);
+    const tw = centered ? CW : 7.6;
+    const tx = centered ? M : M + 0.2;
+    if (kicker) this.text(s, kicker, { x: tx, y: centered ? 2.1 : 1.55, w: tw, h: 0.4, fontSize: 14, bold: true, color: mix(accent.c, "FFFFFF", 0.55), charSpacing: 2, align: centered ? "center" : "left" });
+    if (!centered) this.rect(s, tx, 2.05, 0.9, 0.09, accent.c);
+    this.text(s, title, { x: tx, y: centered ? 2.6 : 2.4, w: tw, h: 2.2, fontSize: fitFont(title, tw, 2.2, centered ? 40 : 44, 24), bold: true, color: "FFFFFF", align: centered ? "center" : "left", valign: centered ? "middle" : "top" });
+    this.text(s, subtitle, { x: tx, y: centered ? 4.9 : 4.75, w: tw, h: 0.5, fontSize: 16, color: "D5D9DD", align: centered ? "center" : "left" });
   }
 
   cover(title: string, subtitle: string, kicker = "해봇 AI") {
@@ -611,7 +650,6 @@ class Deck {
   }
 
   image(kicker: string, title: string, items: { img: FetchedImage; caption?: string }[], color: Color) {
-    const dataUri = (img: FetchedImage) => `data:image/${img.type === "png" ? "png" : "jpeg"};base64,${img.data.toString("base64")}`;
     for (let p = 0; p * 4 < items.length; p++) {
       const group = items.slice(p * 4, p * 4 + 4);
       const s = this.content(kicker, p ? `${title} (계속)` : title, color);
@@ -687,6 +725,11 @@ function renderValue(ctx: Ctx, key: string, value: unknown, title: string, kicke
     return;
   }
 
+  if (typeof value === "string" && imageUrl(value)) {
+    const img = ctx.images.get(imageUrl(value)!);
+    if (img) deck.image(kicker, title, [{ img }], color);
+    return;
+  }
   if (typeof value === "string") {
     const t = value.trim();
     if (key === "body_markdown") return renderMarkdown(ctx, t, title, kicker, color);
@@ -794,7 +837,7 @@ function renderObjects(ctx: Ctx, key: string, objs: Obj[], title: string, kicker
   }
 
   // Items that carry their own picture (logo concepts, product shots)
-  const imgKey = ["image", "url"].find((k) => objs.every((o) => imageUrl(k === "url" ? o : o[k])));
+  const imgKey = ["image", "image_url", "url"].find((k) => objs.filter((o) => imageUrl(k === "url" ? o : o[k])).length >= Math.ceil(objs.length / 2));
   if (imgKey) {
     const textual = objs.some((o) => fieldsOf(o, []).some(([k, v]) => k !== imgKey && typeof v === "string" && v.length > 40));
     if (textual) {
@@ -882,23 +925,47 @@ function renderMarkdown(ctx: Ctx, md: string, title: string, kicker: string, col
   for (const c of chunks) if (c.lines.length) ctx.deck.prose(kicker, c.head, c.lines, color);
 }
 
-function renderPresentation(deck: Deck, o: Obj) {
+function renderPresentation(deck: Deck, o: Obj, images: Map<string, FetchedImage>) {
   const slides = (o.slides as Obj[]).filter(isObj);
-  if (typeof o.storyline === "string" && o.storyline) deck.statement("STORYLINE", "이야기 흐름", o.storyline, PALETTE[0]);
+  // One brand accent drives the whole deck when the run chose one.
+  const pal: Color[] = typeof o.accent_color === "string" && HEX.test(o.accent_color) ? accentPalette(o.accent_color) : [...PALETTE];
+  const pc = (i: number) => pal[((i % pal.length) + pal.length) % pal.length];
+  const imgOf = (v: unknown) => (typeof v === "string" ? images.get(v) : undefined);
+  const cover = imgOf(o.cover_image_url);
+
+  if (typeof o.storyline === "string" && o.storyline) deck.statement("STORYLINE", "이야기 흐름", o.storyline, pal[0]);
   slides.forEach((sl, i) => {
-    const color = colorAt(i);
+    const color = pal.length === PALETTE.length ? colorAt(i) : pal[0];
     const headline = String(sl.headline ?? sl.title ?? `슬라이드 ${i + 1}`);
     const points = Array.isArray(sl.points) ? sl.points.map(String).filter(Boolean) : [];
     const notes = [sl.speaker_notes, sl.visual ? `[시각 자료] ${sl.visual}` : ""].filter((x) => typeof x === "string" && x).join("\n\n");
     const kicker = pad2(i + 1);
+    const photo = imgOf(sl.image_url);
     const short = points.length >= 2 && points.length <= 4 && points.every((p) => p.length <= 70);
-    if (short) {
+    if (photo) {
+      // Claim and points on the left, the slide's photo filling the right
+      const s = deck.base(kicker, color);
+      if (notes) s.addNotes(notes);
+      const imgW = 5.4;
+      deck.photo(s, photo, W - imgW, 0, imgW, H);
+      const w = W - imgW - M - 0.5;
+      deck.text(s, headline, { x: M, y: 0.8, w, h: 1.9, fontSize: fitFont(headline, w, 1.9, 30, 18), bold: true, color: INK, valign: "top", lineSpacingMultiple: 1.1 });
+      deck.rect(s, M, 2.8, 0.9, 0.08, color.c);
+      const pt = fitFont(points.join("\n"), w - 0.7, BOTTOM - 3.2 - points.length * 0.3, 18, 11);
+      let y = 3.15;
+      points.forEach((p, j) => {
+        const h = textHeight(p, pt, w - 0.7, 1.25) + 0.3;
+        deck.circle(s, M, y + 0.02, 0.42, pc(j).c, String(j + 1), 12);
+        deck.text(s, p, { x: M + 0.6, y, w: w - 0.6, h, fontSize: pt, color: BODY });
+        y += h;
+      });
+    } else if (short) {
       // Headline on top, one colored column per point
       const s = deck.content(kicker, headline, color, notes);
       const gap = 0.3;
       const w = (CW - gap * (points.length - 1)) / points.length;
       points.forEach((p, j) => {
-        const c = colorAt(i + j);
+        const c = pc(i + j);
         const x = M + j * (w + gap);
         deck.rect(s, x, TOP + 0.2, w, BOTTOM - TOP - 0.4, c.soft, 0.12);
         deck.rect(s, x, TOP + 0.2, w, 0.1, c.c);
@@ -921,13 +988,17 @@ function renderPresentation(deck: Deck, o: Obj) {
       let y = Math.max(0.8, (H - points.reduce((n, p) => n + rowH(p), 0)) / 2);
       points.forEach((p, j) => {
         const h = rowH(p);
-        deck.circle(s, x, y + 0.02, 0.46, colorAt(i + j).c, String(j + 1), 13);
+        deck.circle(s, x, y + 0.02, 0.46, pc(i + j).c, String(j + 1), 13);
         deck.text(s, p, { x: x + 0.65, y, w: w - 0.65, h, fontSize: pt, color: INK });
         y += h;
       });
     }
   });
-  if (typeof o.closing_ask === "string" && o.closing_ask) deck.closing(o.closing_ask, typeof o.title === "string" ? o.title : deck.name);
+  if (typeof o.closing_ask === "string" && o.closing_ask) {
+    const title = typeof o.title === "string" ? o.title : deck.name;
+    if (cover) deck.photoCover(cover, pal[0], o.closing_ask, title, "", true);
+    else deck.closing(o.closing_ask, title);
+  }
 }
 
 export async function buildPptx(doc: ExportDoc): Promise<Buffer> {
@@ -935,12 +1006,17 @@ export async function buildPptx(doc: ExportDoc): Promise<Buffer> {
   const isDeck = Array.isArray(o.slides) && (o.slides as unknown[]).some((s) => isObj(s) && ("headline" in s || "points" in s));
   const deckTitle = isDeck && typeof o.title === "string" && o.title ? o.title : doc.title;
   const deck = new Deck(deckTitle);
-  deck.cover(deckTitle, doc.subtitle, isDeck ? doc.title : "해봇 AI");
+  const images = await fetchAll(collectImageUrls(o));
+  const coverImg = isDeck && typeof o.cover_image_url === "string" ? images.get(o.cover_image_url) : undefined;
+  if (coverImg) {
+    const accent = typeof o.accent_color === "string" && HEX.test(o.accent_color) ? accentPalette(o.accent_color)[0] : PALETTE[0];
+    deck.photoCover(coverImg, accent, deckTitle, doc.subtitle, doc.title);
+  } else deck.cover(deckTitle, doc.subtitle, isDeck ? doc.title : "해봇 AI");
 
-  const ctx: Ctx = { deck, images: await fetchAll(collectImageUrls(o)), sources: [] };
+  const ctx: Ctx = { deck, images, sources: [] };
 
   if (isDeck) {
-    renderPresentation(deck, o);
+    renderPresentation(deck, o, images);
   } else {
     const sections = Object.entries(o).filter(([k, v]) => !SKIP_KEYS.has(k) && !SLIDE_SKIP.has(k) && !isEmpty(v) && !isSourceArray(v));
     for (const [, v] of Object.entries(o)) if (isSourceArray(v)) ctx.sources.push(...v);

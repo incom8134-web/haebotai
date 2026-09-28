@@ -405,3 +405,8 @@ p { text-wrap: pretty; }
 @keyframes page-enter { from { transform: translateY(8px); } to { transform: none; } }
 .page-enter { animation: page-enter 0.25s cubic-bezier(0.22, 1, 0.36, 1); }
 @media (prefers-reduced-motion: reduce) { .page-enter { animation: none; } }
+
+/* Run progress bar (components/run-progress.tsx): a light sweep across the fill. */
+@keyframes run-progress-shimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+.run-progress-shimmer { background: linear-gradient(90deg, transparent, oklch(1 0 0 / 45%), transparent); animation: run-progress-shimmer 1.6s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .run-progress-shimmer { animation: none; } }

@@ -16,6 +16,7 @@ import {
 import { Segmented } from "@/components/site/page";
 import { ToolForm, type ToolFormValues } from "@/components/tool-form";
 import { RunResult } from "@/components/run-result";
+import { RunProgress } from "@/components/run-progress";
 import { getTool } from "@/lib/tools/registry";
 import { CATEGORY_LABELS } from "@/lib/tools/registry/categories";
 import { seedFromChain } from "@/lib/tools/chain";
@@ -152,7 +153,6 @@ function ToolRunner({
     new Set(),
   );
   const [phase, setPhase] = useState<RunPhase>("idle");
-  const [streamedText, setStreamedText] = useState("");
   const [final, setFinal] = useState<{
     input: ToolFormValues;
     output: unknown;
@@ -179,7 +179,6 @@ function ToolRunner({
 
   async function handleRun() {
     setPhase("streaming");
-    setStreamedText("");
     setFinal(null);
     setErrorMsg(null);
     setShowCancel(false);
@@ -222,8 +221,6 @@ function ToolRunner({
           if (!line) continue;
           const event = JSON.parse(line);
           if (event.type === "status" && event.runId) runIdRef.current = event.runId;
-          else if (event.type === "chunk")
-            setStreamedText((prev) => prev + event.text);
           else if (event.type === "done") {
             setPhase("done");
             setFinal({
@@ -422,12 +419,11 @@ function ToolRunner({
       </div>
 
       {phase === "streaming" ? (
-        <div className="mt-6 glass rounded-[20px] p-4 ">
-          <p className="font-mono text-2xs text-fg-subtle">{t("running")}</p>
-          <pre className="mt-2 overflow-x-auto font-mono text-xs text-fg-muted">
-            {streamedText}
-          </pre>
-        </div>
+        <RunProgress
+          toolId={manifest.id}
+          toolName={locale === "en" ? manifest.name_en : manifest.name_ko}
+          estimatedSeconds={manifest.estimatedSeconds}
+        />
       ) : null}
 
       {phase === "done" && final ? (
