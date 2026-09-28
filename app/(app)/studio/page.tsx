@@ -1,6 +1,7 @@
 import { StudioWorkspace, type StudioRun } from "@/components/studio/studio-workspace";
 import { getBusinessProfile } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/supabase/user";
 
 // The Studio — the "one brief, a whole campaign" workspace (design ported
 // from the haebot-ai-studio prototype). Server side only gathers plain
@@ -10,9 +11,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export default async function StudioPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
 
   const [profile, runsResult] = await Promise.all([
     getBusinessProfile(),

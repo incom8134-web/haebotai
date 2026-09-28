@@ -6,6 +6,7 @@ import type { ProviderId } from "@/lib/ai/types";
 import { getOutputSchema } from "@/lib/tools/schemas";
 import { orderLike } from "@/lib/tools/output-order";
 import { z } from "zod";
+import { getCurrentUser } from "@/lib/supabase/user";
 
 // HAEBOT_A_TOOLS_SPEC.md T2 — run history is only real if a past run's
 // actual output is reachable, not just its row in the list. Reuses the
@@ -14,9 +15,7 @@ import { z } from "zod";
 export default async function LibraryRunPage({ params }: { params: Promise<{ runId: string }> }) {
   const { runId } = await params;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) notFound();
 
   const { data: run } = await supabase
