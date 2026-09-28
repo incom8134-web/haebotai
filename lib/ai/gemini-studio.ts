@@ -4,6 +4,7 @@ import type { BusinessProfile, ToolManifest } from "@/lib/tools/types";
 import type { Source } from "@/lib/tools/registry/shared";
 import { buildBaseInstruction, buildContext } from "@/lib/tools/generate-prompt";
 import { redactInventedPrices } from "@/lib/tools/price-guard";
+import { extractHtml } from "@/lib/tools/html-extract";
 import { addUsage, generateOneImage, getClient, PRO_IMAGE_MODEL, TEXT_MODEL, type AspectRatio } from "./gemini";
 import type { ImageStorageContext, TokenUsage } from "./types";
 
@@ -73,6 +74,9 @@ const DISPLAY_FONTS: Record<string, string | null> = {
   "Do Hyeon": "Do+Hyeon",
   "Gowun Dodum": "Gowun+Dodum",
 };
+
+const PRETENDARD_LINK = '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">';
+const fontLinkTag = (family: string) => `<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=${family}&display=swap">`;
 
 interface SitePlan {
   concept: string;
@@ -152,9 +156,11 @@ OUTPUT: only the HTML document, starting with <!doctype html>. No markdown fence
 
 STACK — the page must be fully self-contained and render instantly without JavaScript:
 - All styling is your own hand-written CSS in one <style> block: a design-token layer of CSS custom properties from the plan's palette (--bg, --surface, --ink, --muted, --primary, --accent), a type scale with clamp(), spacing tokens, then components and sections. Use modern CSS (grid, flex, gap, aspect-ratio, clamp, color-mix, backdrop-filter, :focus-visible, @media for 640/960/1200px). No CSS framework, no Tailwind, no CDN scripts.
-- Fonts (the only external requests): Pretendard for body — <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"> — plus the display font's Google Fonts <link> given below when it isn't Pretendard, each with a system-font fallback stack.
+- Fonts: do NOT write any font <link> or @import — the server adds them. Just use font-family "Pretendard" for body text and the plan's display font for headings, each with a system-font fallback stack.
 - Icons are small inline <svg> elements (stroke icons, currentColor, 1.75 stroke width) that you draw yourself. No icon libraries.
 - One small inline <script> at the end for the mobile menu toggle, the reveal-on-scroll IntersectionObserver and the current year; everything must still look complete if it never runs. Use word-break: keep-all and text-wrap: balance for Korean headings.
+
+ORIGINAL CODE: write this page from scratch for this business. Prefix every class name, id and CSS custom property with the site prefix given below (e.g. .PREFIX-hero, --PREFIX-ink), and do not reproduce any existing template, theme or tutorial markup.
 
 IMAGES: use exactly these placeholders as src/background URLs, each exactly once (never the same photo twice), hero first: {{IMG:hero}}, {{IMG:photo1}}, {{IMG:photo2}}, {{IMG:photo3}}. No other image URLs. Give every <img> its alt text, object-cover, and a sized, rounded container; lazy-load all but the hero.
 
@@ -182,6 +188,52 @@ function fallbackImage(p: SitePlan["palette"]): string {
 export function fillMissingImages(html: string, palette?: SitePlan["palette"]): string {
   const fb = fallbackImage(palette ?? { background: "", surface: "", text: "", muted: "", primary: "#4D7CFE", accent: "#0FA89B" });
   return html.replace(/\{\{IMG:[a-z0-9_-]+\}\}/gi, fb).replaceAll("{{HERO_IMAGE_URL}}", fb);
+}
+
+/**
+ * Writes the page. Gemini's recitation filter sometimes empties a reply
+ * that resembles existing code (portfolio templates trip it often), so
+ * two Pro attempts with different seeds and a fast-model backup run at
+ * the same time: the first Pro page wins, the backup is used only if
+ * both Pro replies were blocked. The run takes as long as one attempt.
+ */
+async function writePage(system: string, prompt: string, abortSignal: AbortSignal | undefined): Promise<{ html: string; usage: TokenUsage }> {
+  let usage = ZERO;
+  // Losing attempts are cancelled once a page is chosen (or the run is).
+  const race = new AbortController();
+  const stop = () => race.abort();
+  abortSignal?.addEventListener("abort", stop);
+  const attempt = async (model: string) => {
+    const res = await getClient().models.generateContent({
+      model,
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      config: {
+        systemInstruction: system,
+        maxOutputTokens: 65_536,
+        seed: Math.floor(Math.random() * 2 ** 31),
+        // The plan already did the thinking; low thinking keeps a full
+        // page well inside the route's 300 s budget.
+        ...(model === PRO_TEXT_MODEL ? { thinkingConfig: { thinkingLevel: ThinkingLevel.LOW } } : {}),
+        abortSignal: race.signal,
+      },
+    });
+    usage = addUsage(usage, res.usageMetadata);
+    const html = extractHtml(res.text ?? "");
+    if (!html) {
+      console.error("homepage: no page in reply", JSON.stringify({ model, finish: res.candidates?.[0]?.finishReason, block: res.promptFeedback?.blockReason, len: res.text?.length ?? 0 }));
+      throw new Error("no page");
+    }
+    return html;
+  };
+
+  const backup = attempt(TEXT_MODEL).catch(() => null);
+  const pro = await Promise.any([attempt(PRO_TEXT_MODEL), attempt(PRO_TEXT_MODEL)]).catch(() => null);
+  if (abortSignal?.aborted) throw new Error("aborted");
+  const html = pro ?? (await backup);
+  stop();
+  abortSignal?.removeEventListener("abort", stop);
+  if (!html) throw new Error("홈페이지를 만들지 못했습니다. 입력 내용을 조금 바꿔 다시 시도해 주세요.");
+  return { html, usage };
 }
 
 export async function generateHomepage(
@@ -212,9 +264,6 @@ export async function generateHomepage(
   usage = sumUsage(usage, planUsage);
 
   const palette = plan.palette;
-  const fontLink = DISPLAY_FONTS[plan.display_font]
-    ? `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=${DISPLAY_FONTS[plan.display_font]}&display=swap">`
-    : "(display font is Pretendard — no extra link)";
 
   const system = [
     SITE_BRIEF,
@@ -223,26 +272,27 @@ export async function generateHomepage(
     ...buildBaseInstruction(manifest).slice(1),
   ].join("\n");
 
-  const pagePrompt = `[Art director's plan]\n${JSON.stringify(plan, null, 2)}\n\nDisplay font link: ${fontLink}\n\n[Business input and profile]\n${brief}\n\nBuild the complete site now.`;
+  // A random class prefix keeps the markup original, which also keeps
+  // Gemini's recitation filter (it blocks output that matches known
+  // code — common for portfolio templates) from emptying the reply.
+  const prefix = `h${Math.random().toString(36).slice(2, 5)}`;
+  const pagePrompt = `[Art director's plan]\n${JSON.stringify(plan, null, 2)}\n\nSite prefix for every class, id and CSS variable: ${prefix}\n\n[Business input and profile]\n${brief}\n\nBuild the complete site now.`;
 
   // Photos and the page are made at the same time; the page only needs
   // the placeholder names.
   const [page, ...shots] = await Promise.all([
-    getClient().models.generateContent({
-      model: PRO_TEXT_MODEL,
-      contents: [{ role: "user", parts: [{ text: pagePrompt }] }],
-      // The plan already did the thinking; low thinking keeps a full page
-      // well inside the route's 300 s budget.
-      config: { systemInstruction: system, maxOutputTokens: 65_536, thinkingConfig: { thinkingLevel: ThinkingLevel.LOW }, abortSignal },
-    }),
+    writePage(system, pagePrompt, abortSignal),
     ...plan.images.map((img) => shoot(img.prompt, img.ratio, img.id, "homepage", storage, abortSignal)),
   ]);
-  usage = addUsage(usage, page.usageMetadata);
+  usage = sumUsage(usage, page.usage);
   shots.forEach((s) => (usage = sumUsage(usage, s.usage)));
   console.info(`homepage: plan+page+photos in ${Math.round((Date.now() - started) / 1000)}s, photos ${shots.filter((s) => s.url).length}/${shots.length}`);
 
-  let html = (page.text ?? "").trim().replace(/^```(?:html)?\s*/i, "").replace(/```\s*$/, "").trim();
-  if (!/<html[\s>]/i.test(html)) throw new Error("홈페이지 HTML을 만들지 못했습니다");
+  let html = page.html;
+  // Font links are added here rather than written by the model: exact,
+  // widely copied lines like these are what trips the recitation filter.
+  const fonts = [PRETENDARD_LINK, ...(DISPLAY_FONTS[plan.display_font] ? [fontLinkTag(DISPLAY_FONTS[plan.display_font]!)] : [])].join("\n");
+  html = /<\/head>/i.test(html) ? html.replace(/<\/head>/i, `${fonts}\n</head>`) : html.replace(/<body/i, `<head>${fonts}</head>\n<body`);
   plan.images.forEach((img, i) => {
     const url = shots[i].url;
     if (url) html = html.replaceAll(`{{IMG:${img.id}}}`, url);
