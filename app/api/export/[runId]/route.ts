@@ -1,6 +1,5 @@
 import type { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { buildProposalDocx, buildBusinessPlanDocx } from "@/lib/tools/export/docx";
 import { buildBusinessPlanXlsx } from "@/lib/tools/export/xlsx";
 import { buildExportDoc } from "@/lib/tools/export/document";
 import { buildGenericDocx } from "@/lib/tools/export/generic-docx";
@@ -14,9 +13,9 @@ import { getOutputSchema } from "@/lib/tools/schemas";
 import { z } from "zod";
 
 // Every finished run exports to .md / .docx / .pdf / .pptx through one
-// document model (lib/tools/export/document.ts); proposal and
-// business-plan keep their bespoke .docx layouts, and business-plan adds
-// the financial .xlsx (HAEBOT_A_TOOLS_SPEC.md §5.1 / §5.2). Generated server-side (docx/exceljs stay out of the
+// document model (lib/tools/export/document.ts) — for the data tools
+// that model carries the same report (KPI tiles, tables, charts) as the
+// result page — and business-plan adds the financial .xlsx (HAEBOT_A_TOOLS_SPEC.md §5.1 / §5.2). Generated server-side (docx/exceljs stay out of the
 // client bundle) from the already-persisted run row, keyed by runId so
 // this works identically for a just-finished run and one from history.
 
@@ -79,11 +78,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   const filename = `${toolName}-${date}.${format}`;
 
   let buffer: Buffer;
-  if (run.tool_id === "proposal" && format === "docx") {
-    buffer = await buildProposalDocx(run.output);
-  } else if (run.tool_id === "business-plan" && format === "docx") {
-    buffer = await buildBusinessPlanDocx(run.output);
-  } else if (format === "xlsx") {
+  if (format === "xlsx") {
     if (run.tool_id !== "business-plan") return fail(request, 400, "이 도구는 해당 형식으로 내보낼 수 없습니다");
     buffer = await buildBusinessPlanXlsx(run.output, run.input ?? {});
   } else {
@@ -93,6 +88,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       toolId: run.tool_id,
       // Older runs were stored in whatever key order the model returned.
       output: orderLike(getOutputSchema(run.tool_id) ?? z.unknown(), run.output),
+      input: run.input,
       sources: (run.sources as Source[] | null) ?? [],
       brandName: profile?.brand_name ?? null,
       createdAt: run.created_at,

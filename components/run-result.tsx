@@ -30,6 +30,8 @@ import { SlideDeck, type DeckOutput } from "@/components/results/slide-deck";
 import { BlogArticle, type BlogOutput } from "@/components/results/blog-article";
 import { AdCreatives, type CopyOutput } from "@/components/results/ad-creatives";
 import { MoodBoard } from "@/components/results/mood-board";
+import { ReportView } from "@/components/results/report-view";
+import { buildReport } from "@/lib/tools/report";
 import { useLocale, useT } from "@/lib/i18n/context";
 import type { Source } from "@/lib/tools/registry/shared";
 import type { ToolManifest } from "@/lib/tools/types";
@@ -288,8 +290,18 @@ interface LogoConcept {
   symbol_image?: { url: string };
 }
 
-function OutputPreview({ output }: { output: unknown }) {
+function OutputPreview({ output, toolId, input }: { output: unknown; toolId?: string; input?: Record<string, unknown> }) {
   const o = output as Record<string, unknown>;
+
+  const report = toolId ? buildReport(toolId, o, input) : null;
+  if (report) {
+    return (
+      <>
+        {Array.isArray(o.mood_board) ? <MoodBoard images={o.mood_board as { url: string; caption?: string }[]} /> : null}
+        <ReportView report={report} />
+      </>
+    );
+  }
 
   if (typeof o.html === "string") {
     return <SitePreview html={o.html} design={o.design as Parameters<typeof SitePreview>[0]["design"]} />;
@@ -459,7 +471,7 @@ function RunResult({
 
       <DownloadPanel runId={runId} toolId={manifest.id} extras={extras} />
 
-      <OutputPreview output={shown} />
+      <OutputPreview output={shown} toolId={manifest.id} input={input} />
 
       <DownloadPanel runId={runId} toolId={manifest.id} extras={extras} compact />
 
