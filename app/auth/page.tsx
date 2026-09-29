@@ -95,11 +95,11 @@ function AuthCard() {
       </ul>
 
       <p className="mt-6 text-2xs leading-relaxed break-keep text-fg-subtle">
-        {L({ ko: "계속하면 ", en: "By continuing you agree to the " })}
+        {L({ ko: "처음 로그인하면 만 14세 이상 여부와 ", en: "On first sign-in we'll ask you to confirm you're 14 or older and accept the " })}
         <Link href="/legal/terms" className="underline underline-offset-2 hover:text-fg">{L({ ko: "이용약관", en: "Terms" })}</Link>
-        {L({ ko: "과 ", en: " and " })}
+        {L({ ko: "·", en: " and " })}
         <Link href="/legal/privacy" className="underline underline-offset-2 hover:text-fg">{L({ ko: "개인정보 처리방침", en: "Privacy Policy" })}</Link>
-        {L({ ko: "에 동의하게 됩니다. 만 14세 이상만 가입할 수 있어요. 입력한 내용은 AI 학습에 쓰지 않아요.", en: ". You must be 14 or older. Your inputs are never used for AI training." })}
+        {L({ ko: " 동의를 확인해요. 만 14세 미만은 가입할 수 없어요. 입력한 내용은 AI 학습에 쓰지 않아요.", en: ". Under-14s can't sign up. Your inputs are never used for AI training." })}
       </p>
     </motion.div>
   );

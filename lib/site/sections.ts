@@ -12,6 +12,8 @@ export const HELP_NAV: SubNavItem[] = [
   { href: "/help/contact", label: { ko: "고객센터", en: "Customer service" }, icon: "headset" },
   { href: "/help/api-guide", label: { ko: "API 키 설명서", en: "API key manual" }, icon: "book-open-text" },
   { href: "/help/whats-new", label: { ko: "새로운 점", en: "What's new" }, icon: "sparkle" },
+  { href: "/help/shortcuts", label: { ko: "단축키", en: "Shortcuts" }, icon: "keyboard" },
+  { href: "/status", label: { ko: "서비스 상태", en: "Status" }, icon: "activity" },
 ];
 
 export const ACCOUNT_NAV: SubNavItem[] = [
@@ -19,6 +21,7 @@ export const ACCOUNT_NAV: SubNavItem[] = [
   { href: "/account/credits", label: { ko: "크레딧·한도", en: "Credits & limits" }, icon: "circle-gauge" },
   { href: "/account/membership", label: { ko: "학생 멤버십", en: "Student membership" }, icon: "crown" },
   { href: "/account/api-key", label: { ko: "내 API 키", en: "My API key" }, icon: "key-round" },
+  { href: "/account/referral", label: { ko: "친구 초대", en: "Invite friends" }, icon: "gift" },
 ];
 
 export const LEGAL_NAV: SubNavItem[] = [

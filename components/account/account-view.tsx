@@ -8,7 +8,7 @@ import { PLANS } from "@/lib/site/plans";
 import { requestStudentVerification, type StudentRequestState } from "@/lib/actions/membership";
 import { deleteApiKey, saveApiKey, testApiKey, type ApiKeyActionState } from "@/lib/actions/api-keys";
 import { useBi } from "@/lib/i18n/context";
-import type { Membership } from "@/lib/membership";
+import type { Membership, PaymentRecord } from "@/lib/membership";
 import type { ApiKeyPriority, ApiKeyProvider, ApiKeySlot, ApiKeyStatus } from "@/lib/api-keys";
 import { getToolCapability } from "@/lib/ai/capabilities";
 import { listTools } from "@/lib/tools/registry";
@@ -171,7 +171,7 @@ function DeleteAccountPanel({ balance }: { balance: number | null }) {
   );
 }
 
-function MembershipPanel({ membership }: { membership: Membership }) {
+function MembershipPanel({ membership, payments }: { membership: Membership; payments: PaymentRecord[] }) {
   const L = useBi();
   const [studentState, studentAction, studentPending] = useActionState<StudentRequestState, FormData>(requestStudentVerification, null);
   const request = studentState?.ok ? "pending" : membership.studentRequest;
@@ -229,7 +229,53 @@ function MembershipPanel({ membership }: { membership: Membership }) {
         </div>
       </section>
 
+      {payments.length > 0 ? <PaymentHistory payments={payments} /> : null}
     </>
+  );
+}
+
+const PAYMENT_STATUS: Record<PaymentRecord["status"], { ko: string; en: string }> = {
+  done: { ko: "결제 완료", en: "Paid" },
+  pending: { ko: "확인 중", en: "Confirming" },
+  failed: { ko: "실패", en: "Failed" },
+  canceled: { ko: "취소·환불", en: "Canceled / refunded" },
+};
+
+function PaymentHistory({ payments }: { payments: PaymentRecord[] }) {
+  const L = useBi();
+  return (
+    <section className="mt-8" aria-labelledby="payment-history">
+      <h2 id="payment-history" className="font-semibold">{L({ ko: "결제 내역", en: "Payment history" })}</h2>
+      <div className="glass mt-3 overflow-x-auto rounded-[24px]">
+        <table className="w-full text-sm">
+          <thead className="text-left text-2xs text-fg-subtle">
+            <tr>
+              <th className="px-5 py-3 font-medium">{L({ ko: "날짜", en: "Date" })}</th>
+              <th className="px-5 py-3 font-medium">{L({ ko: "금액", en: "Amount" })}</th>
+              <th className="px-5 py-3 font-medium">{L({ ko: "상태", en: "Status" })}</th>
+              <th className="px-5 py-3 font-medium">{L({ ko: "영수증", en: "Receipt" })}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {payments.map((p) => (
+              <tr key={p.orderId} className="border-t border-hairline">
+                <td className="px-5 py-3 font-mono text-xs whitespace-nowrap">{p.createdAt.slice(0, 10)}</td>
+                <td className="px-5 py-3 font-mono text-xs whitespace-nowrap">₩{p.amount.toLocaleString()}</td>
+                <td className={cn("px-5 py-3 text-xs whitespace-nowrap", p.status === "done" ? "text-studio-success" : p.status === "failed" ? "text-danger" : "text-fg-muted")}>{L(PAYMENT_STATUS[p.status])}</td>
+                <td className="px-5 py-3 text-xs whitespace-nowrap">
+                  {p.receiptUrl ? (
+                    <a href={p.receiptUrl} target="_blank" rel="noopener noreferrer" className="text-studio-cyan hover:underline">{L({ ko: "영수증 보기", en: "View receipt" })}</a>
+                  ) : (
+                    <span className="text-fg-subtle">—</span>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="mt-2 text-2xs break-keep text-fg-subtle">{L({ ko: "영수증은 토스페이먼츠에서 발급해요. 현금영수증·세금계산서가 필요하면 고객센터로 문의해 주세요.", en: "Receipts are issued by Toss Payments. For a cash receipt or tax invoice, contact customer service." })}</p>
+    </section>
   );
 }
 
