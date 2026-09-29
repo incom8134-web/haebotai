@@ -57,8 +57,60 @@ test("unknown command falls back to 'use as reference'; empty input means no bun
 test("rejects unsupported files and oversize uploads", async () => {
   const exe = await buildReference("blog", { files: [{ name: "a.exe", dataUrl: dataUrl("application/octet-stream", Buffer.from("MZ")) }] });
   assert.equal(exe.ok, false);
-  const big = await buildReference("blog", { files: [{ name: "big.png", dataUrl: dataUrl("image/png", Buffer.alloc(3.5 * 1024 * 1024)) }] });
+  const big = await buildReference("blog", { files: [{ name: "big.png", dataUrl: dataUrl("image/png", Buffer.alloc(31 * 1024 * 1024)) }] });
   assert.equal(big.ok, false);
+});
+
+function memoryStore(files: Record<string, Buffer>) {
+  const removed: string[] = [];
+  return {
+    removed,
+    store: {
+      prefix: "user-1/",
+      download: async (path: string) => files[path] ?? null,
+      remove: async (paths: string[]) => void removed.push(...paths),
+    },
+  };
+}
+
+test("reads uploads from the user's own folder, then deletes them", async () => {
+  const docx = await zip({ "word/document.xml": "<w:p><w:r><w:t>30MB 보고서</w:t></w:r></w:p>" });
+  const pdf = Buffer.concat([Buffer.from("%PDF-1.7\n"), Buffer.alloc(12 * 1024 * 1024)]);
+  const { store, removed } = memoryStore({ "user-1/refs/b/0.docx": docx, "user-1/refs/b/1.pdf": pdf });
+  const r = await buildReference(
+    "presentation",
+    { mode: "improve", files: [{ name: "보고서.docx", path: "user-1/refs/b/0.docx" }, { name: "자료.pdf", path: "user-1/refs/b/1.pdf" }] },
+    store,
+  );
+  assert.ok(r.ok && r.bundle);
+  assert.match(r.bundle.text, /30MB 보고서/);
+  assert.equal(r.bundle.documents.length, 1);
+  assert.deepEqual(r.bundle.fileNames, ["보고서.docx", "자료.pdf"]);
+  assert.deepEqual(removed.sort(), ["user-1/refs/b/0.docx", "user-1/refs/b/1.pdf"]);
+});
+
+test("refuses a path outside the user's folder and never deletes it", async () => {
+  const { store, removed } = memoryStore({ "user-2/refs/x/0.pdf": Buffer.from("%PDF") });
+  const r = await buildReference("blog", { files: [{ name: "a.pdf", path: "user-2/refs/x/0.pdf" }] }, store);
+  assert.equal(r.ok, false);
+  assert.deepEqual(removed, []);
+  const sneaky = await buildReference("blog", { files: [{ name: "a.pdf", path: "user-1/../user-2/refs/x/0.pdf" }] }, store);
+  assert.equal(sneaky.ok, false);
+});
+
+test("a large photo is scaled down before it reaches the model", async () => {
+  const sharp = (await import("sharp")).default;
+  const { randomBytes } = await import("node:crypto");
+  const png = await sharp(randomBytes(3000 * 2400 * 3), { raw: { width: 3000, height: 2400, channels: 3 } }).png().toBuffer();
+  assert.ok(png.length > 1.5 * 1024 * 1024);
+  const { store } = memoryStore({ "user-1/refs/p/0.png": png });
+  const r = await buildReference("image", { files: [{ name: "big.png", path: "user-1/refs/p/0.png" }] }, store);
+  assert.ok(r.ok && r.bundle);
+  const out = Buffer.from(r.bundle.images[0].data, "base64");
+  const meta = await sharp(out).metadata();
+  assert.equal(r.bundle.images[0].mimeType, "image/jpeg");
+  assert.ok(Math.max(meta.width!, meta.height!) <= 2048);
+  assert.ok(out.length < png.length);
 });
 
 test("the prompt block carries the command and treats the material as data", async () => {

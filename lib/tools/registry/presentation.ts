@@ -24,6 +24,8 @@ export const presentation: ToolManifest = {
         { value: "8", label: "8장" },
         { value: "10", label: "10장" },
         { value: "12", label: "12장" },
+        { value: "15", label: "15장" },
+        { value: "20", label: "20장" },
       ],
     },
     {
@@ -53,6 +55,6 @@ export const presentation: ToolManifest = {
   outputRenderer: "document",
   grounding: { requireSources: false, webSearch: false, estimateBadge: true },
   model: "gemini-3.1-pro-preview",
-  estimatedCredits: 60,
-  estimatedSeconds: 95,
+  estimatedCredits: 80,
+  estimatedSeconds: 150,
 };

@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { ChevronDown, FileText, ImageIcon, Paperclip, Presentation, Upload, X } from "lucide-react";
 import { useBi } from "@/lib/i18n/context";
+import { createClient } from "@/lib/supabase/client";
 import { REFERENCE_LIMITS, referenceModesFor } from "@/lib/tools/reference";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +19,32 @@ export interface ReferenceValue {
 }
 
 export const emptyReference = (toolId: string): ReferenceValue => ({ mode: referenceModesFor(toolId)[0].id, text: "", files: [] });
+
+/**
+ * Uploads the reference files straight to the user's own folder in the
+ * "inputs" bucket (up to 30 MB, well past what a JSON request can carry)
+ * and returns their paths for the run request. The server reads and
+ * deletes them.
+ */
+export async function uploadReferenceFiles(files: File[]): Promise<{ name: string; path: string }[]> {
+  if (!files.length) return [];
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("로그인이 필요합니다");
+  const batch = crypto.randomUUID();
+  return Promise.all(
+    files.map(async (f, i) => {
+      // Storage keys stay ASCII: the original name travels separately.
+      const ext = (f.name.split(".").pop() ?? "bin").toLowerCase().replace(/[^a-z0-9]/g, "") || "bin";
+      const path = `${user.id}/refs/${batch}/${i}.${ext}`;
+      const { error } = await supabase.storage.from("inputs").upload(path, f, { contentType: f.type || undefined, upsert: false });
+      if (error) throw new Error(`${f.name}: 업로드하지 못했습니다 (${error.message})`);
+      return { name: f.name, path };
+    }),
+  );
+}
 
 const kb = (n: number) => (n > 1024 * 1024 ? `${(n / 1024 / 1024).toFixed(1)}MB` : `${Math.max(1, Math.round(n / 1024))}KB`);
 
@@ -44,7 +71,7 @@ export function ReferencePanel({ toolId, value, onChange }: { toolId: string; va
     if (bad) return setError(L({ ko: `${bad.name}: 이미지, PDF, Word, PowerPoint, 텍스트 파일만 올릴 수 있어요.`, en: `${bad.name}: images, PDF, Word, PowerPoint or text files only.` }));
     const files = [...value.files, ...incoming];
     if (files.length > REFERENCE_LIMITS.maxFiles) return setError(L({ ko: `파일은 ${REFERENCE_LIMITS.maxFiles}개까지 올릴 수 있어요.`, en: `Up to ${REFERENCE_LIMITS.maxFiles} files.` }));
-    if (files.reduce((n, f) => n + f.size, 0) > REFERENCE_LIMITS.maxTotalBytes) return setError(L({ ko: "파일은 합쳐서 3MB까지 올릴 수 있어요.", en: "Files can total up to 3 MB." }));
+    if (files.reduce((n, f) => n + f.size, 0) > REFERENCE_LIMITS.maxTotalBytes) return setError(L({ ko: "파일은 합쳐서 30MB까지 올릴 수 있어요.", en: "Files can total up to 30 MB." }));
     onChange({ ...value, files });
   }
 
@@ -130,7 +157,7 @@ export function ReferencePanel({ toolId, value, onChange }: { toolId: string; va
             >
               <Upload className="size-5 text-studio-cyan" aria-hidden />
               <span className="text-sm">{L({ ko: "눌러서 고르거나 끌어다 놓기", en: "Click to choose or drop files" })}</span>
-              <span className="text-2xs text-fg-subtle">{L({ ko: "이미지·PDF·Word·PowerPoint·텍스트 · 5개, 합쳐서 3MB까지", en: "Images, PDF, Word, PowerPoint, text · up to 5 files, 3 MB total" })}</span>
+              <span className="text-2xs text-fg-subtle">{L({ ko: `이미지·PDF·Word·PowerPoint·텍스트 · ${REFERENCE_LIMITS.maxFiles}개, 합쳐서 30MB까지`, en: `Images, PDF, Word, PowerPoint, text · up to ${REFERENCE_LIMITS.maxFiles} files, 30 MB total` })}</span>
               <input
                 ref={inputRef}
                 type="file"
