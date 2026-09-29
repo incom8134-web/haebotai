@@ -14,7 +14,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Segmented } from "@/components/site/page";
-import { ToolForm, type ToolFormValues } from "@/components/tool-form";
+import type { ToolFormValues } from "@/components/tool-form";
 import { RunResult } from "@/components/run-result";
 import { RunProgress } from "@/components/run-progress";
 import { emptyReference, ReferencePanel, uploadReferenceFiles, type ReferenceValue } from "@/components/tools/reference-panel";
@@ -27,6 +27,7 @@ import { RunGuide } from "@/components/tools/run-guide";
 import { getExperience } from "@/lib/tools/experience";
 import { cn } from "@/lib/utils";
 import { ExField } from "@/components/tools/experience/controls";
+import { FreeRequest } from "@/components/tools/free-request";
 import { Stage } from "@/components/tools/experience/stage";
 import { useLocale, useT, useBi } from "@/lib/i18n/context";
 import { useLocalValue } from "@/lib/hooks/use-local-list";
@@ -405,7 +406,7 @@ function ToolRunner({
                 </div>
               </div>
               <div className="space-y-5">
-                {section.fields.map((fid) => {
+                {section.fields.filter((fid) => fid !== "free_request").map((fid) => {
                   const field = manifest.inputs.find((f) => f.id === fid);
                   if (!field) return null;
                   return <ExField key={fid} field={field} ui={exp.ui[fid]} value={values[fid]} onChange={(v) => setValues((p) => ({ ...p, [fid]: v }))} />;
@@ -416,9 +417,17 @@ function ToolRunner({
         </ol>
       ) : (
         <div className="glass mt-6 rounded-[24px] p-5 md:p-6">
-          <ToolForm fields={manifest.inputs} values={values} onChange={(id, v) => setValues((p) => ({ ...p, [id]: v }))} />
+          <div className="space-y-5">
+            {manifest.inputs
+              .filter((f) => f.id !== "free_request")
+              .map((field) => (
+                <ExField key={field.id} field={field} value={values[field.id]} onChange={(v) => setValues((p) => ({ ...p, [field.id]: v }))} />
+              ))}
+          </div>
         </div>
       )}
+
+      <FreeRequest toolId={toolId} value={typeof values.free_request === "string" ? values.free_request : ""} onChange={(v) => setValues((p) => ({ ...p, free_request: v }))} />
 
       <ReferencePanel toolId={toolId} value={reference} onChange={setReference} />
 

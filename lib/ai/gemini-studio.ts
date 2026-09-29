@@ -62,18 +62,84 @@ const HEX = /^#[0-9a-f]{6}$/i;
 
 // ------------------------------------------------------------ homepage
 
-// Korean-capable display faces on Google Fonts; body text is Pretendard.
+// Korean-capable faces on Google Fonts (each checked to load). Headings
+// pick from the full range — editorial serifs, geometric, heavy display,
+// handwriting, playful — and body text from the readable ones.
 const DISPLAY_FONTS: Record<string, string | null> = {
   Pretendard: null,
   "Noto Serif KR": "Noto+Serif+KR:wght@400;600;700;900",
   "Gowun Batang": "Gowun+Batang:wght@400;700",
   "Nanum Myeongjo": "Nanum+Myeongjo:wght@400;700;800",
   "Song Myung": "Song+Myung",
+  Hahmlet: "Hahmlet:wght@400;600;800",
   "IBM Plex Sans KR": "IBM+Plex+Sans+KR:wght@400;600;700",
+  "Gothic A1": "Gothic+A1:wght@400;700;900",
+  Orbit: "Orbit",
   "Black Han Sans": "Black+Han+Sans",
   "Do Hyeon": "Do+Hyeon",
+  "Gasoek One": "Gasoek+One",
+  "Bagel Fat One": "Bagel+Fat+One",
+  Jua: "Jua",
+  Dongle: "Dongle:wght@400;700",
   "Gowun Dodum": "Gowun+Dodum",
+  "Nanum Pen Script": "Nanum+Pen+Script",
+  "Hi Melody": "Hi+Melody",
+  "Yeon Sung": "Yeon+Sung",
+  Diphylleia: "Diphylleia",
 };
+const BODY_FONTS: Record<string, string | null> = {
+  Pretendard: null,
+  "Noto Sans KR": "Noto+Sans+KR:wght@400;500;700",
+  "IBM Plex Sans KR": "IBM+Plex+Sans+KR:wght@400;600;700",
+  "Gowun Dodum": "Gowun+Dodum",
+  "Nanum Gothic": "Nanum+Gothic:wght@400;700;800",
+  "Noto Serif KR": "Noto+Serif+KR:wght@400;600;700;900",
+};
+
+// The page's skeleton is chosen per run instead of fixed: every site used
+// to be "sticky header + full-screen photo hero + 6-10 sections".
+const HERO_ARCHETYPES = [
+  "full-bleed photo with a gradient scrim and the headline over it",
+  "split screen: huge headline on a solid color field on one side, tall photo on the other",
+  "giant typographic hero: an oversized headline filling the width, a small framed photo tucked into the layout",
+  "photo mosaic / collage of 3 images at different sizes with the headline overlapping one of them",
+  "centered short statement on a bold color field, the photo starting right below as a wide band",
+  "editorial magazine cover: masthead-style wordmark, issue-like date line, cover photo with captions",
+  "offset frame: photo in an inset rounded frame, headline breaking out of the frame's edge",
+  "horizontal strip: a row of cropped photos scrolling sideways under a one-line headline",
+] as const;
+const NAV_STYLES = [
+  "sticky translucent top bar with links and the action button",
+  "minimal: wordmark top-left and a single menu button opening a full-screen overlay",
+  "floating pill-shaped nav centered near the top, detached from the edges",
+  "no top links: a sticky bottom action bar on mobile and a small corner wordmark",
+  "vertical side rail with section numbers on desktop, top bar on mobile",
+] as const;
+const SHAPES = ["sharp corners (0-2px) and hairline rules", "soft rounded cards (16-24px)", "pill buttons and circular image crops", "organic blob shapes and wavy dividers", "tilted sticker-like cards and badges"] as const;
+const TEXTURES = ["none — pure flat color", "subtle film grain (an inline SVG noise filter)", "paper / linen tone with soft shadows", "visible layout grid lines as decoration", "large faded outline numbers or letters in the background"] as const;
+const SIGNATURES = [
+  "an infinite marquee text band",
+  "a sticky booking/order bar that follows the scroll",
+  "big numbered steps connected by a line",
+  "a before/after or then/now comparison",
+  "a horizontal scroll gallery",
+  "a rotating circular text badge",
+  "pull quotes set huge between sections",
+  "a stats band with oversized numbers",
+  "hand-drawn style underlines and arrows (inline SVG)",
+  "a menu/price list styled like a printed menu board",
+] as const;
+
+// What each kind of site has to do, so a booking page and a portfolio
+// don't come out with the same section list.
+const PURPOSE_BLUEPRINT: Record<string, string> = {
+  intro: "소개 사이트: 이 가게의 이야기와 공간·사람·원칙을 보여 주는 흐름. 방문·연락으로 끝납니다.",
+  booking: "예약 사이트: 첫 화면과 스크롤 내내 예약 행동이 보이고(고정 예약 버튼·바), 가능한 시간/방법, 위치·찾아오는 길, 예약 전 궁금한 점(FAQ)을 짧게.",
+  sales: "판매 사이트: 상품이 주인공 — 상품 그리드와 가격 카드, 선택을 돕는 비교, 배송·교환 안내, 구매 버튼 반복.",
+  portfolio: "포트폴리오: 작업이 주인공 — 큰 이미지의 프로젝트 목록, 대표 작업 1~2개의 케이스 스토리(문제·과정·결과), 작업 방식, 의뢰 방법.",
+  landing: "랜딩 페이지: 제안 하나에 집중 — 짧고 강한 흐름(약속 → 근거 → 제안 → 의심 해소 → 행동), 섹션 4~6개, 같은 행동 버튼 반복.",
+};
+const pick = <T,>(xs: readonly T[]) => xs[Math.floor(Math.random() * xs.length)];
 
 const PRETENDARD_LINK = '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">';
 const fontLinkTag = (family: string) => `<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=${family}&display=swap">`;
@@ -83,6 +149,12 @@ interface SitePlan {
   mood: string[];
   palette: { background: string; surface: string; text: string; muted: string; primary: string; accent: string };
   display_font: string;
+  body_font: string;
+  hero_archetype: string;
+  nav_style: string;
+  shape_language: string;
+  texture: string;
+  signature_elements: string[];
   layout_direction: string;
   primary_action: string;
   sections: { id: string; title: string; goal: string; layout: string }[];
@@ -107,12 +179,18 @@ const SITE_PLAN_SCHEMA = {
       },
       required: ["background", "surface", "text", "muted", "primary", "accent"],
     },
-    display_font: { type: "string", enum: Object.keys(DISPLAY_FONTS), description: "헤드라인 서체" },
+    display_font: { type: "string", enum: Object.keys(DISPLAY_FONTS), description: "헤드라인 서체 — 콘셉트에 맞게 과감하게. 늘 같은 서체를 고르지 마세요" },
+    body_font: { type: "string", enum: Object.keys(BODY_FONTS), description: "본문 서체" },
+    hero_archetype: { type: "string", description: "첫 화면 구성 (영문, 아래 제안 목록 중 하나를 고르거나 콘셉트에 맞게 새로)" },
+    nav_style: { type: "string", description: "내비게이션 방식 (영문)" },
+    shape_language: { type: "string", description: "모서리·도형 언어 (영문)" },
+    texture: { type: "string", description: "배경 질감 (영문)" },
+    signature_elements: { type: "array", items: { type: "string" }, minItems: 1, maxItems: 3, description: "이 사이트를 기억에 남게 할 시그니처 요소 1~3개 (영문)" },
     layout_direction: { type: "string", description: "레이아웃 방향 (예: 풀스크린 사진 히어로 + 비대칭 에디토리얼 그리드 + 넉넉한 여백)" },
     primary_action: { type: "string", description: "방문자가 할 단 하나의 행동과 버튼 문구 (한국어)" },
     sections: {
       type: "array",
-      minItems: 6,
+      minItems: 3,
       maxItems: 10,
       items: {
         type: "object",
@@ -147,7 +225,7 @@ const SITE_PLAN_SCHEMA = {
       },
     },
   },
-  required: ["concept", "mood", "palette", "display_font", "layout_direction", "primary_action", "sections", "images"],
+  required: ["concept", "mood", "palette", "display_font", "body_font", "hero_archetype", "nav_style", "shape_language", "texture", "signature_elements", "layout_direction", "primary_action", "sections", "images"],
 } as const;
 
 const SITE_BRIEF = `You are the lead designer and front-end engineer at an award-winning Seoul branding studio. You build a complete, production-quality single-file website for a Korean small business, following the art director's plan exactly. The result must look like a real premium brand site (Awwwards / Framer-template quality), never like a generic template.
@@ -156,7 +234,7 @@ OUTPUT: only the HTML document, starting with <!doctype html>. No markdown fence
 
 STACK — the page must be fully self-contained and render instantly without JavaScript:
 - All styling is your own hand-written CSS in one <style> block: a design-token layer of CSS custom properties from the plan's palette (--bg, --surface, --ink, --muted, --primary, --accent), a type scale with clamp(), spacing tokens, then components and sections. Use modern CSS (grid, flex, gap, aspect-ratio, clamp, color-mix, backdrop-filter, :focus-visible, @media for 640/960/1200px). No CSS framework, no Tailwind, no CDN scripts.
-- Fonts: do NOT write any font <link> or @import — the server adds them. Just use font-family "Pretendard" for body text and the plan's display font for headings, each with a system-font fallback stack.
+- Fonts: do NOT write any font <link> or @import — the server adds them. Use the plan's body font for body text and the plan's display font for headings, each with a system-font fallback stack.
 - Icons are small inline <svg> elements (stroke icons, currentColor, 1.75 stroke width) that you draw yourself. No icon libraries.
 - One small inline <script> at the end for the mobile menu toggle, the reveal-on-scroll IntersectionObserver and the current year; everything must still look complete if it never runs. Use word-break: keep-all and text-wrap: balance for Korean headings.
 
@@ -164,10 +242,11 @@ ORIGINAL CODE: write this page from scratch for this business. Prefix every clas
 
 IMAGES: use exactly these placeholders as src/background URLs, each exactly once (never the same photo twice), hero first: {{IMG:hero}}, {{IMG:photo1}}, {{IMG:photo2}}, {{IMG:photo3}}. No other image URLs. Give every <img> its alt text, object-cover, and a sized, rounded container; lazy-load all but the hero.
 
-DESIGN (all required):
-- Sticky translucent header (backdrop-blur) with wordmark, section links and the primary action button; a working mobile menu (hamburger toggling a panel).
-- Hero: full-viewport photo ({{IMG:hero}}) with a tasteful gradient overlay for contrast, a large expressive display headline (clamp() sizing, tight leading, keep-all), a sub-line, primary and secondary buttons, and one small trust or detail line.
-- Every section has its OWN layout from the plan (split image/text, bento grid, stat band, numbered process timeline, gallery, menu/price cards, FAQ accordion with <details>, final CTA band over an image or color field, rich footer). Never repeat the same layout twice in a row. Alternate background tones (bg / surface / primary-tinted / dark band) to create rhythm.
+DESIGN — the plan decides the page's skeleton; build exactly what it says, not a default template:
+- Navigation: build the plan's nav_style exactly (it may be a floating pill, an overlay menu, a bottom bar, a side rail or a classic top bar). Whatever it is, it must work on mobile.
+- Hero: build the plan's hero_archetype exactly, using {{IMG:hero}}. Do NOT fall back to "full-screen photo with a dark overlay" unless that is the archetype. Large expressive display headline (clamp() sizing, tight leading, keep-all) and the primary action.
+- Shape language, texture and signature elements: apply the plan's shape_language and texture across the whole page and build every signature element for real (e.g. a working CSS marquee, a sticky bar, an SVG rotating badge).
+- Sections: exactly the plan's sections, each with its OWN layout from the plan. Never repeat the same layout twice in a row. Alternate background tones to create rhythm. The page ends with a closing action and a footer with the business's facts.
 - Real visual craft: generous spacing scale, max-width containers, 12-column thinking, large type contrast, subtle borders and layered shadows, generously rounded cards (16–28px), hover lift and image zoom transitions, focus-visible rings, smooth scroll.
 - Motion: reveal-on-scroll with IntersectionObserver that adds a class; the hidden starting state applies ONLY under html.js (set document.documentElement.classList.add('js') first), so the page is fully visible without JavaScript. Respect prefers-reduced-motion.
 - Mobile-first and flawless from 360px to 1440px (test mentally: nav, hero text size, grids collapsing to one column, no horizontal scroll).
@@ -253,13 +332,38 @@ export async function generateHomepage(
   // "참고 자료" images and PDFs (an old site's screenshot, a brochure).
   const refParts = await toGeminiParts(referenceParts(input, { documents: true }), abortSignal);
 
+  // A fresh combination per run, so the same input doesn't give the same
+  // site; the plan may override it when the user's request or concept
+  // calls for something else.
+  const suggestion = {
+    hero_archetype: pick(HERO_ARCHETYPES),
+    nav_style: pick(NAV_STYLES),
+    shape_language: pick(SHAPES),
+    texture: pick(TEXTURES),
+    signature: pick(SIGNATURES),
+    display_font: pick(Object.keys(DISPLAY_FONTS).filter((f) => f !== "Pretendard")),
+  };
+  const purpose = typeof input.purpose === "string" ? input.purpose : "";
+  const mode = referenceOf(input)?.mode.id ?? "";
+  const commandNote: Record<string, string> = {
+    redesign: "기존 사이트 리디자인: 참고 자료의 기존 사이트 구조(첫 화면, 메뉴, 섹션 순서)를 먼저 파악하고, 새 사이트는 첫 화면 구성·내비게이션·색·서체가 기존과 확실히 다르게 기획하세요. 기존 사이트의 정보는 하나도 빠뜨리지 마세요.",
+    "from-doc": "소개 자료로 만들기: 참고 문서의 장·목차·상품 목록을 섹션 구조의 뼈대로 쓰고, 문서에 있는 사실만 담으세요.",
+    mood: "분위기 참고: 참고 이미지에서 색·질감·빛·서체의 느낌을 뽑아 palette·texture·display_font에 반영하되, 레이아웃과 문구는 복제하지 마세요.",
+    reference: "참고 자료의 사실과 내용을 근거로, 구성과 디자인은 새로 기획하세요.",
+  };
   const { plan, usage: planUsage } = await planJson<SitePlan>(
     [
-      "당신은 서울의 브랜딩 스튜디오 아트 디렉터입니다. 소상공인의 홈페이지를 만들기 전에 디자인 콘셉트, 색, 서체, 섹션 구성, 촬영 목록을 정합니다.",
-      "업종의 뻔한 클리셰(베이커리=파스텔, 병원=파란색)를 피하고, 이 가게의 입력 내용에서 고유한 콘셉트를 찾으세요. 브랜드 컬러가 있으면 반드시 primary로 쓰세요.",
-      "섹션은 입력의 '필요 섹션'을 모두 포함하고, 방문자가 한 가지 행동으로 이어지는 순서로 배치하세요.",
+      "당신은 서울의 브랜딩 스튜디오 아트 디렉터입니다. 소상공인의 홈페이지를 만들기 전에 디자인 콘셉트, 색, 서체, 첫 화면 구성, 내비게이션, 도형·질감, 시그니처 요소, 섹션 구성, 촬영 목록을 정합니다.",
+      "업종의 뻔한 클리셰(베이커리=파스텔, 병원=파란색)와 뻔한 템플릿(전체 화면 사진 + 어두운 오버레이 + 가운데 제목)을 피하고, 이 가게의 입력 내용에서 고유한 콘셉트를 찾으세요. 브랜드 컬러가 있으면 반드시 primary로 쓰세요.",
+      "섹션 수와 순서는 사이트의 목적이 정합니다(아래 목적별 구성). '필요 섹션'은 모두 포함하되 방문자가 한 가지 행동으로 이어지게 배치하세요.",
+      "입력에 '사용자의 자유 요청'이 있으면 그것이 모든 제안과 규칙보다 우선입니다.",
     ].join("\n"),
-    `다음 가게의 홈페이지를 기획하세요.\n\n${brief}`,
+    [
+      `다음 가게의 홈페이지를 기획하세요.\n\n${brief}`,
+      purpose && PURPOSE_BLUEPRINT[purpose] ? `\n[목적별 구성]\n${PURPOSE_BLUEPRINT[purpose]}` : "",
+      mode && commandNote[mode] ? `\n[참고 자료 작업 방식]\n${commandNote[mode]}` : "",
+      `\n[이번 실행의 디자인 제안 — 콘셉트나 사용자 요청과 맞지 않으면 더 나은 것으로 바꿔도 됩니다]\n${JSON.stringify(suggestion, null, 2)}`,
+    ].join("\n"),
     SITE_PLAN_SCHEMA,
     abortSignal,
     refParts,
@@ -294,7 +398,8 @@ export async function generateHomepage(
   let html = page.html;
   // Font links are added here rather than written by the model: exact,
   // widely copied lines like these are what trips the recitation filter.
-  const fonts = [PRETENDARD_LINK, ...(DISPLAY_FONTS[plan.display_font] ? [fontLinkTag(DISPLAY_FONTS[plan.display_font]!)] : [])].join("\n");
+  const families = [DISPLAY_FONTS[plan.display_font], BODY_FONTS[plan.body_font]].filter((f): f is string => Boolean(f));
+  const fonts = [PRETENDARD_LINK, ...[...new Set(families)].map(fontLinkTag)].join("\n");
   html = /<\/head>/i.test(html) ? html.replace(/<\/head>/i, `${fonts}\n</head>`) : html.replace(/<body/i, `<head>${fonts}</head>\n<body`);
   plan.images.forEach((img, i) => {
     const url = shots[i].url;
@@ -318,6 +423,10 @@ export async function generateHomepage(
         mood: plan.mood,
         palette: Object.values(palette).filter((c) => HEX.test(c)),
         display_font: plan.display_font,
+        body_font: plan.body_font,
+        hero: plan.hero_archetype,
+        nav: plan.nav_style,
+        signature: plan.signature_elements,
       },
     },
     sources: [],

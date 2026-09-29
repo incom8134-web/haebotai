@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Check } from "lucide-react";
 import { ToolForm } from "@/components/tool-form";
 import { useBi } from "@/lib/i18n/context";
@@ -32,7 +33,70 @@ function Label({ field, extra }: { field: ToolField; extra?: React.ReactNode }) 
   );
 }
 
-export function ExField({ field, ui, value, onChange }: { field: ToolField; ui?: FieldUi; value: unknown; onChange: (v: unknown) => void }) {
+/**
+ * Every preset choice also takes the user's own wording ("직접 입력"):
+ * a select can hold a custom value, a multi-select gets extra custom
+ * entries. The server accepts any text for these fields.
+ */
+export function ExField(props: { field: ToolField; ui?: FieldUi; value: unknown; onChange: (v: unknown) => void }) {
+  const { field, value, onChange } = props;
+  if (field.kind !== "select" && field.kind !== "multiselect") return <ExFieldBase {...props} />;
+  const known = new Set(field.options.map((o) => o.value));
+  const custom = field.kind === "select" ? (typeof value === "string" && value && !known.has(value) ? value : "") : (Array.isArray(value) ? (value as string[]).filter((v) => !known.has(v)) : []).join(", ");
+  const presetValue = field.kind === "select" ? (custom ? undefined : value) : Array.isArray(value) ? (value as string[]).filter((v) => known.has(v)) : value;
+  return (
+    <div>
+      <ExFieldBase
+        {...props}
+        value={presetValue}
+        onChange={(v) => {
+          if (field.kind === "select") onChange(v);
+          else onChange([...((v as string[]) ?? []), ...custom.split(",").map((x) => x.trim()).filter(Boolean)]);
+        }}
+      />
+      <CustomEntry
+        value={custom}
+        multi={field.kind === "multiselect"}
+        onChange={(text) => {
+          if (field.kind === "select") onChange(text.trim() ? text : undefined);
+          else onChange([...((presetValue as string[]) ?? []), ...text.split(",").map((x) => x.trim()).filter(Boolean)]);
+        }}
+      />
+    </div>
+  );
+}
+
+function CustomEntry({ value, multi, onChange }: { value: string; multi: boolean; onChange: (v: string) => void }) {
+  const L = useBi();
+  const [open, setOpen] = useState(Boolean(value));
+  // A single choice mirrors the field (picking a preset clears it); a
+  // multi-choice keeps its own text so "a, " can be typed mid-entry.
+  const [draft, setDraft] = useState(value);
+  const text = multi ? draft : value;
+  const setText = setDraft;
+  if (!open) {
+    return (
+      <button type="button" onClick={() => setOpen(true)} className="mt-2 text-xs text-fg-subtle underline-offset-2 hover:text-fg hover:underline">
+        ✎ {L({ ko: "직접 입력", en: "Type your own" })}
+      </button>
+    );
+  }
+  return (
+    <input
+      autoFocus={!value}
+      value={text}
+      maxLength={200}
+      onChange={(e) => {
+        setText(e.target.value);
+        onChange(e.target.value);
+      }}
+      placeholder={L(multi ? { ko: "직접 입력 (쉼표로 여러 개)", en: "Your own (comma-separated)" } : { ko: "원하는 값을 직접 입력 (선택지 대신 사용)", en: "Your own value (used instead of the options)" })}
+      className="mt-2 h-10 w-full rounded-xl border border-hairline bg-surface/60 px-3 text-sm outline-none focus-visible:border-studio-cyan/60"
+    />
+  );
+}
+
+function ExFieldBase({ field, ui, value, onChange }: { field: ToolField; ui?: FieldUi; value: unknown; onChange: (v: unknown) => void }) {
   const L = useBi();
   const options: Option[] = "options" in field ? field.options : [];
   const display = ui?.display;

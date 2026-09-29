@@ -39,12 +39,27 @@ export async function uploadReferenceFiles(files: File[]): Promise<{ name: strin
       // Storage keys stay ASCII: the original name travels separately.
       const ext = (f.name.split(".").pop() ?? "bin").toLowerCase().replace(/[^a-z0-9]/g, "") || "bin";
       const path = `${user.id}/refs/${batch}/${i}.${ext}`;
-      const { error } = await supabase.storage.from("inputs").upload(path, f, { contentType: f.type || undefined, upsert: false });
+      // Some systems report no type (e.g. .md, .pptx); storage needs one.
+      const { error } = await supabase.storage.from("inputs").upload(path, f, { contentType: f.type || MIME_BY_EXT[ext] || "application/octet-stream", upsert: false });
       if (error) throw new Error(`${f.name}: 업로드하지 못했습니다 (${error.message})`);
       return { name: f.name, path };
     }),
   );
 }
+
+const MIME_BY_EXT: Record<string, string> = {
+  png: "image/png",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  webp: "image/webp",
+  pdf: "application/pdf",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  txt: "text/plain",
+  md: "text/markdown",
+  csv: "text/csv",
+  html: "text/html",
+};
 
 const kb = (n: number) => (n > 1024 * 1024 ? `${(n / 1024 / 1024).toFixed(1)}MB` : `${Math.max(1, Math.round(n / 1024))}KB`);
 

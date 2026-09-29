@@ -686,7 +686,7 @@ async function* generateStructured(
           maxOutputTokens: deep ? 65_536 : 32_768,
           // Long decks keep full thinking on the draft but a lighter
           // editor pass, so 15-20 slides plus photos fit the run's time.
-          ...(manifest.model.includes("pro") ? { thinkingConfig: { thinkingLevel: deep && Number(input.slide_count ?? 0) < 15 ? ThinkingLevel.HIGH : ThinkingLevel.LOW } } : {}),
+          ...(manifest.model.includes("pro") ? { thinkingConfig: { thinkingLevel: deep && (parseInt(String(input.slide_count ?? ""), 10) || 0) < 15 ? ThinkingLevel.HIGH : ThinkingLevel.LOW } } : {}),
           abortSignal,
         },
       });

@@ -176,7 +176,8 @@ async function readReference(
 
   let text = texts.join("\n\n").trim();
   if (text.length > MAX_TEXT) text = `${text.slice(0, MAX_TEXT)}\n…(이후 생략)`;
-  return { ok: true, bundle: { mode, text, fileNames: files.map((f) => f.name), images, documents } };
+  const slideCount = (text.match(/^\[슬라이드 \d+\]$/gm) ?? []).length || undefined;
+  return { ok: true, bundle: { mode, text, fileNames: files.map((f) => f.name), images, documents, slideCount } };
 }
 
 /** What the run row keeps: no file bytes. */
