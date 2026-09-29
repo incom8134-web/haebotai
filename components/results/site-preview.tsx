@@ -5,7 +5,7 @@ import { useBi } from "@/lib/i18n/context";
 import { useEffect, useRef, useState } from "react";
 import { ExternalLink, Monitor, Smartphone } from "lucide-react";
 
-// The generated site, live: scripts run (Tailwind, icons, scroll
+// The generated site, live: scripts run (Three.js scenes, GSAP scroll
 // animations) inside a sandbox without same-origin access, so the page
 // can't touch the app's cookies or storage. A PC/phone toggle shows the
 // responsive layout, and the design card says what the art director
@@ -16,7 +16,20 @@ interface Design {
   mood?: string[];
   palette?: string[];
   display_font?: string;
+  big_idea?: string;
+  scene?: string;
+  scroll?: string[];
 }
+
+const SCENE_LABEL: Record<string, { ko: string; en: string }> = {
+  "liquid-image": { ko: "커서에 일렁이는 사진", en: "Liquid photo" },
+  orb: { ko: "변형되는 3D 구체", en: "Morphing 3D orb" },
+  "particles-text": { ko: "입자로 그린 상호", en: "Particle wordmark" },
+  "photo-ring": { ko: "3D 사진 링", en: "3D photo ring" },
+  waves: { ko: "흐르는 3D 지형", en: "Flowing 3D terrain" },
+  floating: { ko: "떠다니는 3D 오브젝트", en: "Floating 3D objects" },
+  aurora: { ko: "살아 있는 그라데이션", en: "Living gradient" },
+};
 
 export function SitePreview({ html, design }: { html: string; design?: Design }) {
   const L = useBi();
@@ -70,7 +83,8 @@ export function SitePreview({ html, design }: { html: string; design?: Design })
       {design?.concept ? (
         <div className="rounded-2xl border border-hairline p-3">
           <p className="text-2xs text-fg-subtle">{L({ ko: "디자인 콘셉트", en: "Design concept" })}</p>
-          <p className="mt-1 text-sm leading-relaxed text-fg break-keep">{design.concept}</p>
+          {design.big_idea ? <p className="mt-1 text-sm font-medium leading-relaxed text-fg break-keep">{design.big_idea}</p> : null}
+          <p className="mt-1 text-sm leading-relaxed text-fg-muted break-keep">{design.concept}</p>
           <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5">
             {design.palette?.length ? (
               <span className="flex gap-1">
@@ -80,6 +94,9 @@ export function SitePreview({ html, design }: { html: string; design?: Design })
               </span>
             ) : null}
             {design.display_font ? <span className="text-xs text-fg-muted">{L({ ko: "제목 서체", en: "Heading font" })} {design.display_font}</span> : null}
+            {design.scene && SCENE_LABEL[design.scene] ? (
+              <span className="rounded-full bg-surface-2 px-2 py-0.5 text-2xs text-fg">3D · {L(SCENE_LABEL[design.scene])}</span>
+            ) : null}
             {design.mood?.map((m) => (
               <span key={m} className="rounded-full border border-hairline px-2 py-0.5 text-2xs text-fg-muted">
                 {m}

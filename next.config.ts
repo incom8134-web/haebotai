@@ -9,11 +9,11 @@ const nextConfig: NextConfig = {
   // ESM entry with require() and it failed to load.
   serverExternalPackages: ["@resvg/resvg-js", "satori", "pdfkit"],
   // Files read from disk at runtime that the tracer can't see: the
-  // Pretendard fonts (sangsepage render + PDF export) and pdfkit's
-  // built-in font metrics.
+  // Pretendard fonts (sangsepage render + PDF export), pdfkit's built-in
+  // font metrics, and the homepage site kit's source (lib/site-kit).
   outputFileTracingIncludes: {
     "/api/export/\\[runId\\]": ["./node_modules/pretendard/dist/public/static/Pretendard-{Regular,Bold}.otf", "./node_modules/pdfkit/js/data/**/*"],
-    "/api/tools/\\[toolId\\]/run": ["./node_modules/pretendard/dist/public/static/Pretendard-{Regular,Bold,ExtraBold,Black}.otf"],
+    "/api/tools/\\[toolId\\]/run": ["./node_modules/pretendard/dist/public/static/Pretendard-{Regular,Bold,ExtraBold,Black}.otf", "./lib/site-kit/kit.ts"],
   },
   // Older URLs from the first shell pass, folded into Help / Account / Tools.
   async redirects() {
