@@ -1,6 +1,7 @@
 import "server-only";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
+import { checkRateLimit } from "./rate-limit-check";
 export { checkRateLimit, type RateLimitResult } from "./rate-limit-check";
 
 // Credits cap total spend per user, but not burst *rate* — a retry loop
@@ -30,6 +31,30 @@ export const exportLimiter = new Ratelimit({
   prefix: "ratelimit:export",
 });
 
+// Low-volume actions a person does a few times at most — checkout,
+// consent changes, support tickets, API-key tests, account deletion —
+// keyed per action and member. 10 per 10 minutes stops scripted abuse
+// (and a payment-order loop) without ever touching a real user.
+export const sensitiveLimiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(10, "10 m"),
+  prefix: "ratelimit:sensitive",
+});
+
+// Every /api request per IP (lib/supabase/middleware.ts): a flood from
+// one address is turned away before it reaches a function or the
+// database. Well above what the app itself sends from one browser.
+export const apiIpLimiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(120, "1 m"),
+  prefix: "ratelimit:api-ip",
+});
+
+/** 429 response for a sensitive action over its limit, or null to go ahead. */
+export async function limitSensitive(action: string, who: string): Promise<Response | null> {
+  const r = await checkRateLimit(sensitiveLimiter, `${action}:${who}`);
+  return r.ok ? null : Response.json({ error: "요청이 너무 잦습니다. 잠시 후 다시 시도해주세요." }, { status: 429, headers: { "Retry-After": String(r.retryAfterSeconds ?? 60) } });
+}
 // Checkout order + confirm: a real purchase needs one of each, and confirm
 // calls the Toss API, so a loop here costs external requests.
 export const paymentLimiter = new Ratelimit({

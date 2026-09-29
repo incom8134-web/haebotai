@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { hasCurrentConsent } from "@/lib/consent";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getMembership } from "@/lib/membership";
 import { newOrderId, PRO_ORDER } from "@/lib/payments/pro";
@@ -16,6 +17,9 @@ export async function POST() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return Response.json({ error: "로그인이 필요합니다" }, { status: 401 });
+  if (!hasCurrentConsent(user.app_metadata)) {
+    return Response.json({ error: "서비스 이용 동의가 필요합니다", code: "consent_required" }, { status: 403 });
+  }
 
   const rate = await checkRateLimit(paymentLimiter, user.id);
   if (!rate.ok) {

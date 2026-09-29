@@ -86,9 +86,9 @@ function CreditsView({ balance, plan, apiKeyConnected, usage }: { balance: numbe
             <li className="flex gap-3"><RotateCcw size={16} className="mt-0.5 shrink-0 text-studio-cyan" aria-hidden /><span><b className="font-medium">{L({ ko: "실패·취소는 환불", en: "Failures are refunded" })}</b><span className="text-fg-muted"> — {L({ ko: "중간에 끊겨도 자동으로 돌려드려요.", en: "even if a run drops midway." })}</span></span></li>
           </ul>
           <div className="mt-5 flex flex-wrap gap-2 text-sm">
-            <Link href="/account/membership" className="text-studio-cyan hover:underline">{L({ ko: "학생 멤버십", en: "Student membership" })}</Link>
+            <Link href="/account/membership" className="text-studio-cyan underline underline-offset-2">{L({ ko: "학생 멤버십", en: "Student membership" })}</Link>
             <span className="text-fg-subtle">·</span>
-            <Link href="/account/api-key" className="inline-flex items-center gap-1 text-studio-cyan hover:underline"><KeyRound size={13} aria-hidden /> {L({ ko: "내 API 키로 무료 실행", en: "Run free on your own key" })}</Link>
+            <Link href="/account/api-key" className="inline-flex items-center gap-1 text-studio-cyan underline underline-offset-2"><KeyRound size={13} aria-hidden /> {L({ ko: "내 API 키로 무료 실행", en: "Run free on your own key" })}</Link>
           </div>
         </section>
 

@@ -12,7 +12,7 @@ import { accountDeleteLimiter, checkRateLimit } from "@/lib/rate-limit";
 // See lib/site/legal.ts (개인정보 처리방침 — 보유 기간).
 
 const CONFIRM_WORD = "탈퇴";
-const BUCKETS = ["inputs", "exports", "logos"];
+const BUCKETS = ["inputs", "exports", "logos", "consents"];
 
 type Admin = ReturnType<typeof createAdminClient>;
 

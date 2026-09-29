@@ -323,7 +323,7 @@ function Landing() {
               </details>
             ))}
           </div>
-          <p className="mt-4 text-sm text-fg-muted">{L({ ko: "더 있어요 →", en: "More →" })} <Link href="/help/faq" className="text-studio-cyan hover:underline">{L({ ko: "전체 질문 보기", en: "All questions" })}</Link></p>
+          <p className="mt-4 text-sm text-fg-muted">{L({ ko: "더 있어요 →", en: "More →" })} <Link href="/help/faq" className="text-studio-cyan underline underline-offset-2">{L({ ko: "전체 질문 보기", en: "All questions" })}</Link></p>
         </section>
 
         {/* Final CTA */}
@@ -331,7 +331,7 @@ function Landing() {
           <motion.div {...reveal} className="glass-strong relative overflow-hidden rounded-[36px] px-6 py-14 text-center md:px-12">
             <div className="studio-gradient-bg absolute -top-24 left-1/2 size-72 -translate-x-1/2 rounded-full opacity-25 blur-3xl" aria-hidden />
             <h2 className="relative mx-auto max-w-2xl font-display text-[clamp(1.9rem,4vw,3rem)] leading-tight font-bold tracking-[-0.02em] break-keep">{L({ ko: "오늘 쓰는 브리프 하나가 이번 달 캠페인이 됩니다", en: "Today's brief becomes this month's campaign" })}</h2>
-            <p className="relative mx-auto mt-4 max-w-lg text-base leading-relaxed break-keep text-fg-muted">{L({ ko: "가입은 30초, 첫 결과까지 1분이면 충분해요.", en: "Thirty seconds to sign up, a minute to your first result." })}</p>
+            <p className="relative mx-auto mt-4 max-w-lg text-base leading-relaxed break-keep text-fg-muted">{L({ ko: "구글 계정으로 바로 가입하고, 결과는 도구에 따라 30초~3분이면 나와요.", en: "Sign up with Google, and get results in 30 seconds to 3 minutes depending on the tool." })}</p>
             <Link href="/auth" className={cn(primaryButton, "relative mt-8 h-12 px-7 text-[15px]")}>{L({ ko: "무료로 시작하기", en: "Start free" })} <ArrowRight size={16} aria-hidden /></Link>
           </motion.div>
         </section>
@@ -358,6 +358,8 @@ function Landing() {
             <Link href="/legal/terms" className="text-fg-muted hover:text-fg">{L({ ko: "이용약관", en: "Terms" })}</Link>
             <Link href="/legal/privacy" className="font-semibold text-fg hover:text-fg">{L({ ko: "개인정보 처리방침", en: "Privacy Policy" })}</Link>
             <Link href="/legal/refund" className="text-fg-muted hover:text-fg">{L({ ko: "환불정책", en: "Refund Policy" })}</Link>
+            <Link href="/legal/cookies" className="text-fg-muted hover:text-fg">{L({ ko: "쿠키 정책", en: "Cookies" })}</Link>
+            <Link href="/legal/licenses" className="text-fg-muted hover:text-fg">{L({ ko: "라이선스", en: "Licenses" })}</Link>
           </nav>
           <BusinessInfo />
           <p className="text-xs text-fg-subtle">© {new Date().getFullYear()} {L({ ko: "해봇 AI", en: "Haebot AI" })}</p>

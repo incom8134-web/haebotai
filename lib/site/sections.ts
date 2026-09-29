@@ -28,4 +28,6 @@ export const LEGAL_NAV: SubNavItem[] = [
   { href: "/legal/terms", label: { ko: "이용약관", en: "Terms" }, icon: "scroll-text" },
   { href: "/legal/privacy", label: { ko: "개인정보 처리방침", en: "Privacy" }, icon: "shield-check" },
   { href: "/legal/refund", label: { ko: "환불정책", en: "Refunds" }, icon: "receipt-text" },
+  { href: "/legal/cookies", label: { ko: "쿠키 정책", en: "Cookies" }, icon: "shield-check" },
+  { href: "/legal/licenses", label: { ko: "라이선스", en: "Licenses" }, icon: "scroll-text" },
 ];
