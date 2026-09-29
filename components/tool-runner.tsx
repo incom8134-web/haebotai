@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { RotateCcw, SquarePen, X } from "lucide-react";
+import { AlertTriangle, RotateCcw, SquarePen, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -112,6 +112,7 @@ function ToolRunner({
   defaultProvider,
   hasOwnKey,
   isStudent,
+  balance,
 }: {
   toolId: string;
   profile: BusinessProfile | null;
@@ -128,6 +129,7 @@ function ToolRunner({
   /** Which of availableProviders the user has their own (non-broken) key for — drives the live cost line. */
   hasOwnKey: Partial<Record<ProviderId, boolean>>;
   isStudent: boolean;
+  balance: number | null;
 }) {
   const manifest = getTool(toolId);
   const exp = getExperience(toolId);
@@ -371,6 +373,18 @@ function ToolRunner({
           {exp ? exp.hero.title[locale] : locale === "en" ? manifest.name_en : manifest.name_ko}
         </h1>
         <p className="mt-3 text-base leading-relaxed [text-wrap:pretty] break-keep text-fg-muted">{exp ? exp.hero.story[locale] : manifest.summary}</p>
+        {cost > 0 && balance !== null ? (
+          balance < cost ? (
+            <p role="alert" className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-xl border border-danger/30 bg-danger/10 px-3.5 py-2.5 text-sm break-keep text-fg">
+              <AlertTriangle size={15} className="shrink-0 text-danger" aria-hidden />
+              {L({ ko: `크레딧이 부족해요 — 필요 ${cost} · 보유 ${balance.toLocaleString()}`, en: `Not enough credits — needs ${cost}, you have ${balance.toLocaleString()}` })}
+              <Link href="/account/membership" className="font-medium text-studio-cyan hover:underline">{L({ ko: "충전하기", en: "Top up" })}</Link>
+              <Link href="/account/api-key" className="font-medium text-studio-cyan hover:underline">{L({ ko: "내 API 키 연결", en: "Connect your API key" })}</Link>
+            </p>
+          ) : (
+            <p className="mt-2 text-2xs text-fg-subtle">{L({ ko: `이번 실행 ${cost} 크레딧 · 실행 후 약 ${(balance - cost).toLocaleString()} 남음`, en: `This run uses ${cost} credits · about ${(balance - cost).toLocaleString()} left after` })}</p>
+          )
+        ) : null}
       </header>
 
       {exp?.layout === "steps" ? (

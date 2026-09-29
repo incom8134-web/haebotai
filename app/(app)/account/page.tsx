@@ -1,6 +1,5 @@
-import { redirect } from "next/navigation";
 import { AccountOverview } from "@/components/account/account-view";
-import { createClient } from "@/lib/supabase/server";
+import { signOut } from "@/lib/actions/auth";
 import { getBalance } from "@/lib/credits";
 import { getMembership } from "@/lib/membership";
 import { getApiKeyStatus } from "@/lib/api-keys";
@@ -8,13 +7,6 @@ import { getBusinessProfile } from "@/lib/profile";
 import { getCurrentUser } from "@/lib/supabase/user";
 
 export const metadata = { title: "내 계정 — 해봇 AI" };
-
-async function signOut() {
-  "use server";
-  const supabase = await createClient();
-  await supabase.auth.signOut();
-  redirect("/auth");
-}
 
 export default async function AccountPage() {
   const user = await getCurrentUser();

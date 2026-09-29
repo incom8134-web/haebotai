@@ -29,3 +29,19 @@ export const exportLimiter = new Ratelimit({
   limiter: Ratelimit.slidingWindow(30, "1 m"),
   prefix: "ratelimit:export",
 });
+
+// Checkout order + confirm: a real purchase needs one of each, and confirm
+// calls the Toss API, so a loop here costs external requests.
+export const paymentLimiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(10, "1 m"),
+  prefix: "ratelimit:payment",
+});
+
+// Account deletion walks and deletes every stored file — heavy, and never
+// needed more than once.
+export const accountDeleteLimiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(3, "10 m"),
+  prefix: "ratelimit:account-delete",
+});
