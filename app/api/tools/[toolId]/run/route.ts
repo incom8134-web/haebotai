@@ -71,7 +71,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }
 
   const body = await request.json().catch(() => null);
-  const { chainedFromRunId, provider: requestedProvider, values, reference: rawReference } = (body ?? {}) as {
+  const { chainedFromRunId, provider: requestedProvider, values, reference: rawReference, excludeProfile } = (body ?? {}) as {
+    excludeProfile?: unknown;
     chainedFromRunId?: string;
     provider?: unknown;
     values?: unknown;
@@ -197,7 +198,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }
 
   const runId: string = run.id;
-  const profile = await getBusinessProfile();
+  // Profile fields the member removed from this run (the chips above the form).
+  const excluded = new Set(Array.isArray(excludeProfile) ? excludeProfile.filter((k): k is string => typeof k === "string").slice(0, 32) : []);
+  const fullProfile = await getBusinessProfile();
+  const profile = fullProfile && excluded.size ? (Object.fromEntries(Object.entries(fullProfile).filter(([k]) => !excluded.has(k))) as typeof fullProfile) : fullProfile;
 
   // Local cancel: a client disconnect (request.signal, or the response
   // stream being cancelled) aborts the model call where the runtime
@@ -335,6 +339,18 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         .eq("status", "streaming")
         .select("id");
       if (!finished?.length) {
+        // Not "streaming" any more. Cancelled: the cancel route already
+        // refunded. Anything else (the pending→streaming update never
+        // applied): fail it and refund, and always tell the client — a
+        // silent close left its spinner running.
+        const { data: row } = await admin.from("generations").select("status").eq("id", runId).maybeSingle();
+        if (row?.status === "cancelled") {
+          send({ type: "cancelled" });
+        } else {
+          const { data: failed } = await admin.from("generations").update({ status: "error", error: "결과를 저장하지 못했습니다" }).eq("id", runId).in("status", ["pending", "streaming"]).select("id");
+          if (failed?.length) await settleGenerationCredits(runId, 0);
+          send({ type: "error", error: "결과를 저장하지 못했습니다. 다시 실행해 주세요. 크레딧은 돌려드렸어요." });
+        }
         close();
         return;
       }

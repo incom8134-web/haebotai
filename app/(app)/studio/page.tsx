@@ -13,7 +13,7 @@ export default async function StudioPage() {
   const supabase = await createClient();
   const user = await getCurrentUser();
 
-  const [profile, runsResult] = await Promise.all([
+  const [profile, runsResult, doneResult] = await Promise.all([
     getBusinessProfile(),
     user
       ? supabase
@@ -24,7 +24,13 @@ export default async function StudioPage() {
           .order("created_at", { ascending: false })
           .limit(4)
       : Promise.resolve({ data: [] as never[] }),
+    // For the getting-started checklist: which tools have ever finished
+    // (not just the last few runs, or a step could un-tick itself).
+    user
+      ? supabase.from("generations").select("tool_id").eq("user_id", user.id).eq("status", "done").not("tool_id", "is", null).order("created_at", { ascending: false }).limit(100)
+      : Promise.resolve({ data: [] as never[] }),
   ]);
+  const doneTools = (doneResult.data ?? []).map((r) => r.tool_id as string);
 
   const recentRuns: StudioRun[] = (runsResult.data ?? []).map((run) => ({
     id: run.id,
@@ -34,5 +40,5 @@ export default async function StudioPage() {
     createdAt: run.created_at,
   }));
 
-  return <StudioWorkspace profile={profile} recentRuns={recentRuns} />;
+  return <StudioWorkspace profile={profile} recentRuns={recentRuns} progress={{ runs: doneTools.length, distinctTools: new Set(doneTools).size }} />;
 }

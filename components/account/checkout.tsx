@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { AlertTriangle, ArrowLeft, CircleCheck, Crown, Hourglass } from "lucide-react";
 import { loadTossPayments, type TossPaymentsWidgets } from "@tosspayments/tosspayments-sdk";
 import { useBi } from "@/lib/i18n/context";
@@ -35,6 +36,15 @@ function CheckoutView({ customerKey, membership }: { customerKey: string; member
   const [error, setError] = useState<string | null>(null);
   const blocked = !CLIENT_KEY || membership.plan === "student";
 
+  // Back from Toss's page (bfcache restore): the button would stay stuck on "opening…".
+  useEffect(() => {
+    const reset = (e: PageTransitionEvent) => {
+      if (e.persisted) setPaying(false);
+    };
+    window.addEventListener("pageshow", reset);
+    return () => window.removeEventListener("pageshow", reset);
+  }, []);
+
   useEffect(() => {
     if (blocked) return;
     let cancelled = false;
@@ -61,13 +71,13 @@ function CheckoutView({ customerKey, membership }: { customerKey: string; member
 
   async function pay() {
     const widgets = widgetsRef.current;
-    if (!widgets) return;
+    if (!widgets || paying) return;
     setPaying(true);
     setError(null);
     try {
       const res = await fetch("/api/payments/pro/order", { method: "POST" });
-      const order = await res.json();
-      if (!res.ok) throw new Error(order.error ?? "주문을 만들지 못했습니다");
+      const order = (await res.json().catch(() => ({}))) as { error?: string; orderId?: string; orderName?: string; customerEmail?: string | null };
+      if (!res.ok || !order.orderId || !order.orderName) throw new Error(order.error ?? "주문을 만들지 못했습니다. 잠시 후 다시 시도해 주세요.");
       await widgets.requestPayment({
         orderId: order.orderId,
         orderName: order.orderName,
@@ -144,6 +154,7 @@ function CheckoutView({ customerKey, membership }: { customerKey: string; member
 
 function CheckoutSuccess({ paymentKey, orderId, amount }: { paymentKey: string; orderId: string; amount: string }) {
   const L = useBi();
+  const router = useRouter();
   const [state, setState] = useState<{ status: "confirming" } | { status: "done" } | { status: "pending"; message: string } | { status: "error"; message: string }>({ status: "confirming" });
   const sent = useRef(false);
 
@@ -160,10 +171,14 @@ function CheckoutSuccess({ paymentKey, orderId, amount }: { paymentKey: string; 
       }).catch(() => null);
       const data = res ? await res.json().catch(() => ({})) : {};
       if (res?.status === 202 && data.pending) setState({ status: "pending", message: data.error });
-      else if (res?.ok) setState({ status: "done" });
+      else if (res?.ok) {
+        setState({ status: "done" });
+        // New plan and credits: refresh the balance shown in the shell.
+        router.refresh();
+      }
       else setState({ status: "error", message: data.error ?? L({ ko: "결제를 확인하지 못했어요.", en: "Couldn't confirm the payment." }) });
     })();
-  }, [paymentKey, orderId, amount, L]);
+  }, [paymentKey, orderId, amount, L, router]);
 
   return (
     <>

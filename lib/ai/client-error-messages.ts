@@ -11,8 +11,9 @@
 export interface MappedError {
   ko: string;
   en: string;
-  /** Present when the error is solvable from the API key screen. */
+  /** Where the user can fix it (the API key screen unless linkLabel says otherwise). */
   link?: string;
+  linkLabel?: { ko: string; en: string };
 }
 
 const PATTERNS: { test: (msg: string) => boolean; map: (msg: string) => MappedError }[] = [
@@ -77,7 +78,7 @@ const PATTERNS: { test: (msg: string) => boolean; map: (msg: string) => MappedEr
   },
   {
     test: (m) => m.includes("크레딧이 부족합니다"),
-    map: () => ({ ko: "크레딧이 부족합니다.", en: "Not enough credits." }),
+    map: () => ({ ko: "크레딧이 부족합니다.", en: "Not enough credits.", link: "/account/membership", linkLabel: { ko: "크레딧 충전하기", en: "Top up credits" } }),
   },
   {
     test: (m) => m.includes("요청이 너무 잦습니다"),
@@ -92,7 +93,11 @@ const PATTERNS: { test: (msg: string) => boolean; map: (msg: string) => MappedEr
   },
   {
     test: (m) => m.includes("로그인이 필요합니다"),
-    map: () => ({ ko: "로그인이 필요합니다.", en: "Please sign in." }),
+    map: () => ({ ko: "로그인이 필요합니다.", en: "Please sign in.", link: "/auth", linkLabel: { ko: "로그인하기", en: "Sign in" } }),
+  },
+  {
+    test: (m) => m.includes("서비스 이용 동의가 필요합니다"),
+    map: () => ({ ko: "서비스 이용 동의가 필요해요.", en: "Please accept the terms to continue.", link: "/auth/consent", linkLabel: { ko: "동의하러 가기", en: "Review and accept" } }),
   },
 ];
 
