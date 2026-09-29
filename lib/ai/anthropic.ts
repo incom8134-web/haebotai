@@ -6,7 +6,7 @@ import type { BusinessProfile, ToolManifest } from "@/lib/tools/types";
 import type { Source } from "@/lib/tools/registry/shared";
 import { markApiKeySlotBroken, type ApiKeyPriority } from "@/lib/api-keys";
 import { runWithRotation, type KeyRotationState } from "@/lib/tools/quota-rotation";
-import { buildContext, buildSystemInstruction, collectInputImages } from "@/lib/tools/generate-prompt";
+import { buildContext, buildSystemInstruction, collectInputImages, referenceParts } from "@/lib/tools/generate-prompt";
 import { ANTHROPIC_MODEL, anthropicMaxTokens } from "./models";
 import {
   anthropicRetryDelayMs,
@@ -135,7 +135,7 @@ async function* generateStructured(
   abortSignal: AbortSignal | undefined,
 ): AsyncGenerator<AiStreamEvent, void, void> {
   const contextText = buildContext(manifest, input, profile);
-  const inputImages = collectInputImages(manifest, input);
+  const inputImages = [...collectInputImages(manifest, input), ...referenceParts(input, { documents: false })];
   const system = buildSystemInstruction(manifest);
 
   let usage: TokenUsage = { inputTokens: 0, outputTokens: 0 };

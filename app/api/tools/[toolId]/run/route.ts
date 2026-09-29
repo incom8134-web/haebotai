@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getTool } from "@/lib/tools/registry";
 import type { Source } from "@/lib/tools/registry/shared";
 import { buildInputSchema } from "@/lib/tools/runner";
+import { buildReference, referenceForStorage } from "@/lib/tools/reference-server";
 import { checkGrounding } from "@/lib/tools/grounding";
 import { checkToolPolicy, checkOutputSafety } from "@/lib/tools/policy";
 import { generateOutput, runWithApiKey } from "@/lib/tools/generate";
@@ -65,10 +66,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }
 
   const body = await request.json().catch(() => null);
-  const { chainedFromRunId, provider: requestedProvider, values } = (body ?? {}) as {
+  const { chainedFromRunId, provider: requestedProvider, values, reference: rawReference } = (body ?? {}) as {
     chainedFromRunId?: string;
     provider?: unknown;
     values?: unknown;
+    reference?: unknown;
   };
   const parsedInput = buildInputSchema(manifest.inputs).safeParse(values ?? {});
   if (!parsedInput.success) {
@@ -87,6 +89,16 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return Response.json({ error: providerResolution.error }, { status: 400 });
   }
   const { provider } = providerResolution;
+
+  // Pasted text and uploaded files from the "참고 자료" panel: validated
+  // and turned into text/parts here; the run row keeps only the text and
+  // file names, generation gets the whole bundle as input._reference.
+  const reference = await buildReference(manifest.id, rawReference);
+  if (!reference.ok) {
+    return Response.json({ error: reference.error }, { status: 400 });
+  }
+  const generationInput = reference.bundle ? { ...parsedInput.data, _reference: reference.bundle } : parsedInput.data;
+  const storedInput = reference.bundle ? { ...parsedInput.data, _reference: referenceForStorage(reference.bundle) } : parsedInput.data;
 
   const policy = checkToolPolicy(manifest.id, parsedInput.data);
   if (!policy.ok) {
@@ -141,7 +153,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       user_id: user.id,
       kind: "generate",
       tool_id: manifest.id,
-      input: parsedInput.data,
+      input: storedInput,
       status: "pending",
       credits_reserved: cost,
       chained_from: chainedFrom,
@@ -209,7 +221,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         const result = await runWithApiKey(provider, user.id, userApiKeys, () =>
           generateOutput(
             manifest,
-            parsedInput.data,
+            generationInput,
             profile,
             abort.signal,
             { supabase, userId: user.id, runId },

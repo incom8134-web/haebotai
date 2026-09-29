@@ -8,6 +8,8 @@
 
 import type { BusinessProfile, ToolManifest } from "./types";
 import { getPlaybook, HOUSE_RULES } from "./playbooks.ts";
+import { referencePrompt, type ReferenceBundle } from "./reference.ts";
+import { directionPrompt, type Direction } from "./directions.ts";
 
 // Prompt-level enforcement for the hard guards documented in policy.ts —
 // that file's checks are the pre-flight/output-safety backstop; this is
@@ -80,6 +82,18 @@ export function collectInputImages(manifest: ToolManifest, input: Record<string,
   return images;
 }
 
+/** The "참고 자료" bundle the run route attached, if any. */
+export function referenceOf(input: Record<string, unknown>): ReferenceBundle | null {
+  const r = input._reference as ReferenceBundle | undefined;
+  return r && typeof r === "object" && "mode" in r && Array.isArray(r.images) ? r : null;
+}
+
+/** Reference images (every model) and, for models that read them, PDFs. */
+export function referenceParts(input: Record<string, unknown>, opts: { documents: boolean }): ImagePart[] {
+  const r = referenceOf(input);
+  return r ? [...r.images, ...(opts.documents ? r.documents : [])] : [];
+}
+
 export function buildContext(
   manifest: ToolManifest,
   input: Record<string, unknown>,
@@ -97,6 +111,10 @@ export function buildContext(
       lines.push(`- [비즈니스 프로필] ${PROFILE_LABELS[key]}: ${formatValue(profile[key])}`);
     }
   }
+  const direction = input._direction as Direction | undefined;
+  if (direction?.brief) lines.push("", directionPrompt(direction));
+  const reference = referenceOf(input);
+  if (reference) lines.push("", referencePrompt(reference));
   return lines.join("\n");
 }
 

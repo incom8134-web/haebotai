@@ -12,6 +12,8 @@ import {
   buildResearchPrompt,
   buildReviseInstruction,
   collectInputImages,
+  referenceOf,
+  referenceParts,
 } from "@/lib/tools/generate-prompt";
 import { classifyGeminiError } from "./provider-errors";
 import { getPlaybook } from "@/lib/tools/playbooks";
@@ -367,10 +369,22 @@ async function generateLogo(
   const brandName = String(input.brand_name ?? profile?.brand_name ?? "").trim();
   if (!brandName) throw new Error("브랜드명을 입력해주세요");
   const contextText = buildContext(manifest, input, profile);
+  // "참고 자료" images: the planner sees them; for a refresh, every new
+  // symbol is also drawn from the old logo so it stays recognizable.
+  const refs = referenceParts(input, { documents: false });
+  const refresh = referenceOf(input)?.mode.id === "refresh" && refs.length > 0;
 
   const planRes = await ai.models.generateContent({
     model: TEXT_MODEL,
-    contents: `다음 브랜드의 로고 콘셉트 4가지를 기획하세요. 네 가지는 조형 방식이 서로 확실히 달라야 합니다(예: 구상 심볼, 기하학 추상 마크, 엠블럼/배지, 이니셜 모노그램 — 선택한 스타일을 중심으로 변주). 브랜드명 글자는 서버가 따로 조판하므로, 심볼 이미지에는 글자를 넣지 않습니다.\n\n${contextText}`,
+    contents: [
+      {
+        role: "user",
+        parts: [
+          { text: `다음 브랜드의 로고 콘셉트 4가지를 기획하세요. 네 가지는 조형 방식이 서로 확실히 달라야 합니다(예: 구상 심볼, 기하학 추상 마크, 엠블럼/배지, 이니셜 모노그램 — 선택한 스타일을 중심으로 변주). 브랜드명 글자는 서버가 따로 조판하므로, 심볼 이미지에는 글자를 넣지 않습니다.\n\n${contextText}` },
+          ...refs.map((img) => ({ inlineData: img })),
+        ],
+      },
+    ],
     config: {
       systemInstruction: buildSystemInstruction(manifest),
       responseMimeType: "application/json",
@@ -406,7 +420,10 @@ async function generateLogo(
       ].join(" ");
       const seed = Math.floor(Math.random() * 2 ** 31);
       // Square, so the mark fills the lockup instead of floating in a 16:9 frame.
-      const { image, usage: shotUsage } = await generateOneImage(manifest, [{ text: prompt }], seed, abortSignal, "1:1");
+      const parts: ({ text: string } | { inlineData: ImagePart })[] = refresh
+        ? [{ text: `${prompt} Evolve the attached existing logo: keep its recognizable core idea, simplify and modernize it; do not copy it unchanged.` }, { inlineData: refs[0] }]
+        : [{ text: prompt }];
+      const { image, usage: shotUsage } = await generateOneImage(manifest, parts, seed, abortSignal, "1:1");
       usage = addUsage(usage, { promptTokenCount: shotUsage.inputTokens ?? 0, candidatesTokenCount: shotUsage.outputTokens ?? 0 });
 
       const lockup = await renderLogoLockup({
@@ -459,8 +476,13 @@ async function generateImages(
     }
   }
 
+  // "참고 자료" images guide the look. The planner sees them for both
+  // tools; only product shots get them as a style reference — lookbook
+  // references stay with the planner so no real person's likeness
+  // reaches the image model.
+  const styleRefs = referenceParts(input, { documents: false });
   const contextText = buildContext(manifest, input, profile);
-  const plan = await planShots(manifest, contextText, inputImages, abortSignal);
+  const plan = await planShots(manifest, contextText, [...inputImages, ...styleRefs], abortSignal);
   usage = addUsage(usage, { promptTokenCount: plan.usage.inputTokens ?? 0, candidatesTokenCount: plan.usage.outputTokens ?? 0 });
   const ratio = (["1:1", "4:5", "16:9", "9:16"] as const).find((r) => r === input.ratio) ?? (manifest.id === "brand-model" ? "3:4" : "1:1");
 
@@ -470,7 +492,9 @@ async function generateImages(
       const text = [shot.prompt, plan.modelDescription && `Model (same person in every shot): ${plan.modelDescription}.`, inputImages.length ? "Keep the product exactly as in the attached reference photo." : ""]
         .filter(Boolean)
         .join(" ");
-      const parts: ({ text: string } | { inlineData: ImagePart })[] = [{ text }, ...inputImages.map((img) => ({ inlineData: img }))];
+      const shotRefs = manifest.id === "image" ? styleRefs : [];
+      const styleNote = shotRefs.length ? " Match the lighting, color grade, background and composition style of the style-reference image(s) attached after the product; do not copy their subject." : "";
+      const parts: ({ text: string } | { inlineData: ImagePart })[] = [{ text: text + styleNote }, ...inputImages.map((img) => ({ inlineData: img })), ...shotRefs.map((img) => ({ inlineData: img }))];
       const { image, usage: shotUsage } = await generateOneImage(manifest, parts, seed, abortSignal, ratio);
       usage = addUsage(usage, { promptTokenCount: shotUsage.inputTokens ?? 0, candidatesTokenCount: shotUsage.outputTokens ?? 0 });
       const ext = image.mimeType.includes("png") ? "png" : image.mimeType.includes("webp") ? "webp" : "jpg";
@@ -524,7 +548,8 @@ async function* generateStructured(
 ): AsyncGenerator<AiStreamEvent, void, void> {
   const ai = getClient();
   const contextText = buildContext(manifest, input, profile);
-  const inputImages = collectInputImages(manifest, input);
+  // The tool's own image fields plus the "참고 자료" images and PDFs.
+  const inputImages = [...collectInputImages(manifest, input), ...referenceParts(input, { documents: true })];
 
   let usage: TokenUsage = { inputTokens: 0, outputTokens: 0 };
   let sources: Source[] = [];

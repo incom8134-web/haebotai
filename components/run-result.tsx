@@ -428,18 +428,26 @@ function RunResult({
 }) {
   const { locale } = useLocale();
   const t = useT();
-  const extras = extraDownloads(output, input);
+  // The run's creative direction (lib/tools/directions.ts) is shown as a
+  // chip, not as a result field.
+  const { creative_direction: direction, ...shown } = (output ?? {}) as Record<string, unknown> & { creative_direction?: { name?: string } };
+  const extras = extraDownloads(shown, input);
   const chainTargets = listTools().filter((tool) => tool.acceptsChainFrom?.includes(manifest.id));
 
   return (
     <div className="glass rounded-[20px] p-4 ">
-      <div className="flex items-center gap-2">
-        <p className="font-mono text-2xs text-grounded">
+      <div className="flex flex-wrap items-center gap-2">
+        <p className="font-mono text-2xs whitespace-nowrap text-grounded">
           {t("credits_used")} {creditsUsed ?? "—"} {t("credits")}
         </p>
         {provider ? (
           <Badge variant="outline" className="font-mono text-2xs">
             {PROVIDER_LABEL[provider]}
+          </Badge>
+        ) : null}
+        {direction?.name ? (
+          <Badge variant="outline" className="border-studio-violet/40 text-studio-violet" title={locale === "en" ? "This run's creative direction — the next run takes a different one" : "이번 결과의 창작 방향 — 다음 실행은 다른 방향으로 만들어요"}>
+            {locale === "en" ? "Direction" : "이번 방향"} · {direction.name}
           </Badge>
         ) : null}
         {manifest.grounding.estimateBadge ? (
@@ -451,7 +459,7 @@ function RunResult({
 
       <DownloadPanel runId={runId} toolId={manifest.id} extras={extras} />
 
-      <OutputPreview output={output} />
+      <OutputPreview output={shown} />
 
       <DownloadPanel runId={runId} toolId={manifest.id} extras={extras} compact />
 
