@@ -11,6 +11,7 @@ import {
   FileSpreadsheet,
   FileText,
   FileType,
+  FolderArchive,
   Loader2,
   Presentation,
   type LucideIcon,
@@ -59,6 +60,14 @@ function downloadText(filename: string, text: string, mimeType: string) {
 
 // Works for both signed Storage URLs and data: URIs — fetch() handles
 // both, so this is the one path for "save whatever's behind this src".
+// The homepage's Vite + TypeScript project, zipped in the browser.
+async function downloadProject(filename: string, files: Record<string, string>) {
+  const { default: JSZip } = await import("jszip");
+  const zip = new JSZip();
+  for (const [path, text] of Object.entries(files)) zip.file(path, text);
+  downloadBlob(filename, await zip.generateAsync({ type: "blob" }));
+}
+
 async function downloadFromUrl(filename: string, url: string) {
   const res = await fetch(url);
   downloadBlob(filename, await res.blob());
@@ -126,7 +135,17 @@ function extraDownloads(output: unknown, input?: Record<string, unknown>, en = f
   const extras: ExtraDownload[] = [];
   if (typeof o.html === "string") {
     const html = o.html;
-    extras.push({ key: "html", label: "HTML", hint: en ? "Website file" : "홈페이지 파일", icon: Code2, run: () => downloadText("homepage.html", html, "text/html") });
+    extras.push({ key: "html", label: "HTML", hint: en ? "Single file, ready to host" : "파일 하나로 바로 게시", icon: Code2, run: () => downloadText("homepage.html", html, "text/html") });
+  }
+  if (o.project_files && typeof o.project_files === "object") {
+    const files = o.project_files as Record<string, string>;
+    extras.push({
+      key: "project",
+      label: en ? "TypeScript project" : "TypeScript 프로젝트",
+      hint: en ? "Vite · Three.js · GSAP source, .zip" : "Vite·Three.js·GSAP 소스 .zip",
+      icon: FolderArchive,
+      run: () => void downloadProject("homepage-project.zip", files),
+    });
   }
   if (typeof o.body_markdown === "string") {
     const md = o.body_markdown;
