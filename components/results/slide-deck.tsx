@@ -98,7 +98,7 @@ function LayoutBody({ slide, num, headline, points, accent }: { slide: Slide; nu
   const pad = "absolute inset-0 flex flex-col px-[5%] pt-[4.5%] pb-[4%]";
   switch (slide.layout) {
     case "big_number":
-      if (!slide.stat?.value) return null;
+      if (!slide.stat?.value || slide.stat.value.includes("확인 필요")) return null;
       return (
         <div className={pad}>
           <Head num={num} headline={headline} accent={accent} />

@@ -976,7 +976,8 @@ function renderLayout(deck: Deck, sl: Obj, x: LayoutCtx): boolean {
   switch (layout) {
     case "big_number": {
       const stat = isObj(sl.stat) ? sl.stat : null;
-      if (!stat || !stat.value) return false;
+      // A placeholder is not a headline number: show the slide as points instead.
+      if (!stat || !stat.value || String(stat.value).includes("확인 필요")) return false;
       const s = deck.content(kicker, headline, color, notes);
       const bw = 5.6;
       deck.rect(s, M, TOP, bw, BOTTOM - TOP - 0.1, color.soft, 0.14);
