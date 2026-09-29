@@ -1,9 +1,12 @@
 import type { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { checkConfirm, PRO_ORDER } from "@/lib/payments/pro";
+import { checkConfirm } from "@/lib/payments/pro";
+import { activateOrder, reconcileOrder } from "@/lib/payments/reconcile";
 import { confirmTossPayment } from "@/lib/payments/toss";
 import { checkRateLimit, paymentLimiter } from "@/lib/rate-limit";
+
+const PENDING_MESSAGE = "결제 확인이 늦어지고 있어요. 결제가 완료됐다면 몇 분 안에 자동으로 적용돼요.";
 
 // Step 2 of checkout: Toss redirected to the success page with
 // paymentKey/orderId/amount. Check them against the stored order, ask
@@ -42,30 +45,47 @@ export async function POST(request: NextRequest) {
     if (check.reason === "already_done") return Response.json({ ok: true, alreadyDone: true });
     if (check.reason === "amount_mismatch") {
       await admin.from("payments").update({ status: "failed", fail_reason: "amount_mismatch" }).eq("order_id", orderId).eq("status", "pending");
+      return Response.json({ error: "결제 금액이 주문과 다릅니다" }, { status: 400 });
     }
-    return Response.json({ error: "결제 금액이 주문과 다릅니다" }, { status: 400 });
+    // Not pending: e.g. an earlier confirm timed out. Ask Toss what happened.
+    const outcome = await reconcileOrder(orderId);
+    if (outcome === "activated") return Response.json({ ok: true });
+    return Response.json({ error: "이미 처리된 주문이에요. 멤버십 화면에서 결제 내역을 확인해 주세요." }, { status: 409 });
   }
 
   const toss = await confirmTossPayment({ paymentKey, orderId, amount });
   if (!toss.ok) {
+    // No answer from Toss: it may have approved anyway. Keep the order
+    // retryable (reconcile treats NETWORK_ERROR failures as open) and tell
+    // the user not to pay again.
+    if (toss.code === "NETWORK_ERROR") {
+      await admin.from("payments").update({ status: "failed", fail_reason: `${toss.code}: ${toss.message}` }).eq("order_id", orderId).eq("status", "pending");
+      return Response.json({ pending: true, error: PENDING_MESSAGE }, { status: 202 });
+    }
+    // A previous confirm already went through at Toss but its reply was lost.
+    if (toss.code === "ALREADY_PROCESSED_PAYMENT") {
+      const outcome = await reconcileOrder(orderId);
+      return outcome === "activated" ? Response.json({ ok: true }) : Response.json({ pending: true, error: PENDING_MESSAGE }, { status: 202 });
+    }
     await admin.from("payments").update({ status: "failed", fail_reason: `${toss.code}: ${toss.message}`, raw: toss.raw }).eq("order_id", orderId).eq("status", "pending");
     return Response.json({ error: toss.message, code: toss.code }, { status: 400 });
   }
 
-  const { error } = await admin.rpc("activate_pro", {
-    p_order_id: orderId,
-    p_payment_key: toss.paymentKey,
-    p_method: toss.method,
-    p_approved_at: toss.approvedAt,
-    p_raw: toss.raw,
-    p_days: PRO_ORDER.days,
-    p_credits: PRO_ORDER.credits,
-  });
-  if (error) {
-    // Charged but not activated — needs a human. The order id is what
-    // support looks up (and what a Toss cancel would use).
-    console.error("activate_pro failed", orderId, error.message);
-    return Response.json({ error: `결제는 완료됐지만 프로 적용에 실패했습니다. 주문번호 ${orderId}로 문의해주세요.` }, { status: 500 });
+  // 가상계좌: approved means "account issued", not "paid". Pro waits for the
+  // deposit, which the webhook / scheduled job pick up.
+  if (toss.payment.status === "WAITING_FOR_DEPOSIT") {
+    await admin.from("payments").update({ payment_key: toss.payment.paymentKey, raw: toss.payment.raw }).eq("order_id", orderId).eq("status", "pending");
+    return Response.json({ pending: true, error: "입금을 기다리고 있어요. 입금이 확인되면 자동으로 프로가 적용돼요." }, { status: 202 });
+  }
+  if (toss.payment.status !== "DONE") return Response.json({ pending: true, error: PENDING_MESSAGE }, { status: 202 });
+
+  if (!(await activateOrder(admin, orderId, toss.payment))) {
+    // The webhook may have activated it first.
+    const { data: now } = await admin.from("payments").select("status").eq("order_id", orderId).maybeSingle();
+    if (now?.status === "done") return Response.json({ ok: true });
+    // Charged but not activated yet. The order stays pending, so the
+    // webhook / scheduled job retry activation automatically.
+    return Response.json({ pending: true, error: `결제는 완료됐어요. 프로 적용을 자동으로 다시 시도하고 있어요. 한 시간 넘게 적용되지 않으면 주문번호 ${orderId}로 문의해주세요.` }, { status: 202 });
   }
 
   return Response.json({ ok: true });
