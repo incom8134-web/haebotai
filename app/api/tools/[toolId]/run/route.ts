@@ -192,7 +192,16 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   // update at the end.
   const abort = new AbortController();
   request.signal.addEventListener("abort", () => abort.abort());
-  const isCancelled = () => abort.signal.aborted;
+  // The platform kills the function at maxDuration without running any
+  // cleanup, which would leave the run "streaming" and its credits
+  // reserved. Stop a little earlier ourselves so the run fails cleanly
+  // and the reservation is refunded.
+  let timedOut = false;
+  const watchdog = setTimeout(() => {
+    timedOut = true;
+    abort.abort();
+  }, (maxDuration - 15) * 1000);
+  const isCancelled = () => abort.signal.aborted && !timedOut;
 
   // Only a still-running row is failed; a row the cancel endpoint already
   // marked cancelled (and refunded) keeps that status.
@@ -203,6 +212,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
   const stream = new ReadableStream({
     cancel() {
+      clearTimeout(watchdog);
       abort.abort();
     },
     async start(controller) {
@@ -216,6 +226,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         }
       };
       const close = () => {
+        clearTimeout(watchdog);
         try {
           controller.close();
         } catch {
@@ -244,6 +255,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         sources = result.sources;
         usage = result.usage;
       } catch (err) {
+        if (timedOut) {
+          const message = "시간이 너무 오래 걸려 중단했습니다. 크레딧은 돌려드렸어요. 분량(슬라이드 수 등)을 줄이거나 잠시 후 다시 시도해 주세요.";
+          await fail("error", message);
+          send({ type: "error", error: message });
+          close();
+          return;
+        }
         if (isCancelled()) {
           await fail("cancelled", "사용자가 취소했습니다");
           close();
