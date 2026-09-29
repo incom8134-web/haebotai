@@ -26,6 +26,7 @@ export function HelpHome() {
     { href: "/help/api-guide", icon: BookOpenText, title: { ko: "API 키 설명서", en: "API key manual" }, body: { ko: "발급부터 문제 해결까지", en: "From getting a key to fixing errors" } },
     { href: "/account/credits", icon: CircleGauge, title: { ko: "크레딧·한도", en: "Credits & limits" }, body: { ko: "도구별 비용과 사용 한도", en: "Cost per tool and usage limits" } },
     { href: "/account/membership", icon: Crown, title: { ko: "학생 멤버십", en: "Student membership" }, body: { ko: "재학 인증으로 무제한", en: "Unlimited with enrollment" } },
+    { href: "/legal/terms", icon: ShieldCheck, title: { ko: "약관·정책", en: "Terms & policies" }, body: { ko: "이용약관·개인정보·환불", en: "Terms, privacy, refunds" } },
     { href: "/help/whats-new", icon: Sparkle, title: { ko: "새로운 점", en: "What's new" }, body: { ko: `v${PATCH_NOTES[0].version} · ${PATCH_NOTES[0].date}`, en: `v${PATCH_NOTES[0].version} · ${PATCH_NOTES[0].date}` } },
   ];
   return (
