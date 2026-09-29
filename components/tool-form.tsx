@@ -81,6 +81,9 @@ function TagList({
           className="min-w-24 flex-1 bg-transparent text-sm text-fg outline-none placeholder:text-fg-subtle"
           placeholder={values.length === 0 ? placeholder : ""}
           onKeyDown={(e) => {
+            // Korean IME: Enter first commits the syllable being composed;
+            // acting on that press left a stray syllable in the box.
+            if (e.nativeEvent.isComposing || e.keyCode === 229) return;
             const target = e.currentTarget;
             if (e.key === "Enter" && target.value.trim()) {
               e.preventDefault();
@@ -88,6 +91,14 @@ function TagList({
               target.value = "";
             } else if (e.key === "Backspace" && !target.value && values.length) {
               onChange(values.slice(0, -1));
+            }
+          }}
+          // Text typed but not yet added with Enter would be lost on Save/Run.
+          onBlur={(e) => {
+            const text = e.currentTarget.value.trim();
+            if (text) {
+              onChange([...values, text]);
+              e.currentTarget.value = "";
             }
           }}
         />

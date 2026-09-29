@@ -38,19 +38,25 @@ export async function saveApiKey(_prev: ApiKeyActionState, formData: FormData): 
 
   const key = String(formData.get("apiKey") ?? "").trim();
   if (!check.looksLike(key)) return { ok: false, message: "invalid_format" };
-  if (!(await check.verify(key))) return { ok: false, message: "rejected_by_provider" };
 
+  // Signed in and within the limit BEFORE calling the provider, so the
+  // server can't be used to test other people's keys.
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, message: "signed_out" };
+  if (await limitSensitive("key-save", user.id)) return { ok: false, message: "rate_limited" };
+  if (!(await check.verify(key))) return { ok: false, message: "rejected_by_provider" };
 
   const admin = createAdminClient();
   const { error } = await admin
     .from("user_api_keys")
     .upsert({ user_id: user.id, provider, priority, ciphertext: seal(key, secret), last4: key.slice(-4), broken: false });
-  if (error) return { ok: false, message: error.message };
+  if (error) {
+    console.error("[api-keys] save failed", error.message);
+    return { ok: false, message: "save_failed" };
+  }
   revalidatePath("/account/api-key");
   return { ok: true, message: "saved" };
 }
@@ -80,14 +86,7 @@ export async function testApiKey(provider: ApiKeyProvider, priority: ApiKeyPrior
   if (valid) {
     // A slot the rotation classifier flagged broken (401/403) is worth
     // retrying — the user may have just fixed it on the provider's side.
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (user) {
-      const admin = createAdminClient();
-      await admin.from("user_api_keys").update({ broken: false }).eq("user_id", user.id).eq("provider", provider).eq("priority", priority);
-    }
+    await createAdminClient().from("user_api_keys").update({ broken: false }).eq("user_id", caller.id).eq("provider", provider).eq("priority", priority);
   }
   return valid ? { ok: true, message: "valid" } : { ok: false, message: "rejected_by_provider" };
 }

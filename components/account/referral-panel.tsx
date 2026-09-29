@@ -14,7 +14,11 @@ export function ReferralPanel({ status, link }: { status: ReferralStatus | null;
 
   async function copy() {
     if (!link) return;
-    await navigator.clipboard.writeText(link).catch(() => {});
+    const ok = await navigator.clipboard.writeText(link).then(() => true, () => false);
+    if (!ok) {
+      window.prompt(L({ ko: "아래 링크를 복사해 주세요", en: "Copy this link" }), link);
+      return;
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }

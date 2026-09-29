@@ -1,7 +1,7 @@
 "use client";
 
 import { BrandMark } from "@/components/brand-mark";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { motion } from "motion/react";
@@ -28,7 +28,18 @@ function AuthCard() {
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState(false);
 
+  // Coming back from Google with the Back button restores this page from
+  // the back/forward cache with the button still stuck on "Opening Google…".
+  useEffect(() => {
+    const reset = (e: PageTransitionEvent) => {
+      if (e.persisted) setLoading(false);
+    };
+    window.addEventListener("pageshow", reset);
+    return () => window.removeEventListener("pageshow", reset);
+  }, []);
+
   async function signIn() {
+    if (loading) return;
     setLoading(true);
     setFailed(false);
     const supabase = createClient();

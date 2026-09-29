@@ -38,6 +38,7 @@ import { useBi, useLocale, useT } from "@/lib/i18n/context";
 import type { Source } from "@/lib/tools/registry/shared";
 import type { ToolManifest } from "@/lib/tools/types";
 import { PROVIDER_LABEL, type ProviderId } from "@/lib/ai/types";
+import { toast } from "sonner";
 
 // Shared between the live "done" state in tool-runner.tsx and the
 // library run-detail page — a stored run and a just-finished run render
@@ -69,9 +70,17 @@ async function downloadProject(filename: string, files: Record<string, string>) 
   downloadBlob(filename, await zip.generateAsync({ type: "blob" }));
 }
 
+// An expired signed URL (old Library runs) answers with an XML error —
+// never save that as "image-1.png"; say so instead.
 async function downloadFromUrl(filename: string, url: string) {
-  const res = await fetch(url);
-  downloadBlob(filename, await res.blob());
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    downloadBlob(filename, await res.blob());
+  } catch {
+    const en = document.documentElement.lang === "en";
+    toast.error(en ? "Couldn't download the file. Refresh the page and try again." : "파일을 받지 못했어요. 페이지를 새로고침한 뒤 다시 시도해 주세요.");
+  }
 }
 
 function guessImageExt(url: string): string {
@@ -199,7 +208,12 @@ function DownloadPanel({
   const [busy, setBusy] = useState<ExportFormat | null>(null);
   const formats = formatsFor(toolId);
   const href = (f: ExportFormat) => `/api/export/${runId}?format=${f}`;
-  const start = (f: ExportFormat) => {
+  // Each click builds the file on the server — ignore repeats while one is being made.
+  const start = (f: ExportFormat, e?: { preventDefault: () => void }) => {
+    if (busy) {
+      e?.preventDefault();
+      return;
+    }
     setBusy(f);
     setTimeout(() => setBusy((b) => (b === f ? null : b)), 6000);
   };
@@ -209,7 +223,7 @@ function DownloadPanel({
       <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-hairline pt-3">
         <span className="text-2xs text-fg-subtle">{en ? "Download" : "다운로드"}</span>
         {formats.map((f) => (
-          <a key={f} href={href(f)} onClick={() => start(f)} className={chip}>
+          <a key={f} href={href(f)} onClick={(e) => start(f, e)} className={chip}>
             <FormatIcon format={f} busy={busy === f} className="size-3" />
             {FORMATS[f].label}
           </a>
@@ -253,7 +267,7 @@ function DownloadPanel({
         {lead ? null : (
           <a
             href={href(primary)}
-            onClick={() => start(primary)}
+            onClick={(e) => start(primary, e)}
             className={leadClass}
           >
             <FormatIcon format={primary} busy={busy === primary} className="size-5 shrink-0" />
@@ -270,7 +284,7 @@ function DownloadPanel({
           </a>
         )}
         {(lead ? formats : rest).map((f) => (
-          <a key={f} href={href(f)} onClick={() => start(f)} className={tile}>
+          <a key={f} href={href(f)} onClick={(e) => start(f, e)} className={tile}>
             <FormatIcon format={f} busy={busy === f} className="size-4 shrink-0 text-accent" />
             <span className="flex min-w-0 flex-col">
               <span className="text-sm font-medium text-fg">{FORMATS[f].label}</span>
