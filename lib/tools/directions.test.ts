@@ -25,7 +25,7 @@ test("a small pool still rotates instead of locking up", () => {
 });
 
 test("tools without a pool get no direction", () => {
-  assert.equal(pickDirection("keyword", []), null);
+  assert.equal(pickDirection("prompt", []), null);
 });
 
 test("the prompt names the direction and puts user rules first", () => {

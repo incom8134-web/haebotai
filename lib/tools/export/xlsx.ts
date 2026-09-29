@@ -18,7 +18,11 @@ interface BusinessPlanInput {
 }
 
 interface BusinessPlanOutput {
-  financials: { breakeven_month: number };
+  financials: {
+    breakeven_month: number;
+    yearly?: { year: string; revenue_krw: number; cost_krw: number; customers?: number }[];
+    monthly_revenue_krw?: number[];
+  };
 }
 
 export async function buildBusinessPlanXlsx(
@@ -88,6 +92,36 @@ export async function buildBusinessPlanXlsx(
   const breakevenRow = pl.addRow({ label: "모델 추정 손익분기(개월차)", y1: output.financials.breakeven_month });
 
   breakevenRow.getCell("label").font = { italic: true };
+
+  // The plan's own projection (the numbers its charts show), with the
+  // profit and margin rows as formulas so edits recalculate.
+  const yearly = output.financials.yearly ?? [];
+  if (yearly.length) {
+    const ai = workbook.addWorksheet("사업계획서 추정");
+    const cols = ["B", "C", "D", "E", "F"].slice(0, yearly.length);
+    ai.columns = [{ header: "구분", key: "label", width: 22 }, ...yearly.map((y, i) => ({ header: y.year || `${i + 1}년 차`, key: `y${i}`, width: 16 }))];
+    ai.getRow(1).font = { bold: true };
+    ai.addRow({ label: "매출 (원)", ...Object.fromEntries(yearly.map((y, i) => [`y${i}`, y.revenue_krw])) });
+    ai.addRow({ label: "비용 (원)", ...Object.fromEntries(yearly.map((y, i) => [`y${i}`, y.cost_krw])) });
+    ai.addRow({ label: "영업이익 (원)" });
+    ai.addRow({ label: "영업이익률" });
+    ai.addRow({ label: "고객 수", ...Object.fromEntries(yearly.map((y, i) => [`y${i}`, y.customers ?? 0])) });
+    for (const col of cols) {
+      ai.getCell(`${col}4`).value = { formula: `${col}2-${col}3` };
+      ai.getCell(`${col}5`).value = { formula: `IF(${col}2=0,0,${col}4/${col}2)` };
+      for (const row of [2, 3, 4, 6]) ai.getCell(`${col}${row}`).numFmt = "#,##0";
+      ai.getCell(`${col}5`).numFmt = "0.0%";
+    }
+    const monthly = output.financials.monthly_revenue_krw ?? [];
+    if (monthly.length) {
+      ai.addRow({});
+      ai.addRow({ label: "첫해 월별 매출 (원)" }).font = { bold: true };
+      monthly.forEach((v, i) => {
+        const r = ai.addRow({ label: `${i + 1}월`, y0: v });
+        r.getCell("y0").numFmt = "#,##0";
+      });
+    }
+  }
 
   return Buffer.from(await workbook.xlsx.writeBuffer());
 }
