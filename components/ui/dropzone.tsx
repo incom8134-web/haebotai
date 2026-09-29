@@ -1,5 +1,7 @@
 "use client";
 
+import { useBi } from "@/lib/i18n/context";
+
 import { useRef, useState, type DragEvent, type ClipboardEvent } from "react";
 import { UploadCloud } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -28,12 +30,15 @@ function Dropzone({
   onFiles,
   accept = "image/*",
   maxFiles = 1,
-  label = "이미지를 드래그하거나 클릭하여 업로드",
-  hint = "또는 클립보드에서 붙여넣기",
+  label,
+  hint,
   disabled = false,
   error,
   className,
 }: DropzoneProps) {
+  const L = useBi();
+  label ??= L({ ko: "이미지를 드래그하거나 클릭하여 업로드", en: "Drag an image here or click to upload" });
+  hint ??= L({ ko: "또는 클립보드에서 붙여넣기", en: "or paste from the clipboard" });
   const [dragOver, setDragOver] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 

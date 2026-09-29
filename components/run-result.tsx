@@ -32,7 +32,7 @@ import { AdCreatives, type CopyOutput } from "@/components/results/ad-creatives"
 import { MoodBoard } from "@/components/results/mood-board";
 import { ReportView } from "@/components/results/report-view";
 import { buildReport } from "@/lib/tools/report";
-import { useLocale, useT } from "@/lib/i18n/context";
+import { useBi, useLocale, useT } from "@/lib/i18n/context";
 import type { Source } from "@/lib/tools/registry/shared";
 import type { ToolManifest } from "@/lib/tools/types";
 import { PROVIDER_LABEL, type ProviderId } from "@/lib/ai/types";
@@ -121,24 +121,24 @@ interface ExtraDownload {
 }
 
 /** Files a tool produces besides the document exports. */
-function extraDownloads(output: unknown, input?: Record<string, unknown>): ExtraDownload[] {
+function extraDownloads(output: unknown, input?: Record<string, unknown>, en = false): ExtraDownload[] {
   const o = (output ?? {}) as Record<string, unknown>;
   const extras: ExtraDownload[] = [];
   if (typeof o.html === "string") {
     const html = o.html;
-    extras.push({ key: "html", label: "HTML", hint: "홈페이지 파일", icon: Code2, run: () => downloadText("homepage.html", html, "text/html") });
+    extras.push({ key: "html", label: "HTML", hint: en ? "Website file" : "홈페이지 파일", icon: Code2, run: () => downloadText("homepage.html", html, "text/html") });
   }
   if (typeof o.body_markdown === "string") {
     const md = o.body_markdown;
-    extras.push({ key: "post", label: "블로그 본문", hint: "본문만 .md", icon: FileCode, run: () => downloadText("blog-post.md", md, "text/markdown") });
+    extras.push({ key: "post", label: en ? "Post body" : "블로그 본문", hint: en ? "Body only, .md" : "본문만 .md", icon: FileCode, run: () => downloadText("blog-post.md", md, "text/markdown") });
   }
   if (Array.isArray(o.weeks)) {
     const weeks = o.weeks as CalendarWeek[];
     const ics = typeof input?.start_date === "string" ? buildCalendarIcs(weeks, input.start_date) : null;
     if (ics) {
-      extras.push({ key: "ics", label: "캘린더", hint: "구글·애플 캘린더", icon: CalendarDays, run: () => downloadText("90일-실행-캘린더.ics", ics, "text/calendar") });
+      extras.push({ key: "ics", label: en ? "Calendar" : "캘린더", hint: en ? "Google · Apple Calendar" : "구글·애플 캘린더", icon: CalendarDays, run: () => downloadText("90일-실행-캘린더.ics", ics, "text/calendar") });
     }
-    extras.push({ key: "csv", label: "CSV", hint: "엑셀·시트", icon: FileSpreadsheet, run: () => downloadText("90일-실행-캘린더.csv", buildCalendarCsv(weeks), "text/csv") });
+    extras.push({ key: "csv", label: "CSV", hint: en ? "Excel · Sheets" : "엑셀·시트", icon: FileSpreadsheet, run: () => downloadText("90일-실행-캘린더.csv", buildCalendarCsv(weeks), "text/csv") });
   }
   return extras;
 }
@@ -291,6 +291,7 @@ interface LogoConcept {
 }
 
 function OutputPreview({ output, toolId, input }: { output: unknown; toolId?: string; input?: Record<string, unknown> }) {
+  const L = useBi();
   const o = output as Record<string, unknown>;
 
   const report = toolId ? buildReport(toolId, o, input) : null;
@@ -349,7 +350,7 @@ function OutputPreview({ output, toolId, input }: { output: unknown; toolId?: st
                 </p>
               ) : null}
               <DownloadLink
-                label="다운로드"
+                label={L({ ko: "다운로드", en: "Download" })}
                 onClick={() => downloadFromUrl(`image-${i + 1}.${guessImageExt(url)}`, url)}
               />
             </div>
@@ -383,9 +384,9 @@ function OutputPreview({ output, toolId, input }: { output: unknown; toolId?: st
               {(c.color_spec?.hex ?? []).join(" · ")} · {c.type_spec?.family} {c.type_spec?.weight}
             </p>
             <div className="flex flex-wrap gap-3">
-              <DownloadLink label="로고 PNG" onClick={() => downloadFromUrl(`logo-${i + 1}.png`, c.image.url)} />
+              <DownloadLink label={L({ ko: "로고 PNG", en: "Logo PNG" })} onClick={() => downloadFromUrl(`logo-${i + 1}.png`, c.image.url)} />
               {c.symbol_image?.url ? (
-                <DownloadLink label="심볼만" onClick={() => downloadFromUrl(`logo-${i + 1}-symbol.${guessImageExt(c.symbol_image!.url)}`, c.symbol_image!.url)} />
+                <DownloadLink label={L({ ko: "심볼만", en: "Symbol only" })} onClick={() => downloadFromUrl(`logo-${i + 1}-symbol.${guessImageExt(c.symbol_image!.url)}`, c.symbol_image!.url)} />
               ) : null}
             </div>
           </article>
@@ -408,7 +409,7 @@ function OutputPreview({ output, toolId, input }: { output: unknown; toolId?: st
                 className="w-full rounded-xl border border-hairline bg-white"
               />
               <DownloadLink
-                label="SVG 다운로드"
+                label={L({ ko: "SVG 다운로드", en: "Download SVG" })}
                 onClick={() => downloadText(`logo-concept-${i + 1}.svg`, svg, "image/svg+xml")}
               />
             </div>
@@ -443,7 +444,7 @@ function RunResult({
   // The run's creative direction (lib/tools/directions.ts) is shown as a
   // chip, not as a result field.
   const { creative_direction: direction, ...shown } = (output ?? {}) as Record<string, unknown> & { creative_direction?: { name?: string } };
-  const extras = extraDownloads(shown, input);
+  const extras = extraDownloads(shown, input, locale === "en");
   const chainTargets = listTools().filter((tool) => tool.acceptsChainFrom?.includes(manifest.id));
 
   return (
@@ -477,7 +478,7 @@ function RunResult({
 
       <Collapsible className="mt-4 border-t border-hairline pt-3">
         <CollapsibleTrigger className="group/collapsible flex cursor-pointer items-center gap-1 font-mono text-2xs text-fg-subtle select-none">
-          원본 데이터 보기
+          {locale === "en" ? "View raw data" : "원본 데이터 보기"}
           <ChevronDown className="size-3 transition-transform data-panel-open:rotate-180" />
         </CollapsibleTrigger>
         <CollapsibleContent>

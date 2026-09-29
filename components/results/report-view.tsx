@@ -4,6 +4,7 @@ import { useMemo, type CSSProperties } from "react";
 import { renderChart, WEB_THEME, type ChartSpec } from "@/lib/tools/report/charts";
 import type { Report, ReportBlock, ReportCard, Tone } from "@/lib/tools/report/types";
 import { cn } from "@/lib/utils";
+import { useBi } from "@/lib/i18n/context";
 
 // The data tools' result page (business plan, trend, 90-day plan, money
 // models, keywords, place, proposal, strategy, grants): the report model
@@ -37,11 +38,12 @@ function Chart({ spec, palette, half }: { spec: ChartSpec; palette: string[]; ha
 }
 
 function BlockTitle({ title, estimated }: { title?: string; estimated?: boolean }) {
+  const L = useBi();
   if (!title && !estimated) return null;
   return (
     <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-fg">
       {title}
-      {estimated ? <span className="rounded-full border border-warn/30 bg-warn/10 px-1.5 py-0.5 text-2xs font-medium text-warn">추정</span> : null}
+      {estimated ? <span className="rounded-full border border-warn/30 bg-warn/10 px-1.5 py-0.5 text-2xs font-medium text-warn">{L({ ko: "추정", en: "Estimate" })}</span> : null}
     </p>
   );
 }
@@ -60,6 +62,7 @@ function Spark({ values }: { values: number[] }) {
 }
 
 function Card({ card }: { card: ReportCard }) {
+  const L = useBi();
   return (
     <div className="flex flex-col rounded-2xl border border-hairline bg-surface/60 p-4">
       <div className="flex items-start gap-2">
@@ -80,7 +83,7 @@ function Card({ card }: { card: ReportCard }) {
       {card.spark && card.spark.length > 1 ? (
         <div className="mt-2 flex items-center gap-2">
           <Spark values={card.spark} />
-          <span className="text-2xs text-fg-subtle">관심도 흐름</span>
+          <span className="text-2xs text-fg-subtle">{L({ ko: "관심도 흐름", en: "Interest trend" })}</span>
         </div>
       ) : null}
       {card.facts?.length ? (
@@ -162,6 +165,7 @@ function Table({ block }: { block: Extract<ReportBlock, { type: "table" }> }) {
 }
 
 function Block({ block, palette, half }: { block: ReportBlock; palette: string[]; half?: boolean }) {
+  const L = useBi();
   switch (block.type) {
     case "kpis":
       return (
@@ -251,7 +255,7 @@ function Block({ block, palette, half }: { block: ReportBlock; palette: string[]
         <div className="flex flex-wrap gap-1.5">
           {block.items.map((s, i) => (
             <a key={i} href={s.url} target="_blank" rel="noreferrer" className="inline-flex max-w-full items-center gap-1 truncate rounded-full border border-grounded/25 bg-grounded-dim px-2 py-0.5 font-mono text-2xs text-grounded hover:underline">
-              출처 · {s.domain ?? s.title}
+              {L({ ko: "출처", en: "Source" })} · {s.domain ?? s.title}
             </a>
           ))}
         </div>

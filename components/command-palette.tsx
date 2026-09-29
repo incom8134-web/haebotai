@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useBi } from "@/lib/i18n/context";
 import type { LucideIcon } from "lucide-react";
 import {
   CommandDialog,
@@ -32,6 +33,7 @@ export interface CommandPaletteProps {
 }
 
 function CommandPalette({ groups, open, onOpenChange }: CommandPaletteProps) {
+  const L = useBi();
   const [internalOpen, setInternalOpen] = useState(false);
   const isControlled = open !== undefined;
   const isOpen = isControlled ? open : internalOpen;
@@ -53,12 +55,12 @@ function CommandPalette({ groups, open, onOpenChange }: CommandPaletteProps) {
     <CommandDialog
       open={isOpen}
       onOpenChange={setOpen}
-      title="명령어 팔레트"
-      description="도구 이름이나 하는 일로 검색하세요"
+      title={L({ ko: "명령어 팔레트", en: "Command palette" })}
+      description={L({ ko: "도구 이름이나 하는 일로 검색하세요", en: "Search tools by name or what they do" })}
     >
-      <CommandInput placeholder="도구 검색... (예: 로고, 브랜드 심볼)" />
+      <CommandInput placeholder={L({ ko: "도구 검색... (예: 로고, 브랜드 심볼)", en: "Search tools… (e.g. logo, brand mark)" })} />
       <CommandList>
-        <CommandEmpty className="text-fg-muted">결과가 없습니다.</CommandEmpty>
+        <CommandEmpty className="text-fg-muted">{L({ ko: "결과가 없습니다.", en: "No results." })}</CommandEmpty>
         {groups.map((group) => (
           <CommandGroup key={group.heading} heading={group.heading}>
             {group.items.map((item) => (
