@@ -1,5 +1,6 @@
 import "server-only";
 import { env } from "@/lib/env";
+import { BUSINESS } from "@/lib/site/business";
 
 // Toss Payments 결제 승인 / 조회 API. The secret key never leaves the server;
 // Basic auth is base64("<secretKey>:"). The orderId doubles as the
@@ -22,7 +23,12 @@ export interface TossPayment {
 export type TossResult = { ok: true; payment: TossPayment } | { ok: false; code: string; message: string; raw: unknown };
 
 export function tossConfigured(): boolean {
-  return Boolean(env.TOSS_SECRET_KEY && process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY);
+  if (!env.TOSS_SECRET_KEY || !process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY) return false;
+  // Real (live) payments only once the 통신판매업 신고번호 is on the site:
+  // selling online without it, or without showing it, breaks
+  // 전자상거래법 §10·§12. Test keys keep working for checkout testing.
+  if (env.TOSS_SECRET_KEY.startsWith("live_") && !BUSINESS.mailOrderNumber.trim()) return false;
+  return true;
 }
 
 function authHeader(secretKey: string): string {

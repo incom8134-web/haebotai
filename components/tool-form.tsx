@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Toggle } from "@/components/ui/toggle";
 import { cn } from "@/lib/utils";
+import { useBi } from "@/lib/i18n/context";
 import type { ToolField } from "@/lib/tools/types";
 
 // HAEBOT_A_TOOLS_SPEC.md §3.1 — renders a form from a manifest's
@@ -22,15 +23,35 @@ import type { ToolField } from "@/lib/tools/types";
 
 export type ToolFormValues = Record<string, unknown>;
 
-function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
+// A single control is wrapped in its <label> (so the label names it for
+// screen readers and clicking it focuses the control); a group of
+// controls (toggles, chips, uploads) is a fieldset with a legend.
+function Field({ label, required, group, children }: { label: string; required?: boolean; group?: boolean; children: React.ReactNode }) {
+  const L = useBi();
+  const caption = (
+    <>
+      {label}
+      {required ? (
+        <span className="ml-0.5 text-danger" aria-hidden>
+          *
+        </span>
+      ) : null}
+      {required ? <span className="sr-only"> ({L({ ko: "필수", en: "required" })})</span> : null}
+    </>
+  );
+  if (group) {
+    return (
+      <fieldset className="flex flex-col gap-1.5">
+        <legend className="mb-1.5 text-sm font-medium break-keep text-fg">{caption}</legend>
+        {children}
+      </fieldset>
+    );
+  }
   return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-sm font-medium break-keep text-fg">
-        {label}
-        {required ? <span className="ml-0.5 text-danger">*</span> : null}
-      </label>
+    <label className="flex flex-col gap-1.5">
+      <span className="text-sm font-medium break-keep text-fg">{caption}</span>
       {children}
-    </div>
+    </label>
   );
 }
 
@@ -158,7 +179,7 @@ function ToolForm({
           case "multiselect": {
             const selected = (value as string[]) ?? [];
             return (
-              <Field key={f.id} label={f.label}>
+              <Field key={f.id} label={f.label} group>
                 <div className="flex flex-wrap gap-1.5">
                   {f.options.map((o) => {
                     const active = selected.includes(o.value);
@@ -193,7 +214,7 @@ function ToolForm({
 
           case "chips":
             return (
-              <Field key={f.id} label={f.label}>
+              <Field key={f.id} label={f.label} group>
                 <TagList
                   values={(value as string[]) ?? []}
                   max={f.max}
@@ -205,7 +226,7 @@ function ToolForm({
 
           case "image":
             return (
-              <Field key={f.id} label={f.label}>
+              <Field key={f.id} label={f.label} group>
                 <Dropzone
                   maxFiles={f.maxFiles ?? 1}
                   onFiles={(files) => onChange(f.id, files)}

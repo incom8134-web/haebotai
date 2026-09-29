@@ -46,7 +46,7 @@ export function StatusView({ report }: { report: StatusReport }) {
       </ul>
       <p className="mt-4 text-sm break-keep text-fg-muted">
         {L({ ko: "문제가 계속되면 ", en: "If a problem persists, " })}
-        <Link href="/help/contact" className="text-studio-cyan hover:underline">{L({ ko: "고객센터", en: "contact customer service" })}</Link>
+        <Link href="/help/contact" className="text-studio-cyan underline underline-offset-2">{L({ ko: "고객센터", en: "contact customer service" })}</Link>
         {L({ ko: "로 알려 주세요. 실패한 실행의 크레딧은 자동으로 돌아가요.", en: ". Credits for failed runs are refunded automatically." })}
       </p>
     </div>
