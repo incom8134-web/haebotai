@@ -1,4 +1,6 @@
-"use server";
+// Server-only (not "use server"): these must never become callable
+// Server Actions — reserve/release take a user id and an amount.
+import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";

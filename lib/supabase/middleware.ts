@@ -1,13 +1,28 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { env } from "@/lib/env";
-import { hasCurrentConsent } from "@/lib/consent";
+import { hasCurrentConsent, safeNext } from "@/lib/consent";
 import { apiIpLimiter, checkRateLimit } from "@/lib/rate-limit";
 
 // Public inside the shell: /tools and /tools/<id> (overviews) and /help.
 // Running a tool, the Studio, library, profile and account need a session.
-const PROTECTED_PREFIXES = ["/studio", "/compose", "/library", "/brand", "/account", "/auth/consent"];
+const PROTECTED_PREFIXES = ["/studio", "/library", "/brand", "/account", "/auth/consent"];
 const PROTECTED_PATTERNS = [/^\/tools\/[^/]+\/run(\/|$)/];
+
+// A redirect must carry any session cookies getClaims() just refreshed:
+// Supabase rotates refresh tokens, so dropping the new pair here logs the
+// member out on the next request and they have to sign in again.
+function redirectKeepingSession(url: URL, from: NextResponse): NextResponse {
+  const redirect = NextResponse.redirect(url);
+  for (const cookie of from.cookies.getAll()) redirect.cookies.set(cookie);
+  return redirect;
+}
+
+/** Where a signed-in member goes instead of /auth or a finished consent page (never back into /auth — that would loop). */
+function afterAuth(next: string | null): string {
+  const target = safeNext(next);
+  return target === "/auth" || target.startsWith("/auth/") || target.startsWith("/auth?") ? "/studio" : target;
+}
 
 export async function updateSession(request: NextRequest) {
   // Flood guard for the API: one address can't hammer functions and the
@@ -53,7 +68,19 @@ export async function updateSession(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth";
     url.searchParams.set("next", path + request.nextUrl.search);
-    return NextResponse.redirect(url);
+    return redirectKeepingSession(url, response);
+  }
+
+  // Already signed in: the sign-in page would only make them sign in
+  // again. Confirmed with the auth server first so a revoked session
+  // (valid-looking token) can still reach the sign-in page.
+  if (path === "/auth" && isAuthed && (await supabase.auth.getUser()).data.user) {
+    return redirectKeepingSession(new URL(afterAuth(request.nextUrl.searchParams.get("next")), request.url), response);
+  }
+
+  // Consent already given (Back button, a bookmark): don't ask again.
+  if (path === "/auth/consent" && isAuthed && hasCurrentConsent(data.claims.app_metadata)) {
+    return redirectKeepingSession(new URL(afterAuth(request.nextUrl.searchParams.get("next")), request.url), response);
   }
 
   // Signed in but hasn't given the required consents (or they changed):
@@ -71,7 +98,7 @@ export async function updateSession(request: NextRequest) {
     url.pathname = "/auth/consent";
     url.search = "";
     url.searchParams.set("next", path + request.nextUrl.search);
-    return NextResponse.redirect(url);
+    return redirectKeepingSession(url, response);
   }
 
   return response;

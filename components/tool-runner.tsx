@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import { AlertTriangle, RotateCcw, SquarePen, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -187,9 +187,26 @@ function ToolRunner({
   } | null>(null);
   const [errorMsg, setErrorMsg] = useState<ReturnType<typeof mapRunError> | null>(null);
   const [showCancel, setShowCancel] = useState(false);
+  // Cancel is only offered once the server has created the run: before
+  // that there is nothing to cancel (and nothing to refund) on the server.
+  const [activeRunId, setActiveRunId] = useState<string | null>(null);
+  const [cancelNote, setCancelNote] = useState<string | null>(null);
+  const router = useRouter();
   const abortRef = useRef<AbortController | null>(null);
   const formTopRef = useRef<HTMLDivElement | null>(null);
   const runIdRef = useRef<string | null>(null);
+
+  // ⌘/Ctrl + Enter runs the tool from anywhere on the page (the Run button shows the hint).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && !e.isComposing) {
+        e.preventDefault();
+        document.querySelector<HTMLButtonElement>("[data-run-button]")?.click();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
 
   if (!manifest) return notFound();
 
@@ -197,6 +214,7 @@ function ToolRunner({
   // again for a fresh version (a new creative direction each time).
   function startNew() {
     setValues({});
+    setExcludedProfileKeys(new Set());
     setReference(emptyReference(toolId));
     setFinal(null);
     setErrorMsg(null);
@@ -225,10 +243,14 @@ function ToolRunner({
     : [];
 
   async function handleRun() {
+    if (phase === "streaming") return;
     setPhase("streaming");
     setFinal(null);
     setErrorMsg(null);
     setShowCancel(false);
+    setCancelNote(null);
+    setActiveRunId(null);
+    let finished = false;
 
     const controller = new AbortController();
     abortRef.current = controller;
@@ -258,6 +280,7 @@ function ToolRunner({
         body: JSON.stringify({
           values: serialized,
           provider,
+          ...(excludedProfileKeys.size ? { excludeProfile: [...excludedProfileKeys] } : {}),
           ...(referencePayload ? { reference: referencePayload } : {}),
           ...(chainedFrom ? { chainedFromRunId: chainedFrom.runId } : {}),
         }),
@@ -282,9 +305,17 @@ function ToolRunner({
         buffer = lines.pop() ?? "";
         for (const line of lines) {
           if (!line) continue;
-          const event = JSON.parse(line);
-          if (event.type === "status" && event.runId) runIdRef.current = event.runId;
-          else if (event.type === "done") {
+          let event;
+          try {
+            event = JSON.parse(line);
+          } catch {
+            continue;
+          }
+          if (event.type === "status" && event.runId) {
+            runIdRef.current = event.runId;
+            setActiveRunId(event.runId);
+          } else if (event.type === "done") {
+            finished = true;
             setPhase("done");
             setFinal({
               input: serialized,
@@ -295,10 +326,20 @@ function ToolRunner({
               provider: event.provider ?? provider,
             });
           } else if (event.type === "error") {
+            finished = true;
             setPhase("error");
             setErrorMsg(mapRunError(event.error));
+          } else if (event.type === "cancelled") {
+            finished = true;
+            setPhase("cancelled");
           }
         }
+      }
+      // The stream ended without a final event (connection cut, or the
+      // server stopped): don't leave the spinner running forever.
+      if (!finished) {
+        setPhase("error");
+        setErrorMsg({ ko: "연결이 끊겨 결과를 받지 못했어요. 보관함에서 결과를 확인하거나 다시 실행해 주세요. 실패한 실행의 크레딧은 자동으로 돌아가요.", en: "The connection dropped before the result arrived. Check the Library, or run again — failed runs are refunded automatically." });
       }
     } catch {
       setPhase(controller.signal.aborted ? "cancelled" : "error");
@@ -306,19 +347,33 @@ function ToolRunner({
     } finally {
       clearTimeout(cancelTimer);
       setShowCancel(false);
+      setActiveRunId(null);
       abortRef.current = null;
       runIdRef.current = null;
+      // Credits changed (charged, or refunded): refresh the balance in the
+      // shell and on this page. Client state here is kept.
+      router.refresh();
     }
   }
 
   // Record the cancel on the server first (that's what refunds — a
   // dropped connection alone isn't reliably seen by the run route), then
   // stop reading the stream.
-  function handleCancel() {
+  async function handleCancel() {
     const runId = runIdRef.current;
-    if (runId) fetch(`/api/runs/${runId}/cancel`, { method: "POST", keepalive: true }).catch(() => {});
-    abortRef.current?.abort();
+    if (!runId) return;
+    setShowCancel(false);
+    const res = await fetch(`/api/runs/${runId}/cancel`, { method: "POST", keepalive: true }).catch(() => null);
+    const data = res ? ((await res.json().catch(() => ({}))) as { cancelled?: boolean }) : {};
+    if (data.cancelled) {
+      abortRef.current?.abort();
+      return;
+    }
+    // Too late to cancel (already finishing): let the result arrive rather
+    // than claim a refund that didn't happen.
+    setCancelNote(L({ ko: "이미 거의 끝나서 취소할 수 없어요. 결과가 곧 나와요.", en: "It's nearly done, so it can't be cancelled — the result is on its way." }));
   }
+
 
   const side = (
     <aside className="min-w-0 space-y-4 lg:sticky lg:top-24">
@@ -489,6 +544,7 @@ function ToolRunner({
 
       <div className="mt-6 flex items-center gap-2">
         <Button
+          data-run-button
           onClick={handleRun}
           loading={phase === "streaming"}
           shortcut="⌘↵"
@@ -496,12 +552,13 @@ function ToolRunner({
         >
           {t("run")}
         </Button>
-        {phase === "streaming" && showCancel ? (
+        {phase === "streaming" && showCancel && activeRunId ? (
           <Button variant="ghost" onClick={handleCancel}>
             {t("cancel")}
           </Button>
         ) : null}
       </div>
+      {phase === "streaming" && cancelNote ? <p role="status" className="mt-2 text-xs text-fg-muted">{cancelNote}</p> : null}
 
       {phase === "streaming" ? (
         <RunProgress
@@ -541,7 +598,7 @@ function ToolRunner({
           <p className="text-sm text-danger">{L(errorMsg)}</p>
           {errorMsg.link ? (
             <Link href={errorMsg.link} className="mt-1 inline-block text-sm text-studio-cyan underline underline-offset-2">
-              {L({ ko: "API 키 관리로 이동", en: "Go to API key settings" })}
+              {L(errorMsg.linkLabel ?? { ko: "API 키 관리로 이동", en: "Go to API key settings" })}
             </Link>
           ) : null}
         </div>

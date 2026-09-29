@@ -10,8 +10,8 @@ export function UnsubscribeCard({ u, t, valid }: { u: string; t: string; valid: 
   const [state, setState] = useState<"idle" | "busy" | "done" | "error">("idle");
   async function go() {
     setState("busy");
-    const res = await fetch(`/api/unsubscribe?u=${encodeURIComponent(u)}&t=${encodeURIComponent(t)}`, { method: "POST" });
-    setState(res.ok ? "done" : "error");
+    const res = await fetch(`/api/unsubscribe?u=${encodeURIComponent(u)}&t=${encodeURIComponent(t)}`, { method: "POST" }).catch(() => null);
+    setState(res?.ok ? "done" : "error");
   }
   return (
     <div className="glass-strong rounded-[28px] p-7">

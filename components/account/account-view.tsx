@@ -8,6 +8,7 @@ import { PLANS } from "@/lib/site/plans";
 import { requestStudentVerification, type StudentRequestState } from "@/lib/actions/membership";
 import { deleteApiKey, saveApiKey, testApiKey, type ApiKeyActionState } from "@/lib/actions/api-keys";
 import { useBi } from "@/lib/i18n/context";
+import { useKeepInputForm } from "@/lib/hooks/use-keep-input-form";
 import type { Membership, PaymentRecord } from "@/lib/membership";
 import type { ApiKeyPriority, ApiKeyProvider, ApiKeySlot, ApiKeyStatus } from "@/lib/api-keys";
 import { getToolCapability } from "@/lib/ai/capabilities";
@@ -45,6 +46,7 @@ const KEY_MSG: Record<string, { ko: string; en: string }> = {
   no_key: { ko: "등록된 키가 없어요.", en: "No key saved." },
   signed_out: { ko: "로그인이 필요해요.", en: "Please sign in." },
   rate_limited: { ko: "요청이 너무 잦아요. 잠시 후 다시 시도해 주세요.", en: "Too many requests — try again in a few minutes." },
+  save_failed: { ko: "저장하지 못했어요. 잠시 후 다시 시도해 주세요.", en: "Couldn't save. Please try again shortly." },
 };
 
 const PROVIDER_INFO: Record<ApiKeyProvider, { name: string; placeholder: string }> = {
@@ -236,6 +238,7 @@ function DeleteAccountPanel({ balance }: { balance: number | null }) {
 function MembershipPanel({ membership, payments }: { membership: Membership; payments: PaymentRecord[] }) {
   const L = useBi();
   const [studentState, studentAction, studentPending] = useActionState<StudentRequestState, FormData>(requestStudentVerification, null);
+  const [studentRef, onStudentSubmit] = useKeepInputForm(studentAction, studentState);
   const request = studentState?.ok ? "pending" : membership.studentRequest;
   return (
     <>
@@ -279,7 +282,7 @@ function MembershipPanel({ membership, payments }: { membership: Membership; pay
           ) : request === "pending" ? (
             <p className="grid place-items-center rounded-2xl bg-studio-cyan/10 p-6 text-center text-sm">{L({ ko: "신청을 검토하고 있어요.", en: "We're reviewing your request." })}</p>
           ) : (
-            <form action={studentAction} className="space-y-3">
+            <form ref={studentRef} onSubmit={onStudentSubmit} className="space-y-3">
               {request === "rejected" ? <p className="rounded-xl bg-danger/10 p-3 text-sm text-danger">{L({ ko: "지난 신청은 승인되지 않았어요. 재학증명서 정보를 비고에 적어 다시 신청해 주세요.", en: "Your last request wasn't approved. Add certificate details in the note and try again." })}</p> : null}
               <input name="schoolName" required minLength={2} maxLength={80} className={inputClass} placeholder={L({ ko: "학교 이름 *", en: "School name *" })} aria-label={L({ ko: "학교 이름", en: "School name" })} />
               <input name="schoolEmail" type="email" className={inputClass} placeholder={L({ ko: "학교 이메일 (선택)", en: "School email (optional)" })} aria-label={L({ ko: "학교 이메일", en: "School email" })} />
@@ -351,9 +354,13 @@ function KeySlotRow({ provider, slot, placeholder }: { provider: ApiKeyProvider;
   const L = useBi();
   const [state, action, saving] = useActionState<ApiKeyActionState, FormData>(saveApiKey, null);
   const [other, setOther] = useState<ApiKeyActionState>(null);
+  const [keyRef, onKeySubmit] = useKeepInputForm((fd) => {
+    setOther(null);
+    action(fd);
+  }, state);
   const [busy, startTransition] = useTransition();
   const shown = other ?? state;
-  const connected = state?.ok ? true : other?.message === "deleted" ? false : slot.connected;
+  const connected = other?.message === "deleted" ? false : state?.ok ? true : slot.connected;
   const broken = other?.ok ? false : slot.broken;
 
   return (
@@ -384,7 +391,7 @@ function KeySlotRow({ provider, slot, placeholder }: { provider: ApiKeyProvider;
           </div>
         </div>
       ) : (
-        <form action={(fd) => { setOther(null); action(fd); }} className="mt-2 flex flex-wrap gap-2">
+        <form ref={keyRef} onSubmit={onKeySubmit} className="mt-2 flex flex-wrap gap-2">
           <input type="hidden" name="provider" value={provider} />
           <input type="hidden" name="priority" value={slot.priority} />
           <input name="apiKey" type="password" autoComplete="off" spellCheck={false} required className={cn(inputClass, "h-9 min-w-0 flex-1 font-mono text-sm")} placeholder={placeholder} aria-label={placeholder} />

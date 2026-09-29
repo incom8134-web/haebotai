@@ -7,7 +7,7 @@ import { useBi } from "@/lib/i18n/context";
 import { primaryButton, secondaryButton } from "@/components/site/page";
 
 // Route error boundary (Next.js convention), in the app's glass style.
-export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+export default function Error({ error, retry }: { error: Error & { digest?: string }; retry: () => void }) {
   const L = useBi();
   useEffect(() => {
     console.error(error);
@@ -24,7 +24,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
           <pre className="mt-5 max-h-48 overflow-auto rounded-2xl bg-bg/50 p-4 text-left text-xs whitespace-pre-wrap text-fg-muted">{error.stack ?? error.message}</pre>
         ) : null}
         <div className="mt-7 flex flex-wrap justify-center gap-2">
-          <button type="button" onClick={reset} className={primaryButton}><RotateCcw size={15} aria-hidden /> {L({ ko: "다시 시도", en: "Try again" })}</button>
+          <button type="button" onClick={() => retry()} className={primaryButton}><RotateCcw size={15} aria-hidden /> {L({ ko: "다시 시도", en: "Try again" })}</button>
           <Link href="/help/contact?kind=bug" className={secondaryButton}>{L({ ko: "오류 신고", en: "Report it" })}</Link>
         </div>
       </div>
