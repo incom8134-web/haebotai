@@ -12,6 +12,7 @@ import {
   FileText,
   FileType,
   FolderArchive,
+  Info,
   Loader2,
   Presentation,
   type LucideIcon,
@@ -441,6 +442,26 @@ function OutputPreview({ output, toolId, input }: { output: unknown; toolId?: st
   return <StructuredResult output={output} />;
 }
 
+// Terms 제10–12조 surfaced where the output is used, not only in the Terms.
+function AiOutputNotice({ design }: { design: boolean }) {
+  const { locale } = useLocale();
+  const en = locale === "en";
+  return (
+    <p className="mt-3 flex gap-2 rounded-xl bg-surface-2/50 px-3 py-2 text-2xs leading-relaxed break-keep text-fg-muted">
+      <Info size={13} className="mt-px shrink-0 text-fg-subtle" aria-hidden />
+      <span>
+        {en
+          ? "AI-generated. Check facts, numbers and claims before publishing or commercial use — this isn't legal, tax, medical or investment advice."
+          : "AI가 만든 결과물이에요. 외부 게시·상업적 이용 전에 사실, 숫자, 표현을 꼭 확인하세요. 법률·세무·의료·투자 조언이 아닙니다."}
+        {design ? (en ? " Designs may resemble existing trademarks or people — check rights before use." : " 디자인이 기존 상표나 실존 인물과 비슷할 수 있으니 이용 전에 권리를 확인하세요.") : null}{" "}
+        <Link href="/legal/terms" className="underline underline-offset-2 hover:text-fg">
+          {en ? "Terms" : "이용약관"}
+        </Link>
+      </span>
+    </p>
+  );
+}
+
 function RunResult({
   manifest,
   input,
@@ -488,6 +509,8 @@ function RunResult({
           </Badge>
         ) : null}
       </div>
+
+      <AiOutputNotice design={manifest.category === "design"} />
 
       <DownloadPanel runId={runId} toolId={manifest.id} extras={extras} />
 

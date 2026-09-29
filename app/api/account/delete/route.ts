@@ -64,6 +64,8 @@ export async function POST(request: Request) {
       const { error } = await admin.from(table).delete().eq("user_id", uid);
       if (error) throw new Error(`${table}: ${error.message}`);
     }
+    // Optional table (migration 0014) — its absence must not block deletion.
+    await admin.from("referral_codes").delete().eq("user_id", uid);
     const { error } = await admin.auth.admin.deleteUser(uid, true);
     if (error) throw new Error(`auth: ${error.message}`);
   } catch (err) {

@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { hasConsent, safeNext } from "@/lib/consent";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   // Only same-site relative paths; anything else falls back to the Studio.
-  const rawNext = searchParams.get("next");
-  const next = rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/studio";
+  const next = safeNext(searchParams.get("next"));
 
   if (code) {
     const supabase = await createClient();
@@ -24,7 +24,11 @@ export async function GET(request: Request) {
         .limit(1)
         .maybeSingle();
 
-      return NextResponse.redirect(`${origin}${brand ? next : "/brand"}`);
+      const target = brand ? next : "/brand";
+      if (!hasConsent(user?.user_metadata)) {
+        return NextResponse.redirect(`${origin}/auth/consent?next=${encodeURIComponent(target)}`);
+      }
+      return NextResponse.redirect(`${origin}${target}`);
     }
   }
 

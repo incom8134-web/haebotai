@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { env } from "@/lib/env";
+import { hasConsent } from "@/lib/consent";
 
 // Public inside the shell: /tools and /tools/<id> (overviews) and /help.
 // Running a tool, the Studio, library, profile and account need a session.
@@ -42,6 +43,16 @@ export async function updateSession(request: NextRequest) {
   if (isProtected && !isAuthed) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth";
+    url.searchParams.set("next", path + request.nextUrl.search);
+    return NextResponse.redirect(url);
+  }
+
+  // Signed in but never confirmed age/terms (e.g. accounts from before the
+  // consent step): ask once before any protected page.
+  if (isProtected && isAuthed && !hasConsent(data?.claims.user_metadata)) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/auth/consent";
+    url.search = "";
     url.searchParams.set("next", path + request.nextUrl.search);
     return NextResponse.redirect(url);
   }

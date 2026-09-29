@@ -24,6 +24,53 @@ export interface PendingOrder {
 
 export type ConfirmCheck = { ok: true } | { ok: false; reason: "already_done" | "not_pending" | "amount_mismatch" };
 
+export interface LedgerOrder {
+  status: "pending" | "done" | "failed" | "canceled";
+  amount: number;
+  failReason: string | null;
+  createdAt: string;
+}
+
+/** What Toss reports for the order; `found: false` = Toss never saw a payment for it. */
+export type TossView = { found: false } | { found: true; status: string; totalAmount: number };
+
+export type ReconcileAction =
+  | { kind: "none" }
+  | { kind: "activate" }
+  | { kind: "close"; status: "failed" | "canceled"; reason: string }
+  | { kind: "amount_mismatch" };
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Brings our ledger in line with Toss. Retries orders still pending and
+ * orders we marked failed only because the confirm call never got an
+ * answer (Toss may have approved it anyway). Only a DONE payment at the
+ * stored amount ever grants Pro — WAITING_FOR_DEPOSIT (가상계좌) waits.
+ */
+export function isRetryable(order: Pick<LedgerOrder, "status" | "failReason">): boolean {
+  return order.status === "pending" || (order.status === "failed" && (order.failReason ?? "").startsWith("NETWORK_ERROR"));
+}
+
+export function planReconcile(order: LedgerOrder, toss: TossView, now: number = Date.now()): ReconcileAction {
+  if (!isRetryable(order)) return { kind: "none" };
+  if (!toss.found) {
+    const stale = now - Date.parse(order.createdAt) > DAY_MS;
+    return order.status === "pending" && stale ? { kind: "close", status: "failed", reason: "abandoned" } : { kind: "none" };
+  }
+  switch (toss.status) {
+    case "DONE":
+      return toss.totalAmount === order.amount ? { kind: "activate" } : { kind: "amount_mismatch" };
+    case "CANCELED":
+      return { kind: "close", status: "canceled", reason: "canceled_at_toss" };
+    case "ABORTED":
+    case "EXPIRED":
+      return order.status === "pending" ? { kind: "close", status: "failed", reason: toss.status.toLowerCase() } : { kind: "none" };
+    default:
+      return { kind: "none" };
+  }
+}
+
 /** Validates a success redirect against the stored order before calling Toss. */
 export function checkConfirm(order: PendingOrder, amount: number): ConfirmCheck {
   if (order.status === "done") return { ok: false, reason: "already_done" };

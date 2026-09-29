@@ -4,9 +4,10 @@ import "./globals.css";
 
 // Catches errors thrown by the root layout itself, which app/error.tsx
 // can't — this replaces the whole document (including <html>/<body>)
-// when active, so it can't assume anything the root layout normally
-// provides.
+// when active, so there's no theme or language provider here: both
+// languages are shown, and only the brand tokens from globals.css are used.
 export default function GlobalError({
+  error,
   reset,
 }: {
   error: Error & { digest?: string };
@@ -14,20 +15,33 @@ export default function GlobalError({
 }) {
   return (
     <html lang="ko">
-      <body>
-        <div className="flex min-h-dvh items-center justify-center bg-bg p-8">
-          <div className="flex w-full max-w-md flex-col items-center p-8 text-center">
-            <h2 className="mb-4 text-xl text-fg">
-              예기치 않은 오류가 발생했습니다.
-            </h2>
-            <button
-              onClick={reset}
-              className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white hover:bg-accent-hover"
-            >
-              다시 시도
-            </button>
+      <body className="bg-bg text-fg">
+        <main className="relative grid min-h-dvh place-items-center overflow-hidden p-6">
+          <div className="app-backdrop" aria-hidden>
+            <span className="orb orb-a" />
+            <span className="orb orb-b" />
           </div>
-        </div>
+          <div className="glass-strong w-full max-w-md rounded-[28px] p-8 text-center">
+            <span className="studio-gradient-bg mx-auto grid size-12 place-items-center rounded-2xl text-lg font-bold text-white">H</span>
+            <h1 className="mt-5 text-xl font-bold break-keep">예기치 않은 오류가 발생했어요</h1>
+            <p className="mt-1 text-sm text-fg-muted">Something went wrong.</p>
+            <p className="mt-4 text-sm leading-relaxed break-keep text-fg-muted">
+              진행 중이던 실행의 크레딧은 실패하면 자동으로 돌아가요. 잠시 후 다시 시도해 주세요.
+              <br />
+              <span className="text-fg-subtle">Credits for a failed run are refunded automatically. Please try again.</span>
+            </p>
+            {error.digest ? <p className="mt-3 font-mono text-2xs text-fg-subtle">ref: {error.digest}</p> : null}
+            <div className="mt-6 flex flex-wrap justify-center gap-2">
+              <button type="button" onClick={reset} className="studio-gradient-bg h-11 rounded-2xl px-5 text-sm font-semibold text-white">
+                다시 시도 · Try again
+              </button>
+              {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- full reload on purpose: the root layout itself failed */}
+              <a href="/" className="glass grid h-11 place-items-center rounded-2xl px-5 text-sm font-medium">
+                처음으로 · Home
+              </a>
+            </div>
+          </div>
+        </main>
       </body>
     </html>
   );
