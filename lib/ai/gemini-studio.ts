@@ -7,6 +7,8 @@ import { redactInventedPrices } from "@/lib/tools/price-guard";
 import { extractHtml } from "@/lib/tools/html-extract";
 import { addUsage, generateOneImage, getClient, PRO_IMAGE_MODEL, TEXT_MODEL, toGeminiParts, type AspectRatio } from "./gemini";
 import type { ImageStorageContext, TokenUsage } from "./types";
+import type { SceneType } from "@/lib/site-kit/kit";
+import { assembleSite, toJs, unknownImports, viteProject } from "@/lib/site-kit/assemble";
 
 // The two visual tools, done the way a design studio would: an art
 // director first fixes the concept, palette, type and shot list; the
@@ -152,6 +154,8 @@ const PRETENDARD_LINK = '<link rel="stylesheet" href="https://cdn.jsdelivr.net/g
 const fontLinkTag = (family: string) => `<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=${family}&display=swap">`;
 
 interface SitePlan {
+  big_idea: string;
+  request_details: string[];
   concept: string;
   mood: string[];
   palette: { background: string; surface: string; text: string; muted: string; primary: string; accent: string };
@@ -166,12 +170,34 @@ interface SitePlan {
   primary_action: string;
   sections: { id: string; title: string; goal: string; layout: string; content: string[] }[];
   interactions: { component: string; where: string; behavior: string }[];
+  experience: {
+    scene: SceneType | "none";
+    scene_section: string;
+    scene_reason: string;
+    scene_text: string;
+    scene_shapes: "soft" | "geometric" | "rings" | "mixed";
+    scene_align: "center" | "left" | "right";
+    scroll_moments: string[];
+    micro_interactions: string[];
+  };
   images: { id: string; ratio: AspectRatio; prompt: string; alt: string; section: string }[];
 }
 
 const SITE_PLAN_SCHEMA = {
   type: "object",
   properties: {
+    big_idea: {
+      type: "string",
+      description:
+        "이 요청에서만 나올 수 있는 크리에이티브 빅 아이디어 한두 문장 (한국어). 방문자가 사이트를 스크롤하며 겪는 하나의 경험으로 표현 (예: '반죽이 16시간 발효되는 시간을 스크롤로 따라가며 빵이 완성된다'). 업종 일반론 금지",
+    },
+    request_details: {
+      type: "array",
+      items: { type: "string" },
+      minItems: 3,
+      maxItems: 12,
+      description: "사용자 입력에 있는 구체적인 내용(상호, 지역, 상품·서비스명, 특징, 고객, 사용자가 쓴 표현, 요청한 기능)과 그것이 사이트 어디에 어떻게 보이는지 (한국어). 입력의 모든 구체적 요소가 빠짐없이 들어가야 함",
+    },
     concept: { type: "string", description: "이 사이트의 디자인 콘셉트 한 문장 (한국어). 업종의 뻔한 클리셰가 아니라 이 가게만의 이야기에서 나온 것" },
     mood: { type: "array", items: { type: "string" }, minItems: 3, maxItems: 5, description: "무드 키워드 (한국어)" },
     palette: {
@@ -233,6 +259,39 @@ const SITE_PLAN_SCHEMA = {
         required: ["component", "where", "behavior"],
       },
     },
+    experience: {
+      type: "object",
+      description: "이 사이트의 몰입형 경험 — 3D 장면 하나와 스크롤 연출. 빅 아이디어를 몸으로 느끼게 하는 방향으로",
+      properties: {
+        scene: {
+          type: "string",
+          enum: ["liquid-image", "orb", "particles-text", "photo-ring", "waves", "floating", "aurora", "none"],
+          description:
+            "WebGL 3D 장면 하나. liquid-image=히어로 사진이 커서에 물결처럼 일렁임(음식·패션·뷰티·공간·예술), orb=브랜드 색의 유기적으로 변형되는 3D 구체(웰니스·뷰티·테크·크리에이티브), particles-text=수천 개 입자가 상호를 그렸다가 스크롤에 흩어지고 커서를 피함(이름이 강한 브랜드·런칭·이벤트), photo-ring=사이트 사진들이 3D 링으로 회전·드래그(포트폴리오·갤러리·메뉴·상품), waves=흐르는 3D 점 지형(테크·컨설팅·제조·금융·바다), floating=광택 3D 도형들이 떠다님(교육·키즈·유쾌한 브랜드·신제품), aurora=살아 움직이는 그라데이션 필드(차분하고 고급스러운 브랜드, 문구 중심 섹션). 빅 아이디어와 업종 은유에 가장 맞는 것",
+        },
+        scene_section: { type: "string", description: "장면이 들어갈 섹션 id — 첫 화면의 주인공이므로 항상 'hero'" },
+        scene_reason: { type: "string", description: "이 장면이 이 가게의 이야기와 어떻게 연결되는지 (한국어 한 문장)" },
+        scene_text: { type: "string", description: "particles-text일 때 입자가 그릴 짧은 단어(상호, 12자 이내). 아니면 빈 문자열" },
+        scene_shapes: { type: "string", enum: ["soft", "geometric", "rings", "mixed"], description: "floating일 때 도형 계열" },
+        scene_align: { type: "string", enum: ["center", "left", "right"], description: "orb·floating의 화면 위치 — 헤드라인과 겹치지 않게" },
+        scroll_moments: {
+          type: "array",
+          items: { type: "string" },
+          minItems: 3,
+          maxItems: 6,
+          description:
+            "GSAP ScrollTrigger 스크롤 연출 3~6개를 구체적으로 (영문): 예) pinned horizontal scroll of the menu cards on desktop, headline words rising in on load, hero photo scale-down + clip-path reveal on scroll, parallax layers in the story section, scrubbed timeline line drawing between process steps, section background color shift, number count-up on enter",
+        },
+        micro_interactions: {
+          type: "array",
+          items: { type: "string" },
+          minItems: 2,
+          maxItems: 5,
+          description: "작은 인터랙션 (영문): magnetic primary buttons, 3D tilt on cards, custom cursor label over gallery, hover image reveal on list rows, marquee that reacts to scroll speed, animated underline links 등",
+        },
+      },
+      required: ["scene", "scene_section", "scene_reason", "scene_text", "scene_shapes", "scene_align", "scroll_moments", "micro_interactions"],
+    },
     images: {
       type: "array",
       minItems: 7,
@@ -255,18 +314,30 @@ const SITE_PLAN_SCHEMA = {
       },
     },
   },
-  required: ["concept", "mood", "palette", "display_font", "body_font", "hero_archetype", "nav_style", "shape_language", "texture", "signature_elements", "layout_direction", "primary_action", "sections", "interactions", "images"],
+  required: ["big_idea", "request_details", "experience", "concept", "mood", "palette", "display_font", "body_font", "hero_archetype", "nav_style", "shape_language", "texture", "signature_elements", "layout_direction", "primary_action", "sections", "interactions", "images"],
 } as const;
 
 const SITE_BRIEF = `You are the lead designer and front-end engineer at an award-winning Seoul branding studio. You build a complete, production-quality single-file website for a Korean small business, following the art director's plan exactly. The result must look like a real premium brand site (Awwwards / Framer-template quality), never like a generic template.
 
 OUTPUT: only the HTML document, starting with <!doctype html>. No markdown fences, no commentary.
 
-STACK — the page must be fully self-contained and render instantly without JavaScript:
-- All styling is your own hand-written CSS in one <style> block: a design-token layer of CSS custom properties from the plan's palette (--bg, --surface, --ink, --muted, --primary, --accent), a type scale with clamp(), spacing tokens, then components and sections. Use modern CSS (grid, flex, gap, aspect-ratio, clamp, color-mix, backdrop-filter, :focus-visible, @media for 640/960/1200px). No CSS framework, no Tailwind, no CDN scripts.
+STACK — a modern front-end build, delivered as one HTML document with two parts:
+1. Markup + CSS: semantic HTML and one <style> block of hand-written CSS — a design-token layer of CSS custom properties from the plan's palette (--bg, --surface, --ink, --muted, --primary, --accent), a fluid type scale with clamp(), spacing tokens, then components and sections. Modern CSS: grid, subgrid, container queries, aspect-ratio, clamp, color-mix, backdrop-filter, mix-blend-mode, clip-path, scroll-snap, :has(), :focus-visible, @media 640/960/1200px. No CSS framework, no Tailwind. The page must look complete and readable with this layer alone (no JS).
+2. ONE TypeScript module: <script type="text/typescript"> … </script> placed right before </body> (the server compiles it to JavaScript and adds the import map — never write <script type="module">, an import map, or any CDN <script src>). It is real TypeScript: interfaces/types for data (menu items, FAQ, gallery), typed helpers, querySelector<HTMLElement>, null checks, no any where a type is obvious. Erasable syntax only (no enums, namespaces, decorators). It may import ONLY:
+   - "three" and "three/addons/…" (Three.js r186)
+   - "gsap", "gsap/ScrollTrigger", "gsap/SplitText", "gsap/Flip", "gsap/Observer" (GSAP 3.13, default export gsap)
+   - "lenis" (Lenis 1.3 smooth scroll, default export)
+   - "@haebot/kit" — the studio's tested WebGL kit:
+     mountScene(host: HTMLElement | null, { type: "liquid-image" | "orb" | "particles-text" | "photo-ring" | "waves" | "floating" | "aurora", colors: string[] /* palette hexes */, image?: string /* liquid-image */, images?: string[] /* photo-ring */, text?: string /* particles-text */, shapes?: "soft" | "geometric" | "rings" | "mixed", align?: "center" | "left" | "right", intensity?: number /* 0..1 */ }): { setProgress(p: number): void; destroy(): void } | null
+       — appends an absolutely positioned canvas filling host (give host position: relative/absolute, a real size, and keep a normal <img> or CSS background inside it as the fallback; returns null without WebGL). It handles resize, pointer, off-screen pausing and reduced motion itself.
+     splitWords(el: Element | null): HTMLElement[] — wraps each word in .w > .wi spans and RETURNS THE .wi SPANS (animate the returned array directly, e.g. gsap.from(words, { yPercent: 110, stagger: 0.06 })); Korean-safe
+     magnetic(selector: string, strength?: number) — buttons lean toward the pointer
+     tilt(selector: string, maxDeg?: number) — cards tilt in 3D under the pointer
+     prefersReducedMotion(): boolean
+   Build the plan's experience: mount the plan's scene in the HERO — the first screen is the 3D moment: the hero is at least 100svh (min-height: 100svh), the scene host fills the whole hero (position: absolute; inset: 0; z-index 0) or a large half of a split hero, and the headline, subline and buttons sit above it (position: relative; z-index: 1) with enough contrast (text shadow, a soft scrim or a solid text panel). For liquid-image the host holds the hero <img> and the scene distorts that same photo; for photo-ring the hero shows the ring of the site's photos with the headline over it. colors = the brand colors that stand out on the hero background (primary, accent, …) — never the background color itself. Mount it (read image URLs from the page's own <img> elements, e.g. document.querySelector<HTMLImageElement>(".PREFIX-hero img")?.src, never hard-coded); then Lenis smooth scroll wired to ScrollTrigger (const lenis = new Lenis({ autoRaf: false }); lenis.on("scroll", ScrollTrigger.update); gsap.ticker.add((t) => lenis.raf(t * 1000)); gsap.ticker.lagSmoothing(0); anchor links use lenis.scrollTo(target, { offset: -headerHeight })); then every scroll moment and micro-interaction in the plan with gsap + ScrollTrigger, inside gsap.matchMedia() so pinned/horizontal effects run only at (min-width: 960px) and nothing animates under (prefers-reduced-motion: reduce). Structure the module as small named functions called from one init(), each wrapped so a failure in one never stops the others: const safe = (name: string, fn: () => void) => { try { fn(); } catch (e) { console.warn(name, e); } };
+   Progressive enhancement: never hide content in CSS waiting for JS (no opacity: 0 or transform on .wi, reveal classes or sections in the stylesheet); animate with gsap.from()/fromTo() so content is visible if the module never runs. Scroll-triggered entrances use start: "top 85%" and once: true. Always null-check querySelector results before animating them. Everything interactive (tabs, lightbox, carousel, sticky bar, form, copy address, today's hours) is also implemented in this module.
 - Fonts: do NOT write any font <link> or @import — the server adds them. Use the plan's body font for body text and the plan's display font for headings, each with a system-font fallback stack.
-- Icons are small inline <svg> elements (stroke icons, currentColor, 1.75 stroke width) that you draw yourself. No icon libraries.
-- One small inline <script> at the end for the mobile menu toggle, the reveal-on-scroll IntersectionObserver and the current year; everything must still look complete if it never runs. Use word-break: keep-all and text-wrap: balance for Korean headings.
+- Icons are small inline <svg> elements (stroke icons, currentColor, 1.75 stroke width) that you draw yourself. No icon libraries. Use word-break: keep-all and text-wrap: balance for Korean headings.
 
 ORIGINAL CODE: write this page from scratch for this business. Prefix every class name, id and CSS custom property with the site prefix given below (e.g. .PREFIX-hero, --PREFIX-ink), and do not reproduce any existing template, theme or tutorial markup.
 
@@ -278,11 +349,12 @@ DESIGN — the plan decides the page's skeleton; build exactly what it says, not
 - Shape language, texture and signature elements: apply the plan's shape_language and texture across the whole page and build every signature element for real (e.g. a working CSS marquee, a sticky bar, an SVG rotating badge).
 - Sections: exactly the plan's sections, each with its OWN layout from the plan. Never repeat the same layout twice in a row. Alternate background tones to create rhythm. The page ends with a closing action and a footer with the business's facts.
 - Real visual craft: generous spacing scale, max-width containers, 12-column thinking, large type contrast, subtle borders and layered shadows, generously rounded cards (16–28px), hover lift and image zoom transitions, focus-visible rings, smooth scroll.
-- Motion: reveal-on-scroll with IntersectionObserver that adds a class; the hidden starting state applies ONLY under html.js (set document.documentElement.classList.add('js') first), so the page is fully visible without JavaScript. Respect prefers-reduced-motion.
+- Motion: GSAP choreography from the plan (headline words rising in via splitWords, clip-path image reveals, parallax, pinned horizontal galleries on desktop, scrubbed progress lines) — expressive but never blocking reading; content stays visible without JS; respect prefers-reduced-motion.
+- Immersion: the plan's 3D scene is the site's signature moment — give its section a bold composition (headline layered over or beside the canvas, enough height, a scroll cue) so it feels like an award-site hero, not a widget.
 - Mobile-first and flawless from 360px to 1440px (test mentally: nav, hero text size, grids collapsing to one column, no horizontal scroll).
 - Semantic HTML, one h1, meta description, Open Graph title/description, lang="ko", theme-color.
 
-INTERACTION (build every item in the plan's "interactions" for real, with one small vanilla-JS <script> at the end; everything must still be usable without JS):
+INTERACTION (build every item in the plan's "interactions" for real in the TypeScript module; everything must still be usable without JS):
 - Tabs / category filters switch content with aria-selected and keyboard support; galleries open a lightbox (click to enlarge, next/prev, Esc and backdrop close); carousels have prev/next buttons, dots and touch swipe; the FAQ uses <details>/<summary> with a styled marker; count-up numbers animate once when visible (only numbers from the input).
 - A sticky action bar (booking / order / call) slides in after the hero is scrolled past, and hides near the footer.
 - CONTACT UTILITIES from the user's facts only: tel: links for phone numbers, mailto: for email, a KakaoTalk channel link when a Kakao ID is given, and when an address is given a Google Maps embed (<iframe src="https://www.google.com/maps?q=URL-ENCODED-ADDRESS&output=embed" loading="lazy">) with a "주소 복사" button (navigator.clipboard) and a "길찾기" link. Opening hours shown as a clear table with today highlighted by JS.
@@ -290,7 +362,7 @@ INTERACTION (build every item in the plan's "interactions" for real, with one sm
 - Buttons everywhere they make sense: every section ends with a clear next action; primary and secondary button styles, hover/focus/active states, 44px touch targets.
 - Micro-interactions: hover lift on cards, image zoom on hover, animated underline links, scroll progress bar or back-to-top button, smooth anchor scrolling with the sticky header offset.
 
-STRUCTURE (robust layout): <body> is a plain vertical flow — nav/header, <main> with the sections in order, then <footer>. Never make <body> a grid or flex row; a side rail or split layout lives inside one section (or uses position: sticky/fixed), and the footer always spans the full width at the bottom. Each section is full width with its own inner container; nothing may overlap the next section or overflow at 360px.
+STRUCTURE (robust layout): the document itself scrolls — never a 100vh/100svh container with overflow: auto/scroll, never scroll-snap on a wrapper, never overflow: hidden on html/body (Lenis and ScrollTrigger drive the window scroll). <body> is a plain vertical flow — nav/header, <main> with the sections in order, then <footer>. Never make <body> a grid or flex row; a side rail or split layout lives inside one section (or uses position: sticky/fixed), and the footer always spans the full width at the bottom. Each section is full width with its own inner container; nothing may overlap the next section or overflow at 360px.
 
 PURPOSE: a booking site has a real booking form (name, date/time, menu or service, request) that composes an sms:/mailto: message plus a tel: button; a sales site has product cards with a clear order/buy action; a portfolio has a filterable gallery with a lightbox; a landing page repeats one primary call to action at least three times.
 
@@ -300,7 +372,9 @@ PRICES AND OFFERS (strict): every price, product tier, quantity (stems, grams, m
 
 CONTENT: all visible copy in natural, specific Korean written for THIS business — its product, place, customers and the user's own words. Headlines are claims or invitations, not labels. No lorem ipsum, no "여기에 소개글", no English filler. Follow the facts rules below strictly: use the user's contact/address/hours/prices verbatim; anything not given is written as [입력 필요]; never invent reviews, awards, statistics, certifications or origins.`;
 
-const REVIEW_BRIEF = `You are the creative director and senior front-end reviewer at the same studio. A designer handed you the draft page below. Audit it hard against the art director's plan and this checklist, then return the COMPLETE improved HTML document (only the HTML, starting with <!doctype html>):
+const REVIEW_BRIEF = `You are the creative director and senior front-end reviewer at the same studio. A designer handed you the draft page below. Audit it hard against the art director's plan and this checklist, then return the COMPLETE improved HTML document (only the HTML, starting with <!doctype html>, keeping the same two-part stack: markup + one <style>, and ONE <script type="text/typescript"> module before </body> that imports only three, three/addons/…, gsap, gsap/ScrollTrigger|SplitText|Flip|Observer, lenis and @haebot/kit):
+0. Specific, not generic: the big idea and every item in request_details is visible on the page; a visitor could not mistake this for another business's site. Rewrite anything that reads like template filler.
+0b. The TypeScript module compiles (valid TS, erasable types, no stray markup), mounts the plan's 3D scene correctly with mountScene (host sized, fallback image inside), wires Lenis to ScrollTrigger, builds every scroll moment and micro-interaction from the plan, and wraps each feature in safe(). Fix any API misuse of three/gsap/lenis.
 1. The hero, navigation, shape language, texture and signature elements match the plan — nothing reads like a generic template.
 2. Every interaction in the plan works (tabs, lightbox, carousel with swipe, accordion, sticky action bar, count-up, form composing sms:/mailto:, map embed with copy-address, today's hours highlight) and degrades gracefully without JS.
 3. Every section has real depth from the plan's content list, a clear next-step button, and a distinct layout; no section is thin or repetitive.
@@ -312,14 +386,25 @@ const REVIEW_BRIEF = `You are the creative director and senior front-end reviewe
 Fix everything you find: rewrite weak copy, strengthen layouts, add what's missing, remove clutter. Keep the same class prefix and the same image placeholders. Do not shorten the page.`;
 
 /** What's wrong with a generated page, if anything (for choosing between drafts). */
-export function pageProblems(html: string, imageIds: string[]): string[] {
+export function pageProblems(html: string, imageIds: string[], needsScene = true): string[] {
   const problems: string[] = [];
   if (!/<!doctype html>/i.test(html) || !/<\/html>\s*$/i.test(html.trim())) problems.push("incomplete document");
   for (const id of imageIds) {
     const n = html.split(`{{IMG:${id}}}`).length - 1;
     if (n === 0) problems.push(`missing ${id}`);
   }
-  if (!/<script[\s>]/i.test(html)) problems.push("no script");
+  const ts = [...html.matchAll(/<script\b[^>]*type=["']?text\/typescript["']?[^>]*>([\s\S]*?)<\/script>/gi)].map((m) => m[1]).join("\n");
+  if (!ts.trim()) problems.push("no TypeScript module");
+  else {
+    try {
+      toJs(ts);
+    } catch (err) {
+      problems.push(`script does not compile: ${(err as Error).message.split("\n")[0]}`);
+    }
+    const unknown = unknownImports(ts);
+    if (unknown.length) problems.push(`unknown imports: ${unknown.join(", ")}`);
+    if (needsScene && !/mountScene\s*\(/.test(ts)) problems.push("no 3D scene");
+  }
   if (!/<(button|a)\b/i.test(html)) problems.push("no buttons");
   return problems;
 }
@@ -410,6 +495,7 @@ export async function generateHomepage(
     texture: pick(TEXTURES),
     signature: pick(SIGNATURES),
     display_font: pick(Object.keys(DISPLAY_FONTS).filter((f) => f !== "Pretendard")),
+    scene: pick(["liquid-image", "orb", "particles-text", "photo-ring", "waves", "floating", "aurora"] as const),
   };
   const purpose = typeof input.purpose === "string" ? input.purpose : "";
   const mode = referenceOf(input)?.mode.id ?? "";
@@ -419,12 +505,18 @@ export async function generateHomepage(
     mood: "분위기 참고: 참고 이미지에서 색·질감·빛·서체의 느낌을 뽑아 palette·texture·display_font에 반영하되, 레이아웃과 문구는 복제하지 마세요.",
     reference: "참고 자료의 사실과 내용을 근거로, 구성과 디자인은 새로 기획하세요.",
   };
-  const { plan, usage: planUsage } = await planJson<SitePlan>(
+  // The plan comes from the Pro model; when Pro is rate-limited or down
+  // the fast model plans instead, rather than failing the run.
+  const planArgs = [
     [
       "당신은 서울의 브랜딩 스튜디오 아트 디렉터입니다. 소상공인의 홈페이지를 만들기 전에 디자인 콘셉트, 색, 서체, 첫 화면 구성, 내비게이션, 도형·질감, 시그니처 요소, 섹션 구성, 촬영 목록을 정합니다.",
       "업종의 뻔한 클리셰(베이커리=파스텔, 병원=파란색)와 뻔한 템플릿(전체 화면 사진 + 어두운 오버레이 + 가운데 제목)을 피하고, 이 가게의 입력 내용에서 고유한 콘셉트를 찾으세요. 브랜드 컬러가 있으면 반드시 primary로 쓰세요.",
       "섹션 수와 순서는 사이트의 목적이 정합니다(아래 목적별 구성). '필요 섹션'은 모두 포함하되 방문자가 한 가지 행동으로 이어지게 배치하세요.",
       "입력에 '사용자의 자유 요청'이 있으면 그것이 모든 제안과 규칙보다 우선입니다.",
+      "요청이 구체적이면: 요청의 모든 요소(상호·상품·특징·고객·원하는 기능과 분위기)를 request_details에 적고 사이트에 빠짐없이 보이게 하세요. 사용자가 쓴 표현을 살리세요.",
+      "빅 아이디어·섹션 문구·스크롤 연출 어디에도 입력에 없는 숫자(발효 시간, 경력 연수, 개수, 고객 수, 퍼센트)를 만들지 마세요. 숫자가 필요하면 입력의 숫자만 씁니다.",
+      "요청이 짧거나 막연하면: 섹션을 6~8개로 풍부하게 구성하고, 업종·지역·고객에서 출발해 크리에이티브를 대담하게 확장하세요 — 이 가게만의 빅 아이디어, 브랜드 스토리의 방향, 섹션별 구체 내용, 몰입형 3D 장면과 스크롤 연출, 만지고 싶은 인터랙션까지 풍부하게. 단 가격·수치·후기·수상·경력 같은 사실은 절대 만들지 않습니다.",
+      "결과물은 수상작 수준(Awwwards)의 인터랙티브 사이트입니다: 3D 장면 하나가 빅 아이디어를 상징하고, 스크롤할 때마다 무언가 일어나며, 모든 섹션에 행동 버튼이 있습니다.",
     ].join("\n"),
     [
       `다음 가게의 홈페이지를 기획하세요.\n\n${brief}`,
@@ -435,8 +527,12 @@ export async function generateHomepage(
     SITE_PLAN_SCHEMA,
     abortSignal,
     refParts,
-    PRO_TEXT_MODEL,
-  );
+  ] as const;
+  const { plan, usage: planUsage } = await planJson<SitePlan>(...planArgs, PRO_TEXT_MODEL).catch((err) => {
+    if (abortSignal?.aborted) throw err;
+    console.warn("homepage: Pro plan failed, planning with the fast model", (err as Error).message);
+    return planJson<SitePlan>(...planArgs, TEXT_MODEL);
+  });
   usage = sumUsage(usage, planUsage);
 
   const palette = plan.palette;
@@ -462,28 +558,49 @@ export async function generateHomepage(
   const firstMs = Date.now() - started;
 
   // Senior review: a second pass audits the draft against the plan and
-  // the checklist and returns the improved page. Kept only if it is a
-  // complete page that still uses every photo; skipped when the run is
-  // already long.
-  let draft = page.html;
-  if (Date.now() - started < 150_000) {
+  // the checklist and returns the improved page. The better of the two
+  // (fewest problems: complete document, every photo, a TypeScript module
+  // that compiles, the 3D scene) is kept. The review is skipped when the
+  // draft took long, and cut off before the route's time limit.
+  const ids = plan.images.map((i) => i.id);
+  const needsScene = plan.experience?.scene !== "none";
+  const candidates: string[] = [page.html];
+  if (Date.now() - started < 140_000) {
+    const cutoff = new AbortController();
+    const onAbort = () => cutoff.abort();
+    abortSignal?.addEventListener("abort", onAbort);
+    const timer = setTimeout(() => cutoff.abort(), Math.max(10_000, 245_000 - (Date.now() - started)));
     try {
       const reviewed = await writePage(
         [REVIEW_BRIEF, "", "[Facts and quality rules from the product]", ...buildBaseInstruction(manifest).slice(1)].join("\n"),
-        `[Art director's plan]\n${JSON.stringify(plan, null, 2)}\n\nSite prefix: ${prefix}\n\n[Business input and profile]\n${brief}\n\n[Draft page to review and improve]\n${draft}`,
-        abortSignal,
+        `[Art director's plan]\n${JSON.stringify(plan, null, 2)}\n\nSite prefix: ${prefix}\n\n[Business input and profile]\n${brief}\n\n[Draft page to review and improve]\n${page.html}`,
+        cutoff.signal,
       );
       usage = sumUsage(usage, reviewed.usage);
-      if (pageProblems(reviewed.html, plan.images.map((i) => i.id)).length === 0 || pageProblems(reviewed.html, plan.images.map((i) => i.id)).length < pageProblems(draft, plan.images.map((i) => i.id)).length) draft = reviewed.html;
+      candidates.unshift(reviewed.html);
     } catch (err) {
       if (abortSignal?.aborted) throw err;
+      console.warn("homepage: review skipped", (err as Error).message);
+    } finally {
+      clearTimeout(timer);
+      abortSignal?.removeEventListener("abort", onAbort);
     }
   }
+  const scored = candidates.map((h) => ({ h, problems: pageProblems(h, ids, needsScene) }));
+  const best = scored.reduce((a, b) => (b.problems.length < a.problems.length ? b : a));
   const shots = await photos;
   shots.forEach((s) => (usage = sumUsage(usage, s.usage)));
-  console.info(`homepage: draft ${Math.round(firstMs / 1000)}s, total ${Math.round((Date.now() - started) / 1000)}s, photos ${shots.filter((s) => s.url).length}/${shots.length}, problems ${JSON.stringify(pageProblems(draft, plan.images.map((i) => i.id)))}`);
+  console.info(`homepage: draft ${Math.round(firstMs / 1000)}s, total ${Math.round((Date.now() - started) / 1000)}s, photos ${shots.filter((s) => s.url).length}/${shots.length}, reviewed ${candidates.length > 1}, problems ${JSON.stringify(scored.map((c) => c.problems))}`);
 
-  let html = draft;
+  let html = best.h;
+  // Photos first (the TypeScript may read them from the page's <img>s or
+  // name them directly), then fonts, then the TypeScript is compiled and
+  // the import map added.
+  plan.images.forEach((img, i) => {
+    const url = shots[i].url;
+    if (url) html = html.replaceAll(`{{IMG:${img.id}}}`, url);
+  });
+  html = fillMissingImages(html, palette);
   // Font links are added here rather than written by the model: exact,
   // widely copied lines like these are what trips the recitation filter.
   const families = [DISPLAY_FONTS[plan.display_font], BODY_FONTS[plan.body_font]].filter((f): f is string => Boolean(f));
@@ -492,15 +609,20 @@ export async function generateHomepage(
   const guard = "<style>html,body{overflow-x:clip}body{display:block!important}body>footer{width:100%}</style>";
   const fonts = [PRETENDARD_LINK, ...[...new Set(families)].map(fontLinkTag), guard].join("\n");
   html = /<\/head>/i.test(html) ? html.replace(/<\/head>/i, `${fonts}\n</head>`) : html.replace(/<body/i, `<head>${fonts}</head>\n<body`);
-  plan.images.forEach((img, i) => {
-    const url = shots[i].url;
-    if (url) html = html.replaceAll(`{{IMG:${img.id}}}`, url);
-  });
-  html = fillMissingImages(html, palette);
   // Prices the user gave — typed, or in their reference material (a menu,
   // the old site) — are kept; any other won amount becomes [입력 필요].
   const givenText = [...Object.values(input).filter((v): v is string => typeof v === "string"), referenceOf(input)?.text ?? ""].join("\n");
   html = redactInventedPrices(html, givenText);
+  const site = assembleSite(html);
+  if (site.problems.length) console.warn("homepage: assemble", JSON.stringify(site.problems));
+  html = site.html;
+  const title = /<title>([^<]*)<\/title>/i.exec(html)?.[1]?.trim() || "homepage";
+  let project: Record<string, string> | undefined;
+  try {
+    project = site.mainTs ? viteProject(html, site.mainTs, title) : undefined;
+  } catch (err) {
+    console.warn("homepage: project export skipped", (err as Error).message);
+  }
 
   return {
     output: {
@@ -518,7 +640,11 @@ export async function generateHomepage(
         hero: plan.hero_archetype,
         nav: plan.nav_style,
         signature: plan.signature_elements,
+        big_idea: plan.big_idea,
+        scene: plan.experience?.scene,
+        scroll: plan.experience?.scroll_moments,
       },
+      ...(project ? { project_files: project } : {}),
     },
     sources: [],
     usage,
