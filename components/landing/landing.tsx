@@ -2,7 +2,7 @@
 
 import { BusinessInfo } from "@/components/site/business-info";
 import { BrandMark } from "@/components/brand-mark";
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
@@ -75,7 +75,12 @@ const reveal = {
   transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const },
 };
 
+// Signed-in visitors get "Go to Studio" instead of sign-in/sign-up CTAs,
+// so nobody is sent through Google sign-in again.
+const SignedIn = createContext(false);
+
 function Nav() {
+  const signedIn = useContext(SignedIn);
   const L = useBi();
   return (
     <header className="sticky top-0 z-40 px-3 pt-[max(12px,env(safe-area-inset-top))] md:px-6">
@@ -98,8 +103,14 @@ function Nav() {
         </nav>
         <div className="ml-auto flex items-center gap-2 md:ml-0">
           <div className="glass flex rounded-2xl p-0.5"><ThemeLangControls /></div>
-          <Link href="/auth" className="glass hidden h-11 items-center rounded-2xl px-4 text-sm font-medium sm:flex">{L({ ko: "로그인", en: "Sign in" })}</Link>
-          <Link href="/auth" className={cn(primaryButton, "h-11")}>{L({ ko: "무료로 시작", en: "Start free" })}</Link>
+          {signedIn ? (
+            <Link href="/studio" className={cn(primaryButton, "h-11")}>{L({ ko: "스튜디오로", en: "Go to Studio" })}</Link>
+          ) : (
+            <>
+              <Link href="/auth" className="glass hidden h-11 items-center rounded-2xl px-4 text-sm font-medium sm:flex">{L({ ko: "로그인", en: "Sign in" })}</Link>
+              <Link href="/auth" className={cn(primaryButton, "h-11")}>{L({ ko: "무료로 시작", en: "Start free" })}</Link>
+            </>
+          )}
         </div>
       </div>
     </header>
@@ -163,7 +174,16 @@ function StudioMock() {
   );
 }
 
-function Landing() {
+function Landing({ signedIn = false }: { signedIn?: boolean }) {
+  return (
+    <SignedIn.Provider value={signedIn}>
+      <LandingBody />
+    </SignedIn.Provider>
+  );
+}
+
+function LandingBody() {
+  const signedIn = useContext(SignedIn);
   const L = useBi();
   const { locale } = useLocale();
   const tools = listTools();
@@ -194,7 +214,7 @@ function Landing() {
               {L({ ko: "무엇을 팔지 정하는 일부터 카피, 사진, 상세페이지, 사업계획서까지. 브리프 하나를 쓰면 18개 도구가 서로 결과를 이어받아 캠페인 전체를 만듭니다.", en: "From deciding what to sell to copy, photos, detail pages and business plans. Write one brief and 18 tools pass results to each other to build the whole campaign." })}
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/auth" className={cn(primaryButton, "h-12 px-6 text-[15px]")}>{L({ ko: "무료로 시작하기", en: "Start free" })} <ArrowRight size={16} aria-hidden /></Link>
+              <Link href={signedIn ? "/studio" : "/auth"} className={cn(primaryButton, "h-12 px-6 text-[15px]")}>{signedIn ? L({ ko: "스튜디오로 가기", en: "Go to Studio" }) : L({ ko: "무료로 시작하기", en: "Start free" })} <ArrowRight size={16} aria-hidden /></Link>
               <Link href="/tools" className={cn(secondaryButton, "h-12 px-6 text-[15px]")}>{L({ ko: "도구 둘러보기", en: "Browse tools" })}</Link>
             </div>
             <ul className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-sm text-fg-muted">
@@ -306,7 +326,7 @@ function Landing() {
                 <ul className="mt-5 flex-1 space-y-2.5 text-sm text-fg-muted">
                   {p.features.map((f) => <li key={f.en} className="flex gap-2 break-keep"><Check size={15} className="mt-0.5 shrink-0 text-studio-success" aria-hidden /> {L(f)}</li>)}
                 </ul>
-                <Link href="/auth" className={cn(p.id === "free" ? secondaryButton : primaryButton, "mt-7")}>{p.id === "student" ? L({ ko: "가입 후 인증하기", en: "Sign up, then verify" }) : L({ ko: "시작하기", en: "Get started" })}</Link>
+                <Link href={!signedIn ? "/auth" : p.id === "pro" ? "/account/membership/checkout" : p.id === "student" ? "/account/membership" : "/studio"} className={cn(p.id === "free" ? secondaryButton : primaryButton, "mt-7")}>{p.id === "student" ? (signedIn ? L({ ko: "학생 인증하기", en: "Verify as a student" }) : L({ ko: "가입 후 인증하기", en: "Sign up, then verify" })) : p.id === "pro" && signedIn ? L({ ko: "프로 시작하기", en: "Get Pro" }) : L({ ko: "시작하기", en: "Get started" })}</Link>
               </motion.article>
             ))}
           </div>
@@ -332,7 +352,7 @@ function Landing() {
             <div className="studio-gradient-bg absolute -top-24 left-1/2 size-72 -translate-x-1/2 rounded-full opacity-25 blur-3xl" aria-hidden />
             <h2 className="relative mx-auto max-w-2xl font-display text-[clamp(1.9rem,4vw,3rem)] leading-tight font-bold tracking-[-0.02em] break-keep">{L({ ko: "오늘 쓰는 브리프 하나가 이번 달 캠페인이 됩니다", en: "Today's brief becomes this month's campaign" })}</h2>
             <p className="relative mx-auto mt-4 max-w-lg text-base leading-relaxed break-keep text-fg-muted">{L({ ko: "구글 계정으로 바로 가입하고, 결과는 도구에 따라 30초~3분이면 나와요.", en: "Sign up with Google, and get results in 30 seconds to 3 minutes depending on the tool." })}</p>
-            <Link href="/auth" className={cn(primaryButton, "relative mt-8 h-12 px-7 text-[15px]")}>{L({ ko: "무료로 시작하기", en: "Start free" })} <ArrowRight size={16} aria-hidden /></Link>
+            <Link href={signedIn ? "/studio" : "/auth"} className={cn(primaryButton, "relative mt-8 h-12 px-7 text-[15px]")}>{signedIn ? L({ ko: "스튜디오로 가기", en: "Go to Studio" }) : L({ ko: "무료로 시작하기", en: "Start free" })} <ArrowRight size={16} aria-hidden /></Link>
           </motion.div>
         </section>
       </main>
@@ -349,7 +369,7 @@ function Landing() {
               ["/help/api-guide", { ko: "API 키 설명서", en: "API key manual" }],
               ["/help/whats-new", { ko: "새로운 점", en: "What's new" }],
               ["/status", { ko: "서비스 상태", en: "Status" }],
-              ["/auth", { ko: "로그인", en: "Sign in" }],
+              signedIn ? ["/account", { ko: "내 계정", en: "My account" }] : ["/auth", { ko: "로그인", en: "Sign in" }],
             ].map(([href, label]) => <Link key={href as string} href={href as string} className="hover:text-fg">{L(label as { ko: string; en: string })}</Link>)}
           </nav>
         </div>

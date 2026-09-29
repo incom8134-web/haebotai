@@ -2,8 +2,19 @@ import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 import { isCrossSiteWrite } from "@/lib/origin-check";
 import { REFERRAL, normalizeReferralCode } from "@/lib/referral";
+import { canonicalRedirect } from "@/lib/canonical-host";
 
 export async function proxy(request: NextRequest) {
+  const canonical = canonicalRedirect({
+    method: request.method,
+    host: request.headers.get("host"),
+    path: request.nextUrl.pathname,
+    search: request.nextUrl.search,
+    isProduction: process.env.VERCEL_ENV === "production",
+    siteUrl: process.env.NEXT_PUBLIC_SITE_URL,
+  });
+  if (canonical) return NextResponse.redirect(canonical, 308);
+
   // CSRF backstop on top of SameSite cookies: a browser POST to our API
   // from another site carries that site's Origin. Server-to-server calls
   // (the Toss webhook, Vercel cron) send no Origin and pass.
