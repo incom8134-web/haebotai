@@ -23,7 +23,7 @@ export const BUSINESS = {
   /** 개인정보 보호책임자 */
   privacyOfficer: { name: "이성웅", title: "대표이사", email: "incom2794@naver.com" },
   /** Supabase 프로젝트 리전 (데이터베이스·파일이 저장되는 곳), 예: "대한민국 서울 (ap-northeast-2)" */
-  dataRegion: "",
+  dataRegion: "대한민국 서울 (AWS ap-northeast-2)",
   /** 호스팅 서비스 제공자 (전자상거래법상 표시 사항) */
   hostingProvider: "Vercel Inc.",
   /** 약관·방침 시행일 */
