@@ -20,3 +20,9 @@ export const ACCOUNT_NAV: SubNavItem[] = [
   { href: "/account/membership", label: { ko: "학생 멤버십", en: "Student membership" }, icon: "crown" },
   { href: "/account/api-key", label: { ko: "내 API 키", en: "My API key" }, icon: "key-round" },
 ];
+
+export const LEGAL_NAV: SubNavItem[] = [
+  { href: "/legal/terms", label: { ko: "이용약관", en: "Terms" }, icon: "scroll-text" },
+  { href: "/legal/privacy", label: { ko: "개인정보 처리방침", en: "Privacy" }, icon: "shield-check" },
+  { href: "/legal/refund", label: { ko: "환불정책", en: "Refunds" }, icon: "receipt-text" },
+];

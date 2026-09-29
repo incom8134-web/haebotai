@@ -2,7 +2,7 @@ import "server-only";
 import { ThinkingLevel } from "@google/genai";
 import type { BusinessProfile, ToolManifest } from "@/lib/tools/types";
 import type { Source } from "@/lib/tools/registry/shared";
-import { buildBaseInstruction, buildContext } from "@/lib/tools/generate-prompt";
+import { buildBaseInstruction, buildContext, referenceOf, referenceParts, type ImagePart } from "@/lib/tools/generate-prompt";
 import { redactInventedPrices } from "@/lib/tools/price-guard";
 import { extractHtml } from "@/lib/tools/html-extract";
 import { addUsage, generateOneImage, getClient, PRO_IMAGE_MODEL, TEXT_MODEL, type AspectRatio } from "./gemini";
@@ -49,10 +49,10 @@ async function shoot(
   }
 }
 
-async function planJson<T>(system: string, prompt: string, schema: object, abortSignal: AbortSignal | undefined): Promise<{ plan: T; usage: TokenUsage }> {
+async function planJson<T>(system: string, prompt: string, schema: object, abortSignal: AbortSignal | undefined, attachments: ImagePart[] = []): Promise<{ plan: T; usage: TokenUsage }> {
   const res = await getClient().models.generateContent({
     model: TEXT_MODEL,
-    contents: [{ role: "user", parts: [{ text: prompt }] }],
+    contents: [{ role: "user", parts: [{ text: prompt }, ...attachments.map((a) => ({ inlineData: a }))] }],
     config: { systemInstruction: system, responseMimeType: "application/json", responseJsonSchema: schema, maxOutputTokens: 8192, abortSignal },
   });
   return { plan: JSON.parse(res.text ?? "{}") as T, usage: addUsage(ZERO, res.usageMetadata) };
@@ -197,7 +197,7 @@ export function fillMissingImages(html: string, palette?: SitePlan["palette"]): 
  * the same time: the first Pro page wins, the backup is used only if
  * both Pro replies were blocked. The run takes as long as one attempt.
  */
-async function writePage(system: string, prompt: string, abortSignal: AbortSignal | undefined): Promise<{ html: string; usage: TokenUsage }> {
+async function writePage(system: string, prompt: string, abortSignal: AbortSignal | undefined, attachments: ImagePart[] = []): Promise<{ html: string; usage: TokenUsage }> {
   let usage = ZERO;
   // Losing attempts are cancelled once a page is chosen (or the run is).
   const race = new AbortController();
@@ -206,7 +206,7 @@ async function writePage(system: string, prompt: string, abortSignal: AbortSigna
   const attempt = async (model: string) => {
     const res = await getClient().models.generateContent({
       model,
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      contents: [{ role: "user", parts: [{ text: prompt }, ...attachments.map((a) => ({ inlineData: a }))] }],
       config: {
         systemInstruction: system,
         maxOutputTokens: 65_536,
@@ -250,6 +250,8 @@ export async function generateHomepage(
   const brief = `${buildContext(manifest, input, profile)}\n\n오늘 날짜: ${today} (저작권 연도 등에 사용)`;
   let usage = ZERO;
   const started = Date.now();
+  // "참고 자료" images and PDFs (an old site's screenshot, a brochure).
+  const refParts = referenceParts(input, { documents: true });
 
   const { plan, usage: planUsage } = await planJson<SitePlan>(
     [
@@ -260,6 +262,7 @@ export async function generateHomepage(
     `다음 가게의 홈페이지를 기획하세요.\n\n${brief}`,
     SITE_PLAN_SCHEMA,
     abortSignal,
+    refParts,
   );
   usage = sumUsage(usage, planUsage);
 
@@ -281,7 +284,7 @@ export async function generateHomepage(
   // Photos and the page are made at the same time; the page only needs
   // the placeholder names.
   const [page, ...shots] = await Promise.all([
-    writePage(system, pagePrompt, abortSignal),
+    writePage(system, pagePrompt, abortSignal, refParts),
     ...plan.images.map((img) => shoot(img.prompt, img.ratio, img.id, "homepage", storage, abortSignal)),
   ]);
   usage = sumUsage(usage, page.usage);
@@ -298,7 +301,10 @@ export async function generateHomepage(
     if (url) html = html.replaceAll(`{{IMG:${img.id}}}`, url);
   });
   html = fillMissingImages(html, palette);
-  html = redactInventedPrices(html, Object.values(input).filter((v) => typeof v === "string").join("\n"));
+  // Prices the user gave — typed, or in their reference material (a menu,
+  // the old site) — are kept; any other won amount becomes [입력 필요].
+  const givenText = [...Object.values(input).filter((v): v is string => typeof v === "string"), referenceOf(input)?.text ?? ""].join("\n");
+  html = redactInventedPrices(html, givenText);
 
   return {
     output: {

@@ -1,5 +1,8 @@
 import type { Source } from "../registry/shared.ts";
 import { asCompactPair, formatPrimitive, humanize, isSourceArray, titleKeyOf } from "../output-labels.ts";
+import { buildReport } from "../report/index.ts";
+import type { ChartSpec } from "../report/charts.ts";
+import type { Report } from "../report/types.ts";
 
 // One export model for every tool: a run's JSON output becomes an
 // outline of headings, paragraphs, bullet lists and images, which the
@@ -14,7 +17,12 @@ export type Block =
   | { type: "field"; label: string; value: string }
   | { type: "bullets"; items: string[] }
   | { type: "image"; url: string; caption?: string }
-  | { type: "markdown"; text: string };
+  | { type: "markdown"; text: string }
+  // Report blocks (data tools): drawn as tiles, real tables and charts.
+  | { type: "kpis"; items: { label: string; value: string; note?: string }[] }
+  | { type: "table"; title?: string; header: string[]; rows: string[][]; align?: ("l" | "r" | "c")[]; totalRow?: boolean; caption?: string }
+  | { type: "chart"; title?: string; chart: ChartSpec; palette: string[]; caption?: string; estimated?: boolean }
+  | { type: "callout"; label: string; text: string };
 
 export interface ExportSlide {
   title: string;
@@ -31,10 +39,72 @@ export interface ExportDoc {
   slides?: ExportSlide[];
   /** The run's structured output, for writers that lay out tables and cards. */
   output?: unknown;
+  /** Data tools: the report the result page shows, for writers that lay it out natively (pptx). */
+  report?: Report;
+}
+
+/** A report as export blocks: sections become level-1 headings, cards become sub-headings with facts. */
+export function reportBlocks(report: Report): { blocks: Block[]; sources: Source[] } {
+  const out: Block[] = [];
+  const sources: Source[] = [];
+  if (report.hero.subtitle) out.push({ type: "paragraph", text: report.hero.subtitle });
+  if (report.hero.kpis?.length) out.push({ type: "kpis", items: report.hero.kpis.map((k) => ({ label: k.label, value: k.value, note: k.note })) });
+  for (const section of report.sections) {
+    const onlySources = section.blocks.every((b) => b.type === "sources");
+    if (!onlySources) out.push({ type: "heading", level: 1, text: section.title });
+    if (section.lead) out.push({ type: "paragraph", text: section.lead });
+    for (const b of section.blocks) {
+      switch (b.type) {
+        case "kpis":
+          out.push({ type: "kpis", items: b.items.map((k) => ({ label: k.label, value: k.value, note: k.note })) });
+          break;
+        case "chart":
+          out.push({ type: "chart", title: b.title, chart: b.chart, palette: report.palette, caption: b.caption, estimated: b.estimated });
+          break;
+        case "table":
+          out.push({ type: "table", title: b.title, header: b.header, rows: b.rows, align: b.align, totalRow: b.totalRow, caption: b.caption });
+          break;
+        case "text":
+          if (b.title) out.push({ type: "heading", level: 2, text: b.title });
+          out.push({ type: "paragraph", text: b.text });
+          break;
+        case "callout":
+          out.push({ type: "callout", label: b.label, text: b.text });
+          break;
+        case "bullets":
+          if (b.title) out.push({ type: "heading", level: 2, text: b.title });
+          out.push({ type: "bullets", items: b.style === "num" ? b.items.map((it, i) => `${i + 1}. ${it}`) : b.items });
+          break;
+        case "cards":
+          if (b.title) out.push({ type: "heading", level: 2, text: b.title });
+          for (const c of b.items) {
+            out.push({ type: "heading", level: 3, text: [c.kicker, c.title].filter(Boolean).join(" · ") + (c.badge ? ` [${c.badge}]` : "") });
+            if (c.meter) out.push({ type: "field", label: "점수", value: c.meter.label });
+            for (const f of c.facts ?? []) out.push({ type: "field", label: f.label, value: f.value });
+            if (c.lines?.length) out.push({ type: "bullets", items: c.lines });
+          }
+          break;
+        case "quad": {
+          const depth = Math.max(...b.cells.map((c) => c.items.length));
+          out.push({
+            type: "table",
+            title: b.title,
+            header: b.cells.map((c) => c.title),
+            rows: Array.from({ length: depth }, (_, i) => b.cells.map((c) => c.items[i] ?? "")),
+          });
+          break;
+        }
+        case "sources":
+          sources.push(...b.items);
+          break;
+      }
+    }
+  }
+  return { blocks: out, sources };
 }
 
 // Machine fields that mean nothing in a document.
-export const SKIP_KEYS = new Set(["asset_id", "seed", "zip_asset_id", "preview_url", "svg", "html", "negative_prompt", "refined_prompt", "data_source", "model_seed", "hero_image_prompt", "accent_color", "design"]);
+export const SKIP_KEYS = new Set(["asset_id", "seed", "zip_asset_id", "preview_url", "svg", "html", "negative_prompt", "refined_prompt", "data_source", "model_seed", "hero_image_prompt", "accent_color", "design", "creative_direction"]);
 // A string this short with no line break reads best as "label: value".
 const INLINE_MAX = 80;
 
@@ -142,6 +212,7 @@ export function buildExportDoc(params: {
   toolName: string;
   toolId: string;
   output: unknown;
+  input?: unknown;
   sources: Source[];
   brandName?: string | null;
   createdAt?: string | null;
@@ -151,7 +222,22 @@ export function buildExportDoc(params: {
   const sources: Source[] = [];
   const o = (output ?? {}) as Record<string, unknown>;
 
-  for (const [k, v] of Object.entries(o)) walkField(k, v, 1, blocks, sources);
+  const { creative_direction: _direction, ...rest } = o;
+  void _direction;
+  const report = buildReport(toolId, rest, params.input);
+  if (report) {
+    if (Array.isArray(o.mood_board)) {
+      for (const img of o.mood_board) {
+        const url = imageUrl(img);
+        if (url) blocks.push({ type: "image", url, caption: typeof (img as { caption?: unknown }).caption === "string" ? (img as { caption: string }).caption : undefined });
+      }
+    }
+    const converted = reportBlocks(report);
+    blocks.push(...converted.blocks);
+    sources.push(...converted.sources);
+  } else {
+    for (const [k, v] of Object.entries(o)) walkField(k, v, 1, blocks, sources);
+  }
 
   if (typeof o.html === "string") {
     blocks.push({ type: "paragraph", text: "완성된 HTML 파일은 결과 화면의 'HTML 다운로드'로 받을 수 있습니다." });
@@ -175,6 +261,9 @@ export function buildExportDoc(params: {
     }));
   }
 
+  if (report) {
+    return { title: report.hero.title, subtitle: `${report.hero.eyebrow} · ${subtitle}`, blocks, sources: allSources, output, report };
+  }
   return { title: toolName, subtitle, blocks, sources: allSources, slides, output };
 }
 

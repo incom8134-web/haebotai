@@ -10,6 +10,7 @@ import { anthropicAdapter, runWithApiKey as runWithAnthropicKey } from "@/lib/ai
 import { renderSangsepage } from "./render/sangsepage";
 import { orderLike } from "./output-order";
 import { outputSchemaFor } from "./schemas";
+import { pickDirection } from "./directions";
 
 // HAEBOT_A_TOOLS_SPEC.md §3.2 — real generation for all 15 tools. Thin
 // dispatcher: provider-specific logic (search grounding, image
@@ -60,6 +61,37 @@ export async function generateOutput(
 
   const adapter = ADAPTERS[provider];
   if (!adapter) throw new Error(`${provider} 엔진은 아직 지원하지 않습니다`);
+
+  // A creative direction this user hasn't had in their recent runs of the
+  // tool (lib/tools/directions.ts): every prompt below commits to it, and
+  // the result records it so the next run rotates to another.
+  const direction = pickDirection(manifest.id, await recentDirections(storage, manifest.id));
+  if (direction) input = { ...input, _direction: direction };
+  const result = await generateWith(manifest, input, profile, abortSignal, storage, provider, adapter);
+  return direction ? { ...result, output: { ...(result.output as Record<string, unknown>), creative_direction: { id: direction.id, name: direction.name } } } : result;
+}
+
+async function recentDirections(storage: ImageStorageContext, toolId: string): Promise<string[]> {
+  const { data } = await storage.supabase
+    .from("generations")
+    .select("dir:output->creative_direction->>id")
+    .eq("user_id", storage.userId)
+    .eq("tool_id", toolId)
+    .eq("status", "done")
+    .order("created_at", { ascending: false })
+    .limit(4);
+  return ((data ?? []) as { dir: string | null }[]).map((r) => r.dir).filter((d): d is string => Boolean(d));
+}
+
+async function generateWith(
+  manifest: ToolManifest,
+  input: Record<string, unknown>,
+  profile: BusinessProfile | null,
+  abortSignal: AbortSignal | undefined,
+  storage: ImageStorageContext,
+  provider: ProviderId,
+  adapter: AiAdapter,
+): Promise<{ output: unknown; sources: Source[]; usage: TokenUsage }> {
 
   if (manifest.id === "image" || manifest.id === "brand-model" || manifest.id === "logo") {
     const images = await adapter.generateImages(manifest, input, profile, abortSignal, storage);

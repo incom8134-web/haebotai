@@ -124,7 +124,13 @@ function CheckoutView({ customerKey, membership }: { customerKey: string; member
             <div className="flex justify-between border-t border-hairline pt-2 font-semibold"><dt>{L({ ko: "결제 금액", en: "Total" })}</dt><dd>{won(PRO_ORDER.amount)}</dd></div>
           </dl>
           {error ? <p role="alert" className="mt-4 rounded-xl bg-danger/10 p-3 text-sm text-danger">{error}</p> : null}
-          <button type="button" onClick={pay} disabled={!ready || paying || blocked} className={cn(primaryButton, "mt-5 w-full")}>
+          <p className="mt-4 rounded-xl bg-surface-2/60 p-3 text-2xs leading-relaxed break-keep text-fg-muted">
+            {L({ ko: "결제 후 7일 이내 크레딧을 쓰지 않았다면 전액, 일부 썼다면 남은 크레딧 비율만큼 환불돼요. 7일이 지나면 청약철회가 제한돼요.", en: "Full refund within 7 days if no credits were used; a pro-rated refund if some were. After 7 days, withdrawal is limited." })}{" "}
+            <Link href="/legal/refund" className="underline underline-offset-2 hover:text-fg">{L({ ko: "환불정책", en: "Refund policy" })}</Link>
+            {" · "}
+            <Link href="/legal/terms" className="underline underline-offset-2 hover:text-fg">{L({ ko: "이용약관", en: "Terms" })}</Link>
+          </p>
+          <button type="button" onClick={pay} disabled={!ready || paying || blocked} className={cn(primaryButton, "mt-4 w-full")}>
             {paying ? L({ ko: "결제창 여는 중…", en: "Opening…" }) : L({ ko: `${won(PRO_ORDER.amount)} 결제하기`, en: `Pay ${won(PRO_ORDER.amount)}` })}
           </button>
           <p className="mt-3 text-2xs leading-relaxed text-fg-subtle">
