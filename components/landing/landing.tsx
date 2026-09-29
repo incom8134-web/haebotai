@@ -1,5 +1,6 @@
 "use client";
 
+import { BusinessInfo } from "@/components/site/business-info";
 import { BrandMark } from "@/components/brand-mark";
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -316,6 +317,15 @@ function Landing() {
               ["/auth", { ko: "로그인", en: "Sign in" }],
             ].map(([href, label]) => <Link key={href as string} href={href as string} className="hover:text-fg">{L(label as { ko: string; en: string })}</Link>)}
           </nav>
+        </div>
+        <div className="mx-auto mt-8 flex max-w-[1200px] flex-col gap-3 border-t border-hairline pt-6">
+          <nav className="flex flex-wrap gap-x-4 gap-y-1 text-xs" aria-label={L({ ko: "약관·정책", en: "Legal" })}>
+            <Link href="/legal/terms" className="text-fg-muted hover:text-fg">{L({ ko: "이용약관", en: "Terms" })}</Link>
+            <Link href="/legal/privacy" className="font-semibold text-fg hover:text-fg">{L({ ko: "개인정보 처리방침", en: "Privacy Policy" })}</Link>
+            <Link href="/legal/refund" className="text-fg-muted hover:text-fg">{L({ ko: "환불정책", en: "Refund Policy" })}</Link>
+          </nav>
+          <BusinessInfo />
+          <p className="text-xs text-fg-subtle">© {new Date().getFullYear()} {L({ ko: "해봇 AI", en: "Haebot AI" })}</p>
         </div>
       </footer>
     </div>

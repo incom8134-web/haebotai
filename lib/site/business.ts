@@ -1,0 +1,36 @@
+// The operator's legal details, shown in the footer and the legal pages
+// (/legal/terms, /legal/privacy, /legal/refund). Korean e-commerce law
+// (전자상거래법 §10) and Toss Payments' merchant review require them on
+// the site. Every empty value renders as "(등록 예정)" — fill them in
+// here once and every page picks them up.
+
+export const BUSINESS = {
+  serviceName: "해봇 AI",
+  /** 상호 (법인명) */
+  companyName: "",
+  /** 대표자 */
+  representative: "",
+  /** 사업자등록번호 (000-00-00000) */
+  registrationNumber: "",
+  /** 통신판매업 신고번호 (제0000-서울00-0000호) */
+  mailOrderNumber: "",
+  /** 사업장 주소 */
+  address: "",
+  /** 고객센터 전화 */
+  phone: "",
+  /** 고객센터·개인정보 문의 이메일 */
+  email: "",
+  /** 개인정보 보호책임자 */
+  privacyOfficer: { name: "", title: "", email: "" },
+  /** Supabase 프로젝트 리전 (데이터베이스·파일이 저장되는 곳), 예: "대한민국 서울 (ap-northeast-2)" */
+  dataRegion: "",
+  /** 호스팅 서비스 제공자 (전자상거래법상 표시 사항) */
+  hostingProvider: "Vercel Inc.",
+  /** 약관·방침 시행일 */
+  effectiveDate: "2026년 9월 29일",
+} as const;
+
+export const PENDING = "(등록 예정)";
+
+/** A business field, or the pending marker when it hasn't been filled in. */
+export const biz = (value: string) => value.trim() || PENDING;
