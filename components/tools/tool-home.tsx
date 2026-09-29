@@ -36,7 +36,7 @@ function ToolHome({ toolId }: { toolId: string }) {
 
   async function copyPreset(i: number) {
     try {
-      await navigator.clipboard.writeText(presetLines(tool, c.presets[i]).join("\n"));
+      await navigator.clipboard.writeText(presetLines(tool, c.presets[i], locale, i).join("\n"));
       setCopied(i);
       setTimeout(() => setCopied(null), 1600);
     } catch {
@@ -149,7 +149,7 @@ function ToolHome({ toolId }: { toolId: string }) {
                   </div>
                   <h3 className="mt-3 font-semibold">{L(p.title)}</h3>
                   <ul className="mt-2 flex-1 space-y-1 text-sm text-fg-muted">
-                    {presetLines(tool, p).slice(0, 3).map((line) => <li key={line} className="truncate" title={line}>{line}</li>)}
+                    {presetLines(tool, p, locale, i).slice(0, 3).map((line) => <li key={line} className="truncate" title={line}>{line}</li>)}
                   </ul>
                   {tool.comingSoon ? null : (
                     <Link href={`/tools/${tool.id}/run?preset=${i}`} className="mt-4 inline-flex items-center gap-1.5 self-start text-sm font-medium text-studio-cyan">

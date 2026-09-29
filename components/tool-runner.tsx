@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { RotateCcw, SquarePen, X } from "lucide-react";
@@ -28,6 +28,8 @@ import { getExperience } from "@/lib/tools/experience";
 import { cn } from "@/lib/utils";
 import { ExField } from "@/components/tools/experience/controls";
 import { FreeRequest } from "@/components/tools/free-request";
+import { localizeField } from "@/lib/tools/fields-en";
+import { presetValues } from "@/lib/tools/presets-en";
 import { Stage } from "@/components/tools/experience/stage";
 import { useLocale, useT, useBi } from "@/lib/i18n/context";
 import { useLocalValue } from "@/lib/hooks/use-local-list";
@@ -142,15 +144,32 @@ function ToolRunner({
   const [values, setValues] = useState<ToolFormValues>(() => {
     if (chainedFrom) return seedFromChain(toolId, chainedFrom.toolId, chainedFrom.output);
     const preset = initialPreset !== undefined ? getToolContent(toolId)?.presets[initialPreset] : undefined;
-    if (preset) return { ...preset.values };
+    if (preset) return { ...presetValues(toolId, initialPreset!, preset.values, locale) };
     const brief = manifest ? seedFromBrief(manifest, initialBrief) : {};
     if (Object.keys(brief).length) return brief;
     // A cold visit (no chain, no ?preset=, no brief) opens with the
     // tool's first example pre-filled rather than blank fields — same
     // promise ToolHome's example gallery already makes ("opens with the
     // form filled in"), just honored on a direct /run visit too.
-    return { ...(getToolContent(toolId)?.presets[0]?.values ?? {}) };
+    return { ...presetValues(toolId, 0, getToolContent(toolId)?.presets[0]?.values ?? {}, locale) };
   });
+  // The language is read on the client after the first render, so a form
+  // seeded with a preset in Korean switches to the English sample values
+  // once English is known — only while the user hasn't edited it.
+  const seeded = useRef<{ index: number; values: ToolFormValues } | null>(null);
+  if (seeded.current === null && !chainedFrom && !initialBrief) {
+    const index = initialPreset ?? 0;
+    const preset = getToolContent(toolId)?.presets[index];
+    if (preset) seeded.current = { index, values: { ...preset.values } };
+  }
+  useEffect(() => {
+    const seed = seeded.current;
+    if (!seed || locale !== "en") return;
+    setValues((current) => {
+      const untouched = Object.keys(seed.values).every((k) => JSON.stringify(current[k]) === JSON.stringify(seed.values[k]));
+      return untouched ? { ...current, ...presetValues(toolId, seed.index, seed.values, "en") } : current;
+    });
+  }, [locale, toolId]);
   const [excludedProfileKeys, setExcludedProfileKeys] = useState<Set<string>>(
     new Set(),
   );
@@ -306,7 +325,7 @@ function ToolRunner({
         toolId={toolId}
         onPreset={(i) => {
           const preset = getToolContent(toolId)?.presets[i];
-          if (preset) setValues({ ...preset.values });
+          if (preset) setValues({ ...presetValues(toolId, i, preset.values, locale) });
         }}
       />
     </aside>
@@ -432,7 +451,7 @@ function ToolRunner({
                 {section.fields.filter((fid) => fid !== "free_request").map((fid) => {
                   const field = manifest.inputs.find((f) => f.id === fid);
                   if (!field) return null;
-                  return <ExField key={fid} field={field} ui={exp.ui[fid]} value={values[fid]} onChange={(v) => setValues((p) => ({ ...p, [fid]: v }))} />;
+                  return <ExField key={fid} field={localizeField(toolId, field, locale)} ui={exp.ui[fid]} value={values[fid]} onChange={(v) => setValues((p) => ({ ...p, [fid]: v }))} />;
                 })}
               </div>
             </li>
@@ -444,7 +463,7 @@ function ToolRunner({
             {manifest.inputs
               .filter((f) => f.id !== "free_request")
               .map((field) => (
-                <ExField key={field.id} field={field} value={values[field.id]} onChange={(v) => setValues((p) => ({ ...p, [field.id]: v }))} />
+                <ExField key={field.id} field={localizeField(toolId, field, locale)} value={values[field.id]} onChange={(v) => setValues((p) => ({ ...p, [field.id]: v }))} />
               ))}
           </div>
         </div>
