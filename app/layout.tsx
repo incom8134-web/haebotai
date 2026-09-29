@@ -29,10 +29,14 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 
+const description = "Grounded AI marketing and business tools — every claim cites the fact it was built from.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
   title: "해봇 AI",
-  description:
-    "Grounded AI marketing and business tools — every claim cites the fact it was built from.",
+  description,
+  openGraph: { type: "website", siteName: "해봇 AI", locale: "ko_KR", title: "해봇 AI", description },
+  twitter: { card: "summary_large_image", title: "해봇 AI", description },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

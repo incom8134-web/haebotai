@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { accountDeleteLimiter, checkRateLimit } from "@/lib/rate-limit";
 
 // Self-serve account deletion (회원 탈퇴). Deletes everything personal —
 // results, business profile, API keys, remaining credits, student
@@ -38,6 +39,11 @@ export async function POST(request: Request) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return Response.json({ error: "로그인이 필요합니다" }, { status: 401 });
+
+  const rate = await checkRateLimit(accountDeleteLimiter, user.id);
+  if (!rate.ok) {
+    return Response.json({ error: "요청이 너무 잦습니다. 잠시 후 다시 시도해주세요." }, { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } });
+  }
 
   const body = (await request.json().catch(() => ({}))) as { confirm?: unknown };
   if (body.confirm !== CONFIRM_WORD) return Response.json({ error: `확인을 위해 '${CONFIRM_WORD}'를 입력해 주세요` }, { status: 400 });

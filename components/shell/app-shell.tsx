@@ -1,17 +1,20 @@
 "use client";
 
 import { BrandMark } from "@/components/brand-mark";
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useMemo, useState, useSyncExternalStore, useTransition } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "motion/react";
-import { CircleHelp, CircleUserRound, Coins, LayoutGrid, Library, Moon, Search, Sparkles, Sun, UserRound, Zap, type LucideIcon } from "lucide-react";
+import { AlertTriangle, CircleGauge, CircleHelp, CircleUserRound, Coins, LayoutGrid, Library, LogOut, Moon, Search, Sparkles, Sun, UserRound, X, Zap, type LucideIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { CommandPalette, type CommandPaletteGroup } from "@/components/command-palette";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { signOut } from "@/lib/actions/auth";
+import { PLANS } from "@/lib/site/plans";
 import { listTools } from "@/lib/tools/registry";
 import { CATEGORY_LABELS } from "@/lib/tools/registry/categories";
 import { PATCH_NOTES } from "@/lib/site/patch-notes";
-import { useLocalList } from "@/lib/hooks/use-local-list";
+import { useLocalList, useLocalValue } from "@/lib/hooks/use-local-list";
 import { useBi, useLocale } from "@/lib/i18n/context";
 import type { CategoryId, ToolManifest } from "@/lib/tools/types";
 import type { PlanId } from "@/lib/site/plans";
@@ -111,6 +114,75 @@ function ThemeLangControls({ vertical }: { vertical?: boolean }) {
   );
 }
 
+// About two typical runs (most tools cost 35–50 credits).
+const LOW_CREDIT_THRESHOLD = 100;
+
+// Dismissal remembers the balance it was dismissed at, so the banner comes
+// back only after more credits are spent.
+function LowCreditBanner({ balance }: { balance: number }) {
+  const L = useBi();
+  const [dismissedAt, setDismissedAt] = useLocalValue("haebot-low-credit-dismissed");
+  if (dismissedAt !== null && balance >= Number(dismissedAt)) return null;
+  const empty = balance <= 0;
+  return (
+    <div role="status" className="pointer-events-auto mx-auto mt-2 flex max-w-[1240px] items-center gap-3 rounded-2xl border border-studio-warning/40 bg-studio-warning/10 px-4 py-2.5 text-sm backdrop-blur">
+      <AlertTriangle size={16} className="shrink-0 text-studio-warning" aria-hidden />
+      <p className="min-w-0 flex-1 break-keep text-fg">
+        {empty
+          ? L({ ko: "크레딧을 모두 썼어요.", en: "You're out of credits." })
+          : L({ ko: `크레딧이 ${balance.toLocaleString()} 남았어요.`, en: `Only ${balance.toLocaleString()} credits left.` })}{" "}
+        <span className="text-fg-muted">{L({ ko: "Pro로 충전하거나, 내 API 키를 연결하면 계속 쓸 수 있어요.", en: "Top up with Pro or connect your own API key to keep going." })}</span>
+      </p>
+      <Link href="/account/membership" className="shrink-0 font-medium text-studio-cyan hover:underline">
+        {L({ ko: "충전하기", en: "Top up" })}
+      </Link>
+      <button type="button" onClick={() => setDismissedAt(String(balance))} aria-label={L({ ko: "닫기", en: "Dismiss" })} className="grid size-7 shrink-0 place-items-center rounded-lg text-fg-muted hover:bg-surface-2/60 hover:text-fg">
+        <X size={14} aria-hidden />
+      </button>
+    </div>
+  );
+}
+
+function UserMenu({ email, plan, credits }: { email: string; plan: PlanId; credits: string }) {
+  const L = useBi();
+  const router = useRouter();
+  const [signingOut, startSignOut] = useTransition();
+  const planName = PLANS.find((p) => p.id === plan)?.name;
+  const links = [
+    { href: "/account", icon: CircleUserRound, label: { ko: "내 계정", en: "My account" } },
+    { href: "/account/credits", icon: CircleGauge, label: { ko: "크레딧·한도", en: "Credits & limits" } },
+    { href: "/help", icon: CircleHelp, label: { ko: "도움말", en: "Help" } },
+  ];
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        aria-label={L({ ko: "계정 메뉴", en: "Account menu" })}
+        className="glass pointer-events-auto grid size-11 shrink-0 place-items-center rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-studio-cyan"
+      >
+        <span className="studio-gradient-bg grid size-8 place-items-center rounded-xl text-sm font-semibold text-white">{email[0]?.toUpperCase() ?? "?"}</span>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" sideOffset={8} className="glass-strong w-64 rounded-2xl border-hairline p-1.5">
+        <div className="px-2.5 py-2">
+          <p className="truncate text-sm font-medium text-fg">{email}</p>
+          <p className="mt-0.5 text-2xs text-fg-muted">
+            {planName ? L(planName) : null} · {credits} {L({ ko: "크레딧", en: "credits" })}
+          </p>
+        </div>
+        <DropdownMenuSeparator />
+        {links.map((item) => (
+          <DropdownMenuItem key={item.href} onClick={() => router.push(item.href)} className="rounded-lg px-2.5 py-2">
+            <item.icon aria-hidden /> {L(item.label)}
+          </DropdownMenuItem>
+        ))}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem disabled={signingOut} onClick={() => startSignOut(() => signOut())} className="rounded-lg px-2.5 py-2">
+          <LogOut aria-hidden /> {signingOut ? L({ ko: "로그아웃 중…", en: "Signing out…" }) : L({ ko: "로그아웃", en: "Log out" })}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 function AppShell({ user, balance, plan, answeredTickets, children }: ShellProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -156,7 +228,7 @@ function AppShell({ user, balance, plan, answeredTickets, children }: ShellProps
         <div className="mx-auto flex max-w-[1240px] items-center gap-2">
           <Link href="/studio" className="glass pointer-events-auto flex h-11 items-center gap-2.5 rounded-2xl pr-4 pl-1.5">
             <BrandMark size={32} priority />
-            <span className="hidden text-sm font-bold tracking-[-0.02em] min-[380px]:inline">{L({ ko: "해봇 AI", en: "Haebot AI" })}</span>
+            <span className="hidden text-sm font-bold tracking-[-0.02em] whitespace-nowrap min-[440px]:inline">{L({ ko: "해봇 AI", en: "Haebot AI" })}</span>
           </Link>
           <button
             type="button"
@@ -174,12 +246,15 @@ function AppShell({ user, balance, plan, answeredTickets, children }: ShellProps
           <div className="glass pointer-events-auto flex h-11 items-center rounded-2xl px-0.5 lg:hidden">
             <ThemeLangControls />
           </div>
-          {!user ? (
+          {user ? (
+            <UserMenu email={user.email} plan={plan} credits={credits} />
+          ) : (
             <Link href="/auth" className="studio-gradient-bg pointer-events-auto flex h-11 items-center rounded-2xl px-3.5 text-xs font-semibold text-white lg:hidden">
               {L({ ko: "로그인", en: "Sign in" })}
             </Link>
-          ) : null}
+          )}
         </div>
+        {user && plan !== "student" && balance !== null && balance < LOW_CREDIT_THRESHOLD ? <LowCreditBanner balance={balance} /> : null}
       </div>
 
       <main className="pb-28 lg:pr-24 lg:pb-10">{children}</main>
