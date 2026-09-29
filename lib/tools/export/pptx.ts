@@ -6,6 +6,7 @@ import { imageUrl, plainMarkdownLines, SKIP_KEYS, type ExportDoc } from "./docum
 import { fetchAll, fit, imageSize, type FetchedImage } from "./images.ts";
 import { chartPng } from "./chart-png.ts";
 import type { Report, ReportBlock } from "../report/types.ts";
+import { deckChartSpec, deckPalette, type DeckChart } from "../report/deck.ts";
 
 // PowerPoint export laid out from the run's structured output rather
 // than from flat text: lists of like items become tables with a colored
@@ -191,6 +192,8 @@ class Deck {
   readonly pptx = new PptxGenJS();
   private page = 0;
   readonly name: string;
+  /** Speaker notes for the next slide created (for helpers that build their own slide). */
+  nextNotes?: string;
 
   constructor(name: string) {
     this.name = name;
@@ -219,12 +222,18 @@ class Deck {
     const s = this.pptx.addSlide();
     s.background = { color: background };
     this.page++;
+    this.takeNotes(s);
     this.rect(s, 0, 0, 0.16, H, color.c);
     if (kicker) this.text(s, kicker, { x: M, y: 0.42, w: CW, h: 0.3, fontSize: 11, bold: true, color: color.c, charSpacing: 1 });
     s.addShape(this.pptx.ShapeType.line, { x: M, y: H - 0.45, w: CW, h: 0, line: { color: LINE, width: 0.75 } });
     this.text(s, `해봇 AI · ${this.name}`, { x: M, y: H - 0.38, w: 9, h: 0.24, fontSize: 9, color: MUTED });
     this.text(s, String(this.page), { x: W - M - 1, y: H - 0.38, w: 1, h: 0.24, fontSize: 9, color: MUTED, align: "right" });
     return s;
+  }
+
+  private takeNotes(s: Slide) {
+    if (this.nextNotes) s.addNotes(this.nextNotes);
+    this.nextNotes = undefined;
   }
 
   content(kicker: string, title: string, color: Color, notes?: string): Slide {
@@ -247,6 +256,7 @@ class Deck {
     const s = this.pptx.addSlide();
     s.background = { color: DARK };
     this.page++;
+    this.takeNotes(s);
     this.photo(s, img, 0, 0, W, H);
     this.rect(s, 0, 0, W, H, DARK, 0, { fill: { color: DARK, transparency: 45 } });
     if (!centered) this.rect(s, 0, 0, W * 0.62, H, DARK, 0, { fill: { color: DARK, transparency: 30 } });
@@ -938,6 +948,124 @@ function renderMarkdown(ctx: Ctx, md: string, title: string, kicker: string, col
   for (const c of chunks) if (c.lines.length) ctx.deck.prose(kicker, c.head, c.lines, color);
 }
 
+interface LayoutCtx {
+  kicker: string;
+  headline: string;
+  points: string[];
+  notes: string;
+  photo?: FetchedImage;
+  color: Color;
+  pal: Color[];
+  accentHex: string;
+}
+
+/** The slide's own layout (big number, chart, table, …). False = fall back to the classic layouts. */
+function renderLayout(deck: Deck, sl: Obj, x: LayoutCtx): boolean {
+  const { kicker, headline, points, notes, color } = x;
+  const layout = typeof sl.layout === "string" ? sl.layout : "";
+  const strs = (v: unknown) => (Array.isArray(v) ? v.map((t) => String(t ?? "")).filter(Boolean) : []);
+  const pointsBox = (s: Slide, bx: number, by: number, bw: number, bh: number, lead?: string) => {
+    const runs: Run[] = [];
+    if (lead) runs.push({ text: lead, options: { bold: true, color: color.c, breakLine: true, paraSpaceAfter: 10 } });
+    points.forEach((p) => runs.push({ text: p, options: { breakLine: true, bullet: { indent: 14 }, paraSpaceAfter: 8, color: BODY } }));
+    if (!runs.length) return;
+    const pt = fitFont([lead ?? "", ...points].join("\n"), bw - 0.3, bh - points.length * 0.12, 17, 10);
+    deck.text(s, runs, { x: bx, y: by, w: bw, h: bh, fontSize: pt, valign: "top", lineSpacingMultiple: 1.15 });
+  };
+
+  switch (layout) {
+    case "big_number": {
+      const stat = isObj(sl.stat) ? sl.stat : null;
+      if (!stat || !stat.value) return false;
+      const s = deck.content(kicker, headline, color, notes);
+      const bw = 5.6;
+      deck.rect(s, M, TOP, bw, BOTTOM - TOP - 0.1, color.soft, 0.14);
+      deck.rect(s, M, TOP, 0.1, BOTTOM - TOP - 0.1, color.c);
+      const value = String(stat.value);
+      deck.text(s, value, { x: M + 0.35, y: TOP + 0.4, w: bw - 0.6, h: 2.2, fontSize: fitFont(value, bw - 0.6, 2.2, 96, 36), bold: true, color: color.c, valign: "middle" });
+      deck.text(s, String(stat.label ?? ""), { x: M + 0.35, y: TOP + 2.7, w: bw - 0.6, h: 0.8, fontSize: 20, bold: true, color: INK, valign: "top" });
+      if (stat.context) deck.text(s, String(stat.context), { x: M + 0.35, y: TOP + 3.5, w: bw - 0.6, h: BOTTOM - TOP - 3.8, fontSize: fitFont(String(stat.context), bw - 0.6, 1.3, 14, 10), color: BODY, valign: "top" });
+      pointsBox(s, M + bw + 0.5, TOP + 0.2, CW - bw - 0.5, BOTTOM - TOP - 0.4);
+      return true;
+    }
+    case "chart": {
+      const c = isObj(sl.chart) ? (sl.chart as DeckChart) : null;
+      const spec = deckChartSpec(c);
+      if (!spec) return false;
+      const png = chartPng(spec, deckPalette(x.accentHex), 600);
+      if (!png) return false;
+      const estimate = c?.source === "estimate";
+      const s = deck.content(kicker, headline, color, notes);
+      const cw = 8.1;
+      const box = fit({ width: png.width, height: png.height }, cw * 96, (BOTTOM - TOP - 0.2) * 96);
+      s.addImage({ data: `data:image/png;base64,${png.data.toString("base64")}`, x: M, y: TOP + (BOTTOM - TOP - box.height / 96) / 2, w: box.width / 96, h: box.height / 96 });
+      const rx = M + cw + 0.4;
+      const rw = W - M - rx;
+      if (estimate) {
+        deck.rect(s, rx, TOP, 1.0, 0.36, "FEF3C7", 0.18);
+        deck.text(s, "추정치", { x: rx, y: TOP, w: 1.0, h: 0.36, fontSize: 11, bold: true, color: "B7791F", align: "center", valign: "middle" });
+      }
+      pointsBox(s, rx, TOP + (estimate ? 0.55 : 0), rw, BOTTOM - TOP - (estimate ? 0.65 : 0.1), typeof c?.takeaway === "string" ? c.takeaway : undefined);
+      return true;
+    }
+    case "table": {
+      const t = isObj(sl.table) ? sl.table : null;
+      const header = strs(t?.header);
+      const rows = Array.isArray(t?.rows) ? (t!.rows as unknown[]).map(strs).filter((r) => r.length) : [];
+      if (!header.length || !rows.length) return false;
+      deck.nextNotes = [notes, points.length ? `요점:\n${points.map((p) => `- ${p}`).join("\n")}` : ""].filter(Boolean).join("\n\n");
+      deck.table(kicker, headline, header, rows, color, { labelCol: true });
+      return true;
+    }
+    case "comparison": {
+      const cmp = isObj(sl.compare) ? sl.compare : null;
+      if (!cmp) return false;
+      const s = deck.content(kicker, headline, color, notes);
+      const gap = 0.9;
+      const cw = (CW - gap) / 2;
+      const col = (cx: number, title: string, items: string[], strong: boolean) => {
+        const h = BOTTOM - TOP - 0.1;
+        deck.rect(s, cx, TOP, cw, h, strong ? color.soft : "F3F4F6", 0.14);
+        deck.rect(s, cx, TOP, cw, 0.1, strong ? color.c : "9CA3AF");
+        deck.text(s, title, { x: cx + 0.35, y: TOP + 0.3, w: cw - 0.7, h: 0.7, fontSize: fitFont(title, cw - 0.7, 0.7, 22, 14), bold: true, color: strong ? color.c : "4B5563", valign: "middle" });
+        const pt = fitFont(items.join("\n"), cw - 1.0, h - 1.4 - items.length * 0.15, 18, 10);
+        deck.text(s, items.map((t) => ({ text: t, options: { breakLine: true, bullet: { indent: 14 }, paraSpaceAfter: 10 } })), { x: cx + 0.35, y: TOP + 1.15, w: cw - 0.7, h: h - 1.35, fontSize: pt, color: strong ? INK : "4B5563", valign: "top", lineSpacingMultiple: 1.15 });
+      };
+      col(M, String(cmp.left_title ?? ""), strs(cmp.left_points), false);
+      col(M + cw + gap, String(cmp.right_title ?? ""), strs(cmp.right_points), true);
+      deck.circle(s, M + cw + gap / 2 - 0.36, TOP + (BOTTOM - TOP) / 2 - 0.36, 0.72, color.c, "VS", 14);
+      return true;
+    }
+    case "process": {
+      const steps = Array.isArray(sl.steps) ? (sl.steps as unknown[]).filter(isObj) : [];
+      if (steps.length < 2) return false;
+      deck.nextNotes = notes;
+      deck.timeline(kicker, headline, steps.map((st, i) => ({ mark: pad2(i + 1), head: String(st.title ?? ""), items: st.text ? [String(st.text)] : [] })), color);
+      return true;
+    }
+    case "quote": {
+      const q = isObj(sl.quote) ? sl.quote : null;
+      if (!q || !q.text) return false;
+      deck.nextNotes = [notes, `헤드라인: ${headline}`].filter(Boolean).join("\n\n");
+      deck.statement(kicker, q.source ? `— ${String(q.source)}` : headline, String(q.text), color);
+      return true;
+    }
+    case "photo": {
+      if (!x.photo) return false;
+      deck.nextNotes = notes;
+      deck.photoCover(x.photo, color, headline, points.slice(0, 2).join(" · "), kicker);
+      return true;
+    }
+    case "statement": {
+      deck.nextNotes = [notes, points.length ? `요점:\n${points.map((p) => `- ${p}`).join("\n")}` : ""].filter(Boolean).join("\n\n");
+      deck.statement(kicker, "", headline, color);
+      return true;
+    }
+    default:
+      return false;
+  }
+}
+
 function renderPresentation(deck: Deck, o: Obj, images: Map<string, FetchedImage>) {
   const slides = (o.slides as Obj[]).filter(isObj);
   // One brand accent drives the whole deck when the run chose one.
@@ -955,6 +1083,7 @@ function renderPresentation(deck: Deck, o: Obj, images: Map<string, FetchedImage
     const kicker = pad2(i + 1);
     const photo = imgOf(sl.image_url);
     const short = points.length >= 2 && points.length <= 4 && points.every((p) => p.length <= 70);
+    if (renderLayout(deck, sl, { kicker, headline, points, notes, photo, color, pal, accentHex: `#${pal[0].c}` })) return;
     if (photo) {
       // Claim and points on the left, the slide's photo filling the right
       const s = deck.base(kicker, color);
@@ -1097,13 +1226,14 @@ export async function buildPptx(doc: ExportDoc): Promise<Buffer> {
   const o = isObj(doc.output) ? doc.output : {};
   const isDeck = Array.isArray(o.slides) && (o.slides as unknown[]).some((s) => isObj(s) && ("headline" in s || "points" in s));
   const deckTitle = isDeck && typeof o.title === "string" && o.title ? o.title : doc.title;
+  const deckSubtitle = isDeck && typeof o.subtitle === "string" && o.subtitle ? `${o.subtitle} · ${doc.subtitle}` : doc.subtitle;
   const deck = new Deck(deckTitle);
   const images = await fetchAll(collectImageUrls(o));
   const coverImg = isDeck && typeof o.cover_image_url === "string" ? images.get(o.cover_image_url) : undefined;
   if (coverImg) {
     const accent = typeof o.accent_color === "string" && HEX.test(o.accent_color) ? accentPalette(o.accent_color)[0] : PALETTE[0];
-    deck.photoCover(coverImg, accent, deckTitle, doc.subtitle, doc.title);
-  } else deck.cover(deckTitle, doc.subtitle, isDeck ? doc.title : "해봇 AI");
+    deck.photoCover(coverImg, accent, deckTitle, deckSubtitle, doc.title);
+  } else deck.cover(deckTitle, deckSubtitle, isDeck ? doc.title : "해봇 AI");
 
   const ctx: Ctx = { deck, images, sources: [] };
 

@@ -16,7 +16,7 @@ const MAX_TOKENS_BY_TOOL: Record<string, number> = {
   homepage: 16000, // a full single-file HTML page as one string field
   sangsepage: 16000, // 8-10 long sections, each with real body copy
   blog: 12000, // body_markdown alone can run to the 4000자 option
-  presentation: 12000, // up to 12 slides, each with speaker notes
+  presentation: 32000, // up to 20 slides, each with layout data (charts, tables) and speaker notes
   logo: 10000, // 6 full SVG documents plus specs per concept
   calendar: 10000, // 13 weeks x ~5 tasks — many small repeated objects
   trend: 10000, // up to 8 ideas, each with 8 scores + sources

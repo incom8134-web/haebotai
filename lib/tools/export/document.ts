@@ -3,6 +3,7 @@ import { asCompactPair, formatPrimitive, humanize, isSourceArray, titleKeyOf } f
 import { buildReport } from "../report/index.ts";
 import type { ChartSpec } from "../report/charts.ts";
 import type { Report } from "../report/types.ts";
+import { deckChartSpec, deckPalette, type DeckChart } from "../report/deck.ts";
 
 // One export model for every tool: a run's JSON output becomes an
 // outline of headings, paragraphs, bullet lists and images, which the
@@ -41,6 +42,46 @@ export interface ExportDoc {
   output?: unknown;
   /** Data tools: the report the result page shows, for writers that lay it out natively (pptx). */
   report?: Report;
+}
+
+/** A deck as a document: each slide a section, its layout's data as a chart, table or tiles. */
+export function deckBlocks(o: Record<string, unknown>): Block[] {
+  const out: Block[] = [];
+  const accent = typeof o.accent_color === "string" && /^#[0-9a-f]{6}$/i.test(o.accent_color) ? o.accent_color : "#4D7CFE";
+  const s = (v: unknown) => (typeof v === "string" ? v : "");
+  const list = (v: unknown) => (Array.isArray(v) ? v.map((x) => String(x ?? "")).filter(Boolean) : []);
+  if (s(o.subtitle)) out.push({ type: "paragraph", text: s(o.subtitle) });
+  if (typeof o.cover_image_url === "string") out.push({ type: "image", url: o.cover_image_url });
+  if (s(o.storyline)) out.push({ type: "callout", label: "이야기 흐름", text: s(o.storyline) });
+  (Array.isArray(o.slides) ? o.slides : []).forEach((raw, i) => {
+    if (!raw || typeof raw !== "object") return;
+    const sl = raw as Record<string, unknown>;
+    out.push({ type: "heading", level: 1, text: `${String(i + 1).padStart(2, "0")}. ${s(sl.headline) || s(sl.title) || `슬라이드 ${i + 1}`}` });
+    const stat = sl.stat as Record<string, unknown> | undefined;
+    if (sl.layout === "big_number" && stat?.value) out.push({ type: "kpis", items: [{ label: s(stat.label), value: s(stat.value), note: s(stat.context) || undefined }] });
+    const chart = sl.chart as DeckChart | undefined;
+    const spec = sl.layout === "chart" ? deckChartSpec(chart) : null;
+    if (spec) out.push({ type: "chart", chart: spec, palette: deckPalette(accent), caption: s(chart?.takeaway) || undefined, estimated: chart?.source === "estimate" });
+    const table = sl.table as { header?: unknown; rows?: unknown } | undefined;
+    if (sl.layout === "table" && Array.isArray(table?.rows)) out.push({ type: "table", header: list(table?.header), rows: (table!.rows as unknown[]).map(list) });
+    const cmp = sl.compare as Record<string, unknown> | undefined;
+    if (sl.layout === "comparison" && cmp) {
+      const l = list(cmp.left_points);
+      const r = list(cmp.right_points);
+      out.push({ type: "table", header: [s(cmp.left_title), s(cmp.right_title)], rows: Array.from({ length: Math.max(l.length, r.length) }, (_, k) => [l[k] ?? "", r[k] ?? ""]) });
+    }
+    if (sl.layout === "process" && Array.isArray(sl.steps)) {
+      out.push({ type: "table", header: ["단계", "내용"], rows: (sl.steps as Record<string, unknown>[]).map((st, k) => [`${k + 1}. ${s(st?.title)}`, s(st?.text)]) });
+    }
+    const quote = sl.quote as Record<string, unknown> | undefined;
+    if (sl.layout === "quote" && quote?.text) out.push({ type: "callout", label: s(quote.source) || "인용", text: s(quote.text) });
+    const points = list(sl.points);
+    if (points.length) out.push({ type: "bullets", items: points });
+    if (typeof sl.image_url === "string") out.push({ type: "image", url: sl.image_url });
+    if (s(sl.speaker_notes)) out.push({ type: "field", label: "발표 메모", value: s(sl.speaker_notes) });
+  });
+  if (s(o.closing_ask)) out.push({ type: "heading", level: 1, text: "요청" }, { type: "callout", label: "오늘의 요청", text: s(o.closing_ask) });
+  return out;
 }
 
 /** A report as export blocks: sections become level-1 headings, cards become sub-headings with facts. */
@@ -235,6 +276,8 @@ export function buildExportDoc(params: {
     const converted = reportBlocks(report);
     blocks.push(...converted.blocks);
     sources.push(...converted.sources);
+  } else if (toolId === "presentation" && Array.isArray(o.slides)) {
+    blocks.push(...deckBlocks(o));
   } else {
     for (const [k, v] of Object.entries(o)) walkField(k, v, 1, blocks, sources);
   }

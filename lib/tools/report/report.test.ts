@@ -254,3 +254,28 @@ test("won amounts read in Korean units", () => {
   assert.equal(fmt(22000), "22,000");
   assert.ok(textWidth("가나다", 10) > textWidth("abc", 10));
 });
+
+test("deck slides carry their layout data into charts, tables and tiles", async () => {
+  const { deckBlocks } = await import("../export/document.ts");
+  const { deckChartSpec } = await import("./deck.ts");
+  const bar = deckChartSpec({ kind: "bar", unit: "원", categories: ["평일", "주말"], series: [{ name: "매출", values: [120, 340] }] });
+  assert.equal(bar?.kind, "bar");
+  const donut = deckChartSpec({ kind: "donut", categories: ["A", "B"], series: [{ name: "비중", values: [70, 30] }] });
+  assert.equal(donut?.kind, "donut");
+  assert.equal(deckChartSpec({ kind: "bar", categories: [], series: [] }), null);
+  const blocks = deckBlocks({
+    title: "덱",
+    slides: [
+      { layout: "big_number", headline: "하루 4만 명", points: ["a"], stat: { value: "4만 명", label: "퇴근 인구", context: "성수역" } },
+      { layout: "chart", headline: "주말에 몰린다", points: [], chart: { kind: "bar", unit: "%", categories: ["평일", "주말"], series: [{ name: "비중", values: [30, 70] }], source: "estimate", takeaway: "평일이 빈다" } },
+      { layout: "table", headline: "비교", points: [], table: { header: ["항목", "우리"], rows: [["가격", "6,500원"]] } },
+      { layout: "comparison", headline: "전후", points: [], compare: { left_title: "지금", left_points: ["대기"], right_title: "앞으로", right_points: ["예약"] } },
+      { layout: "quote", headline: "고객", points: [], quote: { text: "늘 품절이에요", source: "단골" } },
+    ],
+    closing_ask: "3,000만 원",
+  });
+  const types = blocks.map((b) => b.type);
+  assert.ok(types.includes("kpis") && types.includes("chart") && types.includes("table") && types.includes("callout"));
+  const chart = blocks.find((b) => b.type === "chart");
+  assert.ok(chart && chart.type === "chart" && chart.estimated);
+});

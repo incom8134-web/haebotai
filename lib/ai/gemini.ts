@@ -1,6 +1,7 @@
 import "server-only";
 import { AsyncLocalStorage } from "node:async_hooks";
-import { GoogleGenAI, ThinkingLevel } from "@google/genai";
+import { createHash } from "node:crypto";
+import { GoogleGenAI, ThinkingLevel, type Part } from "@google/genai";
 import type { BusinessProfile, ToolManifest } from "@/lib/tools/types";
 import type { Source } from "@/lib/tools/registry/shared";
 import { runWithRotation, type KeyRotationState } from "@/lib/tools/quota-rotation";
@@ -63,6 +64,59 @@ export function getClient(): GoogleGenAI {
     client = new GoogleGenAI({ apiKey });
   }
   return client;
+}
+
+// A request to Gemini tops out at 20 MB with everything inline. Reference
+// PDFs can now be up to 30 MB, so whatever doesn't fit in this budget goes
+// through the Files API instead and is referenced by URI. Uploads are
+// cached per API key (a file belongs to the key's project), so the draft,
+// the editor pass and a retry reuse the same upload.
+const INLINE_BUDGET = 14 * 1024 * 1024; // base64 characters
+const stagedFiles = new Map<string, Promise<string>>();
+
+function currentKeyTag(): string {
+  const state = userKeyStore.getStore();
+  const key = state ? state.keys[state.index] : (process.env.GOOGLE_GENAI_API_KEY ?? "");
+  return createHash("sha1").update(key).digest("hex").slice(0, 12);
+}
+
+async function stageFile(part: ImagePart, abortSignal?: AbortSignal): Promise<string> {
+  const id = `${currentKeyTag()}:${createHash("sha1").update(part.data).digest("hex")}`;
+  let pending = stagedFiles.get(id);
+  if (!pending) {
+    const ai = getClient();
+    pending = (async () => {
+      let file = await ai.files.upload({ file: new Blob([Buffer.from(part.data, "base64")], { type: part.mimeType }), config: { mimeType: part.mimeType } });
+      const deadline = Date.now() + 120_000;
+      while (file.state === "PROCESSING" && Date.now() < deadline) {
+        if (abortSignal?.aborted) throw new Error("aborted");
+        await new Promise((r) => setTimeout(r, 2000));
+        file = await ai.files.get({ name: file.name! });
+      }
+      if (file.state !== "ACTIVE" || !file.uri) throw new Error("참고 파일을 모델에 올리지 못했습니다");
+      return file.uri;
+    })();
+    stagedFiles.set(id, pending);
+    pending.catch(() => stagedFiles.delete(id));
+    // Uploaded files expire after 48 h; the cache only needs recent ones.
+    if (stagedFiles.size > 200) stagedFiles.delete(stagedFiles.keys().next().value!);
+  }
+  return pending;
+}
+
+/** Attachments as Gemini parts: inline while they fit, the rest via the Files API. */
+export async function toGeminiParts(parts: ImagePart[], abortSignal?: AbortSignal): Promise<Part[]> {
+  let used = 0;
+  const out: Part[] = [];
+  for (const p of parts) {
+    if (used + p.data.length <= INLINE_BUDGET) {
+      used += p.data.length;
+      out.push({ inlineData: p });
+    } else {
+      out.push({ fileData: { fileUri: await stageFile(p, abortSignal), mimeType: p.mimeType } });
+    }
+  }
+  return out;
 }
 
 export function addUsage(a: TokenUsage, b: { promptTokenCount?: number; candidatesTokenCount?: number } | undefined): TokenUsage {
@@ -540,6 +594,8 @@ async function generateImages(
   };
 }
 
+const DEEP_TOOLS = new Set(["presentation"]);
+
 async function* generateStructured(
   manifest: ToolManifest,
   input: Record<string, unknown>,
@@ -564,11 +620,12 @@ async function* generateStructured(
   }
 
   const jsonSchema = zodToJsonSchema(outputSchemaFor(manifest.id));
+  // Tools where quality is worth the extra tokens and time: full thinking
+  // on the draft and on the editor pass.
+  const deep = DEEP_TOOLS.has(manifest.id) && manifest.model.includes("pro");
 
-  const parts: ({ text: string } | { inlineData: ImagePart })[] = [
-    { text: `다음 정보를 바탕으로 결과를 생성하세요.\n\n${contextText}${groundingBlock}` },
-    ...inputImages.map((img) => ({ inlineData: img })),
-  ];
+  const attachments = await toGeminiParts(inputImages, abortSignal);
+  const parts: Part[] = [{ text: `다음 정보를 바탕으로 결과를 생성하세요.\n\n${contextText}${groundingBlock}` }, ...attachments];
 
   const res = await ai.models.generateContent({
     model: manifest.model,
@@ -577,9 +634,11 @@ async function* generateStructured(
       systemInstruction: buildSystemInstruction(manifest),
       responseMimeType: "application/json",
       responseJsonSchema: jsonSchema,
-      // Long documents (a full homepage, a 90-day strategy) must not be
-      // cut off mid-JSON; the model stops well before this when done.
-      maxOutputTokens: 32_768,
+      // Long documents (a full homepage, a 90-day strategy, a 20-slide
+      // deck) must not be cut off mid-JSON; the model stops well before
+      // this when done.
+      maxOutputTokens: deep ? 65_536 : 32_768,
+      ...(deep ? { thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH } } : {}),
       abortSignal,
     },
   });
@@ -616,7 +675,7 @@ async function* generateStructured(
             role: "user",
             parts: [
               { text: `[입력과 프로필]\n${contextText}${groundingBlock}\n\n[초안]\n${JSON.stringify(parsed.data)}` },
-              ...inputImages.map((img) => ({ inlineData: img })),
+              ...attachments,
             ],
           },
         ],
@@ -624,8 +683,8 @@ async function* generateStructured(
           systemInstruction: buildReviseInstruction(manifest),
           responseMimeType: "application/json",
           responseJsonSchema: jsonSchema,
-          maxOutputTokens: 32_768,
-          ...(manifest.model.includes("pro") ? { thinkingConfig: { thinkingLevel: ThinkingLevel.LOW } } : {}),
+          maxOutputTokens: deep ? 65_536 : 32_768,
+          ...(manifest.model.includes("pro") ? { thinkingConfig: { thinkingLevel: deep ? ThinkingLevel.HIGH : ThinkingLevel.LOW } } : {}),
           abortSignal,
         },
       });
