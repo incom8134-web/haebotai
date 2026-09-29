@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { X } from "lucide-react";
+import { RotateCcw, SquarePen, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -167,9 +167,32 @@ function ToolRunner({
   const [errorMsg, setErrorMsg] = useState<ReturnType<typeof mapRunError> | null>(null);
   const [showCancel, setShowCancel] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+  const formTopRef = useRef<HTMLDivElement | null>(null);
   const runIdRef = useRef<string | null>(null);
 
   if (!manifest) return notFound();
+
+  // After a result: start over with an empty form, or run the same inputs
+  // again for a fresh version (a new creative direction each time).
+  function startNew() {
+    setValues({});
+    setReference(emptyReference(toolId));
+    setFinal(null);
+    setErrorMsg(null);
+    setPhase("idle");
+    formTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  const nextActions = (
+    <div className="flex flex-wrap items-center gap-2">
+      <Button onClick={startNew} className="studio-gradient-bg h-10 rounded-2xl px-4 text-white">
+        <SquarePen className="size-4" aria-hidden /> {L({ ko: "새로 만들기", en: "Start new" })}
+      </Button>
+      <Button variant="secondary" onClick={handleRun} className="h-10 rounded-2xl px-4">
+        <RotateCcw className="size-4" aria-hidden /> {L({ ko: "같은 조건으로 다시 만들기", en: "Run again with the same inputs" })}
+      </Button>
+      <span className="text-2xs text-fg-subtle">{L({ ko: `다시 만들기는 크레딧 ${cost}가 다시 들어요`, en: `Running again uses ${cost} credits` })}</span>
+    </div>
+  );
 
   const profileChips = profile
     ? manifest.usesProfile
@@ -290,7 +313,7 @@ function ToolRunner({
   );
 
   return (
-    <div className="mx-auto max-w-[1240px] px-4 pt-6 pb-10 md:px-6 md:pt-10">
+    <div ref={formTopRef} className="mx-auto max-w-[1240px] scroll-mt-20 px-4 pt-6 pb-10 md:px-6 md:pt-10">
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -457,6 +480,7 @@ function ToolRunner({
 
       {phase === "done" && final ? (
         <div className="mt-6">
+          <div className="mb-3">{nextActions}</div>
           <RunResult
             manifest={manifest}
             input={final.input}
@@ -466,6 +490,10 @@ function ToolRunner({
             runId={final.runId}
             provider={final.provider}
           />
+          <div className="mt-5 glass rounded-[20px] p-4">
+            <p className="mb-2.5 text-sm font-medium">{L({ ko: "다음은 무엇을 할까요?", en: "What next?" })}</p>
+            {nextActions}
+          </div>
         </div>
       ) : null}
 
