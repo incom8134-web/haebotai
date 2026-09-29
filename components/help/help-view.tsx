@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { Clock, Plus, Search, Send } from "lucide-react";
 import { createTicket, type TicketState } from "@/lib/actions/support";
+import { useKeepInputForm } from "@/lib/hooks/use-keep-input-form";
 import { FAQ, FAQ_CATEGORIES, type FaqCategory } from "@/lib/site/faq";
 import { PATCH_NOTES, type NoteKind } from "@/lib/site/patch-notes";
 import { getTool } from "@/lib/tools/registry";
@@ -75,6 +76,7 @@ function Ask({ signedIn, tickets, initialKind, toolId }: { signedIn: boolean; ti
   const { locale } = useLocale();
   const [kind, setKind] = useState<TicketKind>(initialKind);
   const [state, action, pending] = useActionState<TicketState, FormData>(createTicket, null);
+  const [ticketRef, onTicketSubmit] = useKeepInputForm(action, state);
   const tool = toolId ? getTool(toolId) : undefined;
   const fmt = new Intl.DateTimeFormat(locale, { dateStyle: "medium" });
 
@@ -89,7 +91,7 @@ function Ask({ signedIn, tickets, initialKind, toolId }: { signedIn: boolean; ti
             <Link href="/auth?next=/help/contact" className={cn(primaryButton, "mt-4")}>{L({ ko: "로그인", en: "Sign in" })}</Link>
           </div>
         ) : (
-          <form action={action} className="mt-5 space-y-4">
+          <form ref={ticketRef} onSubmit={onTicketSubmit} className="mt-5 space-y-4">
             <Segmented label={L({ ko: "문의 유형", en: "Type" })} value={kind} onChange={setKind} options={(Object.keys(KIND_LABEL) as TicketKind[]).map((k) => ({ value: k, label: L(KIND_LABEL[k]) }))} />
             <input type="hidden" name="kind" value={kind} />
             <input name="subject" required minLength={2} maxLength={120} defaultValue={tool ? `[${locale === "en" ? tool.name_en : tool.name_ko}] ` : ""} className={inputClass} placeholder={L({ ko: "한 줄 요약", en: "One-line summary" })} aria-label={L({ ko: "제목", en: "Subject" })} />

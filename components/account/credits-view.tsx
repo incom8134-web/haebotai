@@ -97,7 +97,7 @@ function CreditsView({ balance, plan, apiKeyConnected, usage }: { balance: numbe
             <h2 className="text-lg font-semibold">{L({ ko: "이번 달 사용", en: "Used this month" })}</h2>
             <p className="font-mono text-xs text-fg-subtle">{L({ ko: `${usage.totalRuns}회 · ${usage.totalCredits} 크레딧`, en: `${usage.totalRuns} runs · ${usage.totalCredits} credits` })}</p>
           </div>
-          <a href="/api/account/usage" className="mt-2 inline-flex items-center gap-1 text-xs text-studio-cyan hover:underline" download>
+          <a href="/api/account/usage" className="mt-2 inline-flex items-center gap-1 text-xs text-studio-cyan hover:underline">
             <Download size={12} aria-hidden /> {L({ ko: "최근 12개월 사용 내역 CSV", en: "Last 12 months as CSV" })}
           </a>
           {usage.byTool.length === 0 ? (
