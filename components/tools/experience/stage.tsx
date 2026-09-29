@@ -22,7 +22,7 @@ function Frame({ children, className }: { children: React.ReactNode; className?:
 }
 
 function Deck({ v }: { v: V }) {
-  const n = Number(str(v.slide_count) || 8);
+  const n = Math.min(30, Math.max(1, parseInt(str(v.slide_count), 10) || 8));
   const bold = v.design_tone === "bold";
   return (
     <Frame>
