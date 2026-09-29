@@ -1,5 +1,7 @@
 "use client";
 
+import { useBi } from "@/lib/i18n/context";
+
 import { Fragment } from "react";
 
 // The blog result as the finished post: cover photo, the chosen title
@@ -53,6 +55,7 @@ function Photo({ slot }: { slot: Slot }) {
 }
 
 export function BlogArticle({ post }: { post: BlogOutput }) {
+  const L = useBi();
   const [title, ...otherTitles] = post.titles ?? [];
   const slots = post.image_slots ?? [];
   const placed = new Set<number>();
@@ -116,7 +119,7 @@ export function BlogArticle({ post }: { post: BlogOutput }) {
         {title ? <h1 className="text-2xl leading-snug font-bold text-fg break-keep md:text-3xl">{title}</h1> : null}
         {post.meta_description ? (
           <p className="mt-3 rounded-xl bg-surface-2/60 p-3 text-sm leading-relaxed text-fg-muted break-keep">
-            <span className="mr-1.5 text-2xs font-semibold text-accent">검색 설명</span>
+            <span className="mr-1.5 text-2xs font-semibold text-accent">{L({ ko: "검색 설명", en: "Meta description" })}</span>
             {post.meta_description}
           </p>
         ) : null}
@@ -139,7 +142,7 @@ export function BlogArticle({ post }: { post: BlogOutput }) {
         ) : null}
         {otherTitles.length ? (
           <div className="mt-5">
-            <p className="text-2xs text-fg-subtle">다른 제목 후보</p>
+            <p className="text-2xs text-fg-subtle">{L({ ko: "다른 제목 후보", en: "Other title options" })}</p>
             <ul className="mt-1.5 flex flex-col gap-1">
               {otherTitles.map((t) => (
                 <li key={t} className="text-sm text-fg break-keep">· {t}</li>
@@ -147,7 +150,7 @@ export function BlogArticle({ post }: { post: BlogOutput }) {
             </ul>
           </div>
         ) : null}
-        {typeof post.char_count === "number" ? <p className="mt-4 font-mono text-2xs text-fg-subtle">본문 {post.char_count.toLocaleString("ko-KR")}자</p> : null}
+        {typeof post.char_count === "number" ? <p className="mt-4 font-mono text-2xs text-fg-subtle">{L({ ko: `본문 ${post.char_count.toLocaleString("ko-KR")}자`, en: `${post.char_count.toLocaleString()} characters` })}</p> : null}
       </div>
     </article>
   );

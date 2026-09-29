@@ -156,7 +156,7 @@ function AppShell({ user, balance, plan, answeredTickets, children }: ShellProps
         <div className="mx-auto flex max-w-[1240px] items-center gap-2">
           <Link href="/studio" className="glass pointer-events-auto flex h-11 items-center gap-2.5 rounded-2xl pr-4 pl-1.5">
             <BrandMark size={32} priority />
-            <span className="hidden text-sm font-bold tracking-[-0.02em] min-[380px]:inline">해봇 AI</span>
+            <span className="hidden text-sm font-bold tracking-[-0.02em] min-[380px]:inline">{L({ ko: "해봇 AI", en: "Haebot AI" })}</span>
           </Link>
           <button
             type="button"

@@ -49,11 +49,18 @@ async function shoot(
   }
 }
 
-async function planJson<T>(system: string, prompt: string, schema: object, abortSignal: AbortSignal | undefined, attachments: Part[] = []): Promise<{ plan: T; usage: TokenUsage }> {
+async function planJson<T>(system: string, prompt: string, schema: object, abortSignal: AbortSignal | undefined, attachments: Part[] = [], model: string = TEXT_MODEL): Promise<{ plan: T; usage: TokenUsage }> {
   const res = await getClient().models.generateContent({
-    model: TEXT_MODEL,
+    model,
     contents: [{ role: "user", parts: [{ text: prompt }, ...attachments] }],
-    config: { systemInstruction: system, responseMimeType: "application/json", responseJsonSchema: schema, maxOutputTokens: 8192, abortSignal },
+    config: {
+      systemInstruction: system,
+      responseMimeType: "application/json",
+      responseJsonSchema: schema,
+      maxOutputTokens: 16_384,
+      ...(model === PRO_TEXT_MODEL ? { thinkingConfig: { thinkingLevel: ThinkingLevel.LOW } } : {}),
+      abortSignal,
+    },
   });
   return { plan: JSON.parse(res.text ?? "{}") as T, usage: addUsage(ZERO, res.usageMetadata) };
 }
@@ -157,7 +164,8 @@ interface SitePlan {
   signature_elements: string[];
   layout_direction: string;
   primary_action: string;
-  sections: { id: string; title: string; goal: string; layout: string }[];
+  sections: { id: string; title: string; goal: string; layout: string; content: string[] }[];
+  interactions: { component: string; where: string; behavior: string }[];
   images: { id: string; ratio: AspectRatio; prompt: string; alt: string; section: string }[];
 }
 
@@ -199,33 +207,55 @@ const SITE_PLAN_SCHEMA = {
           title: { type: "string", description: "섹션 제목 (한국어, 실제 사이트에 쓸 문구)" },
           goal: { type: "string", description: "이 섹션이 방문자에게 하는 일" },
           layout: { type: "string", description: "이 섹션만의 레이아웃 (예: 좌측 대형 사진 + 우측 텍스트, 3열 벤토 그리드, 가로 숫자 띠, 단계 타임라인)" },
+          content: {
+            type: "array",
+            items: { type: "string" },
+            minItems: 3,
+            maxItems: 8,
+            description: "이 섹션에 실제로 들어갈 내용 목록 (한국어): 소제목, 카드별 항목, 버튼 문구, 사진, 입력에서 가져올 사실. 한 줄짜리 섹션이 되지 않게 구체적으로",
+          },
         },
-        required: ["id", "title", "goal", "layout"],
+        required: ["id", "title", "goal", "layout", "content"],
+      },
+    },
+    interactions: {
+      type: "array",
+      minItems: 3,
+      maxItems: 6,
+      description: "방문자가 직접 만지는 인터랙티브 요소 3~6개 — 사이트 목적에 맞게 고르세요: 메뉴·상품 탭/카테고리 필터, 사진 갤러리 + 확대 라이트박스, 사진/후기 캐러셀(좌우 버튼·스와이프), FAQ 아코디언, 스크롤 후 나타나는 고정 예약·주문 바, 예약/문의 폼(문자·이메일로 보내기), 지도 + 주소 복사 버튼, 숫자 카운트업(입력에 있는 숫자만), 전후 비교 슬라이더, 수량·옵션 선택 계산기",
+      items: {
+        type: "object",
+        properties: {
+          component: { type: "string", description: "요소 이름 (영문)" },
+          where: { type: "string", description: "들어갈 섹션 id" },
+          behavior: { type: "string", description: "동작을 구체적으로 (한국어)" },
+        },
+        required: ["component", "where", "behavior"],
       },
     },
     images: {
       type: "array",
-      minItems: 4,
-      maxItems: 4,
-      description: "사이트에 들어갈 사진 4장. 첫 장은 반드시 id 'hero'.",
+      minItems: 7,
+      maxItems: 7,
+      description: "사이트에 들어갈 사진 7장. 첫 장은 반드시 id 'hero'. 나머지는 상품·디테일 클로즈업, 공간·분위기, 만드는 과정·손, 고객이 쓰는 순간(얼굴 없이), 갤러리용 컷 등 서로 다른 장면.",
       items: {
         type: "object",
         properties: {
-          id: { type: "string", enum: ["hero", "photo1", "photo2", "photo3"] },
+          id: { type: "string", enum: ["hero", "photo1", "photo2", "photo3", "photo4", "photo5", "photo6"] },
           ratio: { type: "string", enum: ["16:9", "4:3", "3:4", "1:1"] },
           section: { type: "string", description: "이 사진이 들어갈 섹션 id" },
           alt: { type: "string", description: "대체 텍스트 (한국어)" },
           prompt: {
             type: "string",
             description:
-              "English image prompt like a photo director's brief: the exact subject from THIS business, setting, camera angle and lens, light direction and quality, surface and props, color grade matching the palette, mood, composition. Hero: wide, with calm negative space for a headline. Vary the four shots (hero scene, product detail close-up, space/ambience, hands at work or customer moment — no identifiable faces).",
+              "English image prompt like a photo director's brief: the exact subject from THIS business, setting, camera angle and lens, light direction and quality, surface and props, color grade matching the palette, mood, composition. Hero: wide, with calm negative space for a headline. All seven shots are different scenes with one shared color grade (hero scene, product detail close-ups, space/ambience, hands at work, customer moment — no identifiable faces, no text).",
           },
         },
         required: ["id", "ratio", "section", "alt", "prompt"],
       },
     },
   },
-  required: ["concept", "mood", "palette", "display_font", "body_font", "hero_archetype", "nav_style", "shape_language", "texture", "signature_elements", "layout_direction", "primary_action", "sections", "images"],
+  required: ["concept", "mood", "palette", "display_font", "body_font", "hero_archetype", "nav_style", "shape_language", "texture", "signature_elements", "layout_direction", "primary_action", "sections", "interactions", "images"],
 } as const;
 
 const SITE_BRIEF = `You are the lead designer and front-end engineer at an award-winning Seoul branding studio. You build a complete, production-quality single-file website for a Korean small business, following the art director's plan exactly. The result must look like a real premium brand site (Awwwards / Framer-template quality), never like a generic template.
@@ -240,7 +270,7 @@ STACK — the page must be fully self-contained and render instantly without Jav
 
 ORIGINAL CODE: write this page from scratch for this business. Prefix every class name, id and CSS custom property with the site prefix given below (e.g. .PREFIX-hero, --PREFIX-ink), and do not reproduce any existing template, theme or tutorial markup.
 
-IMAGES: use exactly these placeholders as src/background URLs, each exactly once (never the same photo twice), hero first: {{IMG:hero}}, {{IMG:photo1}}, {{IMG:photo2}}, {{IMG:photo3}}. No other image URLs. Give every <img> its alt text, object-cover, and a sized, rounded container; lazy-load all but the hero.
+IMAGES: use exactly the placeholders listed in the plan's images ({{IMG:hero}}, {{IMG:photo1}} … {{IMG:photo6}}) as src/background URLs, each exactly once (never the same photo twice), hero first. No other image URLs. Give every <img> its alt text, object-cover, and a sized container; lazy-load all but the hero. Photos should be generous and varied in size (full-bleed bands, tall portrait crops, gallery grids), not small thumbnails.
 
 DESIGN — the plan decides the page's skeleton; build exactly what it says, not a default template:
 - Navigation: build the plan's nav_style exactly (it may be a floating pill, an overlay menu, a bottom bar, a side rail or a classic top bar). Whatever it is, it must work on mobile.
@@ -252,9 +282,47 @@ DESIGN — the plan decides the page's skeleton; build exactly what it says, not
 - Mobile-first and flawless from 360px to 1440px (test mentally: nav, hero text size, grids collapsing to one column, no horizontal scroll).
 - Semantic HTML, one h1, meta description, Open Graph title/description, lang="ko", theme-color.
 
-PRICES AND OFFERS (strict): every price, product tier, quantity (stems, grams, minutes, sessions), discount, free gift, guarantee or statistic on the page must appear in the user's input. Do not add extra tiers or sizes to fill a three-card grid — show only the items the user gave (one or two cards is fine), and write [입력 필요] where a detail is missing. The same applies to reviews, awards, certifications, years in business and origins.
+INTERACTION (build every item in the plan's "interactions" for real, with one small vanilla-JS <script> at the end; everything must still be usable without JS):
+- Tabs / category filters switch content with aria-selected and keyboard support; galleries open a lightbox (click to enlarge, next/prev, Esc and backdrop close); carousels have prev/next buttons, dots and touch swipe; the FAQ uses <details>/<summary> with a styled marker; count-up numbers animate once when visible (only numbers from the input).
+- A sticky action bar (booking / order / call) slides in after the hero is scrolled past, and hides near the footer.
+- CONTACT UTILITIES from the user's facts only: tel: links for phone numbers, mailto: for email, a KakaoTalk channel link when a Kakao ID is given, and when an address is given a Google Maps embed (<iframe src="https://www.google.com/maps?q=URL-ENCODED-ADDRESS&output=embed" loading="lazy">) with a "주소 복사" button (navigator.clipboard) and a "길찾기" link. Opening hours shown as a clear table with today highlighted by JS.
+- A booking / inquiry form (name, phone, preferred date/time, message) with inline validation; on submit it composes an SMS (sms:) or email (mailto:) to the business with the filled text — or, if neither is given, shows a friendly message to call or message instead. Never pretend it was sent to a server.
+- Buttons everywhere they make sense: every section ends with a clear next action; primary and secondary button styles, hover/focus/active states, 44px touch targets.
+- Micro-interactions: hover lift on cards, image zoom on hover, animated underline links, scroll progress bar or back-to-top button, smooth anchor scrolling with the sticky header offset.
+
+STRUCTURE (robust layout): <body> is a plain vertical flow — nav/header, <main> with the sections in order, then <footer>. Never make <body> a grid or flex row; a side rail or split layout lives inside one section (or uses position: sticky/fixed), and the footer always spans the full width at the bottom. Each section is full width with its own inner container; nothing may overlap the next section or overflow at 360px.
+
+PURPOSE: a booking site has a real booking form (name, date/time, menu or service, request) that composes an sms:/mailto: message plus a tel: button; a sales site has product cards with a clear order/buy action; a portfolio has a filterable gallery with a lightbox; a landing page repeats one primary call to action at least three times.
+
+CONTENT DEPTH: build each section from the plan's section "content" list — real headings, several items per card grid, supporting copy, captions under photos, and a button. No section is a single sentence. The footer carries the business facts (address, hours, phone, SNS), quick links and the copyright.
+
+PRICES AND OFFERS (strict): every price, product tier, quantity (stems, grams, minutes, sessions), discount, free gift, guarantee or statistic on the page must appear in the user's input. Do not add extra tiers or sizes to fill a three-card grid — show only the items the user gave (one or two cards is fine), and write [입력 필요] where a detail is missing. Never build a statistic, count-up or big-number card around a missing figure — drop that card instead of showing a big "[입력 필요]"; use count-ups only for numbers the user gave. The same applies to reviews, awards, certifications, years in business and origins.
 
 CONTENT: all visible copy in natural, specific Korean written for THIS business — its product, place, customers and the user's own words. Headlines are claims or invitations, not labels. No lorem ipsum, no "여기에 소개글", no English filler. Follow the facts rules below strictly: use the user's contact/address/hours/prices verbatim; anything not given is written as [입력 필요]; never invent reviews, awards, statistics, certifications or origins.`;
+
+const REVIEW_BRIEF = `You are the creative director and senior front-end reviewer at the same studio. A designer handed you the draft page below. Audit it hard against the art director's plan and this checklist, then return the COMPLETE improved HTML document (only the HTML, starting with <!doctype html>):
+1. The hero, navigation, shape language, texture and signature elements match the plan — nothing reads like a generic template.
+2. Every interaction in the plan works (tabs, lightbox, carousel with swipe, accordion, sticky action bar, count-up, form composing sms:/mailto:, map embed with copy-address, today's hours highlight) and degrades gracefully without JS.
+3. Every section has real depth from the plan's content list, a clear next-step button, and a distinct layout; no section is thin or repetitive.
+4. All seven photo placeholders are used exactly once, large and well cropped; no broken or duplicate images.
+5. Typography has strong hierarchy and rhythm; spacing is generous and consistent; colors keep WCAG AA contrast; mobile (360px) and desktop (1440px) both look finished — no overflow, no tiny tap targets.
+6. Structure: <body> is a plain vertical flow (nav, main, footer); no grid/flex on body; the footer spans the full width at the very bottom; no element overlaps another section. The purpose-specific block exists (booking form composing sms:/mailto: for booking, buy actions for sales, filterable gallery for portfolio, repeated CTA for landing).
+7. No stat or count-up card is built around a missing number; remove such cards rather than showing a big [입력 필요].
+8. Facts: keep every real fact from the input exactly; anything missing stays [입력 필요]; no invented prices, reviews, awards or numbers.
+Fix everything you find: rewrite weak copy, strengthen layouts, add what's missing, remove clutter. Keep the same class prefix and the same image placeholders. Do not shorten the page.`;
+
+/** What's wrong with a generated page, if anything (for choosing between drafts). */
+export function pageProblems(html: string, imageIds: string[]): string[] {
+  const problems: string[] = [];
+  if (!/<!doctype html>/i.test(html) || !/<\/html>\s*$/i.test(html.trim())) problems.push("incomplete document");
+  for (const id of imageIds) {
+    const n = html.split(`{{IMG:${id}}}`).length - 1;
+    if (n === 0) problems.push(`missing ${id}`);
+  }
+  if (!/<script[\s>]/i.test(html)) problems.push("no script");
+  if (!/<(button|a)\b/i.test(html)) problems.push("no buttons");
+  return problems;
+}
 
 function fallbackImage(p: SitePlan["palette"]): string {
   const a = HEX.test(p.primary) ? p.primary : "#4D7CFE";
@@ -367,6 +435,7 @@ export async function generateHomepage(
     SITE_PLAN_SCHEMA,
     abortSignal,
     refParts,
+    PRO_TEXT_MODEL,
   );
   usage = sumUsage(usage, planUsage);
 
@@ -385,21 +454,43 @@ export async function generateHomepage(
   const prefix = `h${Math.random().toString(36).slice(2, 5)}`;
   const pagePrompt = `[Art director's plan]\n${JSON.stringify(plan, null, 2)}\n\nSite prefix for every class, id and CSS variable: ${prefix}\n\n[Business input and profile]\n${brief}\n\nBuild the complete site now.`;
 
-  // Photos and the page are made at the same time; the page only needs
-  // the placeholder names.
-  const [page, ...shots] = await Promise.all([
-    writePage(system, pagePrompt, abortSignal, refParts),
-    ...plan.images.map((img) => shoot(img.prompt, img.ratio, img.id, "homepage", storage, abortSignal)),
-  ]);
+  // Photos are made while the page is written and reviewed; the page only
+  // needs the placeholder names.
+  const photos = Promise.all(plan.images.map((img) => shoot(img.prompt, img.ratio, img.id, "homepage", storage, abortSignal)));
+  const page = await writePage(system, pagePrompt, abortSignal, refParts);
   usage = sumUsage(usage, page.usage);
-  shots.forEach((s) => (usage = sumUsage(usage, s.usage)));
-  console.info(`homepage: plan+page+photos in ${Math.round((Date.now() - started) / 1000)}s, photos ${shots.filter((s) => s.url).length}/${shots.length}`);
+  const firstMs = Date.now() - started;
 
-  let html = page.html;
+  // Senior review: a second pass audits the draft against the plan and
+  // the checklist and returns the improved page. Kept only if it is a
+  // complete page that still uses every photo; skipped when the run is
+  // already long.
+  let draft = page.html;
+  if (Date.now() - started < 150_000) {
+    try {
+      const reviewed = await writePage(
+        [REVIEW_BRIEF, "", "[Facts and quality rules from the product]", ...buildBaseInstruction(manifest).slice(1)].join("\n"),
+        `[Art director's plan]\n${JSON.stringify(plan, null, 2)}\n\nSite prefix: ${prefix}\n\n[Business input and profile]\n${brief}\n\n[Draft page to review and improve]\n${draft}`,
+        abortSignal,
+      );
+      usage = sumUsage(usage, reviewed.usage);
+      if (pageProblems(reviewed.html, plan.images.map((i) => i.id)).length === 0 || pageProblems(reviewed.html, plan.images.map((i) => i.id)).length < pageProblems(draft, plan.images.map((i) => i.id)).length) draft = reviewed.html;
+    } catch (err) {
+      if (abortSignal?.aborted) throw err;
+    }
+  }
+  const shots = await photos;
+  shots.forEach((s) => (usage = sumUsage(usage, s.usage)));
+  console.info(`homepage: draft ${Math.round(firstMs / 1000)}s, total ${Math.round((Date.now() - started) / 1000)}s, photos ${shots.filter((s) => s.url).length}/${shots.length}, problems ${JSON.stringify(pageProblems(draft, plan.images.map((i) => i.id)))}`);
+
+  let html = draft;
   // Font links are added here rather than written by the model: exact,
   // widely copied lines like these are what trips the recitation filter.
   const families = [DISPLAY_FONTS[plan.display_font], BODY_FONTS[plan.body_font]].filter((f): f is string => Boolean(f));
-  const fonts = [PRETENDARD_LINK, ...[...new Set(families)].map(fontLinkTag)].join("\n");
+  // Layout guard: a flex or grid <body> puts the footer beside the page
+  // instead of under it, the most common broken layout in drafts.
+  const guard = "<style>html,body{overflow-x:clip}body{display:block!important}body>footer{width:100%}</style>";
+  const fonts = [PRETENDARD_LINK, ...[...new Set(families)].map(fontLinkTag), guard].join("\n");
   html = /<\/head>/i.test(html) ? html.replace(/<\/head>/i, `${fonts}\n</head>`) : html.replace(/<body/i, `<head>${fonts}</head>\n<body`);
   plan.images.forEach((img, i) => {
     const url = shots[i].url;

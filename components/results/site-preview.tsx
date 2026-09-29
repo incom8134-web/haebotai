@@ -1,5 +1,7 @@
 "use client";
 
+import { useBi } from "@/lib/i18n/context";
+
 import { useEffect, useRef, useState } from "react";
 import { ExternalLink, Monitor, Smartphone } from "lucide-react";
 
@@ -17,6 +19,7 @@ interface Design {
 }
 
 export function SitePreview({ html, design }: { html: string; design?: Design }) {
+  const L = useBi();
   const [device, setDevice] = useState<"pc" | "phone">("pc");
   const boxRef = useRef<HTMLDivElement>(null);
   const [boxWidth, setBoxWidth] = useState(0);
@@ -41,7 +44,7 @@ export function SitePreview({ html, design }: { html: string; design?: Design })
     const win = window.open("", "_blank");
     if (!win) return;
     win.opener = null;
-    win.document.title = "홈페이지 미리보기 · 해봇 AI";
+    win.document.title = L({ ko: "홈페이지 미리보기 · 해봇 AI", en: "Website preview · Haebot AI" });
     win.document.body.style.margin = "0";
     const frame = win.document.createElement("iframe");
     frame.setAttribute("sandbox", "allow-scripts");
@@ -66,7 +69,7 @@ export function SitePreview({ html, design }: { html: string; design?: Design })
     <div className="mt-3 flex flex-col gap-3">
       {design?.concept ? (
         <div className="rounded-2xl border border-hairline p-3">
-          <p className="text-2xs text-fg-subtle">디자인 콘셉트</p>
+          <p className="text-2xs text-fg-subtle">{L({ ko: "디자인 콘셉트", en: "Design concept" })}</p>
           <p className="mt-1 text-sm leading-relaxed text-fg break-keep">{design.concept}</p>
           <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5">
             {design.palette?.length ? (
@@ -76,7 +79,7 @@ export function SitePreview({ html, design }: { html: string; design?: Design })
                 ))}
               </span>
             ) : null}
-            {design.display_font ? <span className="text-xs text-fg-muted">제목 서체 {design.display_font}</span> : null}
+            {design.display_font ? <span className="text-xs text-fg-muted">{L({ ko: "제목 서체", en: "Heading font" })} {design.display_font}</span> : null}
             {design.mood?.map((m) => (
               <span key={m} className="rounded-full border border-hairline px-2 py-0.5 text-2xs text-fg-muted">
                 {m}
@@ -89,18 +92,18 @@ export function SitePreview({ html, design }: { html: string; design?: Design })
       <div className="flex items-center justify-between gap-2">
         <div className="flex gap-1 rounded-full border border-hairline p-0.5">
           {toggle("pc", "PC", Monitor)}
-          {toggle("phone", "모바일", Smartphone)}
+          {toggle("phone", L({ ko: "모바일", en: "Mobile" }), Smartphone)}
         </div>
         <button type="button" onClick={openFull} className="inline-flex items-center gap-1 text-xs text-fg-muted hover:text-fg">
           <ExternalLink className="size-3.5" aria-hidden />
-          새 탭에서 크게 보기
+          {L({ ko: "새 탭에서 크게 보기", en: "Open full size in a new tab" })}
         </button>
       </div>
 
       <div ref={boxRef} className="flex justify-center overflow-hidden rounded-2xl border border-hairline bg-surface-2/40" style={{ height: VIEW_H }}>
         {device === "pc" ? (
           <iframe
-            title="생성된 홈페이지 미리보기 (PC)"
+            title={L({ ko: "생성된 홈페이지 미리보기 (PC)", en: "Generated website preview (desktop)" })}
             srcDoc={html}
             sandbox="allow-scripts"
             className="shrink-0 origin-top-left bg-white"
@@ -108,7 +111,7 @@ export function SitePreview({ html, design }: { html: string; design?: Design })
           />
         ) : (
           <iframe
-            title="생성된 홈페이지 미리보기 (모바일)"
+            title={L({ ko: "생성된 홈페이지 미리보기 (모바일)", en: "Generated website preview (mobile)" })}
             srcDoc={html}
             sandbox="allow-scripts"
             className="my-3 w-[390px] max-w-full rounded-[28px] border-4 border-fg/80 bg-white"

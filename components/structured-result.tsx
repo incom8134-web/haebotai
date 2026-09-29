@@ -1,3 +1,6 @@
+"use client";
+
+import { useBi } from "@/lib/i18n/context";
 import type { Source } from "@/lib/tools/registry/shared";
 import { asCompactPair, formatPrimitive, humanize, isSourceArray, titleKeyOf } from "@/lib/tools/output-labels";
 
@@ -23,7 +26,7 @@ import { asCompactPair, formatPrimitive, humanize, isSourceArray, titleKeyOf } f
 
 function DifficultyBar({ value }: { value: number }) {
   return (
-    <span className="inline-flex gap-0.5" aria-label={`난이도 ${value}/5`}>
+    <span className="inline-flex gap-0.5" aria-label={`${value}/5`}>
       {Array.from({ length: 5 }, (_, i) => (
         <span key={i} className={`size-1.5 rounded-full ${i < value ? "bg-accent" : "bg-hairline-str"}`} />
       ))}
@@ -32,14 +35,16 @@ function DifficultyBar({ value }: { value: number }) {
 }
 
 function EstimateBadge() {
+  const L = useBi();
   return (
     <span className="inline-flex items-center rounded-full border border-warn/25 bg-warn/10 px-1.5 py-0.5 text-2xs text-warn">
-      추정
+      {L({ ko: "추정", en: "Estimate" })}
     </span>
   );
 }
 
 function SourceChips({ sources }: { sources: Source[] }) {
+  const L = useBi();
   if (sources.length === 0) return null;
   return (
     <div className="mt-2 flex flex-wrap gap-1.5">
@@ -51,7 +56,7 @@ function SourceChips({ sources }: { sources: Source[] }) {
           rel="noreferrer"
           className="inline-flex items-center gap-1 rounded-full border border-grounded/25 bg-grounded-dim px-2 py-0.5 font-mono text-2xs text-grounded hover:underline"
         >
-          출처 · {s.domain ?? s.title}
+          {L({ ko: "출처", en: "Source" })} · {s.domain ?? s.title}
         </a>
       ))}
     </div>
