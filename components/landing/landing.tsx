@@ -343,10 +343,12 @@ function Landing() {
           <nav className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-fg-muted" aria-label={L({ ko: "바닥글", en: "Footer" })}>
             {[
               ["/tools", { ko: "도구", en: "Tools" }],
+              ["/use-cases", { ko: "활용 사례", en: "Use cases" }],
               ["/help", { ko: "도움말", en: "Help" }],
               ["/help/faq", { ko: "자주 묻는 질문", en: "FAQ" }],
               ["/help/api-guide", { ko: "API 키 설명서", en: "API key manual" }],
               ["/help/whats-new", { ko: "새로운 점", en: "What's new" }],
+              ["/status", { ko: "서비스 상태", en: "Status" }],
               ["/auth", { ko: "로그인", en: "Sign in" }],
             ].map(([href, label]) => <Link key={href as string} href={href as string} className="hover:text-fg">{L(label as { ko: string; en: string })}</Link>)}
           </nav>

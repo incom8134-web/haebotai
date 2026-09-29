@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { motion } from "motion/react";
-import { Gauge, KeyRound, RotateCcw, Timer } from "lucide-react";
+import { Download, Gauge, KeyRound, RotateCcw, Timer } from "lucide-react";
 import { getTool, listTools } from "@/lib/tools/registry";
 import { CATEGORY_LABELS } from "@/lib/tools/registry/categories";
 import { useBi, useLocale } from "@/lib/i18n/context";
 import type { PlanId } from "@/lib/site/plans";
-import type { ToolUsage } from "@/lib/usage";
+import type { OwnKeyUsage, ToolUsage } from "@/lib/usage";
 import { PageHeader } from "@/components/site/page";
 
 // /account/credits — what I have, what each tool costs, what I've used
@@ -15,7 +15,43 @@ import { PageHeader } from "@/components/site/page";
 
 const ALLOWANCE: Record<PlanId, number | null> = { free: 500, pro: 2000, student: null };
 
-function CreditsView({ balance, plan, apiKeyConnected, usage }: { balance: number; plan: PlanId; apiKeyConnected: boolean; usage: { totalRuns: number; totalCredits: number; byTool: ToolUsage[] } }) {
+const PROVIDER_BILLING: Record<string, { name: string; href: string }> = {
+  google: { name: "Google Gemini", href: "https://console.cloud.google.com/billing" },
+  anthropic: { name: "Anthropic (Claude)", href: "https://console.anthropic.com/settings/limits" },
+  openai: { name: "OpenAI", href: "https://platform.openai.com/settings/organization/limits" },
+};
+
+// Own-key runs are billed by the provider, not in credits, so we can't
+// show money — only runs and tokens, plus where to set a spending cap.
+function OwnKeyUsagePanel({ ownKey }: { ownKey: OwnKeyUsage[] }) {
+  const L = useBi();
+  return (
+    <section className="glass mt-6 rounded-[28px] p-6">
+      <h2 className="text-lg font-semibold">{L({ ko: "내 API 키 사용량 (이번 달)", en: "Your own API keys (this month)" })}</h2>
+      <p className="mt-1 text-sm break-keep text-fg-muted">{L({ ko: "이 실행들은 해봇이 아닌 각 제공사에서 직접 청구돼요. 예상치 못한 요금을 막으려면 제공사 콘솔에서 월 예산·한도 알림을 설정하세요.", en: "These runs are billed by each provider, not Haebot. To avoid surprise bills, set a monthly budget or spend limit in the provider's console." })}</p>
+      <ul className="mt-4 divide-y divide-hairline text-sm">
+        {ownKey.map((o) => {
+          const billing = PROVIDER_BILLING[o.provider];
+          return (
+            <li key={o.provider} className="flex flex-wrap items-center justify-between gap-2 py-3">
+              <span className="font-medium">{billing?.name ?? o.provider}</span>
+              <span className="font-mono text-xs text-fg-muted">
+                {L({ ko: `${o.runs}회 · 입력 ${o.inputTokens.toLocaleString()} / 출력 ${o.outputTokens.toLocaleString()} 토큰`, en: `${o.runs} runs · ${o.inputTokens.toLocaleString()} in / ${o.outputTokens.toLocaleString()} out tokens` })}
+              </span>
+              {billing ? (
+                <a href={billing.href} target="_blank" rel="noopener noreferrer" className="text-xs text-studio-cyan hover:underline">
+                  {L({ ko: "예산·한도 설정", en: "Set a budget" })} ↗
+                </a>
+              ) : null}
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
+function CreditsView({ balance, plan, apiKeyConnected, usage }: { balance: number; plan: PlanId; apiKeyConnected: boolean; usage: { totalRuns: number; totalCredits: number; byTool: ToolUsage[]; ownKey: OwnKeyUsage[] } }) {
   const L = useBi();
   const { locale } = useLocale();
   const allowance = ALLOWANCE[plan];
@@ -61,6 +97,9 @@ function CreditsView({ balance, plan, apiKeyConnected, usage }: { balance: numbe
             <h2 className="text-lg font-semibold">{L({ ko: "이번 달 사용", en: "Used this month" })}</h2>
             <p className="font-mono text-xs text-fg-subtle">{L({ ko: `${usage.totalRuns}회 · ${usage.totalCredits} 크레딧`, en: `${usage.totalRuns} runs · ${usage.totalCredits} credits` })}</p>
           </div>
+          <a href="/api/account/usage" className="mt-2 inline-flex items-center gap-1 text-xs text-studio-cyan hover:underline" download>
+            <Download size={12} aria-hidden /> {L({ ko: "최근 12개월 사용 내역 CSV", en: "Last 12 months as CSV" })}
+          </a>
           {usage.byTool.length === 0 ? (
             <p className="mt-6 rounded-2xl border border-dashed border-hairline-str p-8 text-center text-sm text-fg-muted">{L({ ko: "이번 달에는 아직 실행한 도구가 없어요.", en: "No runs yet this month." })}</p>
           ) : (
@@ -83,6 +122,8 @@ function CreditsView({ balance, plan, apiKeyConnected, usage }: { balance: numbe
           )}
         </section>
       </div>
+
+      {usage.ownKey.length > 0 ? <OwnKeyUsagePanel ownKey={usage.ownKey} /> : null}
 
       <section className="mt-8">
         <h2 className="mb-3 text-lg font-semibold">{L({ ko: "도구별 예상 크레딧", en: "Estimated credits per tool" })}</h2>
