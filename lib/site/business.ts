@@ -7,15 +7,15 @@
 export const BUSINESS = {
   serviceName: "해봇 AI",
   /** 상호 (법인명) */
-  companyName: "",
+  companyName: "지니에듀테크 주식회사",
   /** 대표자 */
-  representative: "",
+  representative: "이성웅",
   /** 사업자등록번호 (000-00-00000) */
-  registrationNumber: "",
+  registrationNumber: "528-88-00923",
   /** 통신판매업 신고번호 (제0000-서울00-0000호) */
   mailOrderNumber: "",
   /** 사업장 주소 */
-  address: "",
+  address: "부산광역시 부산진구 엄광로 176, 317호 (가야동, 동의대학교 제1효민생활관)",
   /** 고객센터 전화 */
   phone: "",
   /** 고객센터·개인정보 문의 이메일 */
