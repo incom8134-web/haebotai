@@ -230,10 +230,15 @@ export function referenceModesFor(toolId: string): ReferenceMode[] {
 
 /** What the run page may send; the server re-validates everything. */
 export const REFERENCE_LIMITS = {
-  maxTextChars: 20_000,
-  maxFiles: 5,
-  /** Total upload size, under Vercel's 4.5 MB request body limit once base64-encoded. */
-  maxTotalBytes: 3 * 1024 * 1024,
+  maxTextChars: 50_000,
+  maxFiles: 10,
+  /**
+   * Total upload size. Files go straight from the browser to storage
+   * (Supabase "inputs" bucket, the user's own folder) and the run request
+   * only carries their paths, so this isn't bound by Vercel's 4.5 MB
+   * request body limit.
+   */
+  maxTotalBytes: 30 * 1024 * 1024,
   accept: [".png", ".jpg", ".jpeg", ".webp", ".pdf", ".docx", ".pptx", ".txt", ".md", ".csv", ".html"],
 } as const;
 

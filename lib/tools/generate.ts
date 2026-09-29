@@ -5,7 +5,8 @@ import type { Source } from "./registry/shared";
 import type { AiAdapter, ProviderId, TokenUsage } from "@/lib/ai/types";
 import { generateProductPhotos, geminiAdapter, runWithApiKey as runWithGeminiKey } from "@/lib/ai/gemini";
 import { addPresentationVisuals, addToolVisuals, fillMissingImages, generateHomepage } from "@/lib/ai/gemini-studio";
-import { buildContext, collectInputImages } from "./generate-prompt";
+import { buildContext, collectInputImages, referenceOf } from "./generate-prompt";
+import { guardDeckNumbers } from "./deck-guard";
 import { anthropicAdapter, runWithApiKey as runWithAnthropicKey } from "@/lib/ai/anthropic";
 import { renderSangsepage } from "./render/sangsepage";
 import { orderLike } from "./output-order";
@@ -169,6 +170,13 @@ async function generateWith(
   if (manifest.id === "homepage") {
     const page = output as { html: string };
     output = { ...page, html: fillMissingImages(page.html) };
+  }
+
+  // Big numbers and "from your data" charts must trace back to what the
+  // user gave (checkable only when the material is all text).
+  if (manifest.id === "presentation") {
+    const ref = referenceOf(input);
+    if (!ref || (ref.images.length === 0 && ref.documents.length === 0)) output = guardDeckNumbers(output, buildContext(manifest, input, profile));
   }
 
   // A written deck gets its cover and slide photos and a brand accent

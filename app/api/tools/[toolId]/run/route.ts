@@ -93,7 +93,19 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   // Pasted text and uploaded files from the "참고 자료" panel: validated
   // and turned into text/parts here; the run row keeps only the text and
   // file names, generation gets the whole bundle as input._reference.
-  const reference = await buildReference(manifest.id, rawReference);
+  // Reference files were uploaded straight to the user's own folder of the
+  // "inputs" bucket; read them with the user's session (storage RLS) and
+  // delete them once read.
+  const reference = await buildReference(manifest.id, rawReference, {
+    prefix: `${user.id}/`,
+    download: async (path) => {
+      const { data } = await supabase.storage.from("inputs").download(path);
+      return data ? Buffer.from(await data.arrayBuffer()) : null;
+    },
+    remove: async (paths) => {
+      await supabase.storage.from("inputs").remove(paths);
+    },
+  });
   if (!reference.ok) {
     return Response.json({ error: reference.error }, { status: 400 });
   }
