@@ -17,7 +17,7 @@ import { Segmented } from "@/components/site/page";
 import { ToolForm, type ToolFormValues } from "@/components/tool-form";
 import { RunResult } from "@/components/run-result";
 import { RunProgress } from "@/components/run-progress";
-import { emptyReference, ReferencePanel, type ReferenceValue } from "@/components/tools/reference-panel";
+import { emptyReference, ReferencePanel, uploadReferenceFiles, type ReferenceValue } from "@/components/tools/reference-panel";
 import { getTool } from "@/lib/tools/registry";
 import { CATEGORY_LABELS } from "@/lib/tools/registry/categories";
 import { seedFromChain } from "@/lib/tools/chain";
@@ -194,13 +194,18 @@ function ToolRunner({
       const serialized = await serializeValues(values);
       // "참고 자료": sent beside the form values; the server validates it,
       // reads the documents and keeps only text and file names on the run.
+      let referenceFiles: { name: string; path: string }[] = [];
+      try {
+        referenceFiles = await uploadReferenceFiles(reference.files);
+      } catch (err) {
+        setPhase("error");
+        const msg = err instanceof Error ? err.message : "참고 파일을 올리지 못했습니다";
+        setErrorMsg({ ko: msg, en: "Couldn't upload the reference files. Please try again." });
+        return;
+      }
       const referencePayload =
         reference.text.trim() || reference.files.length
-          ? {
-              mode: reference.mode,
-              text: reference.text,
-              files: await Promise.all(reference.files.map(async (f) => ({ name: f.name, dataUrl: await fileToDataUrl(f) }))),
-            }
+          ? { mode: reference.mode, text: reference.text, files: referenceFiles }
           : undefined;
       const res = await fetch(`/api/tools/${toolId}/run`, {
         method: "POST",

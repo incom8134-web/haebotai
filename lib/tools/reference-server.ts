@@ -6,18 +6,46 @@ import type { ImagePart } from "./generate-prompt.ts";
 // Server side of "참고 자료": validates what the run page sent, turns
 // documents into text the model can read (DOCX paragraphs, PPTX slide by
 // slide, plain text; HTML stripped to its words), and keeps images and
-// PDFs as parts Gemini reads natively. Nothing here is stored raw — the
-// run row keeps only the command, the text and the file names.
+// PDFs as parts Gemini reads natively. Files arrive as paths in the
+// user's own folder of the "inputs" bucket (the browser uploads them
+// directly, up to 30 MB), are read once here and then deleted. Nothing
+// is stored raw — the run row keeps only the command, the text and the
+// file names. Large photos are scaled down to what a model can use.
 
 const referenceSchema = z
   .object({
     mode: z.string().max(40).optional(),
     text: z.string().max(REFERENCE_LIMITS.maxTextChars).optional(),
-    files: z.array(z.object({ name: z.string().max(200), dataUrl: z.string() })).max(REFERENCE_LIMITS.maxFiles).optional(),
+    files: z
+      .array(z.union([z.object({ name: z.string().max(200), path: z.string().max(400) }), z.object({ name: z.string().max(200), dataUrl: z.string() })]))
+      .max(REFERENCE_LIMITS.maxFiles)
+      .optional(),
   })
   .optional();
 
-const MAX_TEXT = 30_000;
+const MAX_TEXT = 80_000;
+/** Longest side a reference photo keeps; plenty for a model to read style and detail. */
+const MAX_IMAGE_SIDE = 2048;
+
+/** Reading a stored upload (and cleaning it up afterwards) — supplied by the route. */
+export interface ReferenceStore {
+  /** Folder every path must sit in: the user's own ("<uid>/"). */
+  prefix: string;
+  download(path: string): Promise<Buffer | null>;
+  remove(paths: string[]): Promise<void>;
+}
+
+/** A photo re-encoded to at most 2048px JPEG when it's bigger than a model needs. */
+export async function shrinkImage(bytes: Buffer, mime: string): Promise<{ data: Buffer; mimeType: string }> {
+  if (bytes.length <= 1.5 * 1024 * 1024) return { data: bytes, mimeType: mime };
+  try {
+    const sharp = (await import("sharp")).default;
+    const data = await sharp(bytes).rotate().resize({ width: MAX_IMAGE_SIDE, height: MAX_IMAGE_SIDE, fit: "inside", withoutEnlargement: true }).jpeg({ quality: 85 }).toBuffer();
+    return { data, mimeType: "image/jpeg" };
+  } catch {
+    return { data: bytes, mimeType: mime };
+  }
+}
 
 const decodeXml = (s: string) =>
   s.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n))).replace(/&amp;/g, "&");
@@ -82,8 +110,23 @@ const EXT_MIME: Record<string, string> = {
 export async function buildReference(
   toolId: string,
   raw: unknown,
+  store?: ReferenceStore,
 ): Promise<{ ok: true; bundle: ReferenceBundle | null } | { ok: false; error: string }> {
   const parsed = referenceSchema.safeParse(raw);
+  const stored = parsed.success ? (parsed.data?.files ?? []).flatMap((f) => ("path" in f ? [f.path] : [])) : [];
+  try {
+    return await readReference(toolId, parsed, store);
+  } finally {
+    // Uploads are read once; never keep the raw files around.
+    if (store && stored.length) await store.remove(stored.filter((p) => p.startsWith(store.prefix))).catch(() => {});
+  }
+}
+
+async function readReference(
+  toolId: string,
+  parsed: ReturnType<typeof referenceSchema.safeParse>,
+  store: ReferenceStore | undefined,
+): Promise<{ ok: true; bundle: ReferenceBundle | null } | { ok: false; error: string }> {
   if (!parsed.success) return { ok: false, error: "참고 자료 형식이 올바르지 않습니다" };
   const ref = parsed.data;
   const pasted = ref?.text?.trim() ?? "";
@@ -98,17 +141,29 @@ export async function buildReference(
   let total = 0;
 
   for (const file of files) {
-    const match = /^data:([^;]*);base64,([A-Za-z0-9+/=\s]*)$/.exec(file.dataUrl);
-    if (!match) return { ok: false, error: `${file.name}: 파일을 읽지 못했습니다` };
     const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
-    const mime = EXT_MIME[ext] ?? match[1];
-    const bytes = Buffer.from(match[2], "base64");
+    let bytes: Buffer;
+    let sentMime = "";
+    if ("path" in file) {
+      if (!store || !file.path.startsWith(store.prefix) || file.path.includes("..")) return { ok: false, error: `${file.name}: 파일을 찾을 수 없습니다` };
+      const got = await store.download(file.path);
+      if (!got) return { ok: false, error: `${file.name}: 올린 파일을 읽지 못했습니다. 다시 올려 주세요` };
+      bytes = got;
+    } else {
+      const match = /^data:([^;]*);base64,([A-Za-z0-9+/=\s]*)$/.exec(file.dataUrl);
+      if (!match) return { ok: false, error: `${file.name}: 파일을 읽지 못했습니다` };
+      sentMime = match[1];
+      bytes = Buffer.from(match[2], "base64");
+    }
+    const mime = EXT_MIME[ext] ?? sentMime;
     total += bytes.length;
-    if (total > REFERENCE_LIMITS.maxTotalBytes) return { ok: false, error: "참고 파일은 합쳐서 3MB까지 올릴 수 있습니다" };
+    if (total > REFERENCE_LIMITS.maxTotalBytes) return { ok: false, error: "참고 파일은 합쳐서 30MB까지 올릴 수 있습니다" };
 
     try {
-      if (mime === "image/png" || mime === "image/jpeg" || mime === "image/webp") images.push({ mimeType: mime, data: match[2] });
-      else if (mime === "application/pdf") documents.push({ mimeType: mime, data: match[2] });
+      if (mime === "image/png" || mime === "image/jpeg" || mime === "image/webp") {
+        const img = await shrinkImage(bytes, mime);
+        images.push({ mimeType: img.mimeType, data: img.data.toString("base64") });
+      } else if (mime === "application/pdf") documents.push({ mimeType: mime, data: bytes.toString("base64") });
       else if (ext === "docx") texts.push(`[파일: ${file.name}]\n${await docxText(bytes)}`);
       else if (ext === "pptx") texts.push(`[파일: ${file.name}]\n${await pptxText(bytes)}`);
       else if (ext === "html" || mime === "text/html") texts.push(`[파일: ${file.name}]\n${htmlText(bytes.toString("utf8"))}`);

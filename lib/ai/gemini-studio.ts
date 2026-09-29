@@ -1,11 +1,11 @@
 import "server-only";
-import { ThinkingLevel } from "@google/genai";
+import { ThinkingLevel, type Part } from "@google/genai";
 import type { BusinessProfile, ToolManifest } from "@/lib/tools/types";
 import type { Source } from "@/lib/tools/registry/shared";
-import { buildBaseInstruction, buildContext, referenceOf, referenceParts, type ImagePart } from "@/lib/tools/generate-prompt";
+import { buildBaseInstruction, buildContext, referenceOf, referenceParts } from "@/lib/tools/generate-prompt";
 import { redactInventedPrices } from "@/lib/tools/price-guard";
 import { extractHtml } from "@/lib/tools/html-extract";
-import { addUsage, generateOneImage, getClient, PRO_IMAGE_MODEL, TEXT_MODEL, type AspectRatio } from "./gemini";
+import { addUsage, generateOneImage, getClient, PRO_IMAGE_MODEL, TEXT_MODEL, toGeminiParts, type AspectRatio } from "./gemini";
 import type { ImageStorageContext, TokenUsage } from "./types";
 
 // The two visual tools, done the way a design studio would: an art
@@ -49,10 +49,10 @@ async function shoot(
   }
 }
 
-async function planJson<T>(system: string, prompt: string, schema: object, abortSignal: AbortSignal | undefined, attachments: ImagePart[] = []): Promise<{ plan: T; usage: TokenUsage }> {
+async function planJson<T>(system: string, prompt: string, schema: object, abortSignal: AbortSignal | undefined, attachments: Part[] = []): Promise<{ plan: T; usage: TokenUsage }> {
   const res = await getClient().models.generateContent({
     model: TEXT_MODEL,
-    contents: [{ role: "user", parts: [{ text: prompt }, ...attachments.map((a) => ({ inlineData: a }))] }],
+    contents: [{ role: "user", parts: [{ text: prompt }, ...attachments] }],
     config: { systemInstruction: system, responseMimeType: "application/json", responseJsonSchema: schema, maxOutputTokens: 8192, abortSignal },
   });
   return { plan: JSON.parse(res.text ?? "{}") as T, usage: addUsage(ZERO, res.usageMetadata) };
@@ -197,7 +197,7 @@ export function fillMissingImages(html: string, palette?: SitePlan["palette"]): 
  * the same time: the first Pro page wins, the backup is used only if
  * both Pro replies were blocked. The run takes as long as one attempt.
  */
-async function writePage(system: string, prompt: string, abortSignal: AbortSignal | undefined, attachments: ImagePart[] = []): Promise<{ html: string; usage: TokenUsage }> {
+async function writePage(system: string, prompt: string, abortSignal: AbortSignal | undefined, attachments: Part[] = []): Promise<{ html: string; usage: TokenUsage }> {
   let usage = ZERO;
   // Losing attempts are cancelled once a page is chosen (or the run is).
   const race = new AbortController();
@@ -206,7 +206,7 @@ async function writePage(system: string, prompt: string, abortSignal: AbortSigna
   const attempt = async (model: string) => {
     const res = await getClient().models.generateContent({
       model,
-      contents: [{ role: "user", parts: [{ text: prompt }, ...attachments.map((a) => ({ inlineData: a }))] }],
+      contents: [{ role: "user", parts: [{ text: prompt }, ...attachments] }],
       config: {
         systemInstruction: system,
         maxOutputTokens: 65_536,
@@ -251,7 +251,7 @@ export async function generateHomepage(
   let usage = ZERO;
   const started = Date.now();
   // "참고 자료" images and PDFs (an old site's screenshot, a brochure).
-  const refParts = referenceParts(input, { documents: true });
+  const refParts = await toGeminiParts(referenceParts(input, { documents: true }), abortSignal);
 
   const { plan, usage: planUsage } = await planJson<SitePlan>(
     [
@@ -333,49 +333,55 @@ interface DeckVisualPlan {
   slide_images: { slide_index: number; prompt: string }[];
 }
 
-const DECK_VISUAL_SCHEMA = {
-  type: "object",
-  properties: {
-    accent_color: { type: "string", description: "덱의 대표 색 HEX 6자리. 브랜드 컬러가 있으면 그것, 없으면 주제와 톤에 맞게. 흰 글씨가 잘 읽히는 진한 색" },
-    cover_prompt: {
-      type: "string",
-      description:
-        "English prompt for the cover background photo: a cinematic, wide scene that captures the deck's core idea for THIS business, with calm dark or blurred areas where a white title will sit on the left. Specific subject, place, light, color grade.",
-    },
-    slide_images: {
-      type: "array",
-      maxItems: 4,
-      description: "사진이 설득력을 더하는 슬라이드만 (표·그래프·숫자가 핵심인 장은 제외). 3~4장.",
-      items: {
-        type: "object",
-        properties: {
-          slide_index: { type: "integer", description: "0부터 시작하는 슬라이드 번호" },
-          prompt: {
-            type: "string",
-            description: "English photo prompt for this slide's claim: specific subject, setting, angle, light, color grade consistent with the cover. Portrait-ish composition. No identifiable faces.",
+const deckVisualSchema = (budget: number) =>
+  ({
+    type: "object",
+    properties: {
+      accent_color: { type: "string", description: "덱의 대표 색 HEX 6자리. 브랜드 컬러가 있으면 그것, 없으면 주제와 톤에 맞게. 흰 글씨가 잘 읽히는 진한 색" },
+      cover_prompt: {
+        type: "string",
+        description:
+          "English prompt for the cover background photo: a cinematic, wide scene that captures the deck's core idea for THIS business, with calm dark or blurred areas where a white title will sit on the left. Specific subject, place, light, color grade.",
+      },
+      slide_images: {
+        type: "array",
+        maxItems: budget,
+        description: `사진이 설득력을 더하는 슬라이드 최대 ${budget}장. layout이 photo인 장은 모두 포함하고, 그다음 statement·quote·points 장에서 고릅니다. chart·table·big_number·comparison·process 장은 제외.`,
+        items: {
+          type: "object",
+          properties: {
+            slide_index: { type: "integer", description: "0부터 시작하는 슬라이드 번호" },
+            prompt: {
+              type: "string",
+              description:
+                "English photo prompt for this slide's claim: specific subject, setting, angle, light, color grade consistent with the cover. Full-bleed landscape for layout 'photo', portrait-ish otherwise. No identifiable faces, no text.",
+            },
           },
+          required: ["slide_index", "prompt"],
         },
-        required: ["slide_index", "prompt"],
       },
     },
-  },
-  required: ["accent_color", "cover_prompt", "slide_images"],
-} as const;
+    required: ["accent_color", "cover_prompt", "slide_images"],
+  }) as const;
 
-/** Cover and slide photos plus a brand accent for a written deck. */
+type DeckSlideLite = { headline: string; points: string[]; visual?: string; layout?: string };
+const NO_PHOTO = new Set(["chart", "table", "big_number", "comparison", "process"]);
+
+/** Cover and slide photos plus a brand accent for a written deck. Longer decks get more photos (up to 8). */
 export async function addPresentationVisuals(
-  deck: { title?: string; storyline?: string; slides: { headline: string; points: string[]; visual?: string }[] } & Record<string, unknown>,
+  deck: { title?: string; storyline?: string; slides: DeckSlideLite[] } & Record<string, unknown>,
   contextText: string,
   abortSignal: AbortSignal | undefined,
   storage: ImageStorageContext,
 ): Promise<{ output: unknown; usage: TokenUsage }> {
   let usage = ZERO;
+  const budget = Math.min(8, Math.max(3, Math.ceil(deck.slides.length / 2.5)));
   let plan: DeckVisualPlan;
   try {
     const r = await planJson<DeckVisualPlan>(
       "당신은 투자 설명회 덱을 만드는 프레젠테이션 아트 디렉터입니다. 덱 전체가 하나의 사진 톤과 색으로 보이도록 표지와 슬라이드 사진을 기획합니다.",
-      `[발표 요청]\n${contextText}\n\n[덱]\n${JSON.stringify({ title: deck.title, storyline: deck.storyline, slides: deck.slides.map((s, i) => ({ index: i, headline: s.headline, visual: s.visual })) })}`,
-      DECK_VISUAL_SCHEMA,
+      `[발표 요청]\n${contextText}\n\n[덱]\n${JSON.stringify({ title: deck.title, storyline: deck.storyline, slides: deck.slides.map((s, i) => ({ index: i, layout: s.layout ?? "points", headline: s.headline, visual: s.visual })) })}`,
+      deckVisualSchema(budget),
       abortSignal,
     );
     plan = r.plan;
@@ -385,13 +391,22 @@ export async function addPresentationVisuals(
     return { output: deck, usage };
   }
 
-  const wanted = plan.slide_images.filter((s) => s.slide_index >= 0 && s.slide_index < deck.slides.length).slice(0, 4);
+  const picked = new Map<number, string>();
+  for (const s of plan.slide_images) {
+    const slide = deck.slides[s.slide_index];
+    if (slide && !NO_PHOTO.has(slide.layout ?? "") && !picked.has(s.slide_index)) picked.set(s.slide_index, s.prompt);
+  }
+  // A photo-layout slide is built around its picture: never leave one without.
+  deck.slides.forEach((s, i) => {
+    if (s.layout === "photo" && !picked.has(i)) picked.set(i, `Editorial documentary photograph, cinematic light, consistent color grade with the rest of the deck: ${s.visual || s.headline}. No text, no identifiable faces.`);
+  });
+  const wanted = [...picked.entries()].slice(0, Math.max(budget, deck.slides.filter((s) => s.layout === "photo").length));
   const [cover, ...shots] = await Promise.all([
     shoot(plan.cover_prompt, "16:9", "cover", "presentation", storage, abortSignal),
-    ...wanted.map((s) => shoot(s.prompt, "3:4", `slide-${s.slide_index + 1}`, "presentation", storage, abortSignal)),
+    ...wanted.map(([i, prompt]) => shoot(prompt, deck.slides[i].layout === "photo" ? "16:9" : "3:4", `slide-${i + 1}`, "presentation", storage, abortSignal)),
   ]);
   [cover, ...shots].forEach((s) => (usage = sumUsage(usage, s.usage)));
-  const bySlide = new Map(wanted.map((s, i) => [s.slide_index, shots[i].url]));
+  const bySlide = new Map(wanted.map(([i], k) => [i, shots[k].url]));
 
   return {
     output: {
