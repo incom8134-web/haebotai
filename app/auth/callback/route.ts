@@ -12,32 +12,30 @@ export async function GET(request: Request) {
   if (code) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
+    // A code that's already been used (refreshing this URL, Back, a second
+    // tab) fails to exchange even though the first exchange signed them
+    // in — go on with the existing session instead of "sign-in failed".
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (error && !user) console.warn("[auth] code exchange failed", error.message);
 
-    if (!error) {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
+    if (user) {
       // Data minimisation: Google sends a profile photo URL with every
       // sign-in; the service never shows or needs it, so drop it from the
       // stored profile (it comes back on the next sign-in and is dropped
-      // again).
-      const meta = user?.user_metadata ?? {};
-      if (user && (meta.avatar_url || meta.picture)) {
-        await createAdminClient()
-          .auth.admin.updateUserById(user.id, { user_metadata: { ...meta, avatar_url: null, picture: null } })
-          .catch((err: unknown) => console.warn("avatar scrub failed", err));
-      }
-
-      const { data: brand } = await supabase
-        .from("brands")
-        .select("id")
-        .eq("user_id", user?.id ?? "")
-        .limit(1)
-        .maybeSingle();
+      // again). Runs alongside the brand lookup so sign-in isn't slower.
+      const meta = user.user_metadata ?? {};
+      const scrub =
+        meta.avatar_url || meta.picture
+          ? createAdminClient()
+              .auth.admin.updateUserById(user.id, { user_metadata: { ...meta, avatar_url: null, picture: null } })
+              .catch((err: unknown) => console.warn("avatar scrub failed", err))
+          : Promise.resolve();
+      const [{ data: brand }] = await Promise.all([supabase.from("brands").select("id").eq("user_id", user.id).limit(1).maybeSingle(), scrub]);
 
       const target = brand ? next : "/brand";
-      if (!hasCurrentConsent(user?.app_metadata)) {
+      if (!hasCurrentConsent(user.app_metadata)) {
         return NextResponse.redirect(`${origin}/auth/consent?next=${encodeURIComponent(target)}`);
       }
       return NextResponse.redirect(`${origin}${target}`);
