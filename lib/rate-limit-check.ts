@@ -28,7 +28,8 @@ export async function checkRateLimit(limiter: Limiter, identifier: string): Prom
     if (success) return { ok: true };
     return { ok: false, retryAfterSeconds: Math.max(1, Math.ceil((reset - Date.now()) / 1000)) };
   } catch (err) {
-    console.error("rate limit check failed, allowing request through:", err);
+    // Stable tag so a log alert (e.g. Vercel log drain / monitor) can match it.
+    console.error("[rate-limit:fail-open] rate limit check failed, allowing request through:", err);
     return { ok: true };
   }
 }

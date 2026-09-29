@@ -165,6 +165,19 @@ export function imageUrl(value: unknown): string | null {
   return null;
 }
 
+// Image URLs come from model-produced JSON, so a prompt-injected URL could
+// point the server-side export fetch at internal hosts. Only our own
+// storage is fetched.
+export function isAllowedImageUrl(url: string, storageOrigin: string | undefined): boolean {
+  if (!storageOrigin) return false;
+  try {
+    const u = new URL(url);
+    return u.protocol === "https:" && u.origin === new URL(storageOrigin).origin && u.pathname.startsWith("/storage/v1/");
+  } catch {
+    return false;
+  }
+}
+
 function walkField(key: string, value: unknown, level: 1 | 2 | 3, out: Block[], sources: Source[]): void {
   if (SKIP_KEYS.has(key) || value === null || value === undefined || value === "") return;
   if (Array.isArray(value) && value.length === 0) return;

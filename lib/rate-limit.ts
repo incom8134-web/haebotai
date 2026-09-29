@@ -55,3 +55,18 @@ export async function limitSensitive(action: string, who: string): Promise<Respo
   const r = await checkRateLimit(sensitiveLimiter, `${action}:${who}`);
   return r.ok ? null : Response.json({ error: "요청이 너무 잦습니다. 잠시 후 다시 시도해주세요." }, { status: 429, headers: { "Retry-After": String(r.retryAfterSeconds ?? 60) } });
 }
+// Checkout order + confirm: a real purchase needs one of each, and confirm
+// calls the Toss API, so a loop here costs external requests.
+export const paymentLimiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(10, "1 m"),
+  prefix: "ratelimit:payment",
+});
+
+// Account deletion walks and deletes every stored file — heavy, and never
+// needed more than once.
+export const accountDeleteLimiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(3, "10 m"),
+  prefix: "ratelimit:account-delete",
+});

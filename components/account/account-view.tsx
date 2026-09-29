@@ -8,7 +8,7 @@ import { PLANS } from "@/lib/site/plans";
 import { requestStudentVerification, type StudentRequestState } from "@/lib/actions/membership";
 import { deleteApiKey, saveApiKey, testApiKey, type ApiKeyActionState } from "@/lib/actions/api-keys";
 import { useBi } from "@/lib/i18n/context";
-import type { Membership } from "@/lib/membership";
+import type { Membership, PaymentRecord } from "@/lib/membership";
 import type { ApiKeyPriority, ApiKeyProvider, ApiKeySlot, ApiKeyStatus } from "@/lib/api-keys";
 import { getToolCapability } from "@/lib/ai/capabilities";
 import { listTools } from "@/lib/tools/registry";
@@ -126,7 +126,9 @@ function AccountOverview({ email, balance, membership, apiKey, brandName, signOu
 
       <ConsentPanel consent={consent} />
 
-      <DeleteAccount balance={balance} />
+      <p className="mt-16 text-right text-2xs text-fg-subtle">
+        <Link href="/account/delete" className="underline-offset-4 hover:text-fg-muted hover:underline">{L({ ko: "회원 탈퇴", en: "Delete account" })}</Link>
+      </p>
     </>
   );
 }
@@ -177,11 +179,11 @@ function ConsentPanel({ consent }: { consent: ConsentState | null }) {
   );
 }
 
-/** 회원 탈퇴: what goes, what the law keeps, then type "탈퇴" to confirm. */
-function DeleteAccount({ balance }: { balance: number | null }) {
+/** 회원 탈퇴 (/account/delete): what goes, what the law keeps, then type "탈퇴" to confirm. */
+function DeleteAccountPanel({ balance }: { balance: number | null }) {
   const L = useBi();
   const router = useRouter();
-  const [open, setOpen] = useState(false);
+  const [understood, setUnderstood] = useState(false);
   const [word, setWord] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -195,45 +197,43 @@ function DeleteAccount({ balance }: { balance: number | null }) {
       router.refresh();
     });
   return (
-    <section className="mt-12 rounded-[24px] border border-danger/30 p-5 md:p-6" aria-labelledby="delete-account">
-      <h2 id="delete-account" className="flex items-center gap-2 font-semibold text-danger">
-        <AlertTriangle size={16} aria-hidden /> {L({ ko: "회원 탈퇴", en: "Delete account" })}
-      </h2>
-      {!open ? (
-        <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm break-keep text-fg-muted">{L({ ko: "계정과 모든 결과물을 지웁니다. 되돌릴 수 없어요.", en: "Deletes your account and every result. This can't be undone." })}</p>
-          <button type="button" onClick={() => setOpen(true)} className={cn(secondaryButton, "h-10 border-danger/40 text-danger hover:bg-danger/10")}>
-            <Trash2 size={14} aria-hidden /> {L({ ko: "탈퇴하기", en: "Delete account" })}
-          </button>
-        </div>
-      ) : (
-        <div className="mt-3 space-y-3 text-sm">
+    <>
+      <PageHeader title={L({ ko: "회원 탈퇴", en: "Delete account" })} lead={L({ ko: "계정과 모든 결과물을 지웁니다. 되돌릴 수 없어요. 아래 내용을 꼭 확인해 주세요.", en: "Deletes your account and every result. This can't be undone — please read the notes below first." })} />
+      <section className="rounded-[24px] border border-danger/30 p-5 md:p-6" aria-labelledby="delete-account">
+        <h2 id="delete-account" className="flex items-center gap-2 font-semibold text-danger dark:text-[#ff6b8b]">
+          <AlertTriangle size={16} aria-hidden /> {L({ ko: "탈퇴 전에 확인하세요", en: "Before you delete" })}
+        </h2>
+        <div className="mt-3 space-y-4 text-sm">
           <ul className="list-disc space-y-1 pl-5 break-keep text-fg-muted">
             <li>{L({ ko: "보관함의 모든 결과물과 파일, 비즈니스 프로필, 등록한 API 키가 바로 삭제됩니다.", en: "All results and files, your business profile and saved API keys are deleted right away." })}</li>
             <li>{L({ ko: `남은 크레딧${balance ? ` ${balance.toLocaleString()}` : ""}은 사라지며 환불되지 않습니다. 결제 후 7일이 지나지 않은 Pro 결제는 탈퇴 전에 고객센터로 환불을 먼저 요청해 주세요.`, en: "Remaining credits are lost and not refunded. For a Pro payment made in the last 7 days, ask customer service for a refund before deleting." })}</li>
             <li>{L({ ko: "결제·계약 기록(5년)과 문의·분쟁 처리 기록(3년)은 전자상거래법에 따라 분리 보관한 뒤 파기합니다.", en: "Payment and contract records (5 years) and complaint records (3 years) are kept separately as the e-commerce law requires, then destroyed." })}</li>
             <li>{L({ ko: "같은 이메일로 다시 가입할 수 있지만, 새 계정으로 시작합니다.", en: "You can sign up again with the same email, as a new account." })}</li>
           </ul>
+          <label className="flex items-start gap-2.5">
+            <input type="checkbox" checked={understood} onChange={(e) => setUnderstood(e.target.checked)} className="mt-0.5 size-4 accent-[var(--color-danger)]" />
+            <span className="break-keep text-fg">{L({ ko: "위 내용을 모두 확인했고, 되돌릴 수 없다는 것을 이해했습니다.", en: "I've read the above and understand this can't be undone." })}</span>
+          </label>
           <label className="block">
             <span className="text-fg">{L({ ko: "확인을 위해 '탈퇴'라고 입력해 주세요", en: "Type 탈퇴 to confirm" })}</span>
-            <input value={word} onChange={(e) => setWord(e.target.value)} className={cn(inputClass, "mt-1.5")} autoComplete="off" />
+            <input value={word} onChange={(e) => setWord(e.target.value)} disabled={!understood} className={cn(inputClass, "mt-1.5 disabled:opacity-50")} autoComplete="off" />
           </label>
           {error ? <p role="alert" className="text-danger">{error}</p> : null}
           <div className="flex flex-wrap gap-2">
-            <button type="button" disabled={word.trim() !== "탈퇴" || pending} onClick={run} className={cn(primaryButton, "h-10 bg-danger text-white disabled:opacity-40")}>
-              {pending ? L({ ko: "삭제하는 중…", en: "Deleting…" }) : L({ ko: "영구 탈퇴", en: "Delete permanently" })}
+            <button type="button" disabled={!understood || word.trim() !== "탈퇴" || pending} onClick={run} className={cn(primaryButton, "h-10 bg-danger bg-none text-white shadow-none hover:shadow-none disabled:opacity-40")}>
+              <Trash2 size={14} aria-hidden /> {pending ? L({ ko: "삭제하는 중…", en: "Deleting…" }) : L({ ko: "영구 탈퇴", en: "Delete permanently" })}
             </button>
-            <button type="button" onClick={() => { setOpen(false); setWord(""); setError(null); }} className={cn(secondaryButton, "h-10")}>
+            <Link href="/account" className={cn(secondaryButton, "h-10")}>
               {L({ ko: "취소", en: "Cancel" })}
-            </button>
+            </Link>
           </div>
         </div>
-      )}
-    </section>
+      </section>
+    </>
   );
 }
 
-function MembershipPanel({ membership }: { membership: Membership }) {
+function MembershipPanel({ membership, payments }: { membership: Membership; payments: PaymentRecord[] }) {
   const L = useBi();
   const [studentState, studentAction, studentPending] = useActionState<StudentRequestState, FormData>(requestStudentVerification, null);
   const request = studentState?.ok ? "pending" : membership.studentRequest;
@@ -291,7 +291,53 @@ function MembershipPanel({ membership }: { membership: Membership }) {
         </div>
       </section>
 
+      {payments.length > 0 ? <PaymentHistory payments={payments} /> : null}
     </>
+  );
+}
+
+const PAYMENT_STATUS: Record<PaymentRecord["status"], { ko: string; en: string }> = {
+  done: { ko: "결제 완료", en: "Paid" },
+  pending: { ko: "확인 중", en: "Confirming" },
+  failed: { ko: "실패", en: "Failed" },
+  canceled: { ko: "취소·환불", en: "Canceled / refunded" },
+};
+
+function PaymentHistory({ payments }: { payments: PaymentRecord[] }) {
+  const L = useBi();
+  return (
+    <section className="mt-8" aria-labelledby="payment-history">
+      <h2 id="payment-history" className="font-semibold">{L({ ko: "결제 내역", en: "Payment history" })}</h2>
+      <div className="glass mt-3 overflow-x-auto rounded-[24px]">
+        <table className="w-full text-sm">
+          <thead className="text-left text-2xs text-fg-subtle">
+            <tr>
+              <th className="px-5 py-3 font-medium">{L({ ko: "날짜", en: "Date" })}</th>
+              <th className="px-5 py-3 font-medium">{L({ ko: "금액", en: "Amount" })}</th>
+              <th className="px-5 py-3 font-medium">{L({ ko: "상태", en: "Status" })}</th>
+              <th className="px-5 py-3 font-medium">{L({ ko: "영수증", en: "Receipt" })}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {payments.map((p) => (
+              <tr key={p.orderId} className="border-t border-hairline">
+                <td className="px-5 py-3 font-mono text-xs whitespace-nowrap">{p.createdAt.slice(0, 10)}</td>
+                <td className="px-5 py-3 font-mono text-xs whitespace-nowrap">₩{p.amount.toLocaleString()}</td>
+                <td className={cn("px-5 py-3 text-xs whitespace-nowrap", p.status === "done" ? "text-studio-success" : p.status === "failed" ? "text-danger" : "text-fg-muted")}>{L(PAYMENT_STATUS[p.status])}</td>
+                <td className="px-5 py-3 text-xs whitespace-nowrap">
+                  {p.receiptUrl ? (
+                    <a href={p.receiptUrl} target="_blank" rel="noopener noreferrer" className="text-studio-cyan hover:underline">{L({ ko: "영수증 보기", en: "View receipt" })}</a>
+                  ) : (
+                    <span className="text-fg-subtle">—</span>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="mt-2 text-2xs break-keep text-fg-subtle">{L({ ko: "영수증은 토스페이먼츠에서 발급해요. 현금영수증·세금계산서가 필요하면 고객센터로 문의해 주세요.", en: "Receipts are issued by Toss Payments. For a cash receipt or tax invoice, contact customer service." })}</p>
+    </section>
   );
 }
 
@@ -390,4 +436,4 @@ function ApiKeyPanel({ apiKey }: { apiKey: ApiKeyStatus }) {
   );
 }
 
-export { AccountOverview, MembershipPanel, ApiKeyPanel };
+export { AccountOverview, DeleteAccountPanel, MembershipPanel, ApiKeyPanel };

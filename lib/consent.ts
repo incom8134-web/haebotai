@@ -65,3 +65,8 @@ export function nextConsentState(prev: ConsentState | null, input: ConsentInput,
     marketing_at: marketingChanged ? now : (prev?.marketing_at ?? now),
   };
 }
+
+/** Same-site relative path, else the Studio. */
+export function safeNext(raw: string | null | undefined): string {
+  return raw && raw.startsWith("/") && !raw.startsWith("//") && !raw.startsWith("/\\") ? raw : "/studio";
+}

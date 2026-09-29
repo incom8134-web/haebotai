@@ -8,10 +8,6 @@
 export const dictionaries = {
   ko: {
     brand: "해봇 AI",
-    login: "로그인",
-    login_google: "Google로 계속하기",
-    login_failed: "로그인에 실패했어요. 다시 시도해 주세요.",
-    logout: "로그아웃",
     library: "보관함",
     library_desc: "최근 실행한 도구 기록입니다.",
     library_empty: "아직 실행한 도구가 없습니다.",
@@ -40,7 +36,6 @@ export const dictionaries = {
     profile_region: "지역",
     profile_weekly_hours: "주당 가용시간",
     profile_budget_band: "예산대",
-    profile_group_basic: "기본 정보",
     profile_group_audience: "타겟 · 톤",
     profile_group_ops: "운영 정보",
     profile_chip_stage: "단계",
@@ -52,7 +47,6 @@ export const dictionaries = {
 
     run: "실행",
     cancel: "취소",
-    running: "실행 중",
     run_failed: "실행에 실패했습니다",
     network_error: "네트워크 오류가 발생했습니다",
     credits_used: "실제",
@@ -64,38 +58,6 @@ export const dictionaries = {
     estimated_credits: "예상",
     seconds: "초",
 
-    landing_eyebrow: "GROUNDED GENERATION",
-    landing_headline_1: "39개의 도구 대신,",
-    landing_headline_2: "하나의 근거 있는 AI",
-    landing_sub:
-      "아이디어 발굴부터 브랜드, 판매, 문서까지 — 18개 도구가 하나의 비즈니스 프로필과 하나의 출처 기준을 공유합니다. 근거 없는 숫자에는 항상 추정 배지가 붙습니다.",
-    landing_cta: "무료로 시작하기",
-    landing_no_card: "카드 등록 없음",
-    landing_proof_placeholder: "[PLACEHOLDER — 로고]",
-    landing_benefit_1_title: "여러 도구 대신, 하나의 앱",
-    landing_benefit_1_body:
-      "아이디어부터 문서까지 18개 도구가 같은 화면, 같은 실행 방식을 씁니다. 도구마다 새로 배울 필요가 없습니다.",
-    landing_benefit_2_title: "모든 도구가 기억합니다",
-    landing_benefit_2_body:
-      "업종, 톤, 타겟 고객을 한 번만 입력하세요. 이후 모든 도구가 자동으로 읽고, 실행마다 다시 묻지 않습니다.",
-    landing_benefit_3_title: "출처 없는 숫자는 없습니다",
-    landing_benefit_3_body:
-      "모든 통계와 시장 수치는 출처 URL을 달거나 추정 배지를 답니다. 확인할 수 없는 숫자는 조용히 넘어가지 않습니다.",
-    landing_how_headline: "시작부터 결과까지, 세 단계",
-    landing_how_1_title: "비즈니스 프로필 한 번 설정",
-    landing_how_1_body:
-      "브랜드명, 업종, 톤, 타겟 고객을 한 번만 입력하세요. 이후 모든 도구가 자동으로 읽습니다.",
-    landing_how_2_title: "18개 도구 중 선택",
-    landing_how_2_body:
-      "⌘K로 검색하거나 카테고리에서 고르세요. 아이디어부터 문서까지, 필요한 도구를 바로 실행합니다.",
-    landing_how_3_title: "출처가 있는 결과 확인",
-    landing_how_3_body:
-      "확인된 숫자는 출처와 함께, 확인되지 않은 숫자는 추정 배지와 함께 나옵니다. 바로 다음 도구로 이어갈 수 있습니다.",
-    landing_final_headline: "지금 시작하세요",
-    landing_final_sub: "회원가입은 30초, 첫 실행까지 1분이면 충분합니다.",
-
-    nav_create: "만들기",
-    nav_brand: "브랜드",
     studio_eyebrow: "마케팅 제작 엔진",
     studio_headline_1: "브리프 하나로,",
     studio_headline_2: "캠페인 전체를.",
@@ -105,7 +67,6 @@ export const dictionaries = {
     studio_brief_hint: "Ctrl + Enter",
     studio_generate: "생성하기",
     studio_opening: "여는 중",
-    studio_profile_missing: "프로필 없음",
     studio_profile_setup: "프로필 설정",
     studio_panel_title: "스튜디오",
     studio_recent: "최근 결과",
@@ -122,10 +83,6 @@ export const dictionaries = {
   },
   en: {
     brand: "해봇 AI",
-    login: "Log in",
-    login_google: "Continue with Google",
-    login_failed: "Sign-in failed. Please try again.",
-    logout: "Log out",
     library: "Library",
     library_desc: "Your recent tool runs.",
     library_empty: "No runs yet.",
@@ -154,7 +111,6 @@ export const dictionaries = {
     profile_region: "Region",
     profile_weekly_hours: "Weekly hours",
     profile_budget_band: "Budget band",
-    profile_group_basic: "Basic info",
     profile_group_audience: "Audience & tone",
     profile_group_ops: "Operations",
     profile_chip_stage: "Stage",
@@ -166,7 +122,6 @@ export const dictionaries = {
 
     run: "Run",
     cancel: "Cancel",
-    running: "Running",
     run_failed: "Run failed",
     network_error: "A network error occurred",
     credits_used: "Used",
@@ -178,38 +133,6 @@ export const dictionaries = {
     estimated_credits: "Est.",
     seconds: "s",
 
-    landing_eyebrow: "GROUNDED GENERATION",
-    landing_headline_1: "Not 39 separate tools —",
-    landing_headline_2: "one grounded AI",
-    landing_sub:
-      "From idea generation to brand, sales, and docs — 18 tools share one Business Profile and one sourcing standard. Unsourced numbers always carry an estimate badge.",
-    landing_cta: "Start free",
-    landing_no_card: "No card required",
-    landing_proof_placeholder: "[PLACEHOLDER — LOGOS]",
-    landing_benefit_1_title: "Many tools, one app",
-    landing_benefit_1_body:
-      "18 tools share one screen and one execution model, from ideas to documents. Nothing new to learn per tool.",
-    landing_benefit_2_title: "Every tool remembers",
-    landing_benefit_2_body:
-      "Enter your industry, tone, and target customer once. Every tool reads it automatically — never asked twice.",
-    landing_benefit_3_title: "No number without a source",
-    landing_benefit_3_body:
-      "Every statistic and market figure carries a source URL or an estimate badge. Unverifiable numbers never pass quietly.",
-    landing_how_headline: "From start to result, three steps",
-    landing_how_1_title: "Set up your Business Profile once",
-    landing_how_1_body:
-      "Enter your brand name, industry, tone, and target customer once. Every tool reads it automatically after that.",
-    landing_how_2_title: "Pick from 18 tools",
-    landing_how_2_body:
-      "Search with ⌘K or browse by category. From ideas to documents, run exactly the tool you need.",
-    landing_how_3_title: "Get a sourced result",
-    landing_how_3_body:
-      "Verified numbers come with a source, unverified ones with an estimate badge. Chain straight into the next tool.",
-    landing_final_headline: "Start now",
-    landing_final_sub: "30 seconds to sign up, one minute to your first run.",
-
-    nav_create: "Create",
-    nav_brand: "Brand",
     studio_eyebrow: "Marketing creation engine",
     studio_headline_1: "One brief.",
     studio_headline_2: "A whole campaign.",
@@ -219,7 +142,6 @@ export const dictionaries = {
     studio_brief_hint: "Ctrl + Enter",
     studio_generate: "Generate",
     studio_opening: "Opening",
-    studio_profile_missing: "No profile",
     studio_profile_setup: "Set up profile",
     studio_panel_title: "Studio",
     studio_recent: "Recent results",

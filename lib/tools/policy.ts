@@ -19,6 +19,7 @@
 // mean the model made it up — scan for that shape and reject.
 
 import { sanitizeSvg } from "./svg.ts";
+import { checkImitation } from "./imitation-guard.ts";
 
 export interface PolicyResult {
   ok: boolean;
@@ -51,6 +52,8 @@ function checkPlacePolicy(input: Record<string, unknown>): PolicyResult {
 
 export function checkToolPolicy(toolId: string, input: Record<string, unknown>): PolicyResult {
   if (toolId === "place") return checkPlacePolicy(input);
+  const imitation = checkImitation(toolId, input);
+  if (imitation) return { ok: false, reason: imitation };
   return { ok: true };
 }
 
