@@ -148,3 +148,21 @@ test("buildImageSystemInstruction still includes brand-model's real-person guard
   const instruction = buildImageSystemInstruction(fakeManifest({ id: "brand-model" }));
   assert.match(instruction, /식별 가능한 특정 인물/);
 });
+
+test("the free request comes last with top priority; presets read as labels, custom values as typed", () => {
+  const m = {
+    id: "presentation",
+    usesProfile: [],
+    inputs: [
+      { kind: "textarea", id: "brief", label: "발표 주제와 목적" },
+      { kind: "select", id: "purpose", label: "목적", options: [{ value: "pitch", label: "제안·피칭" }] },
+      { kind: "select", id: "slide_count", label: "슬라이드 수", options: [{ value: "8", label: "8장" }] },
+      { kind: "textarea", id: "free_request", label: "원하는 대로 자유롭게 요청" },
+    ],
+  } as unknown as ToolManifest;
+  const ctx = buildContext(m, { brief: "투자 제안", purpose: "pitch", slide_count: "18장", free_request: "순서는 그대로 두고 문장만 다듬어 줘" }, null);
+  assert.match(ctx, /목적: 제안·피칭/);
+  assert.match(ctx, /슬라이드 수: 18장/);
+  assert.match(ctx, /\[사용자의 자유 요청 — 가장 우선\]\n순서는 그대로 두고 문장만 다듬어 줘/);
+  assert.ok(ctx.trimEnd().endsWith("사실 규칙은 지키세요."));
+});

@@ -2,6 +2,7 @@
 
 import { useActionState, useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { AlertTriangle, ArrowRight, Check, CircleCheck, CircleGauge, Crown, GraduationCap, KeyRound, LogOut, Trash2 } from "lucide-react";
 import { PLANS } from "@/lib/site/plans";
 import { requestStudentVerification, type StudentRequestState } from "@/lib/actions/membership";
@@ -108,7 +109,65 @@ function AccountOverview({ email, balance, membership, apiKey, brandName, signOu
         ))}
       </div>
       <p className="mt-6 text-sm text-fg-muted">{L(plan.name)} · {brandName ?? L({ ko: "프로필 없음", en: "No profile" })}</p>
+
+      <DeleteAccount balance={balance} />
     </>
+  );
+}
+
+/** 회원 탈퇴: what goes, what the law keeps, then type "탈퇴" to confirm. */
+function DeleteAccount({ balance }: { balance: number | null }) {
+  const L = useBi();
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [word, setWord] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
+  const run = () =>
+    startTransition(async () => {
+      setError(null);
+      const res = await fetch("/api/account/delete", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ confirm: word.trim() }) });
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      if (!res.ok) return setError(data.error ?? "탈퇴를 끝내지 못했습니다");
+      router.replace("/?deleted=1");
+      router.refresh();
+    });
+  return (
+    <section className="mt-12 rounded-[24px] border border-danger/30 p-5 md:p-6" aria-labelledby="delete-account">
+      <h2 id="delete-account" className="flex items-center gap-2 font-semibold text-danger">
+        <AlertTriangle size={16} aria-hidden /> {L({ ko: "회원 탈퇴", en: "Delete account" })}
+      </h2>
+      {!open ? (
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm break-keep text-fg-muted">{L({ ko: "계정과 모든 결과물을 지웁니다. 되돌릴 수 없어요.", en: "Deletes your account and every result. This can't be undone." })}</p>
+          <button type="button" onClick={() => setOpen(true)} className={cn(secondaryButton, "h-10 border-danger/40 text-danger hover:bg-danger/10")}>
+            <Trash2 size={14} aria-hidden /> {L({ ko: "탈퇴하기", en: "Delete account" })}
+          </button>
+        </div>
+      ) : (
+        <div className="mt-3 space-y-3 text-sm">
+          <ul className="list-disc space-y-1 pl-5 break-keep text-fg-muted">
+            <li>{L({ ko: "보관함의 모든 결과물과 파일, 비즈니스 프로필, 등록한 API 키가 바로 삭제됩니다.", en: "All results and files, your business profile and saved API keys are deleted right away." })}</li>
+            <li>{L({ ko: `남은 크레딧${balance ? ` ${balance.toLocaleString()}` : ""}은 사라지며 환불되지 않습니다. 결제 후 7일이 지나지 않은 Pro 결제는 탈퇴 전에 고객센터로 환불을 먼저 요청해 주세요.`, en: "Remaining credits are lost and not refunded. For a Pro payment made in the last 7 days, ask customer service for a refund before deleting." })}</li>
+            <li>{L({ ko: "결제·계약 기록(5년)과 문의·분쟁 처리 기록(3년)은 전자상거래법에 따라 분리 보관한 뒤 파기합니다.", en: "Payment and contract records (5 years) and complaint records (3 years) are kept separately as the e-commerce law requires, then destroyed." })}</li>
+            <li>{L({ ko: "같은 이메일로 다시 가입할 수 있지만, 새 계정으로 시작합니다.", en: "You can sign up again with the same email, as a new account." })}</li>
+          </ul>
+          <label className="block">
+            <span className="text-fg">{L({ ko: "확인을 위해 '탈퇴'라고 입력해 주세요", en: "Type 탈퇴 to confirm" })}</span>
+            <input value={word} onChange={(e) => setWord(e.target.value)} className={cn(inputClass, "mt-1.5")} autoComplete="off" />
+          </label>
+          {error ? <p role="alert" className="text-danger">{error}</p> : null}
+          <div className="flex flex-wrap gap-2">
+            <button type="button" disabled={word.trim() !== "탈퇴" || pending} onClick={run} className={cn(primaryButton, "h-10 bg-danger text-white disabled:opacity-40")}>
+              {pending ? L({ ko: "삭제하는 중…", en: "Deleting…" }) : L({ ko: "영구 탈퇴", en: "Delete permanently" })}
+            </button>
+            <button type="button" onClick={() => { setOpen(false); setWord(""); setError(null); }} className={cn(secondaryButton, "h-10")}>
+              {L({ ko: "취소", en: "Cancel" })}
+            </button>
+          </div>
+        </div>
+      )}
+    </section>
   );
 }
 

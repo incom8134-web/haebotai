@@ -41,6 +41,12 @@ interface ImageStorageContext {
   runId: string;
 }
 
+/** Reference commands that polish the user's own material rather than make something new. */
+const KEEP_STRUCTURE_MODES = new Set(["improve", "seo", "condense"]);
+
+/** Generation must finish by this point of the 300 s run (the route stops at 285 s). */
+const PHOTO_DEADLINE_MS = 250_000;
+
 export async function generateOutput(
   manifest: ToolManifest,
   input: Record<string, unknown>,
@@ -66,7 +72,10 @@ export async function generateOutput(
   // A creative direction this user hasn't had in their recent runs of the
   // tool (lib/tools/directions.ts): every prompt below commits to it, and
   // the result records it so the next run rotates to another.
-  const direction = pickDirection(manifest.id, await recentDirections(storage, manifest.id));
+  // Not when the user asked to keep their own material's structure and
+  // only polish it: a creative direction would rebuild it.
+  const keepStructure = KEEP_STRUCTURE_MODES.has(referenceOf(input)?.mode.id ?? "");
+  const direction = keepStructure ? null : pickDirection(manifest.id, await recentDirections(storage, manifest.id));
   if (direction) input = { ...input, _direction: direction };
   const result = await generateWith(manifest, input, profile, abortSignal, storage, provider, adapter);
   return direction ? { ...result, output: { ...(result.output as Record<string, unknown>), creative_direction: { id: direction.id, name: direction.name } } } : result;
@@ -93,7 +102,7 @@ async function generateWith(
   provider: ProviderId,
   adapter: AiAdapter,
 ): Promise<{ output: unknown; sources: Source[]; usage: TokenUsage }> {
-
+  const started = Date.now();
   if (manifest.id === "image" || manifest.id === "brand-model" || manifest.id === "logo") {
     const images = await adapter.generateImages(manifest, input, profile, abortSignal, storage);
     return { ...images, output: orderLike(outputSchemaFor(manifest.id), images.output) };
@@ -181,18 +190,32 @@ async function generateWith(
 
   // A written deck gets its cover and slide photos and a brand accent
   // (Gemini only, like every other platform-paid image).
-  if (manifest.id === "presentation" && provider === "google") {
-    const visuals = await addPresentationVisuals(
-      output as Parameters<typeof addPresentationVisuals>[0],
-      buildContext(manifest, input, profile),
-      abortSignal,
-      storage,
-    );
-    output = visuals.output;
-    usage = {
-      inputTokens: (usage.inputTokens ?? 0) + (visuals.usage.inputTokens ?? 0),
-      outputTokens: (usage.outputTokens ?? 0) + (visuals.usage.outputTokens ?? 0),
-    };
+  // Photos get only the time left in the run: a long deck that took most
+  // of it is delivered without slide photos rather than cut off.
+  const remaining = PHOTO_DEADLINE_MS - (Date.now() - started);
+  if (manifest.id === "presentation" && provider === "google" && remaining > 45_000) {
+    const budget = new AbortController();
+    const stop = () => budget.abort();
+    abortSignal?.addEventListener("abort", stop);
+    const timer = setTimeout(stop, remaining);
+    try {
+      const visuals = await addPresentationVisuals(
+        output as Parameters<typeof addPresentationVisuals>[0],
+        buildContext(manifest, input, profile),
+        budget.signal,
+        storage,
+      );
+      output = visuals.output;
+      usage = {
+        inputTokens: (usage.inputTokens ?? 0) + (visuals.usage.inputTokens ?? 0),
+        outputTokens: (usage.outputTokens ?? 0) + (visuals.usage.outputTokens ?? 0),
+      };
+    } catch (err) {
+      if (abortSignal?.aborted) throw err;
+    } finally {
+      clearTimeout(timer);
+      abortSignal?.removeEventListener("abort", stop);
+    }
   }
 
   // Blog photos, campaign ad visuals, strategy mood board (Gemini only).

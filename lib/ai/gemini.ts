@@ -684,7 +684,9 @@ async function* generateStructured(
           responseMimeType: "application/json",
           responseJsonSchema: jsonSchema,
           maxOutputTokens: deep ? 65_536 : 32_768,
-          ...(manifest.model.includes("pro") ? { thinkingConfig: { thinkingLevel: deep ? ThinkingLevel.HIGH : ThinkingLevel.LOW } } : {}),
+          // Long decks keep full thinking on the draft but a lighter
+          // editor pass, so 15-20 slides plus photos fit the run's time.
+          ...(manifest.model.includes("pro") ? { thinkingConfig: { thinkingLevel: deep && (parseInt(String(input.slide_count ?? ""), 10) || 0) < 15 ? ThinkingLevel.HIGH : ThinkingLevel.LOW } } : {}),
           abortSignal,
         },
       });
