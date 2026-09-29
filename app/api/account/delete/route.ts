@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { limitSensitive } from "@/lib/rate-limit";
 
 // Self-serve account deletion (회원 탈퇴). Deletes everything personal —
 // results, business profile, API keys, remaining credits, student
@@ -11,7 +12,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // See lib/site/legal.ts (개인정보 처리방침 — 보유 기간).
 
 const CONFIRM_WORD = "탈퇴";
-const BUCKETS = ["inputs", "exports", "logos"];
+const BUCKETS = ["inputs", "exports", "logos", "consents"];
 
 type Admin = ReturnType<typeof createAdminClient>;
 
@@ -39,6 +40,8 @@ export async function POST(request: Request) {
   } = await supabase.auth.getUser();
   if (!user) return Response.json({ error: "로그인이 필요합니다" }, { status: 401 });
 
+  const limited = await limitSensitive("delete", user.id);
+  if (limited) return limited;
   const body = (await request.json().catch(() => ({}))) as { confirm?: unknown };
   if (body.confirm !== CONFIRM_WORD) return Response.json({ error: `확인을 위해 '${CONFIRM_WORD}'를 입력해 주세요` }, { status: 400 });
 

@@ -30,6 +30,7 @@ const MESSAGES: Record<string, { ko: string; en: string }> = {
   body_length: { ko: "내용을 5자 이상 적어 주세요.", en: "Please write at least 5 characters." },
   time_required: { ko: "원격 지원은 가능한 시간을 적어 주세요.", en: "Remote help needs a time that works for you." },
   signed_out: { ko: "로그인 후 보낼 수 있어요.", en: "Sign in to send." },
+  rate_limited: { ko: "요청이 너무 잦아요. 잠시 후 다시 시도해 주세요.", en: "Too many requests — try again in a few minutes." },
 };
 const NOTE: Record<NoteKind, { label: { ko: string; en: string }; className: string }> = {
   new: { label: { ko: "새 기능", en: "New" }, className: "bg-studio-cyan/15 text-studio-cyan" },

@@ -10,6 +10,7 @@ import { LocaleProvider } from "@/lib/i18n/context";
 // whole 2MB font (which made every page slow on phones).
 import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 import "./globals.css";
+import { CookieNotice } from "@/components/site/cookie-notice";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,7 +33,7 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   title: "해봇 AI",
   description:
-    "Grounded AI marketing and business tools — every claim cites the fact it was built from.",
+    "AI marketing and business tools for small businesses, built on your own facts — researched claims come with their sources.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -47,6 +48,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <LocaleProvider>
             <MotionConfig reducedMotion="user">{children}</MotionConfig>
             <Toaster />
+            <CookieNotice />
           </LocaleProvider>
         </ThemeProvider>
       </body>

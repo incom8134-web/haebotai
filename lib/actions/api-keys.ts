@@ -6,6 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { env } from "@/lib/env";
 import { looksLikeAnthropicKey, looksLikeGoogleKey, looksLikeOpenAIKey, seal } from "@/lib/crypto/secret-box";
 import { getUserApiKeySlot, verifyAnthropicKey, verifyGoogleKey, verifyOpenAIKey, type ApiKeyPriority, type ApiKeyProvider } from "@/lib/api-keys";
+import { limitSensitive } from "@/lib/rate-limit";
 
 export type ApiKeyActionState = { ok: boolean; message: string } | null;
 
@@ -68,6 +69,11 @@ export async function deleteApiKey(provider: ApiKeyProvider, priority: ApiKeyPri
 }
 
 export async function testApiKey(provider: ApiKeyProvider, priority: ApiKeyPriority): Promise<ApiKeyActionState> {
+  const {
+    data: { user: caller },
+  } = await (await createClient()).auth.getUser();
+  if (!caller) return { ok: false, message: "signed_out" };
+  if (await limitSensitive("key-test", caller.id)) return { ok: false, message: "rate_limited" };
   const key = await getUserApiKeySlot(provider, priority);
   if (!key) return { ok: false, message: "no_key" };
   const valid = await CHECKS[provider].verify(key);

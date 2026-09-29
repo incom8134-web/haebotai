@@ -12,6 +12,8 @@ export const PLANS: { id: PlanId; name: Bilingual; price: Bilingual; note: Bilin
     features: [
       { ko: "18개 도구 모두 사용", en: "All 18 tools" },
       { ko: "비즈니스 프로필·보관함", en: "Business Profile and Library" },
+      { ko: "모든 형식 내보내기 (PDF·Word·PPT·Markdown 등)", en: "Every export format (PDF, Word, PPT, Markdown…)" },
+      { ko: "내 API 키를 등록하면 크레딧 미차감", en: "No credits charged with your own API key" },
       { ko: "출처 패널과 추정 배지", en: "Sources panel and estimate badges" },
     ],
   },
@@ -23,9 +25,9 @@ export const PLANS: { id: PlanId; name: Bilingual; price: Bilingual; note: Bilin
     credits: { ko: "결제마다 2,000 크레딧", en: "2,000 credits per purchase" },
     features: [
       { ko: "무료 플랜의 모든 기능", en: "Everything in Free" },
-      { ko: "모든 형식 내보내기 (docx·xlsx·ics·SVG·ZIP)", en: "All exports (docx, xlsx, ics, SVG, ZIP)" },
-      { ko: "우선 처리와 1:1 문의 24시간 내 답변", en: "Priority runs and 24-hour support replies" },
-      { ko: "내 API 키 사용 시 크레딧 미차감", en: "No credits charged with your own API key" },
+      { ko: "결제마다 크레딧 2,000 추가 · 유효기간 없음", en: "2,000 more credits per purchase · they never expire" },
+      { ko: "자동 결제 없음 — 필요할 때만 30일 연장", en: "No auto-renewal — extend 30 days only when you want" },
+      { ko: "결제 후 7일 안에 쓰지 않았다면 전액 환불", en: "Full refund within 7 days if unused" },
     ],
     highlight: true,
   },
