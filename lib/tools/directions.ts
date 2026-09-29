@@ -1,0 +1,167 @@
+// Creative directions: why two runs of the same tool no longer look
+// alike. Each creative tool has a pool of genuinely different approaches
+// (a site's layout archetype, a deck's story framework, an ad framework,
+// a blog format, a strategic lens, a logo or photo aesthetic). Every run
+// takes one this user hasn't seen in their recent runs of the tool, the
+// prompt is told to commit to it, and the result records it — so the
+// rotation continues and the user sees which direction they got.
+
+export interface Direction {
+  id: string;
+  /** Shown on the result: "이번 방향". */
+  name: string;
+  /** Added to the prompt. */
+  brief: string;
+}
+
+export const DIRECTIONS: Record<string, Direction[]> = {
+  homepage: [
+    { id: "editorial", name: "에디토리얼 매거진", brief: "잡지 같은 에디토리얼 레이아웃: 큰 세리프 헤드라인, 비대칭 그리드, 번호와 캡션이 붙은 사진, 절제된 흑백 톤에 포인트 컬러 하나." },
+    { id: "immersive", name: "풀스크린 몰입형", brief: "섹션마다 화면을 가득 채우는 사진과 그 위에 얹힌 짧은 문장. 시네마틱한 어두운 오버레이, 스크롤할 때마다 장면이 바뀌는 느낌." },
+    { id: "swiss", name: "스위스 미니멀 그리드", brief: "엄격한 12열 그리드, 넉넉한 여백, 굵은 산세리프와 가는 선, 숫자와 표로 정보를 구조화하는 정보 디자인 스타일. 장식 최소화." },
+    { id: "bento", name: "벤토 그리드", brief: "크기가 서로 다른 카드 타일(벤토 박스)로 정보를 배치하는 모던 레이아웃. 둥근 모서리, 부드러운 그림자, 카드마다 한 가지 메시지." },
+    { id: "colorblock", name: "대담한 컬러 블록", brief: "섹션마다 강한 단색 배경이 교차하는 에너지 있는 구성. 초대형 타이포, 높은 대비, 과감한 크기 대비." },
+    { id: "organic", name: "따뜻한 오가닉", brief: "종이·린넨 같은 질감의 따뜻한 배경, 둥근 형태와 곡선 구분선, 자연 톤 팔레트, 손으로 만든 듯한 포인트 요소." },
+    { id: "dark-luxe", name: "다크 럭셔리", brief: "깊은 어두운 배경에 금속·보석 톤 포인트, 절제된 세리프와 넓은 자간, 여백이 많은 고급스러운 호흡." },
+    { id: "story-scroll", name: "스토리 스크롤", brief: "처음부터 끝까지 하나의 이야기처럼 이어지는 세로 흐름. 단계 번호, 타임라인, 장면 전환이 있는 내러티브 구성." },
+    { id: "playful", name: "플레이풀 스티커", brief: "경쾌한 색, 살짝 기울어진 카드, 스티커 같은 배지와 말풍선, 둥근 산세리프. 친근하고 재미있는 동네 브랜드 톤." },
+  ],
+  presentation: [
+    { id: "scqa", name: "SCQA 구조", brief: "상황(Situation) → 문제(Complication) → 질문(Question) → 답(Answer) 순서로 설득하는 컨설팅식 구조. 사진은 차분한 다큐멘터리 톤." },
+    { id: "problem-solution", name: "문제 → 해결 → 증거", brief: "청중의 문제를 생생하게 보여 주고, 해결책, 그 해결책이 통한다는 증거, 요청 순서로. 사진은 밝은 자연광." },
+    { id: "bab", name: "Before · After · Bridge", brief: "지금의 불편한 현실(Before), 바뀐 뒤의 모습(After), 그 사이를 잇는 방법(Bridge)으로 대비를 극대화. 사진은 대비가 강한 시네마틱 톤." },
+    { id: "data-story", name: "숫자 하나씩", brief: "장마다 핵심 숫자 하나를 크게 내세우고 그 숫자의 의미를 설명하는 데이터 스토리텔링. 입력에 없는 수치는 [확인 필요]. 사진은 미니멀하고 그래픽적인 톤." },
+    { id: "journey", name: "고객 여정", brief: "한 고객의 하루나 구매 여정을 따라가며 각 장면에서 문제와 기회를 보여 주는 구성. 사진은 사람의 손과 장면이 있는 라이프스타일 톤." },
+    { id: "three-act", name: "3막 구조", brief: "설정 → 갈등 → 해결의 이야기 구조. 첫 장에서 긴장을 만들고 마지막에 요청으로 해소. 사진은 영화 스틸 같은 톤." },
+    { id: "objections", name: "의심 먼저 풀기", brief: "청중이 품을 의심 3가지를 먼저 꺼내고 하나씩 근거로 해소한 뒤 결론으로 가는 구성. 사진은 신뢰감 있는 깨끗한 톤." },
+  ],
+  copy: [
+    { id: "pas", name: "PAS (문제·자극·해결)", brief: "문제를 짚고(Problem), 그 불편을 한 번 더 느끼게 한 뒤(Agitate), 해결책을 제시(Solution)하는 구조로 각도마다 씁니다." },
+    { id: "scene", name: "한 장면 스토리", brief: "각 광고를 고객의 구체적인 한 장면(시간, 장소, 행동)으로 시작해, 그 장면의 끝에서 제품이 등장하게 씁니다." },
+    { id: "numbers", name: "숫자·팩트 중심", brief: "헤드라인마다 입력에 있는 구체적인 숫자나 사실(시간, 수량, 가격, 거리)을 앞세웁니다. 없는 숫자는 만들지 않습니다." },
+    { id: "talk", name: "친구에게 말하듯", brief: "광고 같지 않은 대화체. 단골에게 문자 보내듯, 말하는 사람이 느껴지는 문장으로 씁니다." },
+    { id: "contrast", name: "대비와 반전", brief: "고객이 예상하는 것과 실제를 대비시키거나, 첫 문장에서 반전을 주는 훅으로 시작합니다." },
+    { id: "question", name: "질문으로 여는 훅", brief: "고객이 속으로 하고 있는 질문을 헤드라인으로 던지고, 본문에서 바로 답합니다." },
+    { id: "4u", name: "4U (유용·긴급·고유·구체)", brief: "모든 헤드라인이 유용하고(Useful), 긴급하고(Urgent), 고유하고(Unique), 구체적인지(Ultra-specific) 스스로 점검하며 씁니다." },
+  ],
+  blog: [
+    { id: "diary", name: "체험 일기형", brief: "직접 가 본 날의 흐름(도착 → 주문 → 맛·경험 → 나올 때)을 따라가는 일기 같은 구성." },
+    { id: "listicle", name: "리스트 N선형", brief: "읽는 사람이 바로 쓸 수 있는 번호 목록(이유 N가지, 꿀팁 N개)으로 구성하고, 항목마다 구체적인 근거를 붙입니다." },
+    { id: "qa", name: "Q&A 형식", brief: "검색하는 사람이 실제로 묻는 질문들을 소제목으로 삼아 하나씩 답하는 구성." },
+    { id: "compare", name: "비교 분석형", brief: "다른 선택지(대안, 경쟁 유형)와 기준별로 비교해 어떤 사람에게 무엇이 맞는지 판단을 돕는 구성. 비교표 형태의 문단 포함." },
+    { id: "route", name: "동선 가이드형", brief: "방문 전 준비 → 가는 길 → 현장 → 근처 코스로 이어지는 실용 가이드 구성." },
+    { id: "behind", name: "비하인드 스토리형", brief: "만드는 과정, 재료, 만드는 사람의 이야기를 중심으로 브랜드를 소개하는 구성." },
+    { id: "season", name: "계절·상황 제안형", brief: "지금 이 계절·상황(퇴근길, 비 오는 날, 기념일)에 왜 이것이 필요한지 제안하는 구성." },
+  ],
+  strategy: [
+    { id: "category", name: "카테고리 재정의", brief: "기존 카테고리에서 경쟁하지 말고, 이 가게가 1등이 될 수 있는 새로운 카테고리 이름과 기준을 만드는 렌즈로 전략을 짭니다." },
+    { id: "enemy", name: "공공의 적 설정", brief: "고객이 싫어하는 관행·불편(적)을 하나 정하고, 브랜드가 그 적과 싸우는 이야기로 포지셔닝과 캠페인을 짭니다." },
+    { id: "ritual", name: "리추얼 만들기", brief: "고객이 반복하게 되는 작은 의식(시간, 방식, 말)을 설계하고, 그 리추얼을 중심으로 오퍼와 콘텐츠를 짭니다." },
+    { id: "community", name: "단골 커뮤니티", brief: "단골을 하나의 클럽처럼 묶는 방법(이름, 혜택, 모임, 참여)을 중심으로 재방문 전략을 짭니다." },
+    { id: "local", name: "로컬 정체성", brief: "이 동네·지역의 정체성과 이야기를 브랜드의 핵심 자산으로 삼는 렌즈로 전략을 짭니다." },
+    { id: "scarcity", name: "한정의 경제학", brief: "수량·시간·시즌의 한정을 설계해 기다림과 긴급성을 만드는 렌즈로 오퍼와 캠페인을 짭니다." },
+    { id: "founder", name: "만드는 사람 브랜드", brief: "대표·장인의 관점과 원칙을 브랜드의 목소리로 내세우는 렌즈로 콘텐츠와 포지셔닝을 짭니다." },
+  ],
+  sangsepage: [
+    { id: "problem", name: "고민 해결형", brief: "고객의 고민에서 시작해 제품이 그 고민을 하나씩 해결하는 흐름으로 섹션을 구성합니다." },
+    { id: "making", name: "제작 스토리형", brief: "원재료와 만드는 과정을 따라가며 품질을 보여 주는 흐름으로 섹션을 구성합니다." },
+    { id: "scene", name: "사용 장면형", brief: "고객이 제품을 받고, 열고, 쓰는 장면을 순서대로 보여 주는 흐름으로 섹션을 구성합니다." },
+    { id: "gift", name: "선물 제안형", brief: "누구에게, 어떤 날 선물하면 좋은지 상황별로 제안하는 흐름으로 섹션을 구성합니다." },
+    { id: "compare", name: "비교 우위형", brief: "일반 제품과 무엇이 다른지 기준별로 비교하는 흐름으로 섹션을 구성합니다. 경쟁사를 비방하거나 없는 수치를 만들지 않습니다." },
+  ],
+  logo: [
+    { id: "geometric", name: "미니멀 기하학", brief: "원·사각·선 같은 기본 도형만으로 만든 미니멀한 기하학 마크 계열로 네 콘셉트를 변주합니다." },
+    { id: "organic", name: "손그림 오가닉", brief: "손으로 그린 듯한 유기적인 선과 따뜻한 불완전함이 있는 계열로 네 콘셉트를 변주합니다." },
+    { id: "retro", name: "레트로 배지", brief: "빈티지 배지·스탬프·엠블럼 계열의 클래식한 인상으로 네 콘셉트를 변주합니다." },
+    { id: "negative", name: "네거티브 스페이스", brief: "여백 속에 두 번째 의미가 숨어 있는 위트 있는 네거티브 스페이스 계열로 네 콘셉트를 변주합니다." },
+    { id: "monoline", name: "모던 모노라인", brief: "일정한 굵기의 한 줄 선으로 그린 모던한 모노라인 계열로 네 콘셉트를 변주합니다." },
+    { id: "bold", name: "대담한 볼드", brief: "두껍고 꽉 찬 형태, 강한 실루엣의 볼드한 계열로 네 콘셉트를 변주합니다." },
+    { id: "korean", name: "한국적 모티프", brief: "한글 자음 형태, 전통 문양·기와·보자기 같은 한국적 모티프를 현대적으로 단순화한 계열로 네 콘셉트를 변주합니다." },
+  ],
+  image: [
+    { id: "highkey", name: "밝은 하이키 스튜디오", brief: "밝고 깨끗한 하이키 조명, 흰색·밝은 배경, 부드러운 그림자의 스튜디오 톤으로 네 컷을 촬영합니다." },
+    { id: "lowkey", name: "무드 있는 로우키", brief: "어두운 배경과 한 방향 조명으로 질감과 윤곽이 살아나는 로우키 톤으로 네 컷을 촬영합니다." },
+    { id: "lifestyle", name: "자연광 라이프스타일", brief: "창가 자연광, 실제 생활 공간과 손이 등장하는 라이프스타일 톤으로 네 컷을 촬영합니다." },
+    { id: "colorpop", name: "컬러 백드롭 팝", brief: "제품과 어울리는 강한 단색 배경과 선명한 그림자의 팝한 광고 톤으로 네 컷을 촬영합니다." },
+    { id: "flatlay", name: "플랫레이 탑뷰", brief: "위에서 내려다본 플랫레이 구도, 소품을 그래픽적으로 배치한 톤으로 네 컷을 촬영합니다." },
+    { id: "cinematic", name: "시네마틱 무드", brief: "영화 스틸 같은 색보정, 얕은 심도, 이야기가 느껴지는 장면 톤으로 네 컷을 촬영합니다." },
+  ],
+  "brand-model": [
+    { id: "street", name: "도시 스트리트", brief: "도시 거리와 자연스러운 움직임이 있는 스트리트 룩북 톤으로 촬영합니다." },
+    { id: "studio", name: "미니멀 스튜디오", brief: "단색 배경의 깔끔한 스튜디오 룩북 톤으로 촬영합니다." },
+    { id: "natural", name: "자연광 일상", brief: "창가 자연광과 집·카페 같은 일상 공간의 편안한 톤으로 촬영합니다." },
+    { id: "editorial", name: "매거진 에디토리얼", brief: "패션 매거진 같은 과감한 포즈와 구도, 강한 색보정의 에디토리얼 톤으로 촬영합니다." },
+  ],
+  proposal: [
+    { id: "roi", name: "투자 대비 효과", brief: "상대가 얻는 효과를 비용 대비로 계산해 보여 주는 전개로 제안서를 구성합니다. 입력에 없는 수치는 [확인 필요]." },
+    { id: "risk", name: "위험 제거", brief: "상대가 이 결정을 망설일 이유(위험)를 하나씩 없애 주는 전개로 제안서를 구성합니다." },
+    { id: "pilot", name: "작게 먼저 시작", brief: "부담 없는 파일럿으로 시작해 성과를 확인한 뒤 확대하는 단계형 전개로 제안서를 구성합니다." },
+    { id: "vision", name: "함께 만들 모습", brief: "협업 후 상대 조직의 달라진 모습을 먼저 그리고, 거기까지 가는 계획으로 제안서를 구성합니다." },
+  ],
+  "business-plan": [
+    { id: "psst", name: "PSST 심사형", brief: "정부지원사업 심사 양식(문제 인식 → 실현 가능성 → 성장 전략 → 팀 구성) 순서와 용어에 맞춰, 심사위원이 점수 매기기 쉬운 문장으로 씁니다." },
+    { id: "vc", name: "투자자 IR형", brief: "투자자가 보는 순서(시장 크기 → 왜 지금 → 해자 → 확장성 → 회수 가능성)로, 성장 곡선과 단위 경제성을 앞세워 씁니다." },
+    { id: "bank", name: "보수적 대출 심사형", brief: "상환 능력이 핵심입니다. 매출은 보수적으로 잡고, 현금 흐름·고정비·손익분기와 최악의 경우 대응을 먼저 보여 줍니다." },
+    { id: "lean", name: "린 검증형", brief: "가설 → 가장 작은 실험 → 검증 지표 → 다음 단계 구조로, 적은 돈으로 무엇을 먼저 증명할지 중심으로 씁니다." },
+    { id: "story", name: "창업자 스토리형", brief: "창업자가 이 문제를 직접 겪은 장면에서 시작해, 그 경험이 왜 이 팀만의 경쟁력인지로 이어지게 씁니다(사실은 입력된 것만)." },
+  ],
+  trend: [
+    { id: "investor", name: "투자 심사역의 눈", brief: "각 아이디어를 투자 심사처럼 냉정하게 봅니다. 숫자와 반대 근거를 먼저 찾고, 확신이 없으면 '조건부'로 판정합니다." },
+    { id: "contrarian", name: "역발상 체크", brief: "모두가 뜬다고 말하는 것의 함정을 먼저 찾습니다. 과열 신호, 가격 경쟁, 유행 수명을 따져 보고 남는 틈을 제안합니다." },
+    { id: "niche", name: "틈새 발굴", brief: "큰 시장보다 작지만 비어 있는 틈(특정 고객·상황·지역)을 찾는 렌즈로 평가하고, 차별화 포인트도 그 틈에 맞춥니다." },
+    { id: "timing", name: "타이밍 분석", brief: "지금이 들어갈 때인지(초기·성장·성숙·쇠퇴)를 수요 곡선과 신호로 판단하는 데 집중하고, 진입 시점과 이유를 분명히 말합니다." },
+    { id: "solo", name: "1인 실행 가능성", brief: "혼자 또는 작은 팀이 실제로 해낼 수 있는지(시간, 돈, 기술)를 가장 무겁게 보고, 첫 달에 할 일까지 떠올리며 평가합니다." },
+  ],
+  calendar: [
+    { id: "sprint", name: "2주 스프린트", brief: "2주 단위 스프린트(계획 → 실행 → 회고)로 리듬을 만들고, 스프린트마다 눈에 보이는 결과물 하나를 끝냅니다." },
+    { id: "launch", name: "런칭 카운트다운", brief: "특정 런칭일을 향해 거꾸로 세는 구조입니다. 사전 알림 → 대기 명단 → 런칭 주간 → 후속 판매의 흐름으로 짭니다." },
+    { id: "habit", name: "습관 쌓기", brief: "매주 같은 요일·같은 시간에 반복하는 루틴을 중심으로, 작은 일을 꾸준히 쌓아 13주 뒤 큰 결과가 되게 짭니다." },
+    { id: "experiment", name: "실험 중심", brief: "매주 하나의 가설을 작게 실험하고 지표로 판단해, 잘 되는 것에 다음 주 시간을 더 주는 방식으로 짭니다." },
+    { id: "okr", name: "OKR 분기 계획", brief: "하나의 목표(Objective)와 3개의 핵심 결과(Key Results)를 정하고, 모든 과제가 어느 핵심 결과에 기여하는지 드러나게 짭니다." },
+  ],
+  money: [
+    { id: "ladder", name: "수익 사다리", brief: "작은 첫 매출 → 반복 매출 → 확장 매출로 이어지는 사다리로 세 모델을 배치하고, 앞 모델이 다음 모델의 발판이 되게 합니다." },
+    { id: "asset", name: "자산형 수익", brief: "한 번 만들면 계속 팔리는 것(템플릿, 강의, 콘텐츠, 구독)을 우선해 시간과 수익이 분리되는 모델을 찾습니다." },
+    { id: "service", name: "서비스 먼저", brief: "가진 기술을 바로 서비스로 팔아 현금을 먼저 만들고, 그 경험을 상품화하는 순서로 모델을 짭니다." },
+    { id: "local", name: "동네 기반", brief: "사는 지역의 가게·사람·모임을 고객으로 삼는 오프라인·로컬 모델 중심으로 찾습니다." },
+    { id: "platform", name: "플랫폼 올라타기", brief: "크몽·숨고·스마트스토어·클래스101 같은 기존 플랫폼의 수요에 올라타 초기 고객 확보 비용을 줄이는 모델 중심으로 짭니다." },
+  ],
+  keyword: [
+    { id: "local-first", name: "로컬 검색 선점", brief: "지역명·동네·역 이름이 들어간 방문 의도 키워드를 가장 무겁게 보고 플레이스·지도 노출 중심으로 전략을 짭니다." },
+    { id: "question", name: "질문형 롱테일", brief: "사람들이 검색창에 치는 질문(어떻게, 얼마, 추천, 차이)을 중심으로 블로그·지식인형 콘텐츠를 노리는 전략을 짭니다." },
+    { id: "season", name: "시즌·이벤트 캘린더", brief: "계절, 기념일, 시험·명절 같은 시기에 검색이 몰리는 키워드를 찾아 언제 무엇을 준비할지 중심으로 짭니다." },
+    { id: "compare", name: "비교·대안 검색", brief: "'A vs B', '~대신', '~비교', '~후기'처럼 결정 직전의 비교 검색을 노려 전환에 가까운 키워드 중심으로 짭니다." },
+    { id: "ads", name: "광고 효율형", brief: "파워링크·검색광고에 돈을 쓸 때 효율이 좋은(경쟁 낮고 구매 의도 높은) 키워드와 제외할 키워드를 중심으로 짭니다." },
+  ],
+  place: [
+    { id: "photo", name: "사진으로 이기기", brief: "사진이 클릭을 결정한다는 관점에서 대표 사진 순서, 촬영 장면, 메뉴 사진 개선을 가장 앞에 두고 진단합니다." },
+    { id: "review", name: "리뷰 엔진", brief: "리뷰 수와 답글 품질을 키우는 흐름(요청 시점, 영수증 리뷰 유도, 답글 톤)을 중심으로 진단하고 개선합니다." },
+    { id: "keyword", name: "키워드 노출", brief: "플레이스 검색 노출을 결정하는 키워드 배치(상호, 소개, 메뉴명, 소식)를 가장 무겁게 보고 진단합니다." },
+    { id: "conversion", name: "방문 전환", brief: "보고 → 전화·예약·길찾기로 이어지는 전환(예약 버튼, 톡톡, 가격 투명성, 주차·영업 정보)을 중심으로 진단합니다." },
+  ],
+  grant: [
+    { id: "fit", name: "자격 적합도 우선", brief: "자격 요건을 가장 많이 충족하는 사업부터 보여 주고, 부족한 요건은 어떻게 채울 수 있는지까지 씁니다." },
+    { id: "deadline", name: "마감 임박 우선", brief: "마감이 가까운 사업부터 정리하고, 지금 바로 준비해야 할 서류와 일정을 앞세웁니다." },
+    { id: "amount", name: "지원 규모 우선", brief: "지원 금액이 큰 사업부터 보여 주되, 그만큼 경쟁과 준비 부담이 큰지 솔직하게 씁니다." },
+    { id: "easy", name: "준비 부담 적은 순", brief: "서류와 조건이 간단해 이번 달 안에 신청할 수 있는 사업부터 정리하고, 첫 신청 경험을 쌓는 순서를 제안합니다." },
+  ],
+};
+
+/** A direction this user hasn't had in their recent runs of the tool. */
+export function pickDirection(toolId: string, recentIds: string[], random: () => number = Math.random): Direction | null {
+  const pool = DIRECTIONS[toolId];
+  if (!pool?.length) return null;
+  const avoid = new Set(recentIds.slice(0, Math.max(0, Math.min(pool.length - 1, 4))));
+  const fresh = pool.filter((d) => !avoid.has(d.id));
+  const choices = fresh.length ? fresh : pool;
+  return choices[Math.floor(random() * choices.length)];
+}
+
+/** The prompt block for the chosen direction. */
+export function directionPrompt(d: Direction): string {
+  return [
+    `[이번 결과의 창작 방향: ${d.name}]`,
+    d.brief,
+    "이 방향에 확실히 맞춰 이전 결과들과 구조·표현·시각이 뚜렷하게 다르게 만드세요. 다만 사용자가 입력한 조건, 사실 규칙, 참고 자료 작업 지시와 충돌하면 그쪽을 우선하세요.",
+  ].join("\n");
+}

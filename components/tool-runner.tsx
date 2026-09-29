@@ -17,6 +17,7 @@ import { Segmented } from "@/components/site/page";
 import { ToolForm, type ToolFormValues } from "@/components/tool-form";
 import { RunResult } from "@/components/run-result";
 import { RunProgress } from "@/components/run-progress";
+import { emptyReference, ReferencePanel, type ReferenceValue } from "@/components/tools/reference-panel";
 import { getTool } from "@/lib/tools/registry";
 import { CATEGORY_LABELS } from "@/lib/tools/registry/categories";
 import { seedFromChain } from "@/lib/tools/chain";
@@ -153,6 +154,7 @@ function ToolRunner({
     new Set(),
   );
   const [phase, setPhase] = useState<RunPhase>("idle");
+  const [reference, setReference] = useState<ReferenceValue>(() => emptyReference(toolId));
   const [final, setFinal] = useState<{
     input: ToolFormValues;
     output: unknown;
@@ -190,12 +192,23 @@ function ToolRunner({
 
     try {
       const serialized = await serializeValues(values);
+      // "참고 자료": sent beside the form values; the server validates it,
+      // reads the documents and keeps only text and file names on the run.
+      const referencePayload =
+        reference.text.trim() || reference.files.length
+          ? {
+              mode: reference.mode,
+              text: reference.text,
+              files: await Promise.all(reference.files.map(async (f) => ({ name: f.name, dataUrl: await fileToDataUrl(f) }))),
+            }
+          : undefined;
       const res = await fetch(`/api/tools/${toolId}/run`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           values: serialized,
           provider,
+          ...(referencePayload ? { reference: referencePayload } : {}),
           ...(chainedFrom ? { chainedFromRunId: chainedFrom.runId } : {}),
         }),
         signal: controller.signal,
@@ -401,6 +414,8 @@ function ToolRunner({
           <ToolForm fields={manifest.inputs} values={values} onChange={(id, v) => setValues((p) => ({ ...p, [id]: v }))} />
         </div>
       )}
+
+      <ReferencePanel toolId={toolId} value={reference} onChange={setReference} />
 
       <div className="mt-6 flex items-center gap-2">
         <Button

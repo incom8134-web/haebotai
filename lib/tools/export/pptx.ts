@@ -4,6 +4,8 @@ import type { Source } from "../registry/shared.ts";
 import { asCompactPair, formatPrimitive, humanize, isSourceArray, titleKeyOf } from "../output-labels.ts";
 import { imageUrl, plainMarkdownLines, SKIP_KEYS, type ExportDoc } from "./document.ts";
 import { fetchAll, fit, imageSize, type FetchedImage } from "./images.ts";
+import { chartPng } from "./chart-png.ts";
+import type { Report, ReportBlock } from "../report/types.ts";
 
 // PowerPoint export laid out from the run's structured output rather
 // than from flat text: lists of like items become tables with a colored
@@ -649,6 +651,17 @@ class Deck {
     });
   }
 
+  /** One report chart, as large as the slide allows, with its caption under it. */
+  chartImage(kicker: string, title: string, png: { data: Buffer; width: number; height: number }, color: Color, caption?: string, estimated?: boolean) {
+    const s = this.content(kicker, estimated ? `${title} (추정)` : title, color);
+    const capH = caption ? 0.45 : 0;
+    const box = fit({ width: png.width, height: png.height }, CW * 96, (BOTTOM - TOP - capH - 0.1) * 96);
+    const w = box.width / 96;
+    const h = box.height / 96;
+    s.addImage({ data: `data:image/png;base64,${png.data.toString("base64")}`, x: M + (CW - w) / 2, y: TOP + (BOTTOM - TOP - capH - h) / 2, w, h });
+    if (caption) this.text(s, caption, { x: M, y: BOTTOM - capH, w: CW, h: capH, fontSize: 11, color: MUTED, align: "center", valign: "middle" });
+  }
+
   image(kicker: string, title: string, items: { img: FetchedImage; caption?: string }[], color: Color) {
     for (let p = 0; p * 4 < items.length; p++) {
       const group = items.slice(p * 4, p * 4 + 4);
@@ -1001,6 +1014,85 @@ function renderPresentation(deck: Deck, o: Obj, images: Map<string, FetchedImage
   }
 }
 
+/** A data tool's report as slides: headline numbers, then each section's charts, tables and cards. */
+function renderReport(ctx: Ctx, report: Report) {
+  const { deck } = ctx;
+  const color: Color = (() => {
+    const c = report.palette[0].replace("#", "").toUpperCase();
+    return { c, soft: mix(c, "FFFFFF", 0.9) } as unknown as Color;
+  })();
+  if (report.hero.kpis?.length) deck.kpis("핵심 숫자", report.hero.subtitle ? report.hero.subtitle : report.hero.title, report.hero.kpis.map((k) => ({ label: k.note ? `${k.label} · ${k.note}` : k.label, value: k.value })), color);
+  const shown = report.sections.filter((sec) => !sec.blocks.every((b) => b.type === "sources"));
+  if (shown.length >= 4) deck.agenda(shown.map((sec) => sec.title));
+
+  shown.forEach((sec, i) => {
+    const kicker = `${pad2(i + 1)}  ${(sec.kicker ?? "").replace(/^\d+\s*·\s*/, "") || sec.title}`;
+    // Consecutive text and lists read best together on one slide.
+    let prose: { text: string; bullet?: boolean; head?: boolean }[] = [];
+    let proseTitle = "";
+    const flush = () => {
+      if (prose.length) deck.prose(kicker, proseTitle || sec.title, prose, color);
+      prose = [];
+      proseTitle = "";
+    };
+    if (sec.lead) prose.push({ text: sec.lead });
+    for (const b of sec.blocks as ReportBlock[]) {
+      if (b.type === "text" || b.type === "bullets") {
+        if (!prose.length && b.title) proseTitle = b.title;
+        else if (b.title) prose.push({ text: b.title, head: true });
+        if (b.type === "text") prose.push({ text: b.text });
+        else b.items.forEach((t, k) => prose.push({ text: b.style === "num" ? `${k + 1}. ${t}` : t, bullet: b.style !== "num" }));
+        continue;
+      }
+      flush();
+      switch (b.type) {
+        case "kpis":
+          deck.kpis(kicker, sec.title, b.items.map((k) => ({ label: k.note ? `${k.label} · ${k.note}` : k.label, value: k.value })), color);
+          break;
+        case "chart": {
+          // A short, wide chart (a few horizontal bars) would come out as a thin strip; draw it narrower so it scales up.
+          let png = chartPng(b.chart, report.palette, 900);
+          if (png && png.height / png.width < 0.35) png = chartPng(b.chart, report.palette, 520);
+          if (png) deck.chartImage(kicker, b.title ?? sec.title, png, color, b.caption, b.estimated);
+          break;
+        }
+        case "table":
+          deck.table(kicker, b.title ?? sec.title, b.header, b.rows, color);
+          break;
+        case "callout":
+          deck.statement(kicker, b.label, b.text, color);
+          break;
+        case "cards":
+          deck.cards(
+            kicker,
+            b.title ?? sec.title,
+            b.items.map((c) => ({
+              title: c.title,
+              badge: c.badge,
+              lines: [
+                ...(c.kicker ? [{ label: c.kicker, text: "" }] : []),
+                ...(c.meter ? [{ text: c.meter.label }] : []),
+                ...(c.facts ?? []).map((f) => ({ label: f.label, text: f.value })),
+                ...(c.lines ?? []).map((t) => ({ text: t, bullet: true })),
+              ],
+            })),
+            color,
+            0,
+          );
+          break;
+        case "quad":
+          deck.cards(kicker, b.title ?? sec.title, b.cells.map((c) => ({ title: c.title, lines: c.items.map((t) => ({ text: t, bullet: true })) })), color, 0);
+          break;
+        case "sources":
+          ctx.sources.push(...b.items);
+          break;
+      }
+    }
+    flush();
+  });
+  for (const sec of report.sections) for (const b of sec.blocks) if (b.type === "sources") ctx.sources.push(...b.items);
+}
+
 export async function buildPptx(doc: ExportDoc): Promise<Buffer> {
   const o = isObj(doc.output) ? doc.output : {};
   const isDeck = Array.isArray(o.slides) && (o.slides as unknown[]).some((s) => isObj(s) && ("headline" in s || "points" in s));
@@ -1017,6 +1109,10 @@ export async function buildPptx(doc: ExportDoc): Promise<Buffer> {
 
   if (isDeck) {
     renderPresentation(deck, o, images);
+  } else if (doc.report) {
+    const mood = collectImageUrls(o.mood_board).map((u) => images.get(u)).filter((x): x is FetchedImage => Boolean(x));
+    if (mood.length) deck.image("MOOD", "추천 방향 무드보드", mood.map((img) => ({ img })), colorAt(0));
+    renderReport(ctx, doc.report);
   } else {
     const sections = Object.entries(o).filter(([k, v]) => !SKIP_KEYS.has(k) && !SLIDE_SKIP.has(k) && !isEmpty(v) && !isSourceArray(v));
     for (const [, v] of Object.entries(o)) if (isSourceArray(v)) ctx.sources.push(...v);
@@ -1030,6 +1126,7 @@ export async function buildPptx(doc: ExportDoc): Promise<Buffer> {
     deck.table("SOURCES", "출처", ["#", "자료", "링크"], sources.map((s, i) => [String(i + 1), s.title, s.url.length > 70 ? `${s.url.slice(0, 67)}…` : s.url]), PALETTE[0]);
   }
   if (!isDeck) deck.closing(deckTitle, doc.subtitle);
+
 
   return (await deck.pptx.write({ outputType: "nodebuffer" })) as Buffer;
 }
