@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { hasCurrentConsent } from "@/lib/consent";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getTool } from "@/lib/tools/registry";
 import type { Source } from "@/lib/tools/registry/shared";
@@ -16,6 +17,7 @@ import { getMembership } from "@/lib/membership";
 import { getBusinessProfile } from "@/lib/profile";
 import { reserveCredits, releaseUnattachedReservation, settleGenerationCredits } from "@/lib/credits";
 import { runLimiter, checkRateLimit } from "@/lib/rate-limit";
+import { checkSpend } from "@/lib/spend-guard";
 
 // generations writes (insert/update) go through the service-role client
 // (supabase/migrations/0011 revoked insert/update from authenticated) —
@@ -55,6 +57,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   } = await supabase.auth.getUser();
   if (!user) {
     return Response.json({ error: "로그인이 필요합니다" }, { status: 401 });
+  }
+  if (!hasCurrentConsent(user.app_metadata)) {
+    return Response.json({ error: "서비스 이용 동의가 필요합니다", code: "consent_required" }, { status: 403 });
   }
 
   const rate = await checkRateLimit(runLimiter, user.id);
@@ -149,6 +154,16 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return Response.json({ error: keyError }, { status: 400 });
   }
   const cost = resolveCost(provider, hasUsableKey, membership.plan === "student", manifest.estimatedCredits);
+
+  // Platform-wide ceilings on top of credits (lib/spend-guard-core.ts):
+  // kill switch, daily platform AI budget, per-member daily run cap.
+  // Student runs are free for the member but still spend our key, so they
+  // count toward the platform budget at the tool's credit estimate.
+  const usesPlatformKey = provider === "google" && !hasUsableKey;
+  const spend = await checkSpend(user.id, usesPlatformKey ? manifest.estimatedCredits : 0, usesPlatformKey);
+  if (!spend.ok) {
+    return Response.json({ error: spend.message }, { status: 429 });
+  }
 
   const reservation = cost > 0 ? await reserveCredits(user.id, cost) : ({ ok: true } as const);
   if (!reservation.ok) {

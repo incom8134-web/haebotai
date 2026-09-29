@@ -15,6 +15,24 @@ const nextConfig: NextConfig = {
     "/api/export/\\[runId\\]": ["./node_modules/pretendard/dist/public/static/Pretendard-{Regular,Bold}.otf", "./node_modules/pdfkit/js/data/**/*"],
     "/api/tools/\\[toolId\\]/run": ["./node_modules/pretendard/dist/public/static/Pretendard-{Regular,Bold,ExtraBold,Black}.otf", "./lib/site-kit/kit.ts"],
   },
+  // Security headers on every response. No CSP yet: the generated-site
+  // preview runs model-written pages in a sandboxed srcdoc iframe, which
+  // inherits the parent's CSP and would break; the sandbox already keeps
+  // those pages away from the app's cookies and storage.
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), browsing-topics=()" },
+        ],
+      },
+    ];
+  },
   // Older URLs from the first shell pass, folded into Help / Account / Tools.
   async redirects() {
     return [

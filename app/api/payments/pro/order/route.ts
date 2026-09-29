@@ -1,8 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
+import { hasCurrentConsent } from "@/lib/consent";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getMembership } from "@/lib/membership";
 import { newOrderId, PRO_ORDER } from "@/lib/payments/pro";
 import { tossConfigured } from "@/lib/payments/toss";
+import { limitSensitive } from "@/lib/rate-limit";
 
 // Step 1 of checkout: record a pending order (amount fixed server-side)
 // before the payment widget opens. The confirm route only ever approves
@@ -15,6 +17,11 @@ export async function POST() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return Response.json({ error: "로그인이 필요합니다" }, { status: 401 });
+  const limited = await limitSensitive("checkout", user.id);
+  if (limited) return limited;
+  if (!hasCurrentConsent(user.app_metadata)) {
+    return Response.json({ error: "서비스 이용 동의가 필요합니다", code: "consent_required" }, { status: 403 });
+  }
 
   const membership = await getMembership();
   if (membership.plan === "student") {

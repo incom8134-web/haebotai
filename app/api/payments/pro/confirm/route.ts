@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { checkConfirm, PRO_ORDER } from "@/lib/payments/pro";
 import { confirmTossPayment } from "@/lib/payments/toss";
+import { limitSensitive } from "@/lib/rate-limit";
 
 // Step 2 of checkout: Toss redirected to the success page with
 // paymentKey/orderId/amount. Check them against the stored order, ask
@@ -15,6 +16,8 @@ export async function POST(request: NextRequest) {
   } = await supabase.auth.getUser();
   if (!user) return Response.json({ error: "로그인이 필요합니다" }, { status: 401 });
 
+  const limited = await limitSensitive("checkout-confirm", user.id);
+  if (limited) return limited;
   const body = (await request.json().catch(() => null)) as { paymentKey?: unknown; orderId?: unknown; amount?: unknown } | null;
   const paymentKey = typeof body?.paymentKey === "string" ? body.paymentKey : "";
   const orderId = typeof body?.orderId === "string" ? body.orderId : "";

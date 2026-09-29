@@ -149,8 +149,12 @@ function AppShell({ user, balance, plan, answeredTickets, children }: ShellProps
         <span className="orb orb-c" />
       </div>
 
+      <a href="#main" className="sr-only fixed top-3 left-3 z-[100] rounded-full bg-fg px-4 py-2 text-sm font-semibold text-bg focus:not-sr-only">
+        {L({ ko: "본문으로 건너뛰기", en: "Skip to content" })}
+      </a>
+
       {/* Floating top cluster: brand chip + search pill. */}
-      <div className="pointer-events-none sticky top-0 z-30 px-3 pt-[max(12px,env(safe-area-inset-top))] pb-3 md:px-6 lg:pr-28">
+      <header className="pointer-events-none sticky top-0 z-30 px-3 pt-[max(12px,env(safe-area-inset-top))] pb-3 md:px-6 lg:pr-28">
         {/* Soft fade so page content scrolling under the chips never reads as overlap. */}
         <div aria-hidden className="absolute inset-x-0 top-0 -z-10 h-[88px] bg-gradient-to-b from-bg via-bg/80 to-transparent" />
         <div className="mx-auto flex max-w-[1240px] items-center gap-2">
@@ -180,9 +184,9 @@ function AppShell({ user, balance, plan, answeredTickets, children }: ShellProps
             </Link>
           ) : null}
         </div>
-      </div>
+      </header>
 
-      <main className="pb-28 lg:pr-24 lg:pb-10">{children}</main>
+      <main id="main" tabIndex={-1} className="pb-28 outline-none lg:pr-24 lg:pb-10">{children}</main>
 
       {/* Right-side dock (desktop). */}
       <nav aria-label={L({ ko: "주 메뉴", en: "Main" })} className="glass-strong fixed top-1/2 right-4 z-40 hidden -translate-y-1/2 flex-col items-center gap-1 rounded-[28px] p-2 lg:flex">

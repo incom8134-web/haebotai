@@ -430,7 +430,7 @@ function ToolRunner({
       ) : supportedProviders.length > 1 ? (
         <p className="mt-4 text-xs text-fg-subtle">
           {L({ ko: "Claude/ChatGPT 엔진을 쓰려면 API 키를 등록하세요 → ", en: "Register an API key to use the Claude/ChatGPT engine → " })}
-          <Link href="/account/api-key" className="text-accent hover:underline">
+          <Link href="/account/api-key" className="text-studio-cyan underline underline-offset-2">
             {L({ ko: "API 키 관리", en: "Manage API keys" })}
           </Link>
         </p>
@@ -526,7 +526,7 @@ function ToolRunner({
         <div className="mt-6 glass rounded-[20px] p-4 ">
           <p className="text-sm text-danger">{L(errorMsg)}</p>
           {errorMsg.link ? (
-            <Link href={errorMsg.link} className="mt-1 inline-block text-sm text-accent hover:underline">
+            <Link href={errorMsg.link} className="mt-1 inline-block text-sm text-studio-cyan underline underline-offset-2">
               {L({ ko: "API 키 관리로 이동", en: "Go to API key settings" })}
             </Link>
           ) : null}

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { TicketKind } from "@/lib/support";
+import { limitSensitive } from "@/lib/rate-limit";
 
 export type TicketState = { ok: boolean; message: string } | null;
 
@@ -25,6 +26,7 @@ export async function createTicket(_prev: TicketState, formData: FormData): Prom
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, message: "signed_out" };
+  if (await limitSensitive("ticket", user.id)) return { ok: false, message: "rate_limited" };
 
   const { error } = await supabase.from("support_tickets").insert({
     user_id: user.id,

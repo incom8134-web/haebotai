@@ -14,6 +14,7 @@ import { getToolCapability } from "@/lib/ai/capabilities";
 import { listTools } from "@/lib/tools/registry";
 import { PageHeader, inputClass, primaryButton, secondaryButton, textareaClass } from "@/components/site/page";
 import { cn } from "@/lib/utils";
+import type { ConsentState } from "@/lib/consent";
 
 // Which tools currently run on a given provider, read live from the
 // capability map so this list can never drift out of sync with reality.
@@ -32,6 +33,7 @@ const STUDENT_MSG: Record<string, { ko: string; en: string }> = {
   school_email_invalid: { ko: "학교 이메일은 ac.kr 또는 edu 주소여야 해요. 없으면 비워 두고 비고에 적어 주세요.", en: "School emails end in ac.kr or edu. No school email? Leave it blank and add a note." },
   already_pending: { ko: "이미 검토 중인 신청이 있어요.", en: "You already have a request under review." },
   signed_out: { ko: "로그인이 필요해요.", en: "Please sign in." },
+  rate_limited: { ko: "요청이 너무 잦아요. 잠시 후 다시 시도해 주세요.", en: "Too many requests — try again in a few minutes." },
 };
 const KEY_MSG: Record<string, { ko: string; en: string }> = {
   saved: { ko: "확인하고 저장했어요.", en: "Verified and saved." },
@@ -42,6 +44,7 @@ const KEY_MSG: Record<string, { ko: string; en: string }> = {
   server_disabled: { ko: "이 서버에는 키 저장이 설정되지 않았어요.", en: "Key storage isn't configured on this server." },
   no_key: { ko: "등록된 키가 없어요.", en: "No key saved." },
   signed_out: { ko: "로그인이 필요해요.", en: "Please sign in." },
+  rate_limited: { ko: "요청이 너무 잦아요. 잠시 후 다시 시도해 주세요.", en: "Too many requests — try again in a few minutes." },
 };
 
 const PROVIDER_INFO: Record<ApiKeyProvider, { name: string; placeholder: string }> = {
@@ -70,7 +73,7 @@ function providerDescription(provider: ApiKeyProvider): { ko: string; en: string
   };
 }
 
-function AccountOverview({ email, balance, membership, apiKey, brandName, signOut }: { email: string; balance: number | null; membership: Membership; apiKey: ApiKeyStatus; brandName: string | null; signOut: () => void }) {
+function AccountOverview({ email, balance, membership, apiKey, brandName, signOut, consent }: { email: string; balance: number | null; membership: Membership; apiKey: ApiKeyStatus; brandName: string | null; signOut: () => void; consent: ConsentState | null }) {
   const L = useBi();
   const plan = PLANS.find((p) => p.id === membership.plan)!;
   const doors = [
@@ -80,6 +83,7 @@ function AccountOverview({ email, balance, membership, apiKey, brandName, signOu
   ];
   return (
     <>
+      <h1 className="sr-only">{L({ ko: "내 계정", en: "My account" })}</h1>
       {/* Identity */}
       <section className="glass-strong flex flex-wrap items-center gap-4 rounded-[28px] p-6">
         <span className="studio-gradient-bg grid size-14 place-items-center rounded-[18px] text-lg font-semibold text-white">{email[0]?.toUpperCase()}</span>
@@ -110,8 +114,66 @@ function AccountOverview({ email, balance, membership, apiKey, brandName, signOu
       </div>
       <p className="mt-6 text-sm text-fg-muted">{L(plan.name)} · {brandName ?? L({ ko: "프로필 없음", en: "No profile" })}</p>
 
+      {membership.plan === "pro" && membership.daysLeft !== null && membership.daysLeft <= 7 ? (
+        <section className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-[24px] border border-hairline bg-surface-2 p-5" aria-labelledby="pro-ending">
+          <div className="min-w-0">
+            <h2 id="pro-ending" className="font-semibold">{L({ ko: `프로가 ${membership.daysLeft}일 뒤 끝나요`, en: `Pro ends in ${membership.daysLeft} days` })}</h2>
+            <p className="mt-1 text-sm break-keep text-fg-muted">{L({ ko: "자동 결제는 없어요. 계속 쓰려면 직접 연장해 주세요 — 남은 기간에 30일이 더해집니다.", en: "There's no automatic renewal. Extend it yourself to keep Pro — 30 days are added to what's left." })}</p>
+          </div>
+          <Link href="/account/membership/checkout" className={cn(primaryButton, "h-10")}>{L({ ko: "30일 연장하기", en: "Extend 30 days" })}</Link>
+        </section>
+      ) : null}
+
+      <ConsentPanel consent={consent} />
+
       <DeleteAccount balance={balance} />
     </>
+  );
+}
+
+/** What the member agreed to, and the marketing email switch (정보통신망법 §50). */
+function ConsentPanel({ consent }: { consent: ConsentState | null }) {
+  const L = useBi();
+  const [marketing, setMarketing] = useState(consent?.marketing ?? false);
+  const [at, setAt] = useState(consent?.marketing_at ?? null);
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const day = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul" }) : "—");
+  const toggle = (next: boolean) =>
+    startTransition(async () => {
+      setError(null);
+      const res = await fetch("/api/account/marketing", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ optIn: next }) });
+      const data = (await res.json().catch(() => ({}))) as { error?: string; at?: string };
+      if (!res.ok) return setError(data.error ?? "저장하지 못했어요");
+      setMarketing(next);
+      setAt(data.at ?? new Date().toISOString());
+    });
+  return (
+    <section className="mt-12 rounded-[24px] border border-hairline p-5 md:p-6" aria-labelledby="consents">
+      <h2 id="consents" className="font-semibold">{L({ ko: "동의 내역과 수신 설정", en: "Consents and emails" })}</h2>
+      <dl className="mt-3 grid gap-x-6 gap-y-1.5 text-sm sm:grid-cols-[auto_1fr]">
+        <dt className="text-fg-muted">{L({ ko: "이용약관·개인정보 처리방침", en: "Terms · privacy policy" })}</dt>
+        <dd>{L({ ko: `${day(consent?.terms_at)} 동의 (버전 ${consent?.v ?? "—"})`, en: `Agreed ${day(consent?.terms_at)} (version ${consent?.v ?? "—"})` })}</dd>
+        <dt className="text-fg-muted">{L({ ko: "개인정보 국외 이전", en: "Transfer abroad" })}</dt>
+        <dd>{L({ ko: `${day(consent?.overseas_at)} 동의`, en: `Agreed ${day(consent?.overseas_at)}` })}</dd>
+        <dt className="text-fg-muted">{L({ ko: "만 14세 이상 확인", en: "Age 14+ confirmed" })}</dt>
+        <dd>{day(consent?.age14_at)}</dd>
+      </dl>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-hairline pt-4">
+        <div className="min-w-0">
+          <p id="mk-label" className="text-sm font-medium">{L({ ko: "이벤트·새 기능 소식 이메일 (선택)", en: "Event and feature emails (optional)" })}</p>
+          <p className="text-xs text-fg-muted">
+            {marketing ? L({ ko: `수신 중 · ${day(at)} 동의`, en: `On · agreed ${day(at)}` }) : L({ ko: `받지 않음${at ? ` · ${day(at)} 변경` : ""}`, en: `Off${at ? ` · changed ${day(at)}` : ""}` })}
+            {" · "}
+            {L({ ko: "로그인·결제 안내 같은 필수 메일은 설정과 관계없이 보내요.", en: "Sign-in and payment notices are sent regardless." })}
+          </p>
+        </div>
+        <button type="button" role="switch" aria-checked={marketing} aria-labelledby="mk-label" disabled={pending} onClick={() => toggle(!marketing)} className={cn("relative h-7 w-12 shrink-0 rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-offset-2", marketing ? "bg-studio-cyan" : "bg-fg/20")}>
+          <span className={cn("absolute top-1 left-1 size-5 rounded-full bg-white shadow transition-transform", marketing ? "translate-x-5" : "")} />
+        </button>
+      </div>
+      {error ? <p role="alert" className="mt-2 text-sm text-danger">{error}</p> : null}
+    </section>
   );
 }
 
@@ -321,7 +383,7 @@ function ApiKeyPanel({ apiKey }: { apiKey: ApiKeyStatus }) {
           <p className="rounded-xl bg-studio-warning/10 p-3 text-sm text-fg-muted">{L(KEY_MSG.server_disabled)}</p>
         )}
         <p className="text-sm text-fg-muted">
-          {L({ ko: "처음이라면", en: "First time?" })} <Link href="/help/api-guide" className="text-studio-cyan hover:underline">{L({ ko: "API 키 설명서", en: "Read the API key manual" })}</Link>{L({ ko: "를 보세요 — 발급, 보안, 문제 해결까지 담겨 있어요.", en: " — getting a key, security and troubleshooting." })}
+          {L({ ko: "처음이라면", en: "First time?" })} <Link href="/help/api-guide" className="text-studio-cyan underline underline-offset-2">{L({ ko: "API 키 설명서", en: "Read the API key manual" })}</Link>{L({ ko: "를 보세요 — 발급, 보안, 문제 해결까지 담겨 있어요.", en: " — getting a key, security and troubleshooting." })}
         </p>
       </section>
     </>
