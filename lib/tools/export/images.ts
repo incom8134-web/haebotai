@@ -1,4 +1,5 @@
 import "server-only";
+import { isAllowedImageUrl } from "./document.ts";
 
 // docx / pdf / pptx embed images as bytes, so result images (signed
 // storage URLs) are fetched server-side. A failed or slow fetch just
@@ -11,6 +12,7 @@ export interface FetchedImage {
 }
 
 export async function fetchImage(url: string): Promise<FetchedImage | null> {
+  if (!isAllowedImageUrl(url, process.env.NEXT_PUBLIC_SUPABASE_URL)) return null;
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(15_000), cache: "no-store" });
     if (!res.ok) return null;

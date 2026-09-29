@@ -13,7 +13,7 @@ import { PageHeader } from "@/components/site/page";
 // /account/credits — what I have, what each tool costs, what I've used
 // this month, and the limits that apply regardless of credits.
 
-const ALLOWANCE: Record<PlanId, number | null> = { free: 100, pro: 2000, student: null };
+const ALLOWANCE: Record<PlanId, number | null> = { free: 500, pro: 2000, student: null };
 
 function CreditsView({ balance, plan, apiKeyConnected, usage }: { balance: number; plan: PlanId; apiKeyConnected: boolean; usage: { totalRuns: number; totalCredits: number; byTool: ToolUsage[] } }) {
   const L = useBi();
