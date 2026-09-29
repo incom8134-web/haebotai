@@ -19,6 +19,8 @@ import { CATEGORY_LABELS } from "@/lib/tools/registry/categories";
 import { briefField } from "@/lib/tools/brief";
 import { useFavorites } from "@/lib/hooks/use-local-list";
 import { useLocale, useT } from "@/lib/i18n/context";
+import { localizeField } from "@/lib/tools/fields-en";
+import { getToolContent } from "@/lib/tools/content";
 import type { DictKey } from "@/lib/i18n/dictionaries";
 import type { BusinessProfile, CategoryId, ToolManifest } from "@/lib/tools/types";
 import { cn } from "@/lib/utils";
@@ -190,7 +192,7 @@ function StudioWorkspace({
           <div className="glass-strong rounded-[26px] p-5">
             <div className="mb-3 flex items-center justify-between gap-3 text-xs text-fg-muted">
               <span className="truncate">
-                {activeBriefField ? `${t("studio_brief_label")} — ${activeBriefField.label}` : active.summary}
+                {activeBriefField ? `${t("studio_brief_label")} — ${localizeField(active.id, activeBriefField, locale).label}` : locale === "en" ? (getToolContent(active.id)?.tagline.en ?? active.name_en) : active.summary}
               </span>
               {activeBriefField ? <span className="hidden shrink-0 text-2xs sm:inline">{t("studio_brief_hint")}</span> : null}
             </div>

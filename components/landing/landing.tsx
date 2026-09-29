@@ -60,7 +60,7 @@ function Nav() {
       <div className="mx-auto flex max-w-[1200px] items-center gap-2">
         <Link href="/" className="glass flex h-11 items-center gap-2.5 rounded-2xl pr-4 pl-1.5">
           <BrandMark size={32} priority />
-          <span className="text-sm font-bold tracking-[-0.02em]">해봇 AI</span>
+          <span className="text-sm font-bold tracking-[-0.02em]">{L({ ko: "해봇 AI", en: "Haebot AI" })}</span>
         </Link>
         <nav className="glass mx-auto hidden h-11 items-center gap-1 rounded-2xl px-1.5 md:flex" aria-label={L({ ko: "페이지 안내", en: "Page" })}>
           {[
@@ -160,7 +160,7 @@ function Landing() {
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}>
             <div className="mb-6 flex items-center gap-4">
               <BrandMark size={72} priority className="drop-shadow-[0_18px_40px_rgba(77,124,254,0.35)]" />
-              <span className="font-display text-4xl font-bold tracking-[-0.03em]">해봇 AI</span>
+              <span className="font-display text-4xl font-bold tracking-[-0.03em]">{L({ ko: "해봇 AI", en: "Haebot AI" })}</span>
             </div>
             <p className="glass inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-medium text-studio-cyan"><Sparkles size={13} aria-hidden /> {L({ ko: "소상공인·1인 사업자를 위한 AI 마케팅 스튜디오", en: "An AI marketing studio for small businesses" })}</p>
             <h1 className="mt-6 font-display text-[clamp(2.5rem,5.2vw,4rem)] leading-[1.05] font-bold tracking-[-0.03em] break-keep">
@@ -306,7 +306,7 @@ function Landing() {
 
       <footer className="border-t border-hairline px-4 py-10 md:px-6">
         <div className="mx-auto flex max-w-[1200px] flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <p className="flex items-center gap-2 text-sm font-semibold"><BrandMark size={28} /> 해봇 AI</p>
+          <p className="flex items-center gap-2 text-sm font-semibold"><BrandMark size={28} /> {L({ ko: "해봇 AI", en: "Haebot AI" })}</p>
           <nav className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-fg-muted" aria-label={L({ ko: "바닥글", en: "Footer" })}>
             {[
               ["/tools", { ko: "도구", en: "Tools" }],

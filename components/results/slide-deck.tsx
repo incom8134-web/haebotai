@@ -1,5 +1,7 @@
 "use client";
 
+import { useBi } from "@/lib/i18n/context";
+
 import { useMemo, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { PRINT_THEME, renderChart } from "@/lib/tools/report/charts";
@@ -94,7 +96,7 @@ function Bullets({ items, accent, size = 1.45 }: { items: string[]; accent: stri
 }
 
 /** The slide's own layout; null falls back to the classic photo / columns layouts. */
-function LayoutBody({ slide, num, headline, points, accent }: { slide: Slide; num: string; headline: string; points: string[]; accent: string }) {
+function LayoutBody({ slide, num, headline, points, accent, estimateLabel = "추정치" }: { slide: Slide; num: string; headline: string; points: string[]; accent: string; estimateLabel?: string }) {
   const pad = "absolute inset-0 flex flex-col px-[5%] pt-[4.5%] pb-[4%]";
   switch (slide.layout) {
     case "big_number":
@@ -120,7 +122,7 @@ function LayoutBody({ slide, num, headline, points, accent }: { slide: Slide; nu
           <div className="mt-[2.5%] grid flex-1 grid-cols-[62%_1fr] gap-[3%] min-h-0">
             <div className="min-h-0"><ChartSvg chart={slide.chart} accent={accent} /></div>
             <div className="flex flex-col justify-center gap-[4%]">
-              {slide.chart?.source === "estimate" ? <span className="self-start rounded-full bg-amber-100 px-[4%] py-[1%] font-bold text-amber-700" style={{ fontSize: "1.1cqw" }}>추정치</span> : null}
+              {slide.chart?.source === "estimate" ? <span className="self-start rounded-full bg-amber-100 px-[4%] py-[1%] font-bold text-amber-700" style={{ fontSize: "1.1cqw" }}>{estimateLabel}</span> : null}
               {slide.chart?.takeaway ? <p className="font-bold leading-snug break-keep" style={{ color: accent, fontSize: "1.55cqw" }}>{slide.chart.takeaway}</p> : null}
               <Bullets items={points} accent={accent} size={1.3} />
             </div>
@@ -228,11 +230,12 @@ function LayoutBody({ slide, num, headline, points, accent }: { slide: Slide; nu
 }
 
 function SlideCard({ slide, index, accent }: { slide: Slide; index: number; accent: string }) {
+  const L = useBi();
   const [open, setOpen] = useState(false);
   const headline = slide.headline ?? slide.title ?? `슬라이드 ${index + 1}`;
   const points = slide.points ?? [];
   const num = String(index + 1).padStart(2, "0");
-  const custom = LayoutBody({ slide, num, headline, points, accent });
+  const custom = LayoutBody({ slide, num, headline, points, accent, estimateLabel: L({ ko: "추정치", en: "Estimate" }) });
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -277,14 +280,14 @@ function SlideCard({ slide, index, accent }: { slide: Slide; index: number; acce
       </Frame>
       {slide.speaker_notes || slide.visual ? (
         <button type="button" onClick={() => setOpen((v) => !v)} className="flex items-center gap-1 self-start text-2xs text-fg-subtle hover:text-fg">
-          발표 메모 {open ? "닫기" : "보기"}
+          {open ? L({ ko: "발표 메모 닫기", en: "Hide speaker notes" }) : L({ ko: "발표 메모 보기", en: "Show speaker notes" })}
           <ChevronDown className={`size-3 transition-transform ${open ? "rotate-180" : ""}`} aria-hidden />
         </button>
       ) : null}
       {open ? (
         <div className="rounded-lg border border-hairline p-2.5 text-xs leading-relaxed text-fg-muted">
           {slide.speaker_notes ? <p>{slide.speaker_notes}</p> : null}
-          {slide.visual ? <p className="mt-1.5 text-fg-subtle">시각 자료: {slide.visual}</p> : null}
+          {slide.visual ? <p className="mt-1.5 text-fg-subtle">{L({ ko: "시각 자료", en: "Visual" })}: {slide.visual}</p> : null}
         </div>
       ) : null}
     </div>
@@ -292,6 +295,7 @@ function SlideCard({ slide, index, accent }: { slide: Slide; index: number; acce
 }
 
 export function SlideDeck({ deck }: { deck: DeckOutput }) {
+  const L = useBi();
   const accent = deck.accent_color && HEX.test(deck.accent_color) ? deck.accent_color : "#4D7CFE";
   return (
     <div className="mt-3 flex flex-col gap-4">
@@ -300,7 +304,7 @@ export function SlideDeck({ deck }: { deck: DeckOutput }) {
         <div className="absolute inset-0 flex flex-col justify-center px-[6%]">
           <span className="block h-[0.7cqw] w-[7%]" style={{ background: accent }} />
           <p className="mt-[3%] max-w-[62%] font-bold leading-tight break-keep" style={{ fontSize: "4.4cqw" }}>
-            {deck.title ?? "발표자료"}
+            {deck.title ?? L({ ko: "발표자료", en: "Presentation" })}
           </p>
           {deck.subtitle ? (
             <p className="mt-[2%] max-w-[55%] font-semibold text-white/90 break-keep" style={{ fontSize: "1.8cqw" }}>

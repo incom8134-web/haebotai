@@ -10,6 +10,7 @@ export const BUSINESS = {
   companyName: "지니에듀테크 주식회사",
   /** 대표자 */
   representative: "이성웅",
+  representativeEn: "Lee Sung-woong",
   /** 사업자등록번호 (000-00-00000) */
   registrationNumber: "528-88-00923",
   /** 통신판매업 신고번호 (제0000-서울00-0000호) */
