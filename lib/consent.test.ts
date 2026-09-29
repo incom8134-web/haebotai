@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { CONSENT_VERSION, hasCurrentConsent, nextConsentState, parseConsentInput } from "./consent.ts";
+import { CONSENT_VERSION, hasCurrentConsent, nextConsentState, parseConsentInput, safeNext } from "./consent.ts";
 
 test("every required item must be agreed", () => {
   const r = parseConsentInput({ age14: true, terms: true, privacy: true, overseas: false, marketing: true });
@@ -33,4 +33,12 @@ test("marketing time only moves when the choice changes", () => {
   assert.equal(again.marketing_at, "2026-01-01T00:00:00Z");
   const off = nextConsentState(again, { ...input, marketing: false }, "2026-07-01T00:00:00Z");
   assert.equal(off.marketing_at, "2026-07-01T00:00:00Z");
+});
+
+test("next redirects stay on this site", () => {
+  assert.equal(safeNext("/library?x=1"), "/library?x=1");
+  assert.equal(safeNext("//evil.example"), "/studio");
+  assert.equal(safeNext("/\\evil.example"), "/studio");
+  assert.equal(safeNext("https://evil.example"), "/studio");
+  assert.equal(safeNext(null), "/studio");
 });

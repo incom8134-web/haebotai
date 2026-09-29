@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, ArrowLeft, CircleCheck, Crown } from "lucide-react";
+import { AlertTriangle, ArrowLeft, CircleCheck, Crown, Hourglass } from "lucide-react";
 import { loadTossPayments, type TossPaymentsWidgets } from "@tosspayments/tosspayments-sdk";
 import { useBi } from "@/lib/i18n/context";
 import type { Membership } from "@/lib/membership";
@@ -144,7 +144,7 @@ function CheckoutView({ customerKey, membership }: { customerKey: string; member
 
 function CheckoutSuccess({ paymentKey, orderId, amount }: { paymentKey: string; orderId: string; amount: string }) {
   const L = useBi();
-  const [state, setState] = useState<{ status: "confirming" } | { status: "done" } | { status: "error"; message: string }>({ status: "confirming" });
+  const [state, setState] = useState<{ status: "confirming" } | { status: "done" } | { status: "pending"; message: string } | { status: "error"; message: string }>({ status: "confirming" });
   const sent = useRef(false);
 
   useEffect(() => {
@@ -159,7 +159,8 @@ function CheckoutSuccess({ paymentKey, orderId, amount }: { paymentKey: string; 
         body: JSON.stringify({ paymentKey, orderId, amount: Number(amount) }),
       }).catch(() => null);
       const data = res ? await res.json().catch(() => ({})) : {};
-      if (res?.ok) setState({ status: "done" });
+      if (res?.status === 202 && data.pending) setState({ status: "pending", message: data.error });
+      else if (res?.ok) setState({ status: "done" });
       else setState({ status: "error", message: data.error ?? L({ ko: "결제를 확인하지 못했어요.", en: "Couldn't confirm the payment." }) });
     })();
   }, [paymentKey, orderId, amount, L]);
@@ -180,6 +181,17 @@ function CheckoutSuccess({ paymentKey, orderId, amount }: { paymentKey: string; 
             <div className="mt-6 flex justify-center gap-2">
               <Link href="/studio" className={primaryButton}>{L({ ko: "스튜디오로", en: "Go to Studio" })}</Link>
               <Link href="/account/credits" className={secondaryButton}>{L({ ko: "크레딧 보기", en: "View credits" })}</Link>
+            </div>
+          </>
+        ) : state.status === "pending" ? (
+          <>
+            <Hourglass size={40} className="mx-auto text-studio-warning" aria-hidden />
+            <h1 className="mt-4 font-display text-2xl font-bold">{L({ ko: "결제를 확인하고 있어요", en: "Payment is being confirmed" })}</h1>
+            <p className="mt-2 text-sm break-keep text-fg-muted">{state.message}</p>
+            <p className="mt-2 text-xs break-keep text-fg-subtle">{L({ ko: "다시 결제하지 마세요. 확인되는 대로 자동으로 적용돼요.", en: "Please don't pay again — it will apply automatically once confirmed." })}</p>
+            <div className="mt-6 flex justify-center gap-2">
+              <Link href="/account/membership" className={primaryButton}>{L({ ko: "멤버십 보기", en: "View membership" })}</Link>
+              <Link href="/help/contact?kind=billing" className={secondaryButton}>{L({ ko: "문의하기", en: "Contact us" })}</Link>
             </div>
           </>
         ) : (

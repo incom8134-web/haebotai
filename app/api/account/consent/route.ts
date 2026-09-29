@@ -1,4 +1,7 @@
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { REFERRAL } from "@/lib/referral";
+import { redeemReferral } from "@/lib/referral-server";
 import { consentOf, nextConsentState, parseConsentInput } from "@/lib/consent";
 import { appendConsentLog, requestMeta, saveConsentState } from "@/lib/consent-server";
 import { limitSensitive } from "@/lib/rate-limit";
@@ -30,5 +33,14 @@ export async function POST(request: Request) {
   // A fresh session token that carries the new consent (cookies set on
   // this response), so the next page load passes the gate at once.
   await supabase.auth.refreshSession().catch(() => null);
+
+  // Everyone passes through here once, so this is where an invite link
+  // pays out (the SQL only accepts accounts younger than 7 days).
+  const jar = await cookies();
+  const ref = jar.get(REFERRAL.cookie)?.value;
+  if (ref) {
+    await redeemReferral(user.id, ref).catch((err: unknown) => console.warn("referral redeem failed", err));
+    jar.delete(REFERRAL.cookie);
+  }
   return Response.json({ ok: true });
 }

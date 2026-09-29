@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import { OnboardingChecklist } from "@/components/studio/onboarding-checklist";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -124,6 +125,7 @@ function StudioWorkspace({
       <div className="mx-auto grid max-w-[1240px] gap-8 px-4 pt-6 pb-10 md:px-8 md:pt-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
         {/* ── Left: brief ─────────────────────────────────────────── */}
         <section className="min-w-0">
+          <OnboardingChecklist hasProfile={Boolean(profile?.brand_name)} runs={recentRuns.filter((r) => r.status === "done").length} distinctTools={new Set(recentRuns.filter((r) => r.status === "done").map((r) => r.toolId)).size} />
           <div className="mb-7">
             <div className="mb-4 flex items-center gap-2 text-2xs font-semibold uppercase tracking-[0.24em] text-studio-cyan">
               <span className="h-px w-8 bg-studio-cyan" aria-hidden />

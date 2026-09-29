@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { Geist, Geist_Mono, Space_Grotesk } from "next/font/google";
 import { MotionConfig } from "motion/react";
 import { Toaster } from "@/components/ui/sonner";
@@ -30,22 +31,27 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 
+const description = "AI marketing and business tools for small businesses, built on your own facts — researched claims come with their sources.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
   title: "해봇 AI",
-  description:
-    "AI marketing and business tools for small businesses, built on your own facts — researched claims come with their sources.",
+  description,
+  openGraph: { type: "website", siteName: "해봇 AI", locale: "ko_KR", title: "해봇 AI", description },
+  twitter: { card: "summary_large_image", title: "해봇 AI", description },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const locale = (await cookies()).get("locale")?.value === "en" ? "en" : "ko";
   return (
     <html
-      lang="ko"
+      lang={locale}
       className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
         <ThemeProvider>
-          <LocaleProvider>
+          <LocaleProvider initialLocale={locale}>
             <MotionConfig reducedMotion="user">{children}</MotionConfig>
             <Toaster />
             <CookieNotice />

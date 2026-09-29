@@ -10,6 +10,34 @@ export interface Membership {
   studentRequest: "pending" | "approved" | "rejected" | null;
 }
 
+export interface PaymentRecord {
+  orderId: string;
+  amount: number;
+  status: "pending" | "done" | "failed" | "canceled";
+  createdAt: string;
+  receiptUrl: string | null;
+}
+
+/** The user's orders, newest first (RLS: own rows only). Receipt URL comes from Toss's stored payment object. */
+export async function getPaymentHistory(): Promise<PaymentRecord[]> {
+  const supabase = await createClient();
+  const user = await getCurrentUser();
+  if (!user) return [];
+  const { data } = await supabase
+    .from("payments")
+    .select("order_id, amount, status, created_at, receipt_url:raw->receipt->>url")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(24);
+  return (data ?? []).map((r) => ({
+    orderId: r.order_id,
+    amount: r.amount,
+    status: r.status,
+    createdAt: r.created_at,
+    receiptUrl: typeof r.receipt_url === "string" && /^https:\/\/([a-z0-9-]+\.)*tosspayments\.com\//.test(r.receipt_url) ? r.receipt_url : null,
+  }));
+}
+
 export async function getMembership(): Promise<Membership> {
   const supabase = await createClient();
   const user = await getCurrentUser();

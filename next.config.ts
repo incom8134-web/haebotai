@@ -1,5 +1,26 @@
 import type { NextConfig } from "next";
 
+// Full policy, shipped as Report-Only: browsers report what it WOULD block
+// to /api/csp-report without blocking anything. Once the reports are clean
+// in production, rename the header to Content-Security-Policy to enforce.
+// Generated-site previews (srcdoc iframes) inherit this policy, so the
+// site kit's CDN and font hosts are listed too.
+const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).host : "*.supabase.co";
+const CSP = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' https://js.tosspayments.com https://*.tosspayments.com https://cdn.jsdelivr.net",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net",
+  `img-src 'self' data: blob: https://${supabase} https://*.tosspayments.com`,
+  "font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net",
+  `connect-src 'self' https://${supabase} wss://${supabase} https://*.tosspayments.com`,
+  "frame-src 'self' blob: https://*.tosspayments.com https://www.google.com",
+  "media-src 'self' blob:",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self' https://*.tosspayments.com",
+  "report-uri /api/csp-report",
+].join("; ");
+
 const nextConfig: NextConfig = {
   // @resvg/resvg-js ships a native .node binary addon, and satori's
   // harfbuzzjs dependency loads a .wasm file by relative path — bundling
@@ -15,20 +36,25 @@ const nextConfig: NextConfig = {
     "/api/export/\\[runId\\]": ["./node_modules/pretendard/dist/public/static/Pretendard-{Regular,Bold}.otf", "./node_modules/pdfkit/js/data/**/*"],
     "/api/tools/\\[toolId\\]/run": ["./node_modules/pretendard/dist/public/static/Pretendard-{Regular,Bold,ExtraBold,Black}.otf", "./lib/site-kit/kit.ts"],
   },
-  // Security headers on every response. No CSP yet: the generated-site
-  // preview runs model-written pages in a sandboxed srcdoc iframe, which
-  // inherits the parent's CSP and would break; the sandbox already keeps
-  // those pages away from the app's cookies and storage.
   async headers() {
     return [
       {
         source: "/:path*",
         headers: [
-          { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
+          { key: "Strict-Transport-Security", value: "max-age=63072000" },
           { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "X-Frame-Options", value: "DENY" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), browsing-topics=()" },
+          { key: "Content-Security-Policy-Report-Only", value: CSP },
+        ],
+      },
+      {
+        // Checkout return pages are left frameable in case Toss's payment
+        // layer loads them inside its iframe.
+        source: "/:path((?!account/membership/checkout).*)",
+        headers: [
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },
         ],
       },
     ];
