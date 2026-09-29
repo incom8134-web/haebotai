@@ -5,7 +5,7 @@ import { BrandMark } from "@/components/brand-mark";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ArrowRight, Check, FileText, GraduationCap, Image as ImageIcon, Link2, MessageSquareText, Plus, ShieldCheck, Sparkles, UserRound } from "lucide-react";
 import { listTools, getTool } from "@/lib/tools/registry";
 import { CATEGORY_LABELS } from "@/lib/tools/registry/categories";
@@ -44,6 +44,28 @@ function Hero3D() {
     return () => mq.removeEventListener("change", update);
   }, []);
   return show ? <Hero3DScene /> : null;
+}
+
+// Muted, looping, silent (audio stripped at encode time). No autoplay for
+// people who asked for reduced motion; controls let anyone pause it.
+function DemoVideo({ label }: { label: string }) {
+  const reduce = useReducedMotion();
+  return (
+    <video
+      src="/videos/demo.mp4"
+      poster="/videos/demo-poster.jpg"
+      aria-label={label}
+      className="aspect-video w-full rounded-[22px] bg-black object-cover"
+      autoPlay={!reduce}
+      muted
+      loop
+      playsInline
+      controls
+      preload="metadata"
+      width={1280}
+      height={720}
+    />
+  );
 }
 
 const reveal = {
@@ -185,6 +207,17 @@ function Landing() {
           </motion.div>
           <motion.div initial={{ opacity: 0, y: 24, filter: "blur(8px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}>
             <StudioMock />
+          </motion.div>
+        </section>
+
+        {/* Demo video */}
+        <section className="mx-auto max-w-[1200px] px-4 py-16 md:px-6">
+          <motion.div {...reveal} className="max-w-2xl">
+            <p className="text-sm font-medium text-studio-cyan">{L({ ko: "직접 보세요", en: "See it in action" })}</p>
+            <h2 className="mt-3 font-display text-[clamp(1.9rem,3.6vw,2.8rem)] leading-tight font-bold tracking-[-0.02em] break-keep">{L({ ko: "브리프 한 줄에서 결과물까지", en: "From one brief to finished assets" })}</h2>
+          </motion.div>
+          <motion.div {...reveal} className="glass mt-10 overflow-hidden rounded-[28px] p-2">
+            <DemoVideo label={L({ ko: "해봇 AI 사용 흐름 데모 영상", en: "Haebot AI demo video" })} />
           </motion.div>
         </section>
 

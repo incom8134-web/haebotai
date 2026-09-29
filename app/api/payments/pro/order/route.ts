@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getMembership } from "@/lib/membership";
 import { newOrderId, PRO_ORDER } from "@/lib/payments/pro";
 import { tossConfigured } from "@/lib/payments/toss";
+import { checkRateLimit, paymentLimiter } from "@/lib/rate-limit";
 
 // Step 1 of checkout: record a pending order (amount fixed server-side)
 // before the payment widget opens. The confirm route only ever approves
@@ -15,6 +16,11 @@ export async function POST() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return Response.json({ error: "로그인이 필요합니다" }, { status: 401 });
+
+  const rate = await checkRateLimit(paymentLimiter, user.id);
+  if (!rate.ok) {
+    return Response.json({ error: "요청이 너무 잦습니다. 잠시 후 다시 시도해주세요." }, { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } });
+  }
 
   const membership = await getMembership();
   if (membership.plan === "student") {

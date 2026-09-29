@@ -5,6 +5,7 @@ import { DEFAULT_TOOL_CAPABILITY, getToolCapability } from "@/lib/ai/capabilitie
 import { getBusinessProfile } from "@/lib/profile";
 import { getApiKeyStatus } from "@/lib/api-keys";
 import { getMembership } from "@/lib/membership";
+import { getBalance } from "@/lib/credits";
 import { createClient } from "@/lib/supabase/server";
 import type { ProviderId } from "@/lib/ai/types";
 
@@ -30,11 +31,12 @@ export default async function ToolPage({
   // flows and old bookmarks there instead of a form that can only fail.
   if (tool.comingSoon) redirect(`/tools/${toolId}`);
 
-  const [profile, { fromRun, brief, preset }, keyStatus, membership] = await Promise.all([
+  const [profile, { fromRun, brief, preset }, keyStatus, membership, balance] = await Promise.all([
     getBusinessProfile(),
     searchParams,
     getApiKeyStatus(),
     getMembership(),
+    getBalance(),
   ]);
 
   // Which engines this run page actually offers: google is always
@@ -68,6 +70,7 @@ export default async function ToolPage({
       defaultProvider={capability.default}
       hasOwnKey={hasOwnKey}
       isStudent={membership.plan === "student"}
+      balance={balance}
     />
   );
 }
