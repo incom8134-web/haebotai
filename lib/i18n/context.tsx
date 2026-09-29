@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useSyncExternalStore } from "react";
+import { createContext, useContext, useEffect, useSyncExternalStore } from "react";
 import { dictionaries, type DictKey, type Locale } from "./dictionaries";
 
 // ponytail: client-side preference (localStorage), no URL-based routing
@@ -48,6 +48,9 @@ const LocaleContext = createContext<LocaleContextValue>({ locale: "ko", setLocal
 
 function LocaleProvider({ children }: { children: React.ReactNode }) {
   const locale = useSyncExternalStore(subscribe, readLocale, getServerSnapshot);
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
   return <LocaleContext.Provider value={{ locale, setLocale: writeLocale }}>{children}</LocaleContext.Provider>;
 }
 
