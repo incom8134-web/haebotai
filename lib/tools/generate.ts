@@ -41,6 +41,9 @@ interface ImageStorageContext {
   runId: string;
 }
 
+/** Generation must finish by this point of the 300 s run (the route stops at 285 s). */
+const PHOTO_DEADLINE_MS = 250_000;
+
 export async function generateOutput(
   manifest: ToolManifest,
   input: Record<string, unknown>,
@@ -93,7 +96,7 @@ async function generateWith(
   provider: ProviderId,
   adapter: AiAdapter,
 ): Promise<{ output: unknown; sources: Source[]; usage: TokenUsage }> {
-
+  const started = Date.now();
   if (manifest.id === "image" || manifest.id === "brand-model" || manifest.id === "logo") {
     const images = await adapter.generateImages(manifest, input, profile, abortSignal, storage);
     return { ...images, output: orderLike(outputSchemaFor(manifest.id), images.output) };
@@ -181,18 +184,32 @@ async function generateWith(
 
   // A written deck gets its cover and slide photos and a brand accent
   // (Gemini only, like every other platform-paid image).
-  if (manifest.id === "presentation" && provider === "google") {
-    const visuals = await addPresentationVisuals(
-      output as Parameters<typeof addPresentationVisuals>[0],
-      buildContext(manifest, input, profile),
-      abortSignal,
-      storage,
-    );
-    output = visuals.output;
-    usage = {
-      inputTokens: (usage.inputTokens ?? 0) + (visuals.usage.inputTokens ?? 0),
-      outputTokens: (usage.outputTokens ?? 0) + (visuals.usage.outputTokens ?? 0),
-    };
+  // Photos get only the time left in the run: a long deck that took most
+  // of it is delivered without slide photos rather than cut off.
+  const remaining = PHOTO_DEADLINE_MS - (Date.now() - started);
+  if (manifest.id === "presentation" && provider === "google" && remaining > 45_000) {
+    const budget = new AbortController();
+    const stop = () => budget.abort();
+    abortSignal?.addEventListener("abort", stop);
+    const timer = setTimeout(stop, remaining);
+    try {
+      const visuals = await addPresentationVisuals(
+        output as Parameters<typeof addPresentationVisuals>[0],
+        buildContext(manifest, input, profile),
+        budget.signal,
+        storage,
+      );
+      output = visuals.output;
+      usage = {
+        inputTokens: (usage.inputTokens ?? 0) + (visuals.usage.inputTokens ?? 0),
+        outputTokens: (usage.outputTokens ?? 0) + (visuals.usage.outputTokens ?? 0),
+      };
+    } catch (err) {
+      if (abortSignal?.aborted) throw err;
+    } finally {
+      clearTimeout(timer);
+      abortSignal?.removeEventListener("abort", stop);
+    }
   }
 
   // Blog photos, campaign ad visuals, strategy mood board (Gemini only).
