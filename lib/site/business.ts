@@ -17,11 +17,11 @@ export const BUSINESS = {
   /** 사업장 주소 */
   address: "부산광역시 부산진구 엄광로 176, 317호 (가야동, 동의대학교 제1효민생활관)",
   /** 고객센터 전화 */
-  phone: "",
+  phone: "051-331-0110",
   /** 고객센터·개인정보 문의 이메일 */
-  email: "",
+  email: "incom2794@naver.com",
   /** 개인정보 보호책임자 */
-  privacyOfficer: { name: "", title: "", email: "" },
+  privacyOfficer: { name: "이성웅", title: "대표이사", email: "incom2794@naver.com" },
   /** Supabase 프로젝트 리전 (데이터베이스·파일이 저장되는 곳), 예: "대한민국 서울 (ap-northeast-2)" */
   dataRegion: "",
   /** 호스팅 서비스 제공자 (전자상거래법상 표시 사항) */
