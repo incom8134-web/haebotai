@@ -73,7 +73,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   }
 
   const manifest = getTool(run.tool_id);
-  const toolName = manifest?.name_ko ?? run.tool_id;
+  // The document belongs to the user's project: no service branding.
+  const toolName = (manifest?.name_ko ?? run.tool_id).replace(/^해봇\s*/, "");
   const date = new Date(run.created_at ?? Date.now()).toISOString().slice(0, 10);
   const filename = `${toolName}-${date}.${format}`;
 
@@ -90,7 +91,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       output: orderLike(getOutputSchema(run.tool_id) ?? z.unknown(), run.output),
       input: run.input,
       sources: (run.sources as Source[] | null) ?? [],
-      brandName: profile?.brand_name ?? null,
+      // The business this run was for (lib/tools/request-brief.ts); the
+      // saved profile only when the run was about the account's own business.
+      brandName: exportBrandName(run.output, profile?.brand_name ?? null),
       createdAt: run.created_at,
     });
     // pdfkit and pptxgenjs load only for their own format, so a problem
@@ -115,4 +118,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       "Content-Disposition": `attachment; filename="haebot-${run.tool_id}-${date}.${format}"; filename*=UTF-8''${encodeURIComponent(filename)}`,
     },
   });
+}
+
+function exportBrandName(output: unknown, profileBrand: string | null): string | null {
+  const brief = (output as { request_brief?: { subject?: unknown; uses_profile?: unknown } } | null)?.request_brief;
+  const subject = typeof brief?.subject === "string" ? brief.subject.trim() : "";
+  if (subject) return subject;
+  return brief?.uses_profile === false ? null : profileBrand;
 }

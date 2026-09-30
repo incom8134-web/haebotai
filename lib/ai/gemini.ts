@@ -260,7 +260,7 @@ export async function generateProductPhotos(
   references: ImagePart[],
   abortSignal: AbortSignal | undefined,
 ): Promise<{ photos: (string | null)[]; usage: TokenUsage }> {
-  const photoManifest = { id: "image", name_ko: "해봇 상세페이지", summary: "상세페이지 제품 사진", model: PRO_IMAGE_MODEL } as ToolManifest;
+  const photoManifest = { id: "image", name_ko: "상세페이지", summary: "상세페이지 제품 사진", model: PRO_IMAGE_MODEL } as ToolManifest;
   let usage: TokenUsage = { inputTokens: 0, outputTokens: 0 };
   const photos = await Promise.all(
     prompts.map(async ({ prompt, ratio }) => {
@@ -284,7 +284,7 @@ export async function generateProductPhotos(
 // self-contained (no signed URL that expires). Called from generate.ts
 // after the page itself is written.
 export async function generateHeroImage(prompt: string, abortSignal: AbortSignal | undefined): Promise<{ dataUrl: string; usage: TokenUsage }> {
-  const heroManifest = { id: "image", name_ko: "해봇 홈페이지", summary: "홈페이지 히어로 사진", model: PRO_IMAGE_MODEL } as ToolManifest;
+  const heroManifest = { id: "image", name_ko: "홈페이지", summary: "홈페이지 히어로 사진", model: PRO_IMAGE_MODEL } as ToolManifest;
   const { image, usage } = await generateOneImage(
     heroManifest,
     [{ text: `Website hero photograph, wide banner composition with calm negative space on one side for a headline. ${prompt} Photorealistic, natural light, high detail. No text, no logos, no watermark.` }],

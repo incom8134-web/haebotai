@@ -199,7 +199,6 @@ class Deck {
     this.name = name;
     this.pptx.layout = "LAYOUT_WIDE"; // 13.33 x 7.5 in
     this.pptx.title = name;
-    this.pptx.company = "해봇 AI";
   }
 
   text(slide: Slide, text: string | Run[], opts: TextOpts) {
@@ -226,7 +225,7 @@ class Deck {
     this.rect(s, 0, 0, 0.16, H, color.c);
     if (kicker) this.text(s, kicker, { x: M, y: 0.42, w: CW, h: 0.3, fontSize: 11, bold: true, color: color.c, charSpacing: 1 });
     s.addShape(this.pptx.ShapeType.line, { x: M, y: H - 0.45, w: CW, h: 0, line: { color: LINE, width: 0.75 } });
-    this.text(s, `해봇 AI · ${this.name}`, { x: M, y: H - 0.38, w: 9, h: 0.24, fontSize: 9, color: MUTED });
+    this.text(s, this.name, { x: M, y: H - 0.38, w: 9, h: 0.24, fontSize: 9, color: MUTED });
     this.text(s, String(this.page), { x: W - M - 1, y: H - 0.38, w: 1, h: 0.24, fontSize: 9, color: MUTED, align: "right" });
     return s;
   }
@@ -269,7 +268,7 @@ class Deck {
     this.text(s, subtitle, { x: tx, y: centered ? 4.9 : 4.75, w: tw, h: 0.5, fontSize: 16, color: "D5D9DD", align: centered ? "center" : "left" });
   }
 
-  cover(title: string, subtitle: string, kicker = "해봇 AI") {
+  cover(title: string, subtitle: string, kicker = "") {
     const s = this.pptx.addSlide();
     s.background = { color: DARK };
     this.page++;
@@ -1234,7 +1233,7 @@ export async function buildPptx(doc: ExportDoc): Promise<Buffer> {
   if (coverImg) {
     const accent = typeof o.accent_color === "string" && HEX.test(o.accent_color) ? accentPalette(o.accent_color)[0] : PALETTE[0];
     deck.photoCover(coverImg, accent, deckTitle, deckSubtitle, doc.title);
-  } else deck.cover(deckTitle, deckSubtitle, isDeck ? doc.title : "해봇 AI");
+  } else deck.cover(deckTitle, deckSubtitle, isDeck ? doc.title : "");
 
   const ctx: Ctx = { deck, images, sources: [] };
 

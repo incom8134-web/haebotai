@@ -36,7 +36,7 @@ async function shoot(
   const text = `${prompt} Photorealistic, editorial quality, natural light, rich detail, cohesive color grade. Absolutely no text, letters, numbers, logos, signage or watermarks anywhere in the image.`;
   try {
     // Pro image model, with the shared fallback to the fast one.
-    const manifest = { id: "image", name_ko: "해봇 비주얼", summary: "브랜드 비주얼 사진", model: PRO_IMAGE_MODEL } as ToolManifest;
+    const manifest = { id: "image", name_ko: "브랜드 비주얼", summary: "브랜드 비주얼 사진", model: PRO_IMAGE_MODEL } as ToolManifest;
     const { image, usage } = await generateOneImage(manifest, [{ text }], Math.floor(Math.random() * 2 ** 31), abortSignal, ratio);
     const ext = image.mimeType.includes("png") ? "png" : "jpg";
     const path = `${storage.userId}/${folder}/${storage.runId}/${name}.${ext}`;
@@ -148,7 +148,6 @@ const PURPOSE_BLUEPRINT: Record<string, string> = {
   portfolio: "포트폴리오: 작업이 주인공 — 큰 이미지의 프로젝트 목록, 대표 작업 1~2개의 케이스 스토리(문제·과정·결과), 작업 방식, 의뢰 방법.",
   landing: "랜딩 페이지: 제안 하나에 집중 — 짧고 강한 흐름(약속 → 근거 → 제안 → 의심 해소 → 행동), 섹션 4~6개, 같은 행동 버튼 반복.",
 };
-const pick = <T,>(xs: readonly T[]) => xs[Math.floor(Math.random() * xs.length)];
 
 const PRETENDARD_LINK = '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">';
 const fontLinkTag = (family: string) => `<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=${family}&display=swap">`;
@@ -177,6 +176,9 @@ interface SitePlan {
     scene_text: string;
     scene_shapes: "soft" | "geometric" | "rings" | "mixed";
     scene_align: "center" | "left" | "right";
+    scene_variant: string;
+    scene_motion: "calm" | "lively" | "dramatic";
+    scene_placement: "hero-background" | "hero-side" | "section-band" | "closing-cta";
     scroll_moments: string[];
     micro_interactions: string[];
   };
@@ -265,11 +267,22 @@ const SITE_PLAN_SCHEMA = {
       properties: {
         scene: {
           type: "string",
-          enum: ["liquid-image", "orb", "particles-text", "photo-ring", "waves", "floating", "aurora", "none"],
+          enum: ["liquid-image", "orb", "particles-text", "photo-ring", "waves", "floating", "aurora", "bokeh", "ribbons", "contours", "none"],
           description:
-            "WebGL 3D 장면 하나. liquid-image=히어로 사진이 커서에 물결처럼 일렁임(음식·패션·뷰티·공간·예술), orb=브랜드 색의 유기적으로 변형되는 3D 구체(웰니스·뷰티·테크·크리에이티브), particles-text=수천 개 입자가 상호를 그렸다가 스크롤에 흩어지고 커서를 피함(이름이 강한 브랜드·런칭·이벤트), photo-ring=사이트 사진들이 3D 링으로 회전·드래그(포트폴리오·갤러리·메뉴·상품), waves=흐르는 3D 점 지형(테크·컨설팅·제조·금융·바다), floating=광택 3D 도형들이 떠다님(교육·키즈·유쾌한 브랜드·신제품), aurora=살아 움직이는 그라데이션 필드(차분하고 고급스러운 브랜드, 문구 중심 섹션). 빅 아이디어와 업종 은유에 가장 맞는 것",
+            "톤에 맞는 WebGL 장면 하나, 또는 none. liquid-image=사진이 커서에 일렁임(음식·패션·공간·예술), orb=변형되는 3D 구체(웰니스·뷰티·크리에이티브·테크), particles-text=입자가 상호나 형태를 그림(런칭·이벤트·테크), photo-ring=사진들의 3D 링 또는 갤러리 월(포트폴리오·갤러리·상품·공방), waves=흐르는 3D 지형(테크·컨설팅·제조·바다), floating=떠다니는 3D 도형(교육·키즈·유쾌한 브랜드·신제품), aurora=살아 있는 그라데이션(차분·고급·문구 중심), bokeh=부드러운 빛망울(카페·웨딩·호텔·따뜻하고 차분한 곳), ribbons=흐르는 리본(패션·뷰티·음악·웰니스), contours=등고선(아웃도어·여행·부동산·건축·컨설팅), none=3D 없이 절제된 CSS·GSAP 움직임만(법률·의료·장례·금융처럼 신뢰와 절제가 먼저인 곳, 또는 사진이 주인공이어야 할 때). [요청 분석]의 톤·에너지·피할 것에 맞춰 고르고, 무작위로 고르지 마세요",
         },
-        scene_section: { type: "string", description: "장면이 들어갈 섹션 id — 첫 화면의 주인공이므로 항상 'hero'" },
+        scene_section: { type: "string", description: "장면이 들어갈 섹션 id (scene_placement와 맞게: 보통 hero)" },
+        scene_variant: {
+          type: "string",
+          enum: ["", "glossy", "pearl", "wire", "text", "sphere", "wave", "ring", "wall", "dots", "lines", "mesh", "gloss", "glass", "matte", "metal", "flow", "soft", "dusk", "warm", "cool", "silk", "neon", "map", "fine"],
+          description: "장면의 모습. orb: glossy(화려)·pearl(부드럽고 절제)·wire(테크·선) / particles-text: text·sphere·wave / photo-ring: ring(드래그 회전)·wall(차분한 갤러리 월) / waves: dots·lines(차분)·mesh(테크) / floating: gloss·glass(맑고 고급)·matte(따뜻·키즈)·metal(강렬) / aurora: flow·soft(가장 차분)·dusk(노을) / bokeh: warm·cool / ribbons: silk(우아)·neon(밤·음악) / contours: map·fine. none이면 빈 문자열",
+        },
+        scene_motion: { type: "string", enum: ["calm", "lively", "dramatic"], description: "움직임의 속도·세기 — 톤의 에너지와 맞게 (격식·고급·의료·교육은 calm, 대부분 lively, 이벤트·음악·스포츠는 dramatic)" },
+        scene_placement: {
+          type: "string",
+          enum: ["hero-background", "hero-side", "section-band", "closing-cta"],
+          description: "장면 위치: hero-background(첫 화면 전체 배경), hero-side(분할 첫 화면의 한쪽), section-band(중간의 몰입 띠 섹션), closing-cta(마지막 행동 섹션 배경). 사진이 주인공인 첫 화면이면 section-band나 closing-cta도 좋습니다",
+        },
         scene_reason: { type: "string", description: "이 장면이 이 가게의 이야기와 어떻게 연결되는지 (한국어 한 문장)" },
         scene_text: { type: "string", description: "particles-text일 때 입자가 그릴 짧은 단어(상호, 12자 이내). 아니면 빈 문자열" },
         scene_shapes: { type: "string", enum: ["soft", "geometric", "rings", "mixed"], description: "floating일 때 도형 계열" },
@@ -290,7 +303,7 @@ const SITE_PLAN_SCHEMA = {
           description: "작은 인터랙션 (영문): magnetic primary buttons, 3D tilt on cards, custom cursor label over gallery, hover image reveal on list rows, marquee that reacts to scroll speed, animated underline links 등",
         },
       },
-      required: ["scene", "scene_section", "scene_reason", "scene_text", "scene_shapes", "scene_align", "scroll_moments", "micro_interactions"],
+      required: ["scene", "scene_section", "scene_reason", "scene_text", "scene_shapes", "scene_align", "scene_variant", "scene_motion", "scene_placement", "scroll_moments", "micro_interactions"],
     },
     images: {
       type: "array",
@@ -327,14 +340,14 @@ STACK — a modern front-end build, delivered as one HTML document with two part
    - "three" and "three/addons/…" (Three.js r186)
    - "gsap", "gsap/ScrollTrigger", "gsap/SplitText", "gsap/Flip", "gsap/Observer" (GSAP 3.13, default export gsap)
    - "lenis" (Lenis 1.3 smooth scroll, default export)
-   - "@haebot/kit" — the studio's tested WebGL kit:
-     mountScene(host: HTMLElement | null, { type: "liquid-image" | "orb" | "particles-text" | "photo-ring" | "waves" | "floating" | "aurora", colors: string[] /* palette hexes */, image?: string /* liquid-image */, images?: string[] /* photo-ring */, text?: string /* particles-text */, shapes?: "soft" | "geometric" | "rings" | "mixed", align?: "center" | "left" | "right", intensity?: number /* 0..1 */ }): { setProgress(p: number): void; destroy(): void } | null
+   - "@site/kit" — the studio's tested WebGL kit:
+     mountScene(host: HTMLElement | null, { type: "liquid-image" | "orb" | "particles-text" | "photo-ring" | "waves" | "floating" | "aurora" | "bokeh" | "ribbons" | "contours", variant?: string /* the plan's scene_variant */, motion?: "calm" | "lively" | "dramatic" /* the plan's scene_motion */, colors: string[] /* palette hexes */, image?: string /* liquid-image */, images?: string[] /* photo-ring */, text?: string /* particles-text */, shapes?: "soft" | "geometric" | "rings" | "mixed", align?: "center" | "left" | "right", intensity?: number /* 0..1 */ }): { setProgress(p: number): void; destroy(): void } | null
        — appends an absolutely positioned canvas filling host (give host position: relative/absolute, a real size, and keep a normal <img> or CSS background inside it as the fallback; returns null without WebGL). It handles resize, pointer, off-screen pausing and reduced motion itself.
      splitWords(el: Element | null): HTMLElement[] — wraps each word in .w > .wi spans and RETURNS THE .wi SPANS (animate the returned array directly, e.g. gsap.from(words, { yPercent: 110, stagger: 0.06 })); Korean-safe
      magnetic(selector: string, strength?: number) — buttons lean toward the pointer
      tilt(selector: string, maxDeg?: number) — cards tilt in 3D under the pointer
      prefersReducedMotion(): boolean
-   Build the plan's experience: mount the plan's scene in the HERO — the first screen is the 3D moment: the hero is at least 100svh (min-height: 100svh), the scene host fills the whole hero (position: absolute; inset: 0; z-index 0) or a large half of a split hero, and the headline, subline and buttons sit above it (position: relative; z-index: 1) with enough contrast (text shadow, a soft scrim or a solid text panel). For liquid-image the host holds the hero <img> and the scene distorts that same photo; for photo-ring the hero shows the ring of the site's photos with the headline over it. colors = the brand colors that stand out on the hero background (primary, accent, …) — never the background color itself. Mount it (read image URLs from the page's own <img> elements, e.g. document.querySelector<HTMLImageElement>(".PREFIX-hero img")?.src, never hard-coded); then Lenis smooth scroll wired to ScrollTrigger (const lenis = new Lenis({ autoRaf: false }); lenis.on("scroll", ScrollTrigger.update); gsap.ticker.add((t) => lenis.raf(t * 1000)); gsap.ticker.lagSmoothing(0); anchor links use lenis.scrollTo(target, { offset: -headerHeight })); then every scroll moment and micro-interaction in the plan with gsap + ScrollTrigger, inside gsap.matchMedia() so pinned/horizontal effects run only at (min-width: 960px) and nothing animates under (prefers-reduced-motion: reduce). Structure the module as small named functions called from one init(), each wrapped so a failure in one never stops the others: const safe = (name: string, fn: () => void) => { try { fn(); } catch (e) { console.warn(name, e); } };
+   Build the plan's experience exactly as planned — scene, scene_variant (pass as variant) and scene_motion (pass as motion) — at the plan's scene_placement: hero-background = the host fills the whole first screen (min-height: 100svh; position: absolute; inset: 0; z-index 0) with the headline, subline and buttons above it (position: relative; z-index: 1); hero-side = one half of a split first screen, text on the other half; section-band = a full-width immersive band (60–90svh) between content sections with one short statement over it; closing-cta = the background of the final call-to-action section. Keep text readable over any scene (text shadow, a soft scrim or a solid text panel). If the plan's scene is "none", do not import or mount any WebGL — carry the tone with refined motion only (GSAP reveals, parallax on photos, subtle hover states). For liquid-image the host holds the hero <img> and the scene distorts that same photo; for photo-ring the hero shows the ring of the site's photos with the headline over it. colors = the brand colors that stand out on the hero background (primary, accent, …) — never the background color itself. Mount it (read image URLs from the page's own <img> elements, e.g. document.querySelector<HTMLImageElement>(".PREFIX-hero img")?.src, never hard-coded); then Lenis smooth scroll wired to ScrollTrigger (const lenis = new Lenis({ autoRaf: false }); lenis.on("scroll", ScrollTrigger.update); gsap.ticker.add((t) => lenis.raf(t * 1000)); gsap.ticker.lagSmoothing(0); anchor links use lenis.scrollTo(target, { offset: -headerHeight })); then every scroll moment and micro-interaction in the plan with gsap + ScrollTrigger, inside gsap.matchMedia() so pinned/horizontal effects run only at (min-width: 960px) and nothing animates under (prefers-reduced-motion: reduce). Structure the module as small named functions called from one init(), each wrapped so a failure in one never stops the others: const safe = (name: string, fn: () => void) => { try { fn(); } catch (e) { console.warn(name, e); } };
    Progressive enhancement: never hide content in CSS waiting for JS (no opacity: 0 or transform on .wi, reveal classes or sections in the stylesheet); animate with gsap.from()/fromTo() so content is visible if the module never runs. Scroll-triggered entrances use start: "top 85%" and once: true. Always null-check querySelector results before animating them. Everything interactive (tabs, lightbox, carousel, sticky bar, form, copy address, today's hours) is also implemented in this module.
 - Fonts: do NOT write any font <link> or @import — the server adds them. Use the plan's body font for body text and the plan's display font for headings, each with a system-font fallback stack.
 - Icons are small inline <svg> elements (stroke icons, currentColor, 1.75 stroke width) that you draw yourself. No icon libraries. Use word-break: keep-all and text-wrap: balance for Korean headings.
@@ -350,7 +363,7 @@ DESIGN — the plan decides the page's skeleton; build exactly what it says, not
 - Sections: exactly the plan's sections, each with its OWN layout from the plan. Never repeat the same layout twice in a row. Alternate background tones to create rhythm. The page ends with a closing action and a footer with the business's facts.
 - Real visual craft: generous spacing scale, max-width containers, 12-column thinking, large type contrast, subtle borders and layered shadows, generously rounded cards (16–28px), hover lift and image zoom transitions, focus-visible rings, smooth scroll.
 - Motion: GSAP choreography from the plan (headline words rising in via splitWords, clip-path image reveals, parallax, pinned horizontal galleries on desktop, scrubbed progress lines) — expressive but never blocking reading; content stays visible without JS; respect prefers-reduced-motion.
-- Immersion: the plan's 3D scene is the site's signature moment — give its section a bold composition (headline layered over or beside the canvas, enough height, a scroll cue) so it feels like an award-site hero, not a widget.
+- Immersion: the plan's scene (if any) is the site's signature moment at its placement — compose that section around it (headline layered over or beside the canvas, enough height, a scroll cue). Its speed and boldness follow the plan's scene_motion and the tone: calm sites stay quiet and precise, lively ones playful, dramatic ones bold.
 - Mobile-first and flawless from 360px to 1440px (test mentally: nav, hero text size, grids collapsing to one column, no horizontal scroll).
 - Semantic HTML, one h1, meta description, Open Graph title/description, lang="ko", theme-color.
 
@@ -372,9 +385,9 @@ PRICES AND OFFERS (strict): every price, product tier, quantity (stems, grams, m
 
 CONTENT: all visible copy in natural, specific Korean written for THIS business — its product, place, customers and the user's own words. Headlines are claims or invitations, not labels. No lorem ipsum, no "여기에 소개글", no English filler. Follow the facts rules below strictly: use the user's contact/address/hours/prices verbatim; anything not given is written as [입력 필요]; never invent reviews, awards, statistics, certifications or origins.`;
 
-const REVIEW_BRIEF = `You are the creative director and senior front-end reviewer at the same studio. A designer handed you the draft page below. Audit it hard against the art director's plan and this checklist, then return the COMPLETE improved HTML document (only the HTML, starting with <!doctype html>, keeping the same two-part stack: markup + one <style>, and ONE <script type="text/typescript"> module before </body> that imports only three, three/addons/…, gsap, gsap/ScrollTrigger|SplitText|Flip|Observer, lenis and @haebot/kit):
+const REVIEW_BRIEF = `You are the creative director and senior front-end reviewer at the same studio. A designer handed you the draft page below. Audit it hard against the art director's plan and this checklist, then return the COMPLETE improved HTML document (only the HTML, starting with <!doctype html>, keeping the same two-part stack: markup + one <style>, and ONE <script type="text/typescript"> module before </body> that imports only three, three/addons/…, gsap, gsap/ScrollTrigger|SplitText|Flip|Observer, lenis and @site/kit):
 0. Specific, not generic: the big idea and every item in request_details is visible on the page; a visitor could not mistake this for another business's site. Rewrite anything that reads like template filler.
-0b. The TypeScript module compiles (valid TS, erasable types, no stray markup), mounts the plan's 3D scene correctly with mountScene (host sized, fallback image inside), wires Lenis to ScrollTrigger, builds every scroll moment and micro-interaction from the plan, and wraps each feature in safe(). Fix any API misuse of three/gsap/lenis.
+0b. The TypeScript module compiles (valid TS, erasable types, no stray markup), mounts the plan's scene (if it has one) with mountScene using the plan's variant, motion and placement (host sized, fallback image inside), and imports no WebGL when the scene is "none", wires Lenis to ScrollTrigger, builds every scroll moment and micro-interaction from the plan, and wraps each feature in safe(). Fix any API misuse of three/gsap/lenis.
 1. The hero, navigation, shape language, texture and signature elements match the plan — nothing reads like a generic template.
 2. Every interaction in the plan works (tabs, lightbox, carousel with swipe, accordion, sticky action bar, count-up, form composing sms:/mailto:, map embed with copy-address, today's hours highlight) and degrades gracefully without JS.
 3. Every section has real depth from the plan's content list, a clear next-step button, and a distinct layout; no section is thin or repetitive.
@@ -485,17 +498,14 @@ export async function generateHomepage(
   // "참고 자료" images and PDFs (an old site's screenshot, a brochure).
   const refParts = await toGeminiParts(referenceParts(input, { documents: true }), abortSignal);
 
-  // A fresh combination per run, so the same input doesn't give the same
-  // site; the plan may override it when the user's request or concept
-  // calls for something else.
-  const suggestion = {
-    hero_archetype: pick(HERO_ARCHETYPES),
-    nav_style: pick(NAV_STYLES),
-    shape_language: pick(SHAPES),
-    texture: pick(TEXTURES),
-    signature: pick(SIGNATURES),
-    display_font: pick(Object.keys(DISPLAY_FONTS).filter((f) => f !== "Pretendard")),
-    scene: pick(["liquid-image", "orb", "particles-text", "photo-ring", "waves", "floating", "aurora"] as const),
+  // Design options the art director chooses from — by the request's tone
+  // (the [요청 분석] block in the brief), never at random.
+  const menu = {
+    hero_archetypes: HERO_ARCHETYPES,
+    nav_styles: NAV_STYLES,
+    shape_languages: SHAPES,
+    textures: TEXTURES,
+    signature_elements: SIGNATURES,
   };
   const purpose = typeof input.purpose === "string" ? input.purpose : "";
   const mode = referenceOf(input)?.mode.id ?? "";
@@ -516,13 +526,15 @@ export async function generateHomepage(
       "요청이 구체적이면: 요청의 모든 요소(상호·상품·특징·고객·원하는 기능과 분위기)를 request_details에 적고 사이트에 빠짐없이 보이게 하세요. 사용자가 쓴 표현을 살리세요.",
       "빅 아이디어·섹션 문구·스크롤 연출 어디에도 입력에 없는 숫자(발효 시간, 경력 연수, 개수, 고객 수, 퍼센트)를 만들지 마세요. 숫자가 필요하면 입력의 숫자만 씁니다.",
       "요청이 짧거나 막연하면: 섹션을 6~8개로 풍부하게 구성하고, 업종·지역·고객에서 출발해 크리에이티브를 대담하게 확장하세요 — 이 가게만의 빅 아이디어, 브랜드 스토리의 방향, 섹션별 구체 내용, 몰입형 3D 장면과 스크롤 연출, 만지고 싶은 인터랙션까지 풍부하게. 단 가격·수치·후기·수상·경력 같은 사실은 절대 만들지 않습니다.",
-      "결과물은 수상작 수준(Awwwards)의 인터랙티브 사이트입니다: 3D 장면 하나가 빅 아이디어를 상징하고, 스크롤할 때마다 무언가 일어나며, 모든 섹션에 행동 버튼이 있습니다.",
+      "모든 디자인 결정(색, 서체, 첫 화면, 도형·질감, 3D 장면과 모습·속도, 스크롤 연출)은 브리프의 [요청 분석]에 있는 톤·대상·보는 사람·피할 것에서 출발합니다. 무작위로 고르거나 이전 사이트의 패턴을 반복하지 말고, 이 요청에 가장 어울리는 것을 고르세요. 선택지 목록은 참고일 뿐, 톤에 맞으면 새로 만들어도 됩니다.",
+      "결과물은 수상작 수준(Awwwards)의 인터랙티브 사이트입니다. 다만 움직임의 양은 톤이 정합니다: 격식·신뢰가 먼저인 곳은 절제된 전환과 차분한 장면(또는 3D 없음), 활기찬 곳은 과감한 연출. 모든 섹션에 행동 버튼이 있습니다.",
+      "요청이 저장된 프로필과 다른 가게·고객사·프로젝트라면 프로필의 이름·색·톤을 쓰지 말고, 이 서비스(해봇 AI)의 이름도 사이트에 넣지 마세요.",
     ].join("\n"),
     [
       `다음 가게의 홈페이지를 기획하세요.\n\n${brief}`,
       purpose && PURPOSE_BLUEPRINT[purpose] ? `\n[목적별 구성]\n${PURPOSE_BLUEPRINT[purpose]}` : "",
       mode && commandNote[mode] ? `\n[참고 자료 작업 방식]\n${commandNote[mode]}` : "",
-      `\n[이번 실행의 디자인 제안 — 콘셉트나 사용자 요청과 맞지 않으면 더 나은 것으로 바꿔도 됩니다]\n${JSON.stringify(suggestion, null, 2)}`,
+      `\n[디자인 선택지 — 톤에 맞는 것을 고르거나 새로 만드세요]\n${JSON.stringify(menu, null, 2)}`,
     ].join("\n"),
     SITE_PLAN_SCHEMA,
     abortSignal,
@@ -642,6 +654,8 @@ export async function generateHomepage(
         signature: plan.signature_elements,
         big_idea: plan.big_idea,
         scene: plan.experience?.scene,
+        scene_variant: plan.experience?.scene_variant,
+        tone: typeof (input._brief as { tone?: unknown } | undefined)?.tone === "string" ? (input._brief as { tone: string }).tone : undefined,
         scroll: plan.experience?.scroll_moments,
       },
       ...(project ? { project_files: project } : {}),
