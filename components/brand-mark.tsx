@@ -1,7 +1,8 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
-// The 해봇 AI mark (public/brand, cropped from app/sublogo.png). The
+// The 해봇 AI mark (public/brand, rendered from public/brand/mark.svg by
+// scripts/brand/render-brand.mjs — the H with a rising sun). The
 // wordmark next to it is live text in the theme's own colour, so the
 // logo reads on both the light and dark themes — the full-logo PNG has
 // navy text that disappears on dark.
