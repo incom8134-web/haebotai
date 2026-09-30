@@ -10,9 +10,9 @@ import type { ToolManifest } from "../types";
 
 export const logo: ToolManifest = {
   id: "logo",
-  category: "design",
-  name_ko: "해봇 로고",
-  name_en: "Logo Generator",
+  category: "brand",
+  name_ko: "로고 디렉션 랩",
+  name_en: "Logo Direction Lab",
   summary: "브랜드명과 연상 키워드로 서로 다른 방향의 로고 콘셉트 4종(심볼 + 브랜드명 조합)을 디자인합니다.",
   icon: Shapes,
   inputs: [

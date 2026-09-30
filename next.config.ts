@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { TOOL_REDIRECTS } from "./lib/tools/tool-redirects";
 
 // Full policy, shipped as Report-Only: browsers report what it WOULD block
 // to /api/csp-report without blocking anything. Once the reports are clean
@@ -74,6 +75,11 @@ const nextConfig: NextConfig = {
       { source: "/api-management", destination: "/account/api-key", permanent: false },
       { source: "/history", destination: "/library", permanent: false },
       { source: "/workflows", destination: "/tools#flows", permanent: false },
+      // Tool URLs before the 25-tool redesign (docs/redesign-plan.md §3).
+      ...Object.entries(TOOL_REDIRECTS).flatMap(([from, to]) => [
+        { source: `/tools/${from}`, destination: to ? `/tools/${to}` : "/tools", permanent: true },
+        { source: `/tools/${from}/run`, destination: to ? `/tools/${to}/run` : "/tools", permanent: true },
+      ]),
     ];
   },
 };

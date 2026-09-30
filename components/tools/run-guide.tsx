@@ -1,5 +1,6 @@
 "use client";
 
+import { toolSlug } from "@/lib/tools/catalog";
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight, BookOpen, Check, Copy, Headset, Lightbulb, Plus, WandSparkles } from "lucide-react";
@@ -79,7 +80,7 @@ export function RunGuide({ toolId, onPreset }: { toolId: string; onPreset: (inde
         <div className="smooth-body"><div><pre className="mt-3 rounded-xl border border-hairline bg-bg/40 p-3 font-sans text-xs leading-relaxed whitespace-pre-wrap">{L(c.sample)}</pre></div></div>
       </details>
       <div className="flex flex-wrap gap-x-4 gap-y-1 px-1 text-sm">
-        <Link href={`/tools/${toolId}`} className="inline-flex items-center gap-1 text-fg-muted hover:text-fg"><BookOpen size={13} aria-hidden /> {L({ ko: "사용법·FAQ", en: "How-to & FAQ" })}</Link>
+        <Link href={`/tools/${toolSlug(toolId)}`} className="inline-flex items-center gap-1 text-fg-muted hover:text-fg"><BookOpen size={13} aria-hidden /> {L({ ko: "사용법·FAQ", en: "How-to & FAQ" })}</Link>
         <Link href={`/help/contact?tool=${toolId}`} className="inline-flex items-center gap-1 text-fg-muted hover:text-fg"><Headset size={13} aria-hidden /> {L({ ko: "문의하기", en: "Ask support" })} <ArrowUpRight size={12} aria-hidden /></Link>
       </div>
     </div>

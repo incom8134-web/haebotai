@@ -1,4 +1,5 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound, permanentRedirect, redirect } from "next/navigation";
+import { redirectFor } from "@/lib/tools/catalog";
 import { ToolRunner } from "@/components/tool-runner";
 import { getTool } from "@/lib/tools/registry";
 import { DEFAULT_TOOL_CAPABILITY, getToolCapability } from "@/lib/ai/capabilities";
@@ -24,12 +25,19 @@ export default async function ToolPage({
   params: Promise<{ toolId: string }>;
   searchParams: Promise<{ fromRun?: string; brief?: string; preset?: string }>;
 }) {
-  const { toolId } = await params;
-  const tool = getTool(toolId);
-  if (!tool) notFound();
+  const { toolId: requested } = await params;
+  const query = new URLSearchParams(Object.entries(await searchParams).filter((e): e is [string, string] => typeof e[1] === "string")).toString();
+  const qs = query ? `?${query}` : "";
+  const moved = redirectFor(requested);
+  if (moved !== null) permanentRedirect(moved ? `/tools/${moved}/run${qs}` : "/tools");
+  const tool = getTool(requested);
+  if (!tool || tool.retired) notFound();
+  if (tool.slug && tool.slug !== requested) permanentRedirect(`/tools/${tool.slug}/run${qs}`);
   // Not runnable yet — the overview page explains, so send pinned links,
   // flows and old bookmarks there instead of a form that can only fail.
-  if (tool.comingSoon) redirect(`/tools/${toolId}`);
+  if (tool.comingSoon) redirect(`/tools/${requested}`);
+  // Everything below works with the engine id (what runs store).
+  const toolId = tool.id;
 
   const [profile, { fromRun, brief, preset }, keyStatus, membership, balance] = await Promise.all([
     getBusinessProfile(),

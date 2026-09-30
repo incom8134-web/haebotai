@@ -8,9 +8,9 @@ import type { ToolManifest } from "../types";
 
 export const sangsepage: ToolManifest = {
   id: "sangsepage",
-  category: "sales",
-  name_ko: "해봇 상세페이지",
-  name_en: "Product Detail Page",
+  category: "brand",
+  name_ko: "세일즈 페이지 설계소",
+  name_en: "Sales Page Architect",
   summary: "제품 사진과 특징으로 스마트스토어 상세페이지를 만듭니다.",
   icon: LayoutTemplate,
   inputs: [

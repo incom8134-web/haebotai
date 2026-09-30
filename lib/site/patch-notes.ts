@@ -4,6 +4,19 @@ export type NoteKind = "new" | "improved" | "fixed";
 
 export const PATCH_NOTES: { version: string; date: string; title: Bilingual; items: { kind: NoteKind; text: Bilingual }[] }[] = [
   {
+    version: "2.0.0",
+    date: "2026-09-30",
+    title: { ko: "새 도구 체계: 5개 분야, 25개 도구", en: "New tool lineup: 5 areas, 25 tools" },
+    items: [
+      { kind: "new", text: { ko: "도구를 발견·수익 설계, 브랜드·웹·세일즈, 캠페인·콘텐츠, 문서·운영 시스템, 리서치·인텔리전스 5개 분야로 새로 정리", en: "Tools are reorganised into five areas: Discover & Monetize, Brand/Web/Sales, Campaigns & Content, Documents & Operations, Research & Intelligence" } },
+      { kind: "new", text: { ko: "도구 이름과 주소가 바뀌었어요. 예전 주소와 보관함의 결과는 그대로 새 도구로 연결됩니다", en: "Tools have new names and URLs. Old links and your saved results lead to the new tools" } },
+      { kind: "new", text: { ko: "새 리서치·인텔리전스 분야와 훅 연구소, 콘텐츠 변환기, 업무 매뉴얼 빌더 등 13개 도구를 순서대로 공개합니다 (도구 목록에 '곧 공개'로 표시)", en: "A new Research & Intelligence area plus 13 more tools (Hook Lab, Content Transformer, SOP Builder and others) launch in stages — marked \"coming soon\"" } },
+      { kind: "improved", text: { ko: "도구 찾기: 하고 싶은 일로 검색, 설계·판매·만들기·운영·조사 필터, 즐겨찾기와 최근 사용, 도구마다 받게 될 결과를 미리 표시", en: "Finding tools: search by task, Build/Sell/Create/Operate/Research filters, pinned and recent tools, and each tool's deliverables shown up front" } },
+      { kind: "improved", text: { ko: "밝고 따뜻한 새 디자인 (다크 모드는 그대로 선택 가능)", en: "A brighter, warmer design (dark mode still available)" } },
+      { kind: "improved", text: { ko: "네이버 플레이스·프롬프트 빌더·지원사업 매칭은 종료하고 가까운 도구로 연결", en: "Place optimisation, Prompt builder and Grant matching are retired; their links lead to the closest tool" } },
+    ],
+  },
+  {
     version: "1.7.0",
     date: "2026-09-22",
     title: { ko: "15개 도구에서 Claude 선택, 키 상태 한눈에", en: "Choose Claude on 15 tools, key status at a glance" },

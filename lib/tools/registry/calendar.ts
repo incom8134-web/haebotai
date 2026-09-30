@@ -6,9 +6,9 @@ import type { ToolManifest } from "../types";
 
 export const calendar: ToolManifest = {
   id: "calendar",
-  category: "ideas",
-  name_ko: "해봇 90일 실행 캘린더",
-  name_en: "90-Day Execution Calendar",
+  category: "operate",
+  name_ko: "운영 플래너",
+  name_en: "Operations Planner",
   summary: "실행할 모델을 13주 실행 계획으로 쪼갭니다.",
   icon: CalendarDays,
   inputs: [
