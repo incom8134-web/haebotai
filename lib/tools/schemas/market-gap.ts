@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { sourceSchema } from "../registry/shared";
+import { sourceSchema } from "../registry/shared.ts";
 
 // 시장 빈틈 탐지기: customer needs × existing solutions, with how well each
 // solution covers each need — the empty cells are the gaps. Every need and

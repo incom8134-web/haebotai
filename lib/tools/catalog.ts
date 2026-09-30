@@ -234,7 +234,7 @@ export const CATALOG: CatalogTool[] = [
     promise: b("짧은 영상·게시물의 첫 3초를 잡는 훅을 유형별로", "Opening hooks for short-form content, by hook family"),
     outputs: [b("유형별 훅 카드", "Hook cards by family"), b("플랫폼별 변형", "Platform variants"), b("이어질 첫 장면", "The first scene that follows")],
     icon: Magnet,
-    engine: null,
+    engine: "hook-lab",
     next: ["content-transformer", "ad-factory"],
   },
   {
@@ -256,7 +256,7 @@ export const CATALOG: CatalogTool[] = [
     promise: b("글 하나를 인스타·링크드인·쇼츠·뉴스레터용으로 각각 다시", "One piece of content, rewritten for every platform"),
     outputs: [b("플랫폼별 버전", "Platform versions"), b("쇼츠 대본", "Short-video script"), b("뉴스레터", "Newsletter")],
     icon: GitFork,
-    engine: null,
+    engine: "content-transformer",
     next: ["campaign-planner"],
   },
   {

@@ -41,7 +41,7 @@ export const copy: ToolManifest = {
     { kind: "chips", id: "must_include", label: "꼭 넣을 사실", max: 6 },
   ],
   usesProfile: ["brand_name", "tone", "voice_examples", "target_customer"],
-  acceptsChainFrom: ["brand-dna", "offer-architect", "strategy", "keyword"],
+  acceptsChainFrom: ["hook-lab", "brand-dna", "offer-architect", "strategy", "keyword"],
   outputRenderer: "cards",
   grounding: { requireSources: false, webSearch: true, estimateBadge: true },
   model: "gemini-3.1-pro-preview",

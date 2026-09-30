@@ -26,6 +26,10 @@ const outputSchema = z.object({
     z.object({ name: z.string(), idea: z.string(), example_line: z.string(), channels: z.array(z.string()), first_content: z.string() }),
   ),
   recommended_territory: z.string(),
+  // The campaign on a week grid, one lane per channel (the planner's timeline).
+  channel_plan: z.array(
+    z.object({ channel: z.string(), phase: z.string(), start_week: z.number().min(1).max(13), end_week: z.number().min(1).max(13), activity: z.string(), kpi: z.string() }),
+  ),
   action_plan: z.array(z.object({ phase: z.string(), goal: z.string(), tasks: z.array(z.string()) })),
   kpis: z.array(z.object({ metric: z.string(), baseline: z.string(), target: z.string(), how_to_measure: z.string() })),
   risks: z.array(z.object({ risk: z.string(), likelihood: z.number().min(1).max(5), impact: z.number().min(1).max(5), mitigation: z.string() })),

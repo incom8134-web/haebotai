@@ -36,6 +36,8 @@ export const TOOL_CAPABILITIES: Record<string, ToolCapability> = {
   "market-gap": { providers: ["google"], default: "google" },
   "mvp-blueprint": { providers: ["google"], default: "google" },
   "brand-dna": { providers: ["google"], default: "google" },
+  "hook-lab": { providers: ["google"], default: "google" },
+  "content-transformer": { providers: ["google"], default: "google" },
   money: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 2
   trend: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 4
   strategy: { providers: ["google", "anthropic"], default: "google" },

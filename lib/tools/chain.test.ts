@@ -48,3 +48,11 @@ test("brand-dna carries the brand's rules into logo, site and ads", () => {
   assert.equal(seedFromChain("copy", "brand-dna", dna).audience, "맞벌이 부모");
   assert.equal(seedFromChain("brand-dna", "idea-radar", radar, 0).target_customer, "보호자");
 });
+
+test("campaign hand-offs: strategy → hooks, blog → transformer, hook → ads", () => {
+  const strategy = { recommended_territory: "B", territories: [{ name: "A", idea: "a" }, { name: "B", idea: "퇴근길 5분", example_line: "5분이면 충분" }], segments: [{ name: "직장인" }] };
+  assert.match(String(seedFromChain("hook-lab", "strategy", strategy).topic), /퇴근길 5분/);
+  assert.equal(seedFromChain("hook-lab", "strategy", strategy).audience, "직장인");
+  assert.deepEqual(seedFromChain("content-transformer", "blog", { body_markdown: "## 제목\n본문" }), { source: "## 제목\n본문", source_type: "blog" });
+  assert.equal(seedFromChain("copy", "hook-lab", { best: { text: "오래 걷는 게 답이 아니에요" } }).offer, "오래 걷는 게 답이 아니에요");
+});

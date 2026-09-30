@@ -8,6 +8,8 @@ const outputSchema = z.object({
       headline: z.string(),
       body: z.string(),
       cta: z.string(),
+      // The B side of an A/B test: a different headline and body for the same angle.
+      variant_b: z.object({ headline: z.string(), body: z.string(), test_note: z.string() }),
     }),
   ),
   channel_versions: z.array(z.object({ channel: z.string(), copy: z.string(), note: z.string() })),
