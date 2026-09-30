@@ -85,6 +85,8 @@ export const PALETTES: Record<string, string[]> = {
   "market-gap": ["#0E7490", "#DC2626", "#CA8A04", "#7C3AED", "#16A34A", "#64748B"],
   "hook-lab": ["#DB2777", "#0891B2", "#EA580C", "#65A30D", "#7C3AED", "#64748B"],
   "content-transformer": ["#0E7C66", "#E11D48", "#2563EB", "#D97706", "#9333EA", "#64748B"],
+  "sop-builder": ["#0369A1", "#EA580C", "#16A34A", "#9333EA", "#DB2777", "#64748B"],
+  "meeting-action": ["#4D7C0F", "#0284C7", "#C026D3", "#EA580C", "#0F766E", "#64748B"],
   "brand-dna": ["#BE185D", "#0F766E", "#CA8A04", "#4338CA", "#EA580C", "#64748B"],
   "mvp-blueprint": ["#9333EA", "#EA580C", "#0284C7", "#16A34A", "#E11D48", "#64748B"],
 };

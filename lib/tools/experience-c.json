@@ -1137,5 +1137,261 @@
         }
       ]
     }
+  },
+  "sop-builder": {
+    "layout": "steps",
+    "visual": "checklist",
+    "hero": {
+      "title": {
+        "ko": "머릿속 방식을 누구나 따르는 매뉴얼로",
+        "en": "Turn how you work into a manual anyone can follow"
+      },
+      "story": {
+        "ko": "지금 하는 방식을 편하게 적어 주세요. 역할별 흐름, 확인 기준, 예외 대응까지 정리해 드려요.",
+        "en": "Describe how you do it now. You'll get the flow by role, checks and exception handling."
+      }
+    },
+    "sections": [
+      {
+        "title": {
+          "ko": "어떤 일인가요",
+          "en": "What's the job"
+        },
+        "hint": {
+          "ko": "지금 하는 순서대로 편하게",
+          "en": "In your own words, in order"
+        },
+        "fields": [
+          "process",
+          "standard",
+          "frequency"
+        ]
+      },
+      {
+        "title": {
+          "ko": "누가, 무엇으로",
+          "en": "Who and with what"
+        },
+        "hint": {
+          "ko": "역할, 도구, 자주 생기는 문제",
+          "en": "Roles, tools, common problems"
+        },
+        "fields": [
+          "roles",
+          "tools",
+          "problems",
+          "detail"
+        ]
+      }
+    ],
+    "ui": {
+      "process": {
+        "placeholder": {
+          "ko": "예: 오전 9시에 주문 확인 → 포장 → 송장 출력 → 4시 집하",
+          "en": "e.g. 9am check orders → pack → print labels → 4pm pickup"
+        }
+      },
+      "roles": {
+        "placeholder": {
+          "ko": "Enter로 추가 — 예: 사장, 알바",
+          "en": "Press Enter — e.g. owner, part-timer"
+        }
+      },
+      "tools": {
+        "placeholder": {
+          "ko": "Enter로 추가",
+          "en": "Press Enter"
+        }
+      },
+      "frequency": {
+        "display": "segmented"
+      },
+      "detail": {
+        "display": "cards",
+        "options": {
+          "simple": {
+            "icon": "minus",
+            "desc": {
+              "ko": "한 장 요약",
+              "en": "One page"
+            }
+          },
+          "standard": {
+            "icon": "layout-list",
+            "desc": {
+              "ko": "보통",
+              "en": "Standard"
+            }
+          },
+          "detailed": {
+            "icon": "graduation-cap",
+            "desc": {
+              "ko": "신입 교육용",
+              "en": "For training"
+            }
+          }
+        }
+      }
+    },
+    "stage": {
+      "headline": {
+        "ko": "흐름도와 체크리스트",
+        "en": "Flow and checklist"
+      },
+      "story": {
+        "ko": "역할별 줄에 놓인 단계, 판단 지점, 단계별 확인 기준, 예외 대응을 한 장에.",
+        "en": "Steps in lanes by role, decision points, checks and exceptions on one page."
+      },
+      "promises": [
+        {
+          "icon": "route",
+          "text": {
+            "ko": "역할별 흐름",
+            "en": "Flow by role"
+          }
+        },
+        {
+          "icon": "clipboard-check",
+          "text": {
+            "ko": "품질 체크",
+            "en": "Quality checks"
+          }
+        },
+        {
+          "icon": "life-buoy",
+          "text": {
+            "ko": "예외 대응",
+            "en": "Exceptions"
+          }
+        }
+      ]
+    }
+  },
+  "meeting-action": {
+    "layout": "split",
+    "visual": "checklist",
+    "hero": {
+      "title": {
+        "ko": "회의는 끝, 이제 실행",
+        "en": "Meeting done — now act"
+      },
+      "story": {
+        "ko": "메모를 붙여 넣으면 결정·할 일·열린 질문으로 나눠 드려요. 메모에 없는 담당자나 날짜는 지어내지 않아요.",
+        "en": "Paste the notes; get decisions, actions and open questions. Owners or dates not in the notes are never invented."
+      }
+    },
+    "sections": [
+      {
+        "title": {
+          "ko": "회의 메모",
+          "en": "Notes"
+        },
+        "hint": {
+          "ko": "정리 안 된 메모 그대로 괜찮아요",
+          "en": "Messy notes are fine"
+        },
+        "fields": [
+          "notes"
+        ]
+      },
+      {
+        "title": {
+          "ko": "회의 정보",
+          "en": "Meeting details"
+        },
+        "hint": {
+          "ko": "날짜가 있으면 마감이 날짜로 바뀌어요",
+          "en": "A date turns deadlines into dates"
+        },
+        "fields": [
+          "meeting_date",
+          "participants",
+          "meeting_type"
+        ]
+      }
+    ],
+    "ui": {
+      "notes": {
+        "placeholder": {
+          "ko": "회의 메모나 녹취 텍스트를 붙여 넣으세요",
+          "en": "Paste notes or a transcript"
+        }
+      },
+      "meeting_date": {
+        "display": "date"
+      },
+      "participants": {
+        "placeholder": {
+          "ko": "Enter로 추가",
+          "en": "Press Enter"
+        }
+      },
+      "meeting_type": {
+        "display": "cards",
+        "options": {
+          "team": {
+            "icon": "user-round",
+            "desc": {
+              "ko": "팀 정기 회의",
+              "en": "Team"
+            }
+          },
+          "client": {
+            "icon": "handshake",
+            "desc": {
+              "ko": "고객 미팅",
+              "en": "Client"
+            }
+          },
+          "planning": {
+            "icon": "notebook-pen",
+            "desc": {
+              "ko": "기획 회의",
+              "en": "Planning"
+            }
+          },
+          "review": {
+            "icon": "repeat",
+            "desc": {
+              "ko": "회고",
+              "en": "Review"
+            }
+          }
+        }
+      }
+    },
+    "stage": {
+      "headline": {
+        "ko": "담당자별 실행 보드",
+        "en": "Action board by owner"
+      },
+      "story": {
+        "ko": "결정, 담당자·마감이 있는 할 일, 열린 질문, 보낼 정리 메시지와 캘린더 파일까지.",
+        "en": "Decisions, actions with owners and dates, open questions, a recap message and a calendar file."
+      },
+      "promises": [
+        {
+          "icon": "flag",
+          "text": {
+            "ko": "결정사항",
+            "en": "Decisions"
+          }
+        },
+        {
+          "icon": "user-round",
+          "text": {
+            "ko": "담당·마감",
+            "en": "Owners & dates"
+          }
+        },
+        {
+          "icon": "calendar-check",
+          "text": {
+            "ko": "캘린더 파일",
+            "en": "Calendar file"
+          }
+        }
+      ]
+    }
   }
 }

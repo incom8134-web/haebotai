@@ -1,6 +1,8 @@
 import { brandDnaReport } from "./brand-dna.ts";
 import { contentTransformerReport } from "./content-transformer.ts";
 import { hookLabReport } from "./hook-lab.ts";
+import { meetingActionReport } from "./meeting-action.ts";
+import { sopBuilderReport } from "./sop-builder.ts";
 import { businessPlanReport } from "./business-plan.ts";
 import { calendarReport } from "./calendar.ts";
 import { grantReport } from "./grant.ts";
@@ -36,6 +38,8 @@ const BUILDERS: Record<string, (o: Record<string, unknown>, input: Record<string
   "brand-dna": brandDnaReport,
   "hook-lab": hookLabReport,
   "content-transformer": contentTransformerReport,
+  "sop-builder": sopBuilderReport,
+  "meeting-action": meetingActionReport,
 };
 
 export const hasReport = (toolId: string) => toolId in BUILDERS;

@@ -25,6 +25,8 @@ import mvpBlueprintSchema from "./mvp-blueprint";
 import brandDnaSchema from "./brand-dna";
 import hookLabSchema from "./hook-lab";
 import contentTransformerSchema from "./content-transformer";
+import sopBuilderSchema from "./sop-builder";
+import meetingActionSchema from "./meeting-action";
 
 // Each tool's output schema (zod), kept out of lib/tools/registry so the
 // registry — imported by the app shell, Studio, tool pages and the ⌘K
@@ -39,6 +41,8 @@ const OUTPUT_SCHEMAS: Record<string, z.ZodType> = {
   "brand-dna": brandDnaSchema,
   "hook-lab": hookLabSchema,
   "content-transformer": contentTransformerSchema,
+  "sop-builder": sopBuilderSchema,
+  "meeting-action": meetingActionSchema,
   "blog": blogSchema,
   "brand-model": brandModelSchema,
   "business-plan": businessPlanSchema,

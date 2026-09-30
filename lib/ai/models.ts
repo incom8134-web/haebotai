@@ -29,6 +29,8 @@ const MAX_TOKENS_BY_TOOL: Record<string, number> = {
   "brand-dna": 10000,
   "hook-lab": 10000,
   "content-transformer": 16000, // up to 8 full platform versions
+  "sop-builder": 12000,
+  "meeting-action": 10000,
 };
 const MAX_TOKENS_DEFAULT = 8000;
 

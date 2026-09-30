@@ -302,7 +302,7 @@ export const CATALOG: CatalogTool[] = [
     promise: b("반복 업무를 누가 해도 같은 결과가 나오는 절차서로", "Repeated work turned into a procedure anyone can follow"),
     outputs: [b("단계별 절차 흐름도", "Step-by-step process flow"), b("담당 역할과 품질 체크리스트", "Roles and quality checklist"), b("예외 상황 대응", "Exception handling")],
     icon: ListChecks,
-    engine: null,
+    engine: "sop-builder",
     next: ["ops-planner"],
   },
   {
@@ -313,7 +313,7 @@ export const CATALOG: CatalogTool[] = [
     promise: b("회의 메모를 결정사항·담당자·마감이 있는 실행 보드로", "Meeting notes turned into decisions, owners and deadlines"),
     outputs: [b("결정사항과 요약", "Decisions and summary"), b("담당자별 할 일과 마감", "Actions by owner with due dates"), b("다음 회의 안건", "Follow-up agenda")],
     icon: MessagesSquare,
-    engine: null,
+    engine: "meeting-action",
     next: ["ops-planner"],
   },
   {

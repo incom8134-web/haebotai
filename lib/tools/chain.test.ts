@@ -56,3 +56,11 @@ test("campaign hand-offs: strategy → hooks, blog → transformer, hook → ads
   assert.deepEqual(seedFromChain("content-transformer", "blog", { body_markdown: "## 제목\n본문" }), { source: "## 제목\n본문", source_type: "blog" });
   assert.equal(seedFromChain("copy", "hook-lab", { best: { text: "오래 걷는 게 답이 아니에요" } }).offer, "오래 걷는 게 답이 아니에요");
 });
+
+test("meeting board hands its actions to the ops plan and SOP", () => {
+  const m = { title: "주간 회의", summary: "요약", decisions: [{ decision: "목요일 촬영" }], actions: [{ task: "작가 섭외", owner: "준호", due: "" }, { task: "수수료 조사", owner: "소라", due: "2026-10-13" }] };
+  const cal = seedFromChain("calendar", "meeting-action", m);
+  assert.match(String(cal.model), /수수료 조사 \(소라, 2026-10-13\)/);
+  assert.deepEqual(cal.milestones, ["목요일 촬영"]);
+  assert.match(String(seedFromChain("sop-builder", "meeting-action", m).process), /작가 섭외 \(준호\)/);
+});

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { sourceSchema } from "../registry/shared";
+import { sourceSchema } from "../registry/shared.ts";
 
 // A 사업계획서 is built for the reviewer who reads it (bank, investor,
 // grant committee, partner), so its structure is not fixed: `chapters`

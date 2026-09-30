@@ -102,6 +102,12 @@ function seedFromDiscover(targetId: string, sourceId: string, source: unknown, p
     if (sourceId === "blog") return { source: s(out.body_markdown), source_type: "blog" };
     if (sourceId === "strategy") return { source: lines(s(out.positioning_statement), s(out.promise), ...arr(out.territories).map((t) => `${s(t.name)}: ${s(t.idea)}`)), source_type: "notes" };
   }
+  if (sourceId === "meeting-action") {
+    const actions = arr(out.actions).map((a) => `${s(a.task)} (${s(a.owner) || "미정"}${s(a.due) ? `, ${s(a.due)}` : ""})`);
+    if (targetId === "calendar") return { model: lines(s(out.title), ...actions), milestones: arr(out.decisions).map((d) => s(d.decision)).filter(Boolean).slice(0, 5) };
+    if (targetId === "sop-builder") return { process: lines(s(out.summary), ...actions) };
+    return {};
+  }
   if (targetId === "copy" && sourceId === "hook-lab") {
     const best = o(out.best);
     return { offer: s(best.text), must_include: [] };

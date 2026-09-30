@@ -26,7 +26,7 @@ export const calendar: ToolManifest = {
     },
   ],
   usesProfile: ["weekly_hours"],
-  acceptsChainFrom: ["idea-radar", "mvp-blueprint", "money", "trend"],
+  acceptsChainFrom: ["meeting-action", "idea-radar", "mvp-blueprint", "money", "trend"],
   outputRenderer: "calendar",
   grounding: { requireSources: false, webSearch: false, estimateBadge: false },
   model: "gemini-3.1-pro-preview",
