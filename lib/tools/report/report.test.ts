@@ -182,6 +182,107 @@ const SAMPLES: Record<string, { output: Record<string, unknown>; input?: Record<
       unmatched_reasons: [],
     },
   },
+  "idea-radar": {
+    output: {
+      summary: "간호 경력을 살린 보호자 대상 서비스가 가장 빠릅니다.",
+      lens: "기술에서 바깥으로",
+      ideas: ["보호자 상담", "간호 전자책", "요양원 워크숍", "건강 유튜브"].map((name, i) => ({
+        name,
+        one_liner: `${name} 한 줄`,
+        archetype: ["service", "content", "b2b", "content"][i],
+        customer: { who: "보호자", situation: "퇴원 직후" },
+        problem: "무엇을 챙길지 모름",
+        value_proposition: "2주 체크리스트",
+        why_you: "병동 8년",
+        revenue: { model: "상담", price_hint: "3만 원", potential_note: "월 100만 원(추정)" },
+        mvp: "카카오 상담",
+        resources: ["상담 예약 폼"],
+        first_validation: { action: "맘카페 체크리스트", success_signal: "7일 20건", days: 7 },
+        scores: { fit: 9 - i, demand: 7, speed: 8 - i, capital: 9, edge: 6 + (i % 2) },
+        risks: ["의료 행위 오해"],
+      })),
+      recommendation: { pick: "보호자 상담", reason: "가장 빠름", runner_up: "간호 전자책" },
+    },
+  },
+  "revenue-mapper": {
+    output: {
+      business_summary: "소그룹 필라테스",
+      segments: [{ id: "s1", name: "직장인", pays_for: "퇴근 후 운동", willingness: "high" }],
+      streams: [
+        { name: "정기권", type: "subscription", segment_ids: ["s1"], what_they_get: "월 8회", price_model: "월정액", price_low_krw: 160000, price_high_krw: 200000, frequency: "매월", role: "core", effort: 3, weeks_to_first_revenue: 4, margin_note: "강사비" },
+        { name: "체험", type: "one_time", segment_ids: ["s1"], what_they_get: "1회", price_model: "단건", price_low_krw: 20000, price_high_krw: 20000, frequency: "1회", role: "experimental", effort: 1, weeks_to_first_revenue: 1, margin_note: "" },
+        { name: "1:1", type: "service", segment_ids: ["s1"], what_they_get: "자세 교정", price_model: "회당", price_low_krw: 60000, price_high_krw: 80000, frequency: "월 1회", role: "upsell", effort: 2, weeks_to_first_revenue: 6, margin_note: "" },
+      ],
+      ladder: [
+        { step: "첫 계단", offer: "체험", price_krw: 20000, purpose: "신뢰" },
+        { step: "핵심", offer: "정기권", price_krw: 180000, purpose: "반복" },
+        { step: "프리미엄", offer: "1:1", price_krw: 70000, purpose: "업셀" },
+      ],
+      unit_economics: { price_krw: 180000, variable_cost_krw: 60000, acquisition_cost_krw: 40000, purchases_per_year: 10, retention_years: 1.5, notes: ["추정"] },
+      recommended_mix: { start_with: "정기권", add_next: "1:1", avoid_for_now: ["온라인 강의"], reason: "공간 활용" },
+      assumptions: ["재등록 60%"],
+    },
+  },
+  "offer-architect": {
+    output: {
+      offer_name: "4주 인스타 자립반",
+      headline: "하루 15분",
+      subheadline: "사장님이 직접",
+      positioning_line: "대행 대신 자립",
+      target: { who: "동네 가게 사장님", situation: "무엇을 올릴지 모름", desired_outcome: "주 5회 게시" },
+      core_promise: "4주 뒤 주 5회",
+      value_stack: [{ item: "주간 과제", what_it_does: "습관", why_it_matters: "지속" }],
+      packages: [
+        { tier: "entry", name: "녹화", price_krw: 190000, includes: ["강의"], best_for: "혼자" },
+        { tier: "core", name: "소그룹", price_krw: 390000, includes: ["4주"], best_for: "대부분" },
+        { tier: "premium", name: "1:1", price_krw: 590000, includes: ["코칭"], best_for: "바쁜 분" },
+      ],
+      bonuses: [{ name: "템플릿", why: "시간 절약" }],
+      guarantee: { type: "추가 코칭", terms: "과제 4회 제출 시", caution: "제출 확인" },
+      urgency: { mechanism: "기수당 4명", honest_note: "실제 정원" },
+      objections: [{ objection: "시간 없음", answer: "하루 15분" }],
+      cta: { button: "자리 확인", microcopy: "4명 한정" },
+      sales_message: { short: "짧게", long: "길게" },
+    },
+  },
+  "market-gap": {
+    output: {
+      market_summary: "노견 돌봄",
+      needs: [
+        { id: "n1", need: "투약", who: "보호자", intensity: 5, evidence: "후기", origin: "search" },
+        { id: "n2", need: "기저귀", who: "보호자", intensity: 4, evidence: "입력", origin: "user" },
+      ],
+      solutions: [
+        { name: "펫호텔", kind: "direct", note: "", coverage: [{ need_id: "n1", level: 0 }, { need_id: "n2", level: 1 }] },
+        { name: "펫시터", kind: "indirect", note: "", coverage: [{ need_id: "n1", level: 1 }] },
+      ],
+      gaps: [{ title: "투약 방문 돌봄", need_ids: ["n1"], why_unserved: "책임", opportunity: "간호 교육", differentiation: "수의 테크니션", confidence: "medium", origin: "hypothesis" }],
+      validation_questions: [{ question: "월 문의 수?", ask_whom: "동물병원", signal: "월 5건 이상" }],
+      sources: [{ url: "https://example.com/a", title: "후기" }],
+    },
+  },
+  "mvp-blueprint": {
+    output: {
+      product_one_liner: "PT 예약",
+      target_user: "회원",
+      core_job: "예약 변경",
+      features: [
+        { name: "예약", description: "", priority: "must", effort: "S", reason: "핵심" },
+        { name: "알림", description: "", priority: "should", effort: "M", reason: "편의" },
+        { name: "AI 식단", description: "", priority: "later", effort: "L", reason: "나중" },
+      ],
+      journey: [{ moment: "discover", user_action: "QR", product_response: "예약 폼" }],
+      stack: [{ layer: "예약", choice: "네이버 폼", why: "무료", alternative: "구글 폼", cost_note: "0원" }],
+      stages: [
+        { name: "조립", weeks: 2, goal: "예약", deliverables: ["폼"], exit_criteria: "테스트 5건" },
+        { name: "시범", weeks: 2, goal: "20명", deliverables: ["운영"], exit_criteria: "60% 사용" },
+        { name: "결제", weeks: 2, goal: "결제", deliverables: ["PG"], exit_criteria: "첫 결제" },
+      ],
+      launch_checklist: [{ item: "개인정보 처리방침", category: "legal" }],
+      validation: { hypothesis: "앱으로 바꾼다", metric: "변경률", target: "60%", method: "시트" },
+      out_of_scope: ["리뷰"],
+    },
+  },
 };
 
 function charts(report: Report) {

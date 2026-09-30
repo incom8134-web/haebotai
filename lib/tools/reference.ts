@@ -185,6 +185,19 @@ export const REFERENCE_MODES: Record<string, ReferenceMode[]> = {
   ],
   trend: [REFERENCE],
   money: [REFERENCE],
+  "idea-radar": [REFERENCE],
+  "revenue-mapper": [REFERENCE, IMPROVE("가격표·수익 구조")],
+  "offer-architect": [REFERENCE, IMPROVE("판매 제안")],
+  "market-gap": [
+    REFERENCE,
+    {
+      id: "reviews",
+      label: { ko: "고객 리뷰·설문 넣기", en: "Add reviews or surveys" },
+      hint: { ko: "리뷰·설문·인터뷰 메모를 붙여 넣기", en: "Paste reviews, surveys or interview notes" },
+      instruction: "참고 자료는 이 시장 고객의 리뷰·설문·인터뷰입니다. 여기서 반복되는 불만과 요청을 니즈로 정리하고 origin=user로 표시하세요.",
+    },
+  ],
+  "mvp-blueprint": [REFERENCE, IMPROVE("기획서")],
   calendar: [REFERENCE, IMPROVE("실행 계획")],
   prompt: [
     REFERENCE,

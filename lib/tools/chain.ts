@@ -6,7 +6,103 @@
 // belongs in without an LLM doing the mapping), so — like the output
 // renderer — it's the one place per-pair code is expected.
 
-export function seedFromChain(targetId: string, sourceId: string, sourceOutput: unknown): Record<string, unknown> {
+type Loose = Record<string, unknown>;
+const o = (v: unknown): Loose => (v && typeof v === "object" && !Array.isArray(v) ? (v as Loose) : {});
+const arr = (v: unknown): Loose[] => (Array.isArray(v) ? v.map(o) : []);
+const s = (v: unknown): string => (typeof v === "string" ? v : "");
+const lines = (...xs: (string | false | undefined)[]) => xs.filter(Boolean).join("\n");
+
+// 2.0 discover tools. `pick` is the idea the member chose on the result
+// (an index into ideas[]); without it the recommended idea is used.
+function seedFromDiscover(targetId: string, sourceId: string, source: unknown, pick?: number): Loose | null {
+  const out = o(source);
+  if (sourceId === "idea-radar") {
+    const ideas = arr(out.ideas);
+    const recommended = ideas.findIndex((i) => s(i.name) === s(o(out.recommendation).pick));
+    const idea = ideas[pick !== undefined && ideas[pick] ? pick : Math.max(0, recommended)];
+    if (!idea) return {};
+    const customer = o(idea.customer);
+    const who = s(customer.who);
+    const description = lines(`${s(idea.name)} — ${s(idea.one_liner)}`, s(idea.problem) && `문제: ${s(idea.problem)}`, s(idea.value_proposition) && `가치: ${s(idea.value_proposition)}`);
+    switch (targetId) {
+      case "revenue-mapper":
+        return { idea: lines(description, s(o(idea.revenue).model) && `수익 방식: ${s(o(idea.revenue).model)}`), customers: who };
+      case "offer-architect":
+        return { product: description, target_customer: who, problem: s(idea.problem) };
+      case "market-gap":
+        return { market: s(idea.name), customer: who, known_problems: s(idea.problem) };
+      case "mvp-blueprint":
+        return { idea: lines(description, s(idea.mvp) && `MVP: ${s(idea.mvp)}`), target_user: who };
+      case "trend":
+        return { ideas: ideas.slice(0, 3).map((i) => s(i.name)).filter(Boolean) };
+      case "calendar":
+        return { model: lines(description, s(o(idea.first_validation).action) && `첫 검증: ${s(o(idea.first_validation).action)}`) };
+      case "strategy":
+        return { context: description };
+    }
+    return {};
+  }
+  if (sourceId === "revenue-mapper") {
+    const mix = o(out.recommended_mix);
+    const ue = o(out.unit_economics);
+    if (targetId === "offer-architect") {
+      const ladder = arr(out.ladder).map((l) => Number(l.price_krw)).filter((n) => Number.isFinite(n) && n > 0);
+      return {
+        product: lines(s(out.business_summary), s(mix.start_with) && `먼저 팔 것: ${s(mix.start_with)}`),
+        target_customer: s(arr(out.segments)[0]?.name),
+        ...(ladder.length ? { price_min: Math.min(...ladder), price_max: Math.max(...ladder) } : {}),
+      };
+    }
+    if (targetId === "business-plan") {
+      const price = Number(ue.price_krw);
+      const variable = Number(ue.variable_cost_krw);
+      return {
+        item: lines(s(out.business_summary), s(mix.start_with) && `핵심 수익원: ${s(mix.start_with)}`),
+        ...(price > 0 ? { unit_price: price } : {}),
+        ...(price > 0 && variable >= 0 && variable < price ? { variable_cost_rate: Math.round((variable / price) * 100) } : {}),
+      };
+    }
+    return {};
+  }
+  if (sourceId === "offer-architect") {
+    const packages = arr(out.packages);
+    const core = packages.find((p) => p.tier === "core") ?? packages[0];
+    const target = o(out.target);
+    if (targetId === "sangsepage")
+      return {
+        product_name: s(out.offer_name),
+        features: arr(out.value_stack).map((v) => s(v.item)).filter(Boolean).slice(0, 5),
+        ...(Number(core?.price_krw) > 0 ? { price: Number(core?.price_krw) } : {}),
+        target_customer: s(target.who),
+      };
+    if (targetId === "copy")
+      return { offer: lines(s(out.offer_name), s(out.core_promise), s(o(out.sales_message).short)), audience: s(target.who) };
+    return {};
+  }
+  if (sourceId === "market-gap") {
+    const gap = arr(out.gaps)[pick ?? 0] ?? arr(out.gaps)[0];
+    if (!gap) return {};
+    const idea = lines(`${s(gap.title)}: ${s(gap.opportunity)}`, s(gap.differentiation) && `차별화: ${s(gap.differentiation)}`);
+    if (targetId === "mvp-blueprint") return { idea };
+    if (targetId === "idea-radar") return { interests: [s(gap.title)].filter(Boolean), target_customer: s(arr(out.needs)[0]?.who) };
+    return {};
+  }
+  if (sourceId === "mvp-blueprint") {
+    if (targetId === "homepage")
+      return { content: lines(s(out.product_one_liner), s(out.core_job) && `핵심: ${s(out.core_job)}`, s(out.target_user) && `대상: ${s(out.target_user)}`) };
+    if (targetId === "calendar")
+      return {
+        model: s(out.product_one_liner),
+        milestones: arr(out.stages).map((st) => s(st.name)).filter(Boolean).slice(0, 5),
+      };
+    return {};
+  }
+  return null;
+}
+
+export function seedFromChain(targetId: string, sourceId: string, sourceOutput: unknown, pick?: number): Record<string, unknown> {
+  const discover = seedFromDiscover(targetId, sourceId, sourceOutput, pick);
+  if (discover) return discover;
   const output = sourceOutput as {
     models?: { name: string }[];
     ideas?: { name: string }[];

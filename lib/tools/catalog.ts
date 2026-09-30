@@ -109,7 +109,7 @@ export const CATALOG: CatalogTool[] = [
     promise: b("내 경험·자원·시간에 맞는 사업 아이디어를 점수와 함께 비교", "Business ideas that fit your skills, budget and time, scored side by side"),
     outputs: [b("아이디어 카드와 적합도 점수", "Idea cards with fit scores"), b("타깃 고객과 풀 문제", "Target customer and problem"), b("MVP 개념과 첫 검증 행동", "MVP concept and first validation step")],
     icon: Radar,
-    engine: "money",
+    engine: "idea-radar",
     next: ["revenue-mapper", "mvp-blueprint", "market-gap"],
   },
   {
@@ -120,7 +120,7 @@ export const CATALOG: CatalogTool[] = [
     promise: b("하나의 아이디어에서 나올 수 있는 수익 흐름과 가격 모델을 한 장의 지도로", "Every way an idea can earn, mapped with pricing models"),
     outputs: [b("수익원 흐름도", "Revenue-flow map"), b("가격·구독·패키지 모델", "Pricing, subscription and package models"), b("단위 경제성 틀", "Unit-economics frame")],
     icon: Network,
-    engine: null,
+    engine: "revenue-mapper",
     next: ["offer-architect", "doc-studio"],
   },
   {
@@ -131,7 +131,7 @@ export const CATALOG: CatalogTool[] = [
     promise: b("제품·서비스를 고객이 바로 이해하고 사고 싶어지는 제안으로", "Turn a product into an offer people understand and want"),
     outputs: [b("핵심 오퍼와 가치 제안", "Core offer and value proposition"), b("패키지·보너스·보증 구성", "Packages, bonuses, guarantee"), b("판매 메시지와 CTA", "Sales message and CTA")],
     icon: Blocks,
-    engine: null,
+    engine: "offer-architect",
     next: ["sales-page", "ad-factory"],
   },
   {
@@ -142,7 +142,7 @@ export const CATALOG: CatalogTool[] = [
     promise: b("고객의 불편과 기존 해결책 사이의 빈자리를 지도로", "Where customer pain and existing solutions don't meet"),
     outputs: [b("니즈 × 기존 해결책 지도", "Needs × solutions map"), b("기회 카드와 차별화 방향", "Opportunity cards and differentiation"), b("검증 질문", "Validation questions")],
     icon: Telescope,
-    engine: null,
+    engine: "market-gap",
     next: ["idea-radar", "mvp-blueprint"],
   },
   {
@@ -153,7 +153,7 @@ export const CATALOG: CatalogTool[] = [
     promise: b("아이디어를 처음 내놓을 최소한의 제품과 출시 순서로", "The smallest real first version and the order to launch it"),
     outputs: [b("핵심 기능과 뺄 기능", "Core vs later features"), b("사용자 여정", "User journey"), b("개발 단계와 출시 체크리스트", "Build stages and launch checklist")],
     icon: Rocket,
-    engine: null,
+    engine: "mvp-blueprint",
     next: ["web-builder", "ops-planner"],
   },
 
@@ -426,6 +426,7 @@ export const CATALOG: CatalogTool[] = [
 
 /** Old tool ids (and their URLs) → the tool that replaced them. */
 export const RETIRED: Record<string, string> = {
+  money: "idea-radar",
   place: "seo-composer",
   prompt: "",
   grant: "doc-studio",

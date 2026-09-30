@@ -1,0 +1,733 @@
+{
+  "idea-radar": {
+    "layout": "steps",
+    "visual": "score",
+    "hero": {
+      "title": {
+        "ko": "가진 것에서 출발하는 사업 탐색",
+        "en": "Find a business starting from what you have"
+      },
+      "story": {
+        "ko": "경력, 관심, 돈, 시간을 솔직하게 적어 주세요. 서로 다른 형태의 아이디어를 같은 기준으로 매겨 나란히 놓아 드려요.",
+        "en": "Be honest about your experience, interests, money and time. You'll get ideas of different kinds, scored on the same axes."
+      }
+    },
+    "sections": [
+      {
+        "title": {
+          "ko": "나는 무엇을 할 수 있나요",
+          "en": "What you can do"
+        },
+        "hint": {
+          "ko": "자격, 연차, 해 본 일을 구체적으로",
+          "en": "Certificates, years, things you've done"
+        },
+        "fields": [
+          "skills",
+          "interests",
+          "target_customer"
+        ]
+      },
+      {
+        "title": {
+          "ko": "어떤 사업을 원하나요",
+          "en": "What kind of business"
+        },
+        "hint": {
+          "ko": "형태와 채널, 지역",
+          "en": "Type, channel and place"
+        },
+        "fields": [
+          "business_types",
+          "channel",
+          "location"
+        ]
+      },
+      {
+        "title": {
+          "ko": "현실적인 조건",
+          "en": "Real constraints"
+        },
+        "hint": {
+          "ko": "돈, 시간, 감당할 위험",
+          "en": "Money, time and risk"
+        },
+        "fields": [
+          "budget",
+          "weekly_hours",
+          "risk",
+          "avoid"
+        ]
+      }
+    ],
+    "ui": {
+      "skills": {
+        "placeholder": {
+          "ko": "예: 대학병원 간호사 8년, 퇴원 교육·보호자 상담",
+          "en": "e.g. 8 years as a hospital nurse, discharge education"
+        }
+      },
+      "interests": {
+        "placeholder": {
+          "ko": "Enter로 추가 — 예: 건강 교육, 핸드메이드",
+          "en": "Press Enter — e.g. health education, handmade"
+        }
+      },
+      "target_customer": {
+        "placeholder": {
+          "ko": "예: 처음 부모님 간병을 시작한 40대",
+          "en": "e.g. people in their 40s newly caring for a parent"
+        }
+      },
+      "business_types": {
+        "display": "toggles"
+      },
+      "channel": {
+        "display": "cards",
+        "options": {
+          "online": {
+            "icon": "globe",
+            "desc": {
+              "ko": "온라인에서만",
+              "en": "Online only"
+            }
+          },
+          "offline": {
+            "icon": "store",
+            "desc": {
+              "ko": "매장·대면",
+              "en": "In person"
+            }
+          },
+          "hybrid": {
+            "icon": "repeat",
+            "desc": {
+              "ko": "둘 다",
+              "en": "Both"
+            }
+          }
+        }
+      },
+      "budget": {
+        "display": "segmented"
+      },
+      "weekly_hours": {
+        "display": "slider",
+        "min": 2,
+        "max": 60,
+        "step": 1,
+        "unit": {
+          "ko": "시간/주",
+          "en": "hrs/week"
+        }
+      },
+      "location": {
+        "placeholder": {
+          "ko": "예: 대구 수성구",
+          "en": "e.g. Suseong-gu, Daegu"
+        }
+      },
+      "risk": {
+        "display": "cards",
+        "options": {
+          "low": {
+            "icon": "shield",
+            "desc": {
+              "ko": "잃지 않는 게 먼저",
+              "en": "Don't lose money"
+            }
+          },
+          "mid": {
+            "icon": "scale",
+            "desc": {
+              "ko": "적당히",
+              "en": "Some risk"
+            }
+          },
+          "high": {
+            "icon": "rocket",
+            "desc": {
+              "ko": "크게 걸어도 됨",
+              "en": "Go big"
+            }
+          }
+        }
+      }
+    },
+    "stage": {
+      "headline": {
+        "ko": "아이디어 카드, 다섯 축 점수",
+        "en": "Idea cards with five scores"
+      },
+      "story": {
+        "ko": "적합도·수요·속도·자본·우위를 나란히 비교하고, 마음에 드는 아이디어는 즐겨찾기하거나 바로 다음 도구로 이어가세요.",
+        "en": "Compare fit, demand, speed, capital and edge side by side, star favourites or continue in the next tool."
+      },
+      "promises": [
+        {
+          "icon": "layers",
+          "text": {
+            "ko": "4~6개 아이디어",
+            "en": "4–6 ideas"
+          }
+        },
+        {
+          "icon": "chart-column",
+          "text": {
+            "ko": "다섯 축 점수",
+            "en": "Five scores"
+          }
+        },
+        {
+          "icon": "flask-conical",
+          "text": {
+            "ko": "첫 검증 행동",
+            "en": "First test"
+          }
+        }
+      ]
+    }
+  },
+  "revenue-mapper": {
+    "layout": "split",
+    "visual": "tiers",
+    "hero": {
+      "title": {
+        "ko": "누가, 무엇에, 얼마를 내나요",
+        "en": "Who pays, for what, and how much"
+      },
+      "story": {
+        "ko": "아이디어 하나에서 나올 수 있는 수익 흐름을 모두 펼치고, 지금 시작할 조합 하나를 골라 드려요.",
+        "en": "Lay out every revenue stream one idea can have, and pick the mix to start with."
+      }
+    },
+    "sections": [
+      {
+        "title": {
+          "ko": "아이디어와 고객",
+          "en": "Idea and customers"
+        },
+        "hint": {
+          "ko": "무엇을 누구에게",
+          "en": "What, for whom"
+        },
+        "fields": [
+          "idea",
+          "customers",
+          "assets"
+        ]
+      },
+      {
+        "title": {
+          "ko": "숫자와 선호",
+          "en": "Numbers and preferences"
+        },
+        "hint": {
+          "ko": "모르면 비워 두세요",
+          "en": "Leave blank if unsure"
+        },
+        "fields": [
+          "preferred_models",
+          "target_price",
+          "unit_cost",
+          "monthly_goal"
+        ]
+      }
+    ],
+    "ui": {
+      "idea": {
+        "placeholder": {
+          "ko": "예: 기구 4대 소그룹 필라테스 스튜디오",
+          "en": "e.g. small-group Pilates studio with 4 reformers"
+        }
+      },
+      "customers": {
+        "placeholder": {
+          "ko": "예: 퇴근 후 운동하는 30~40대 직장인",
+          "en": "e.g. office workers in their 30s–40s"
+        }
+      },
+      "assets": {
+        "placeholder": {
+          "ko": "예: 강사 자격증, 20평 공간, 인스타 팔로워 1,200명",
+          "en": "e.g. instructor licence, studio space, 1,200 followers"
+        }
+      },
+      "preferred_models": {
+        "display": "toggles"
+      }
+    },
+    "stage": {
+      "headline": {
+        "ko": "수익 흐름 지도와 가치 사다리",
+        "en": "Revenue map and value ladder"
+      },
+      "story": {
+        "ko": "세그먼트와 수익 흐름을 선으로 잇고, 첫 계단부터 프리미엄까지의 사다리와 고객 한 명의 가치를 보여 드려요.",
+        "en": "Segments connected to streams, a ladder from first step to premium, and what one customer is worth."
+      },
+      "promises": [
+        {
+          "icon": "shapes",
+          "text": {
+            "ko": "흐름 지도",
+            "en": "Flow map"
+          }
+        },
+        {
+          "icon": "layers",
+          "text": {
+            "ko": "가치 사다리",
+            "en": "Value ladder"
+          }
+        },
+        {
+          "icon": "calculator",
+          "text": {
+            "ko": "단위 경제성",
+            "en": "Unit economics"
+          }
+        }
+      ]
+    }
+  },
+  "offer-architect": {
+    "layout": "split",
+    "visual": "copy",
+    "hero": {
+      "title": {
+        "ko": "사고 싶어지는 제안을 블록으로",
+        "en": "Build an offer people want, block by block"
+      },
+      "story": {
+        "ko": "고객이 얻는 결과에서 출발해 약속, 가치, 패키지, 보증, 답변을 쌓습니다. 과장이나 거짓 희소성은 쓰지 않아요.",
+        "en": "Start from the customer's outcome and stack promise, value, packages, guarantee and answers — no hype or fake scarcity."
+      }
+    },
+    "sections": [
+      {
+        "title": {
+          "ko": "무엇을 누구에게",
+          "en": "What, for whom"
+        },
+        "hint": {
+          "ko": "고객이 겪는 문제와 얻는 결과",
+          "en": "The problem and the outcome"
+        },
+        "fields": [
+          "product",
+          "target_customer",
+          "problem",
+          "outcome"
+        ]
+      },
+      {
+        "title": {
+          "ko": "가격과 근거",
+          "en": "Price and proof"
+        },
+        "hint": {
+          "ko": "실제로 있는 근거만",
+          "en": "Only proof you really have"
+        },
+        "fields": [
+          "price_min",
+          "price_max",
+          "differentiation",
+          "proof",
+          "channel"
+        ]
+      }
+    ],
+    "ui": {
+      "product": {
+        "placeholder": {
+          "ko": "예: 4주 소그룹 인스타그램 운영 코칭",
+          "en": "e.g. 4-week small-group Instagram coaching"
+        }
+      },
+      "target_customer": {
+        "placeholder": {
+          "ko": "예: 직원 5명 이하 동네 가게 사장님",
+          "en": "e.g. owners of shops with under 5 staff"
+        }
+      },
+      "outcome": {
+        "placeholder": {
+          "ko": "예: 하루 15분으로 주 5회 게시",
+          "en": "e.g. post 5×/week in 15 minutes a day"
+        }
+      },
+      "proof": {
+        "placeholder": {
+          "ko": "Enter로 추가 — 예: 수강생 40명",
+          "en": "Press Enter — e.g. 40 students"
+        }
+      },
+      "channel": {
+        "display": "cards",
+        "options": {
+          "smartstore": {
+            "icon": "shopping-bag",
+            "desc": {
+              "ko": "오픈마켓",
+              "en": "Marketplace"
+            }
+          },
+          "website": {
+            "icon": "globe",
+            "desc": {
+              "ko": "자사몰·랜딩",
+              "en": "Own site"
+            }
+          },
+          "sns": {
+            "icon": "megaphone",
+            "desc": {
+              "ko": "SNS",
+              "en": "Social"
+            }
+          },
+          "offline": {
+            "icon": "store",
+            "desc": {
+              "ko": "매장·대면",
+              "en": "In person"
+            }
+          },
+          "b2b": {
+            "icon": "handshake",
+            "desc": {
+              "ko": "영업·제안",
+              "en": "B2B sales"
+            }
+          }
+        }
+      }
+    },
+    "stage": {
+      "headline": {
+        "ko": "복사해서 바로 쓰는 오퍼 블록",
+        "en": "Offer blocks, ready to copy"
+      },
+      "story": {
+        "ko": "핵심 약속, 3단 패키지, 보증과 망설임별 답변까지. 블록마다 복사 버튼이 있어요.",
+        "en": "Core promise, three tiers, guarantee and objection answers — each block has a copy button."
+      },
+      "promises": [
+        {
+          "icon": "target",
+          "text": {
+            "ko": "핵심 약속",
+            "en": "Core promise"
+          }
+        },
+        {
+          "icon": "layers",
+          "text": {
+            "ko": "3단 패키지",
+            "en": "3 tiers"
+          }
+        },
+        {
+          "icon": "shield-check",
+          "text": {
+            "ko": "정직한 보증",
+            "en": "Honest guarantee"
+          }
+        }
+      ]
+    }
+  },
+  "market-gap": {
+    "layout": "split",
+    "visual": "map",
+    "hero": {
+      "title": {
+        "ko": "아무도 제대로 풀지 않는 불편 찾기",
+        "en": "Find the pain nobody solves well"
+      },
+      "story": {
+        "ko": "고객의 불편과 기존 해결책을 검색해 지도로 그립니다. 확인한 사실과 가설은 따로 표시해요.",
+        "en": "We research customer pain and existing solutions and map them — verified facts and hypotheses labelled apart."
+      }
+    },
+    "sections": [
+      {
+        "title": {
+          "ko": "어디를 볼까요",
+          "en": "Where to look"
+        },
+        "hint": {
+          "ko": "시장, 고객, 지역",
+          "en": "Market, customer, region"
+        },
+        "fields": [
+          "market",
+          "customer",
+          "region"
+        ]
+      },
+      {
+        "title": {
+          "ko": "알고 있는 것",
+          "en": "What you already know"
+        },
+        "hint": {
+          "ko": "선택 — 넣으면 지도가 정확해져요",
+          "en": "Optional — sharpens the map"
+        },
+        "fields": [
+          "known_problems",
+          "competitors",
+          "angle"
+        ]
+      }
+    ],
+    "ui": {
+      "market": {
+        "placeholder": {
+          "ko": "예: 노령견 돌봄 서비스",
+          "en": "e.g. senior dog care"
+        }
+      },
+      "customer": {
+        "placeholder": {
+          "ko": "예: 10살 이상 반려견을 키우는 맞벌이",
+          "en": "e.g. working couples with dogs over 10"
+        }
+      },
+      "competitors": {
+        "placeholder": {
+          "ko": "Enter로 추가 — 예: 펫호텔",
+          "en": "Press Enter — e.g. pet hotels"
+        }
+      },
+      "region": {
+        "placeholder": {
+          "ko": "예: 서울",
+          "en": "e.g. Seoul"
+        }
+      },
+      "angle": {
+        "display": "cards",
+        "options": {
+          "underserved": {
+            "icon": "user-round",
+            "desc": {
+              "ko": "방치된 고객",
+              "en": "Underserved"
+            }
+          },
+          "price": {
+            "icon": "banknote",
+            "desc": {
+              "ko": "가격대 사이",
+              "en": "Price gap"
+            }
+          },
+          "experience": {
+            "icon": "mouse-pointer-click",
+            "desc": {
+              "ko": "불편한 경험",
+              "en": "Bad experience"
+            }
+          },
+          "any": {
+            "icon": "compass",
+            "desc": {
+              "ko": "상관없음",
+              "en": "Any"
+            }
+          }
+        }
+      }
+    },
+    "stage": {
+      "headline": {
+        "ko": "니즈 × 해결책 지도",
+        "en": "Needs × solutions map"
+      },
+      "story": {
+        "ko": "칸마다 얼마나 잘 풀리는지 색으로 보여 주고, 비어 있는 칸에서 기회와 검증 질문을 뽑아요.",
+        "en": "Colour shows coverage per cell; the empty cells become opportunities with validation questions."
+      },
+      "promises": [
+        {
+          "icon": "search",
+          "text": {
+            "ko": "검색 근거",
+            "en": "Search evidence"
+          }
+        },
+        {
+          "icon": "scan-search",
+          "text": {
+            "ko": "빈틈 카드",
+            "en": "Gap cards"
+          }
+        },
+        {
+          "icon": "badge-alert",
+          "text": {
+            "ko": "가설 표시",
+            "en": "Hypotheses labelled"
+          }
+        }
+      ]
+    }
+  },
+  "mvp-blueprint": {
+    "layout": "steps",
+    "visual": "checklist",
+    "hero": {
+      "title": {
+        "ko": "작게, 빨리, 제대로 내놓기",
+        "en": "Launch small, fast and right"
+      },
+      "story": {
+        "ko": "꼭 필요한 기능만 남기고, 실력과 예산에 맞는 도구로 기간 안에 출시하는 순서를 짭니다.",
+        "en": "Keep only what's essential and plan a launch that fits your skills, budget and timeline."
+      }
+    },
+    "sections": [
+      {
+        "title": {
+          "ko": "무엇을 만들까요",
+          "en": "What you're building"
+        },
+        "hint": {
+          "ko": "제품과 처음 쓸 사람",
+          "en": "Product and first users"
+        },
+        "fields": [
+          "idea",
+          "target_user",
+          "product_type",
+          "must_have"
+        ]
+      },
+      {
+        "title": {
+          "ko": "만드는 조건",
+          "en": "Build constraints"
+        },
+        "hint": {
+          "ko": "누가, 얼마 동안, 얼마로",
+          "en": "Who, how long, how much"
+        },
+        "fields": [
+          "build_skill",
+          "weeks",
+          "budget"
+        ]
+      }
+    ],
+    "ui": {
+      "idea": {
+        "placeholder": {
+          "ko": "예: 동네 헬스장 PT 예약·출석 서비스",
+          "en": "e.g. PT booking for a local gym"
+        }
+      },
+      "target_user": {
+        "placeholder": {
+          "ko": "예: PT를 받는 30~40대 회원",
+          "en": "e.g. members in their 30s–40s"
+        }
+      },
+      "product_type": {
+        "display": "cards",
+        "options": {
+          "web": {
+            "icon": "globe",
+            "desc": {
+              "ko": "웹 서비스",
+              "en": "Web"
+            }
+          },
+          "app": {
+            "icon": "smartphone",
+            "desc": {
+              "ko": "모바일 앱",
+              "en": "Mobile app"
+            }
+          },
+          "service": {
+            "icon": "handshake",
+            "desc": {
+              "ko": "사람이 하는 서비스",
+              "en": "Human service"
+            }
+          },
+          "physical": {
+            "icon": "package",
+            "desc": {
+              "ko": "실물 제품",
+              "en": "Physical"
+            }
+          },
+          "content": {
+            "icon": "book-open",
+            "desc": {
+              "ko": "콘텐츠·강의",
+              "en": "Content"
+            }
+          }
+        }
+      },
+      "build_skill": {
+        "display": "segmented"
+      },
+      "weeks": {
+        "display": "slider",
+        "min": 1,
+        "max": 26,
+        "step": 1,
+        "unit": {
+          "ko": "주",
+          "en": "weeks"
+        }
+      },
+      "must_have": {
+        "placeholder": {
+          "ko": "예: 예약 변경, 카카오톡 알림",
+          "en": "e.g. rescheduling, KakaoTalk alerts"
+        }
+      }
+    },
+    "stage": {
+      "headline": {
+        "ko": "MVP 보드: 기능, 여정, 단계",
+        "en": "MVP board: features, journey, stages"
+      },
+      "story": {
+        "ko": "Must·Should·Later 칸, 사용자 여정, 도구 조합, 단계별 기준과 출시 체크리스트를 한 보드에 담아요.",
+        "en": "Must/Should/Later columns, the user journey, tool stack, stage criteria and a launch checklist on one board."
+      },
+      "promises": [
+        {
+          "icon": "list-checks",
+          "text": {
+            "ko": "MoSCoW 기능",
+            "en": "MoSCoW features"
+          }
+        },
+        {
+          "icon": "route",
+          "text": {
+            "ko": "사용자 여정",
+            "en": "User journey"
+          }
+        },
+        {
+          "icon": "clipboard-check",
+          "text": {
+            "ko": "출시 체크리스트",
+            "en": "Launch checklist"
+          }
+        }
+      ]
+    }
+  }
+}

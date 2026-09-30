@@ -35,6 +35,7 @@ import { BlogArticle, type BlogOutput } from "@/components/results/blog-article"
 import { AdCreatives, type CopyOutput } from "@/components/results/ad-creatives";
 import { MoodBoard } from "@/components/results/mood-board";
 import { ReportView } from "@/components/results/report-view";
+import { DISCOVER_VIEWS } from "@/components/results/discover";
 import { buildReport } from "@/lib/tools/report";
 import { useBi, useLocale, useT } from "@/lib/i18n/context";
 import type { Source } from "@/lib/tools/registry/shared";
@@ -326,9 +327,12 @@ interface LogoConcept {
   symbol_image?: { url: string };
 }
 
-function OutputPreview({ output, toolId, input }: { output: unknown; toolId?: string; input?: Record<string, unknown> }) {
+function OutputPreview({ output, toolId, input, runId }: { output: unknown; toolId?: string; input?: Record<string, unknown>; runId?: string }) {
   const L = useBi();
   const o = output as Record<string, unknown>;
+
+  const View = toolId ? DISCOVER_VIEWS[toolId] : undefined;
+  if (View && o && typeof o === "object") return <View output={o} runId={runId} />;
 
   const report = toolId ? buildReport(toolId, o, input) : null;
   if (report) {
@@ -541,7 +545,7 @@ function RunResult({
 
       <DownloadPanel runId={runId} toolId={manifest.id} extras={extras} />
 
-      <OutputPreview output={shown} toolId={manifest.id} input={input} />
+      <OutputPreview output={shown} toolId={manifest.id} input={input} runId={runId} />
 
       <DownloadPanel runId={runId} toolId={manifest.id} extras={extras} compact />
 

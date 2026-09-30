@@ -42,7 +42,8 @@ export interface ToolContent {
   sample: Bilingual;
 }
 
-const content = raw as Record<string, ToolContent>;
+// JSON inference types missing preset keys as undefined; content.test.ts checks the shape.
+const content = raw as unknown as Record<string, ToolContent>;
 
 export function getToolContent(toolId: string): ToolContent | undefined {
   return content[toolId];
