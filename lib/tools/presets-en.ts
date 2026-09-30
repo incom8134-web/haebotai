@@ -4,6 +4,15 @@
 // languages. Used when the UI is in English.
 
 export const PRESET_VALUES_EN: Record<string, Record<number, Record<string, string | string[]>>> = {
+  "hook-lab": {
+    0: { topic: "Three things new dog owners get wrong on walks", product: "1:1 dog walking training", audience: "Owners in their 20s–30s with a dog under a year old", proof: ["Trainer with 8 years' experience"] },
+    1: { topic: "Why our bakery's bread is sold out by 3pm", audience: "Office workers in their 20s–40s nearby", avoid: "'Delicious', 'the best'" },
+    2: { topic: "What a first-year freelance designer should do in January for taxes", product: "Tax filing service for freelancers", audience: "Freelance designers in their first year" },
+  },
+  "content-transformer": {
+    0: { source: "How to choose running shoes: most beginners pick shoes for looks, but cushioning, width and drop matter more. Walk for 10 minutes in the store, try them on in the evening when your feet are largest, and measure your stride with a phone. The first 3 months, run 20 minutes, 3 times a week.", audience: "People starting running in their 20s–40s", cta: "Book a free gait test in store" },
+    1: { source: "Lecture notes: The 3 questions that decide a small business's pricing — 1) what does the customer compare you with? 2) what does the customer lose if they don't buy? 3) what is the smallest unit they'd buy first? Most owners price from cost, but customers price from alternatives.", audience: "Small business owners", cta: "Subscribe to the newsletter" },
+  },
   "brand-dna": {
     0: { brand_name: "Onsaem Pediatric Clinic", offering: "A neighbourhood pediatric clinic with evening hours, for working parents of children under 10", target_customer: "Working parents in their 30s–40s", values: ["Explain clearly", "No rushing"], avoid: "Cold, hospital-like and intimidating" },
     1: { brand_name: "Rawpress", offering: "Cold-pressed juice subscription delivered at dawn to office workers", target_customer: "Health-conscious office workers in their late 20s–30s", values: ["Nothing added", "Honest labels"], competitors: ["Supermarket juice", "Big juice brands"], avoid: "Preachy wellness talk" },

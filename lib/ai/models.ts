@@ -27,6 +27,8 @@ const MAX_TOKENS_BY_TOOL: Record<string, number> = {
   "offer-architect": 10000,
   "market-gap": 10000, // needs × solutions coverage + sources
   "brand-dna": 10000,
+  "hook-lab": 10000,
+  "content-transformer": 16000, // up to 8 full platform versions
 };
 const MAX_TOKENS_DEFAULT = 8000;
 

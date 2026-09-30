@@ -97,6 +97,26 @@ export const AGENT_GUIDES: Record<string, AgentGuide> = {
       { id: "sensory-world", name: "감각의 세계", when: "외식·뷰티·공간처럼 분위기가 상품일 때", structure: "대표 장면과 감각 → 무드 단어 → 색과 질감 → 그 장면을 말하는 목소리" },
     ],
   },
+  "hook-lab": {
+    objective: "이 대상이 이 플랫폼에서 스크롤을 멈추고, 이어지는 내용이 그 약속을 지키는 첫 3초",
+    decide: ["보는 사람이 이미 품은 궁금증·불편·오해", "어떤 훅 유형을 쓸지와 비중", "첫 장면이 말보다 먼저 보여 줄 것"],
+    approaches: [
+      { id: "pain-first", name: "불편 먼저", when: "대상이 매일 겪는 불편이 분명할 때", structure: "불편 찌르기 → 전후 비교 → 숫자 → 증거" },
+      { id: "myth-break", name: "통념 뒤집기", when: "업계에 흔한 오해가 있을 때", structure: "통념 뒤집기 → 질문 → 증거 → 이야기" },
+      { id: "curiosity-gap", name: "호기심 공백", when: "과정·비밀·뒷이야기가 매력일 때", structure: "호기심 공백 → 이야기 → 숫자 → 질문" },
+      { id: "proof-led", name: "결과로 시작", when: "보여 줄 수 있는 결과·숫자가 있을 때", structure: "증거 → 전후 비교 → 숫자 → 불편" },
+    ],
+  },
+  "content-transformer": {
+    objective: "원본의 핵심은 지키되 플랫폼마다 그곳에서 읽히는 모양으로 다시 짠 버전들",
+    decide: ["원본의 핵심 메시지 한 문장", "플랫폼마다 첫 줄의 각도", "무엇을 어느 플랫폼에서 뺄지"],
+    approaches: [
+      { id: "one-message", name: "한 메시지, 여러 입구", when: "원본의 주장이 하나로 분명할 때", structure: "핵심 메시지 고정 → 플랫폼마다 다른 첫 줄 → 같은 결론과 행동" },
+      { id: "split-series", name: "쪼개서 연재", when: "원본이 길고 요점이 여럿일 때", structure: "요점별로 나눔 → 카드뉴스·스레드는 연재 → 뉴스레터에서 전체 연결" },
+      { id: "story-cut", name: "장면으로 다시", when: "원본이 설명형인데 영상·SNS가 필요할 때", structure: "설명을 장면으로 바꿈 → 쇼츠 대본 → 캡션 → 긴 글은 근거" },
+      { id: "expert-note", name: "전문가 노트", when: "링크드인·뉴스레터처럼 신뢰가 먼저일 때", structure: "관점 한 줄 → 근거 → 실무 팁 → 대화 유도" },
+    ],
+  },
   homepage: {
     objective: "방문자가 이 사업을 신뢰하고 한 가지 행동(예약·문의·구매·방문)으로 이어지는, 이 사업에만 맞는 사이트",
     decide: [

@@ -90,6 +90,22 @@ function seedFromDiscover(targetId: string, sourceId: string, source: unknown, p
     if (targetId === "idea-radar") return { interests: [s(gap.title)].filter(Boolean), target_customer: s(arr(out.needs)[0]?.who) };
     return {};
   }
+  if (targetId === "hook-lab") {
+    if (sourceId === "strategy") {
+      const t = arr(out.territories).find((x) => s(x.name) === s(out.recommended_territory)) ?? arr(out.territories)[0];
+      return { topic: lines(s(t?.idea), s(t?.example_line) && `예: ${s(t?.example_line)}`), audience: s(arr(out.segments)[0]?.name) };
+    }
+    if (sourceId === "brand-dna") return { product: s(o(out.essence).one_line), audience: s(o(out.positioning).for_whom) };
+    if (sourceId === "offer-architect") return { topic: s(out.core_promise), product: s(out.offer_name), audience: s(o(out.target).who) };
+  }
+  if (targetId === "content-transformer") {
+    if (sourceId === "blog") return { source: s(out.body_markdown), source_type: "blog" };
+    if (sourceId === "strategy") return { source: lines(s(out.positioning_statement), s(out.promise), ...arr(out.territories).map((t) => `${s(t.name)}: ${s(t.idea)}`)), source_type: "notes" };
+  }
+  if (targetId === "copy" && sourceId === "hook-lab") {
+    const best = o(out.best);
+    return { offer: s(best.text), must_include: [] };
+  }
   if (sourceId === "brand-dna") {
     const essence = o(out.essence);
     const pos = o(out.positioning);

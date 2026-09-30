@@ -306,6 +306,34 @@ const SAMPLES: Record<string, { output: Record<string, unknown>; input?: Record<
       touchpoints: [{ touchpoint: "간판", apply: "크림 바탕" }],
     },
   },
+  "hook-lab": {
+    output: {
+      summary: "요약",
+      audience_insight: "산책 줄 당김이 가장 큰 스트레스",
+      families: [
+        { family: "contrarian", why_it_works: "통념" },
+        { family: "number", why_it_works: "구체성" },
+      ],
+      hooks: [
+        { family: "contrarian", text: "오래 걷는 게 답이 아니에요", on_screen: "산책 오래 X", first_scene: "멈춘 발", follow_line: "3분이 중요", strength: 8, variants: [{ platform: "reels", text: "r" }] },
+        { family: "number", text: "3분만 바꾸세요", on_screen: "3분", first_scene: "타이머", follow_line: "이렇게", strength: 7, variants: [] },
+      ],
+      best: { text: "오래 걷는 게 답이 아니에요", reason: "통념" },
+      avoid: ["꿀팁 공개"],
+    },
+  },
+  "content-transformer": {
+    output: {
+      core_message: "러닝화는 발에 맞는지가 먼저",
+      key_points: ["쿠션", "발볼"],
+      versions: [
+        { platform: "instagram_carousel", angle: "a", title: "t", body: "", slides: [{ heading: "h", text: "본문입니다" }], script: [], posts: [], hashtags: ["#러닝"], cta: "예약", note: "" },
+        { platform: "shorts_script", angle: "b", title: "", body: "", slides: [], script: [{ time: "0-3", visual: "신발장", voice: "어느 쪽이 맞을까요" }], posts: [], hashtags: [], cta: "", note: "" },
+        { platform: "kakao", angle: "c", title: "", body: "매장에서 무료 보행 분석을 받아 보세요.", slides: [], script: [], posts: [], hashtags: [], cta: "", note: "" },
+      ],
+      dropped: ["통계"],
+    },
+  },
 };
 
 function charts(report: Report) {
@@ -343,7 +371,7 @@ test("each tool has its own look: different accent colors and chart kinds", () =
   const reports = Object.entries(SAMPLES).map(([tool, s]) => buildReport(tool, s.output, s.input)!);
   assert.equal(new Set(reports.map((r) => r.palette[0])).size, reports.length);
   const kinds = reports.map((r) => charts(r).map((c) => c.kind).sort().join(","));
-  assert.equal(new Set(kinds).size, kinds.length, "no two tools share the same chart mix");
+  assert.equal(new Set(kinds).size, kinds.length, `no two tools share the same chart mix: ${Object.keys(SAMPLES).map((t, i) => `${t}=${kinds[i]}`).join(" ")}`);
 });
 
 test("a business plan saved before the richer schema still renders its P&L", () => {

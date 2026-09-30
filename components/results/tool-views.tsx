@@ -5,6 +5,11 @@ import { LogoBoard } from "./brand/logo-board";
 import { SalesPageBoard } from "./brand/sales-page-board";
 import { SiteBoard } from "./brand/site-board";
 import { Storyboard } from "./brand/storyboard";
+import { AdBoard } from "./campaign/ad-board";
+import { CampaignBoard } from "./campaign/campaign-board";
+import { ContentBranches } from "./campaign/content-branches";
+import { HookBoard } from "./campaign/hook-board";
+import { SeoEditor } from "./campaign/seo-editor";
 import { GapMap } from "./discover/gap-map";
 import { IdeaBoard } from "./discover/idea-board";
 import { MvpBoard } from "./discover/mvp-board";
@@ -33,5 +38,11 @@ export const TOOL_VIEWS: Record<string, { match: (o: Record<string, unknown>) =>
   logo: { match: (o) => has(o, "concepts") && Boolean((o.concepts as { image?: { url?: string } }[])[0]?.image?.url), View: LogoBoard },
   sangsepage: { match: (o) => has(o, "sections"), View: SalesPageBoard },
   homepage: { match: (o) => typeof o.html === "string", View: SiteBoard },
+  "hook-lab": { match: (o) => has(o, "hooks"), View: HookBoard },
+  "content-transformer": { match: (o) => has(o, "versions"), View: ContentBranches },
+  // Strategy runs from before the channel plan fall through to the plain report.
+  strategy: { match: (o) => has(o, "channel_plan"), View: CampaignBoard },
+  blog: { match: (o) => typeof o.body_markdown === "string", View: SeoEditor },
+  copy: { match: (o) => has(o, "angles"), View: AdBoard },
   presentation: { match: (o) => has(o, "slides") && (o.slides as { headline?: unknown }[]).some((s) => typeof s?.headline === "string"), View: Storyboard },
 };
