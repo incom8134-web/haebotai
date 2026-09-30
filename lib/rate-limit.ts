@@ -23,6 +23,15 @@ export const runLimiter = new Ratelimit({
   prefix: "ratelimit:run",
 });
 
+// Reading a request before a run (/api/tools/[toolId]/intent): one fast
+// model call, no credits. Looser than runs (a member may edit and re-read),
+// still a ceiling on a loop.
+export const intentLimiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(20, "1 m"),
+  prefix: "ratelimit:intent",
+});
+
 // Export generation (docx/xlsx) is real CPU work but no external API
 // cost — looser ceiling, just enough to stop hammering.
 export const exportLimiter = new Ratelimit({

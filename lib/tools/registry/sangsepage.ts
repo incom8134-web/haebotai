@@ -36,6 +36,6 @@ export const sangsepage: ToolManifest = {
   outputRenderer: "document",
   grounding: { requireSources: false, webSearch: true, estimateBadge: false },
   model: "gemini-3.1-pro-preview",
-  estimatedCredits: 70,
-  estimatedSeconds: 110,
+  estimatedCredits: 90,
+  estimatedSeconds: 230,
 };

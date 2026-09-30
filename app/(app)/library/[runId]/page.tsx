@@ -34,7 +34,8 @@ export default async function LibraryRunPage({ params }: { params: Promise<{ run
       status={run.status}
       input={run.input ?? undefined}
       // Older runs were stored in whatever key order the model returned.
-      output={orderLike(getOutputSchema(run.tool_id) ?? z.unknown(), run.output)}
+      // An unfinished run's output is its working state, not a result.
+      output={run.status === "done" ? orderLike(getOutputSchema(run.tool_id) ?? z.unknown(), run.output) : null}
       sources={(run.sources ?? []) as Source[]}
       creditsUsed={run.credits_used}
       provider={run.provider as ProviderId | null}

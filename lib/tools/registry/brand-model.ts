@@ -70,6 +70,6 @@ export const brandModel: ToolManifest = {
   outputRenderer: "images",
   grounding: { requireSources: false, webSearch: false, estimateBadge: false },
   model: "gemini-3-pro-image",
-  estimatedCredits: 50,
-  estimatedSeconds: 35,
+  estimatedCredits: 60,
+  estimatedSeconds: 80,
 };

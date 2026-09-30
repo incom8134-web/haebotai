@@ -279,3 +279,24 @@ test("deck slides carry their layout data into charts, tables and tiles", async 
   const chart = blocks.find((b) => b.type === "chart");
   assert.ok(chart && chart.type === "chart" && chart.estimated);
 });
+
+test("a business plan with chapters follows them, with analysis placed where a chapter asked", () => {
+  const plan = {
+    title: "브런치 카페",
+    one_liner: "요약",
+    plan_type: "대출 심사용",
+    chapters: [
+      { title: "1. 사업 개요", purpose: "작성자용 메모", body: "개요 본문" },
+      { title: "2. 자금 계획", purpose: "p", body: "자금 본문", data: "funding" },
+      { title: "3. 상환 능력", purpose: "p", body: "상환 본문", data: "financials" },
+    ],
+    funding: { total_krw: 50_000_000, uses: [{ item: "보증금", amount_krw: 15_000_000 }, { item: "인테리어", amount_krw: 35_000_000 }] },
+    financials: { yearly: [{ year: "1년 차", revenue_krw: 3e8, cost_krw: 2e8, customers: 0 }, { year: "2년 차", revenue_krw: 3.2e8, cost_krw: 2.1e8, customers: 0 }, { year: "3년 차", revenue_krw: 3.4e8, cost_krw: 2.2e8, customers: 0 }], monthly_revenue_krw: Array(12).fill(25e6), assumptions: ["a"], breakeven_month: 4 },
+  };
+  const ids = buildReport("business-plan", plan)!.sections.map((s) => s.id);
+  assert.deepEqual(ids, ["one-liner", "chapter-1", "chapter-2", "funding", "chapter-3", "financials"]);
+  const report = buildReport("business-plan", plan)!;
+  const first = report.sections.find((s) => s.id === "chapter-1")!;
+  assert.equal(first.title, "사업 개요", "readers see the chapter title, not the writer's purpose note");
+  assert.ok(!report.sections.some((s) => s.id === "market" || s.id === "competition"), "analysis the plan left out stays out");
+});

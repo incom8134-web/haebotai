@@ -9,7 +9,11 @@
 import type { BusinessProfile, ToolManifest } from "./types";
 import { getPlaybook, HOUSE_RULES } from "./playbooks.ts";
 import { referencePrompt, type ReferenceBundle } from "./reference.ts";
-import { directionPrompt, type Direction } from "./directions.ts";
+import { briefBlock, type RequestBrief } from "./request-brief.ts";
+import { intentBlock } from "../agents/intent.ts";
+import { strategyBlock } from "../agents/strategy.ts";
+import { revisionBlock } from "../agents/critic.ts";
+import type { Critique, Intent, Strategy } from "../agents/types.ts";
 
 // Prompt-level enforcement for the hard guards documented in policy.ts —
 // that file's checks are the pre-flight/output-safety backstop; this is
@@ -47,6 +51,11 @@ export const PROFILE_LABELS: Record<keyof BusinessProfile, string> = {
   weekly_hours: "주당 가용시간",
   budget_band: "예산대",
 };
+
+/** The tool's name without the service brand ("해봇 홈페이지" → "홈페이지"). */
+export function toolLabel(manifest: Pick<ToolManifest, "name_ko">): string {
+  return manifest.name_ko.replace(/^해봇\s*/, "");
+}
 
 export function formatValue(v: unknown): string {
   if (Array.isArray(v)) return v.length ? v.join(", ") : "(없음)";
@@ -125,25 +134,35 @@ export function buildContext(
       return `- ${f.label}: ${formatValue(input[f.id])}`;
     });
   if (profile) {
+    lines.push("", "[계정에 저장된 비즈니스 프로필 — 이번 요청의 대상과 같은 사업일 때만 참고]");
     for (const key of manifest.usesProfile) {
-      lines.push(`- [비즈니스 프로필] ${PROFILE_LABELS[key]}: ${formatValue(profile[key])}`);
+      lines.push(`- ${PROFILE_LABELS[key]}: ${formatValue(profile[key])}`);
     }
   }
-  const direction = input._direction as Direction | undefined;
-  if (direction?.brief) lines.push("", directionPrompt(direction));
+  const brief = input._brief as RequestBrief | undefined;
+  if (brief?.tone) lines.push("", briefBlock(brief));
+  // Agent directives (lib/agents): the understood request, the chosen
+  // strategy's blueprint and rubric, and — on a revision — the critique.
+  const intent = input._intent as { intent: Intent; answers: { question: string; answer: string }[] } | undefined;
+  if (intent?.intent) lines.push("", intentBlock(intent.intent, intent.answers ?? []));
+  const strategy = input._strategy as Strategy | undefined;
+  if (strategy?.blueprint?.length) lines.push("", strategyBlock(strategy));
   const reference = referenceOf(input);
   if (reference) lines.push("", referencePrompt(reference));
   const free = typeof input.free_request === "string" ? input.free_request.trim() : "";
   if (free) lines.push("", freeRequestPrompt(free));
+  const revision = input._revision as { draft: string; critique: Critique } | undefined;
+  if (revision?.critique) lines.push("", "[이전 초안]", revision.draft, "", revisionBlock(revision.critique));
   return lines.join("\n");
 }
 
 export function buildBaseInstruction(manifest: ToolManifest, opts: { houseRules?: boolean } = {}): string[] {
   const playbook = getPlaybook(manifest.id);
+  const label = toolLabel(manifest);
   const parts = [
     playbook
-      ? `당신은 ${playbook.role}입니다. 지금 해봇 AI의 "${manifest.name_ko}" 도구로서 일합니다: ${manifest.summary}`
-      : `당신은 해봇 AI의 "${manifest.name_ko}" 도구입니다. ${manifest.summary}`,
+      ? `당신은 ${playbook.role}입니다. 지금 사용자의 요청으로 "${label}" 작업을 합니다: ${manifest.summary}`
+      : `당신은 "${label}" 작업을 하는 전문가입니다. ${manifest.summary}`,
     "이 사용자의 상황에 실제로 맞는 구체적인 내용을 만드세요. 누구에게나 해당하는 뻔하고 일반적인 결과는 피하세요.",
   ];
   if (opts.houseRules !== false) parts.push("[작업 원칙]", ...HOUSE_RULES.map((r) => `- ${r}`));
@@ -187,8 +206,8 @@ export function buildImageSystemInstruction(manifest: ToolManifest): string {
 export function buildResearchPrompt(manifest: ToolManifest, contextText: string): string {
   const research = getPlaybook(manifest.id)?.research;
   return research
-    ? `"${manifest.name_ko}" 작업 전에 웹 검색으로 다음을 조사하세요: ${research}. 찾은 사실은 수치·이름·날짜를 살려 출처와 함께 한국어로 정리하고, 찾지 못한 것은 찾지 못했다고 쓰세요.\n\n${contextText}`
-    : `"${manifest.name_ko}" 요청에 필요한 최신 사실 정보를 웹 검색으로 조사하세요. 찾은 핵심 사실과 수치를 근거와 함께 한국어로 요약하세요.\n\n${contextText}`;
+    ? `"${toolLabel(manifest)}" 작업 전에 웹 검색으로 다음을 조사하세요: ${research}. 찾은 사실은 수치·이름·날짜를 살려 출처와 함께 한국어로 정리하고, 찾지 못한 것은 찾지 못했다고 쓰세요.\n\n${contextText}`
+    : `"${toolLabel(manifest)}" 요청에 필요한 최신 사실 정보를 웹 검색으로 조사하세요. 찾은 핵심 사실과 수치를 근거와 함께 한국어로 요약하세요.\n\n${contextText}`;
 }
 
 /**
@@ -200,7 +219,7 @@ export function buildResearchPrompt(manifest: ToolManifest, contextText: string)
 export function buildReviseInstruction(manifest: ToolManifest): string {
   const playbook = getPlaybook(manifest.id);
   const parts = [
-    `당신은 까다로운 시니어 에디터입니다. 아래 [초안]은 ${playbook ? playbook.role : "전문가"}가 해봇 AI의 "${manifest.name_ko}" 결과로 쓴 것입니다. 소상공인 고객이 돈을 내고 받는 결과물이라는 기준으로 검토하고 더 좋게 고쳐 쓰세요.`,
+    `당신은 까다로운 시니어 에디터입니다. 아래 [초안]은 ${playbook ? playbook.role : "전문가"}가 "${toolLabel(manifest)}" 결과로 쓴 것입니다. 소상공인 고객이 돈을 내고 받는 결과물이라는 기준으로 검토하고 더 좋게 고쳐 쓰세요.`,
     "반드시 한국어로 작성하세요.",
     "[검토할 점]",
     "1. 업종 이름만 바꾸면 다른 가게에도 통하는 일반적인 문장 → 이 사업의 이름·제품·지역·고객·숫자를 넣어 다시 쓰기",

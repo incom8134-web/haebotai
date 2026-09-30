@@ -66,6 +66,6 @@ export const prompt: ToolManifest = {
   outputRenderer: "code",
   grounding: { requireSources: false, webSearch: false, estimateBadge: false },
   model: "gemini-3.1-pro-preview",
-  estimatedCredits: 15,
-  estimatedSeconds: 65,
+  estimatedCredits: 20,
+  estimatedSeconds: 140,
 };

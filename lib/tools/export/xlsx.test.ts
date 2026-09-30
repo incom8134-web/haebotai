@@ -26,29 +26,54 @@ async function loadWorkbook(buffer: Buffer) {
   return workbook;
 }
 
-test("assumptions land on the exact rows the P&L formulas reference", async () => {
+// Plans with a price and volume: the computed model (lib/tools/financial-model.ts).
+test("model sheets: assumptions land on the rows the formulas reference", async () => {
   const workbook = await loadWorkbook(await buildBusinessPlanXlsx(OUTPUT, INPUT));
-  const assumptions = workbook.getWorksheet("가정")!;
-  assert.equal(assumptions.getCell("B2").value, INPUT.unit_price, "단가 must be on row 2, not row 1 (header)");
-  assert.equal(assumptions.getCell("B3").value, INPUT.monthly_sales_target);
-  assert.equal(assumptions.getCell("B4").value, INPUT.fixed_cost);
-  assert.equal(assumptions.getCell("B5").value, INPUT.variable_cost_rate / 100);
+  const a = workbook.getWorksheet("가정")!;
+  assert.equal(a.getCell("B2").value, INPUT.unit_price, "객단가 must be on row 2, not row 1 (header)");
+  assert.equal(a.getCell("B3").value, 25, "month 1 ramps from half of the month-12 target");
+  assert.equal(a.getCell("B5").value, INPUT.variable_cost_rate / 100);
+  assert.equal(a.getCell("B6").value, INPUT.fixed_cost);
+  assert.equal(a.getCell("C2").value, "입력값");
 });
 
-test("P&L formulas have no leading '=' (ExcelJS writes the string literally into <f>)", async () => {
+test("model sheets: formulas have no leading '=' and chain month → year", async () => {
   const workbook = await loadWorkbook(await buildBusinessPlanXlsx(OUTPUT, INPUT));
+  const months = workbook.getWorksheet("1년 차 월별")!;
   const pl = workbook.getWorksheet("3개년 손익")!;
-  const formulaCells = ["B2", "C2", "D2", "B3", "B4", "B5", "B6", "B7"];
-  for (const address of formulaCells) {
+  for (const [sheet, cells] of [[months, ["B2", "C2", "D2", "E2", "F2", "G2", "B13", "G13"]], [pl, ["B2", "C2", "D2", "B3", "C3", "B6", "D7"]]] as const) {
+    for (const address of cells) {
+      const value = sheet.getCell(address).value as { formula?: string } | null;
+      assert.ok(value?.formula, `${address} must hold a formula`);
+      assert.ok(!value.formula.startsWith("="), `${address} formula "${value.formula}" must not start with "="`);
+    }
+  }
+  assert.equal((months.getCell("C2").value as { formula: string }).formula, "B2*가정!$B$2");
+  assert.equal((months.getCell("F2").value as { formula: string }).formula, "C2-D2-E2");
+  assert.equal((pl.getCell("B3").value as { formula: string }).formula, "SUM('1년 차 월별'!C2:C13)");
+  assert.equal((pl.getCell("B6").value as { formula: string }).formula, "B3-B4-B5");
+});
+
+// Older runs without a price: the P&L rebuilt from the form's figures.
+const NO_PRICE = { monthly_sales_target: 50, fixed_cost: 2000000, variable_cost_rate: 40 };
+
+test("input sheets: assumptions land on the exact rows the P&L formulas reference", async () => {
+  const workbook = await loadWorkbook(await buildBusinessPlanXlsx(OUTPUT, NO_PRICE));
+  const assumptions = workbook.getWorksheet("가정")!;
+  assert.equal(assumptions.getCell("B2").value, 0, "단가 must be on row 2, not row 1 (header)");
+  assert.equal(assumptions.getCell("B3").value, NO_PRICE.monthly_sales_target);
+  assert.equal(assumptions.getCell("B4").value, NO_PRICE.fixed_cost);
+  assert.equal(assumptions.getCell("B5").value, NO_PRICE.variable_cost_rate / 100);
+});
+
+test("input sheets: P&L formulas have no leading '=' and reference the right cells", async () => {
+  const workbook = await loadWorkbook(await buildBusinessPlanXlsx(OUTPUT, NO_PRICE));
+  const pl = workbook.getWorksheet("3개년 손익")!;
+  for (const address of ["B2", "C2", "D2", "B3", "B4", "B5", "B6", "B7"]) {
     const value = pl.getCell(address).value as { formula?: string } | null;
     assert.ok(value?.formula, `${address} must hold a formula`);
     assert.ok(!value.formula.startsWith("="), `${address} formula "${value.formula}" must not start with "="`);
   }
-});
-
-test("P&L formulas reference the correct assumption cells and chain correctly", async () => {
-  const workbook = await loadWorkbook(await buildBusinessPlanXlsx(OUTPUT, INPUT));
-  const pl = workbook.getWorksheet("3개년 손익")!;
   assert.equal((pl.getCell("B2").value as { formula: string }).formula, "가정!$B$3");
   assert.equal((pl.getCell("B4").value as { formula: string }).formula, "B3*가정!$B$2");
   assert.equal((pl.getCell("B7").value as { formula: string }).formula, "B4-B5-B6");

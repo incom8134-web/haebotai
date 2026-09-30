@@ -7,7 +7,7 @@
       { "title": { "ko": "지금 모습과 경쟁자", "en": "Where you are now" }, "hint": { "ko": "현재 소개글을 붙여 넣으면 무엇이 달라지는지 비교해 드려요", "en": "Paste your current listing to see what changes" }, "fields": ["current_info", "competitors"] }
     ],
     "ui": {
-      "business_name": { "placeholder": { "ko": "예: 해봇 베이커리", "en": "e.g. Haebot Bakery" } },
+      "business_name": { "placeholder": { "ko": "예: 달빛 베이커리", "en": "e.g. Moonlight Bakery" } },
       "region": { "placeholder": { "ko": "예: 부산 해운대구", "en": "e.g. Haeundae-gu, Busan" } },
       "current_info": { "placeholder": { "ko": "지금 지도 앱에 올라가 있는 소개글을 그대로 붙여 넣으세요", "en": "Paste your current map listing text" } },
       "competitors": { "placeholder": { "ko": "Enter로 추가 — 근처 경쟁 가게", "en": "Press Enter — nearby competitors" } }
@@ -38,7 +38,7 @@
       { "title": { "ko": "색", "en": "Color" }, "hint": { "ko": "브랜드 컬러는 프로필에서 가져와요", "en": "Brand colors come from your profile" }, "fields": ["color_tendency"] }
     ],
     "ui": {
-      "brand_name": { "placeholder": { "ko": "예: 해봇 베이커리", "en": "e.g. Haebot Bakery" } },
+      "brand_name": { "placeholder": { "ko": "예: 달빛 베이커리", "en": "e.g. Moonlight Bakery" } },
       "keywords": { "placeholder": { "ko": "Enter로 추가 — 예: 밀, 아침, 손맛", "en": "Press Enter — e.g. wheat, morning, handmade" } },
       "style": { "display": "cards", "options": { "wordmark": { "icon": "type", "desc": { "ko": "글자만으로", "en": "Letters only" } }, "symbol_wordmark": { "icon": "shapes", "desc": { "ko": "심볼 + 글자", "en": "Symbol + name" } }, "initial": { "icon": "square-dashed", "desc": { "ko": "첫 글자 모노그램", "en": "Monogram" } }, "emblem": { "icon": "badge", "desc": { "ko": "원형·배지형", "en": "Seal or badge" } } } },
       "color_tendency": { "display": "swatches" }

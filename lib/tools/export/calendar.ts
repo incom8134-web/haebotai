@@ -42,7 +42,7 @@ function escapeIcsText(s: string): string {
 export function buildCalendarIcs(weeks: CalendarWeek[], startDate: string): string | null {
   if (Number.isNaN(new Date(`${startDate}T00:00:00`).getTime())) return null;
 
-  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//해봇 AI//90일 실행 캘린더//KO", "CALSCALE:GREGORIAN"];
+  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//90-day plan//90일 실행 캘린더//KO", "CALSCALE:GREGORIAN"];
   const stamp = `${toIcsDate(new Date())}T000000Z`;
   let uid = 0;
   for (const week of weeks) {

@@ -24,6 +24,6 @@ export const proposal: ToolManifest = {
   outputRenderer: "document",
   grounding: { requireSources: false, webSearch: true, estimateBadge: false },
   model: "gemini-3.1-pro-preview",
-  estimatedCredits: 45,
-  estimatedSeconds: 95,
+  estimatedCredits: 58,
+  estimatedSeconds: 200,
 };

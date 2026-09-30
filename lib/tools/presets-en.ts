@@ -32,7 +32,7 @@ export const PRESET_VALUES_EN: Record<string, Record<number, Record<string, stri
     1: { primary_keyword: "Figma course" },
   },
   place: {
-    0: { business_name: "Haebot Bakery", region: "Haeundae-gu, Busan", competitors: ["OO Bakery", "XX Bakehouse"] },
+    0: { business_name: "Moonlight Bakery", region: "Haeundae-gu, Busan", competitors: ["OO Bakery", "XX Bakehouse"] },
     1: { business_name: "Hair Salon Bom", region: "Mangwon-dong, Mapo-gu, Seoul" },
   },
   image: {
@@ -42,7 +42,7 @@ export const PRESET_VALUES_EN: Record<string, Record<number, Record<string, stri
     3: { description: "Spring sale banner with cherry blossoms and pastel background, space left for the product" },
   },
   logo: {
-    0: { brand_name: "Haebot Bakery", keywords: ["Wheat", "Morning", "Handmade"] },
+    0: { brand_name: "Moonlight Bakery", keywords: ["Wheat", "Morning", "Handmade"] },
     1: { keywords: ["Trust", "Growth", "Speed"] },
     2: { keywords: ["Leaf", "Cycle", "Bio"] },
   },

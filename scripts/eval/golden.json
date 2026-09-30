@@ -1,0 +1,113 @@
+{
+ "copy_funeral": {
+  "tool": "copy",
+  "values": {
+   "offer": "\"평안 추모공원\" 봉안당 사전 상담 안내",
+   "audience": "부모님 장례를 미리 준비하려는 50~60대",
+   "goal": "awareness",
+   "channels": [
+    "landing",
+    "sms"
+   ]
+  }
+ },
+ "copy_truck": {
+  "tool": "copy",
+  "values": {
+   "offer": "\"불맛 떡볶이 트럭\" 금요일 밤 홍대 출몰, 치즈 추가 무료",
+   "audience": "홍대 20대",
+   "goal": "conversion",
+   "channels": [
+    "instagram"
+   ]
+  }
+ },
+ "bp_loan": {
+  "tool": "business-plan",
+  "values": {
+   "item": "부산 전포동 12평 브런치 카페 창업. 은행 소상공인 정책자금 대출 5천만 원 신청용",
+   "purpose": "loan",
+   "unit_price": 14000,
+   "monthly_sales_target": 1800,
+   "fixed_cost": 7500000,
+   "variable_cost_rate": 38
+  }
+ },
+ "bp_vc": {
+  "tool": "business-plan",
+  "values": {
+   "item": "중소 제조공장용 AI 설비 이상탐지 SaaS. 시드 투자 10억 유치용",
+   "purpose": "investment",
+   "market": "국내 중소 제조업 스마트팩토리"
+  }
+ },
+ "deck_client": {
+  "tool": "presentation",
+  "values": {
+   "brief": "고객사 \"한빛정밀\" (자동차 부품 제조) 스마트팩토리 도입 제안 — 현황, 문제, 도입 단계, 기대 효과",
+   "audience": "한빛정밀 경영진",
+   "slide_count": "8"
+  }
+ },
+ "deck_teach": {
+  "tool": "presentation",
+  "values": {
+   "brief": "동네 도서관 어르신 대상 '스마트폰으로 사기 문자 구별하기' 1시간 강의",
+   "audience": "65세 이상 어르신",
+   "slide_count": "8"
+  }
+ },
+ "hp_law": {
+  "tool": "homepage",
+  "values": {
+   "content": "\"김앤리 법률사무소\" 부산 서면. 이혼·상속·가사 전문 변호사 2인. 첫 상담 30분, 비밀 보장.",
+   "facts": "051-000-5678, 부산진구 서면로 10, 평일 09:00-18:00",
+   "purpose": "booking"
+  }
+ },
+ "hp_club": {
+  "tool": "homepage",
+  "values": {
+   "content": "테크노 파티 \"NIGHT SHIFT\" 성수동 창고에서 11월 한 달간 매주 토요일 밤. 라인업 공개 예정, 얼리버드 티켓.",
+   "purpose": "landing"
+  }
+ },
+ "logo_tea": {
+  "tool": "logo",
+  "values": {
+   "brand_name": "차담",
+   "keywords": [
+    "전통 찻집",
+    "쉼",
+    "대화"
+   ]
+  }
+ },
+ "vague_hp": {
+  "tool": "homepage",
+  "values": {
+   "content": "우리 가게 홈페이지"
+  }
+ },
+ "truck_other": {
+  "tool": "copy",
+  "values": {
+   "offer": "\"불맛 떡볶이 트럭\" 금요일 밤 홍대 출몰, 치즈 추가 무료",
+   "audience": "홍대 20대",
+   "goal": "conversion",
+   "channels": [
+    "instagram"
+   ]
+  },
+  "override": "긴급성·희소성(게릴라)",
+  "note": "same inputs, member asked for a different strategy"
+ },
+ "kids_hp": {
+  "tool": "homepage",
+  "values": {
+   "content": "\"꼬마과학자 실험실\" 초등 1~4학년 과학 실험 교실. 슬라임, 로켓, 화산 실험. 매주 토요일 체험수업.",
+   "facts": "카카오톡 채널 @kidslab, 경기 성남 분당구",
+   "purpose": "intro"
+  }
+ }
+}

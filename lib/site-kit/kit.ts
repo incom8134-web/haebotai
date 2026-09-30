@@ -1,5 +1,5 @@
-// Haebot site kit: tested WebGL scenes and interaction helpers that the
-// homepage generator's pages import as "@haebot/kit". The generated page
+// Site kit: tested WebGL scenes and interaction helpers that the
+// homepage generator's pages import as "@site/kit". The generated page
 // writes its own TypeScript (layout choreography, GSAP scroll moments,
 // forms); the heavy, easy-to-get-wrong Three.js setup lives here, so every
 // site gets a working, fast 3D moment instead of a broken canvas.
@@ -12,7 +12,10 @@ import * as THREE from "three";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 
-export type SceneType = "liquid-image" | "orb" | "particles-text" | "photo-ring" | "waves" | "floating" | "aurora";
+export type SceneType = "liquid-image" | "orb" | "particles-text" | "photo-ring" | "waves" | "floating" | "aurora" | "bokeh" | "ribbons" | "contours";
+
+/** How a scene moves — pick it from the brand's tone, not for show. */
+export type SceneMotion = "calm" | "lively" | "dramatic";
 
 export interface SceneOptions {
   type: SceneType;
@@ -28,8 +31,18 @@ export interface SceneOptions {
   shapes?: "soft" | "geometric" | "rings" | "mixed";
   /** orb / floating: where the object sits in the frame. */
   align?: "center" | "left" | "right";
-  /** 0..1, how strong the motion and pointer response are (default 0.6). */
+  /** 0..1, how strong the motion and pointer response are (default from motion). */
   intensity?: number;
+  /** calm (slow, subtle), lively, dramatic (fast, bold). Default lively. */
+  motion?: SceneMotion;
+  /**
+   * The scene's look:
+   *   orb: glossy | pearl | wire · particles-text: text | sphere | wave ·
+   *   photo-ring: ring | wall · waves: dots | lines | mesh ·
+   *   floating: gloss | glass | matte | metal · aurora: flow | soft | dusk ·
+   *   bokeh: warm | cool · ribbons: silk | neon · contours: map | fine
+   */
+  variant?: string;
 }
 
 export interface SceneHandle {
@@ -240,7 +253,15 @@ function orb(o: SceneOptions, k: number): Built {
         gl_FragColor = vec4(col, 1.0);
       }`,
   });
-  const mesh = new THREE.Mesh(new THREE.IcosahedronGeometry(1.1, 96), material);
+  // pearl: soft and pastel, barely moving; wire: a line drawing of the
+  // same form; glossy: the full liquid look.
+  const variant = o.variant === "pearl" || o.variant === "wire" ? o.variant : "glossy";
+  if (variant === "pearl") {
+    for (const u of [uniforms.uC1, uniforms.uC2]) u.value.lerp(new THREE.Vector3(1, 1, 1), 0.35);
+  }
+  if (variant === "wire") material.wireframe = true;
+  const ampScale = variant === "pearl" ? 0.4 : 1;
+  const mesh = new THREE.Mesh(new THREE.IcosahedronGeometry(1.1, variant === "wire" ? 28 : 96), material);
   const x = o.align === "left" ? -1.1 : o.align === "right" ? 1.1 : 0;
   mesh.position.x = x;
   scene.add(mesh);
@@ -256,7 +277,7 @@ function orb(o: SceneOptions, k: number): Built {
     },
     update(t, s) {
       uniforms.uTime.value = t;
-      uniforms.uAmp.value = (0.2 + s.progress * 0.35 + s.speed * 0.4) * (0.6 + k * 0.6);
+      uniforms.uAmp.value = (0.2 + s.progress * 0.35 + s.speed * 0.4) * (0.6 + k * 0.6) * ampScale;
       mesh.rotation.y += (s.pointer.x * 0.6 - mesh.rotation.y) * 0.05 + s.dt * 0.1;
       mesh.rotation.x += (-s.pointer.y * 0.4 - mesh.rotation.x) * 0.05;
       mesh.position.y = -s.progress * 0.8;
@@ -293,6 +314,32 @@ function textPoints(text: string, max: number): Float32Array {
   const out: number[] = [];
   for (let i = 0; i < pts.length; i += 2 * step) out.push((pts[i] / W - 0.5) * 6, -(pts[i + 1] / H - 0.5) * 1.8, 0);
   return new Float32Array(out);
+}
+
+/** Points evenly spread over a sphere (Fibonacci lattice). */
+function spherePoints(n: number): Float32Array {
+  const out = new Float32Array(n * 3);
+  const golden = Math.PI * (3 - Math.sqrt(5));
+  for (let i = 0; i < n; i++) {
+    const y = 1 - (i / (n - 1)) * 2;
+    const r = Math.sqrt(1 - y * y);
+    const a = i * golden;
+    out.set([Math.cos(a) * r * 1.7, y * 1.7, Math.sin(a) * r * 1.7], i * 3);
+  }
+  return out;
+}
+
+/** Points on a gently rolling sheet. */
+function wavePoints(n: number): Float32Array {
+  const side = Math.floor(Math.sqrt(n));
+  const out = new Float32Array(side * side * 3);
+  for (let i = 0; i < side; i++)
+    for (let j = 0; j < side; j++) {
+      const x = (i / (side - 1) - 0.5) * 7;
+      const z = (j / (side - 1) - 0.5) * 4;
+      out.set([x, Math.sin(x * 0.9) * 0.35 + Math.cos(z * 1.4) * 0.25 - 0.4, z], (i * side + j) * 3);
+    }
+  return out;
 }
 
 function particlesText(o: SceneOptions, k: number): Built {
@@ -341,7 +388,7 @@ function particlesText(o: SceneOptions, k: number): Built {
   scene.add(points);
   let formStart = -1;
   const build = () => {
-    const target = textPoints((o.text ?? "HELLO").slice(0, 14), 7000);
+    const target = o.variant === "sphere" ? spherePoints(5000) : o.variant === "wave" ? wavePoints(5200) : textPoints((o.text ?? "HELLO").slice(0, 14), 7000);
     const n = target.length / 3;
     const scatter = new Float32Array(n * 3);
     const seed = new Float32Array(n);
@@ -528,7 +575,22 @@ function waves(o: SceneOptions, k: number): Built {
         gl_FragColor = vec4(mix(uC1, uC2, smoothstep(-0.4, 0.6, vH)), vFade * smoothstep(0.5, 0.2, d));
       }`,
   });
-  const points = new THREE.Points(geometry, material);
+  // dots: a point cloud; lines: contour-like rows; mesh: a wire grid.
+  let points: THREE.Object3D;
+  if (o.variant === "lines" || o.variant === "mesh") {
+    const cols = 180;
+    const rows = 120;
+    const step = o.variant === "lines" ? 3 : 4;
+    const idx: number[] = [];
+    for (let r = 0; r <= rows; r += step) for (let c = 0; c < cols; c++) idx.push(r * (cols + 1) + c, r * (cols + 1) + c + 1);
+    if (o.variant === "mesh") for (let c = 0; c <= cols; c += step) for (let r = 0; r < rows; r++) idx.push(r * (cols + 1) + c, (r + 1) * (cols + 1) + c);
+    geometry.setIndex(idx);
+    material.fragmentShader = /* glsl */ `
+      precision highp float;
+      uniform vec3 uC1; uniform vec3 uC2; varying float vH; varying float vFade;
+      void main(){ gl_FragColor = vec4(mix(uC1, uC2, smoothstep(-0.4, 0.6, vH)), vFade * 0.85); }`;
+    points = new THREE.LineSegments(geometry, material);
+  } else points = new THREE.Points(geometry, material);
   scene.add(points);
   return {
     scene,
@@ -550,6 +612,13 @@ function waves(o: SceneOptions, k: number): Built {
     },
   };
 }
+
+const FLOAT_MATERIALS: Record<string, THREE.MeshPhysicalMaterialParameters> = {
+  gloss: { roughness: 0.28, metalness: 0.05, clearcoat: 1, clearcoatRoughness: 0.15 },
+  glass: { roughness: 0.05, metalness: 0, transmission: 1, thickness: 1.2, ior: 1.45, transparent: true, opacity: 0.95 },
+  matte: { roughness: 0.9, metalness: 0, clearcoat: 0 },
+  metal: { roughness: 0.22, metalness: 1, clearcoat: 0.4 },
+};
 
 function floating(o: SceneOptions, k: number, renderer: THREE.WebGLRenderer): Built {
   const scene = new THREE.Scene();
@@ -588,7 +657,7 @@ function floating(o: SceneOptions, k: number, renderer: THREE.WebGLRenderer): Bu
   const mats: THREE.Material[] = [];
   const n = 9;
   for (let i = 0; i < n; i++) {
-    const mat = new THREE.MeshPhysicalMaterial({ color: colors[i % colors.length], roughness: 0.28, metalness: 0.05, clearcoat: 1, clearcoatRoughness: 0.15 });
+    const mat = new THREE.MeshPhysicalMaterial({ color: colors[i % colors.length], ...FLOAT_MATERIALS[o.variant ?? "gloss"] ?? FLOAT_MATERIALS.gloss });
     mats.push(mat);
     const mesh = new THREE.Mesh(families[set[i % set.length]](), mat);
     const a = (i / n) * Math.PI * 2;
@@ -643,13 +712,14 @@ function aurora(o: SceneOptions, k: number): Built {
     uC2: { value: vec3(c2) },
     uC3: { value: vec3(c3) },
     uC4: { value: vec3(c4) },
+    uStyle: { value: o.variant === "soft" ? 1 : o.variant === "dusk" ? 2 : 0 },
   };
   const material = new THREE.ShaderMaterial({
     uniforms,
     vertexShader: /* glsl */ `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`,
     fragmentShader: /* glsl */ `
       precision highp float;
-      uniform float uTime; uniform vec2 uRes; uniform vec2 uMouse;
+      uniform float uTime; uniform vec2 uRes; uniform vec2 uMouse; uniform int uStyle;
       uniform vec3 uC1; uniform vec3 uC2; uniform vec3 uC3; uniform vec3 uC4;
       varying vec2 vUv;
       ${NOISE}
@@ -658,13 +728,28 @@ function aurora(o: SceneOptions, k: number): Built {
         vec2 uv = vUv; vec2 q = uv; q.x *= uRes.x / uRes.y;
         q += (uMouse - 0.5) * 0.15;
         float t = uTime * 0.07;
-        float n1 = fbm(vec3(q * 1.3, t));
-        float n2 = fbm(vec3(q * 1.7 + n1, t * 1.3 + 4.0));
-        vec3 col = mix(uC1, uC2, smoothstep(-0.5, 0.6, n1));
-        col = mix(col, uC3, smoothstep(0.0, 0.8, n2) * 0.8);
-        col = mix(col, uC4, smoothstep(0.4, 1.0, n1 * n2 + uv.y * 0.4) * 0.6);
-        float grain = fract(sin(dot(uv * uRes, vec2(12.9898, 78.233)) + uTime) * 43758.5453);
-        col += (grain - 0.5) * 0.035;
+        vec3 col;
+        if (uStyle == 1) {
+          // soft: two or three large, slow colour fields, no grain
+          float n1 = snoise(vec3(q * 0.55, t * 0.6));
+          float n2 = snoise(vec3(q * 0.45 + 3.0, t * 0.5));
+          col = mix(uC1, uC2, smoothstep(-0.7, 0.7, n1));
+          col = mix(col, uC3, smoothstep(-0.2, 0.9, n2) * 0.55);
+        } else if (uStyle == 2) {
+          // dusk: a vertical sky gradient with a glowing, drifting horizon
+          float h = uv.y + snoise(vec3(q.x * 0.8, 0.0, t)) * 0.06;
+          col = mix(uC3, uC1, smoothstep(0.0, 0.75, h));
+          col = mix(col, uC2, exp(-pow((h - 0.38) * 5.0, 2.0)) * 0.8);
+          col = mix(col, uC4, smoothstep(0.75, 1.0, h) * 0.4);
+        } else {
+          float n1 = fbm(vec3(q * 1.3, t));
+          float n2 = fbm(vec3(q * 1.7 + n1, t * 1.3 + 4.0));
+          col = mix(uC1, uC2, smoothstep(-0.5, 0.6, n1));
+          col = mix(col, uC3, smoothstep(0.0, 0.8, n2) * 0.8);
+          col = mix(col, uC4, smoothstep(0.4, 1.0, n1 * n2 + uv.y * 0.4) * 0.6);
+          float grain = fract(sin(dot(uv * uRes, vec2(12.9898, 78.233)) + uTime) * 43758.5453);
+          col += (grain - 0.5) * 0.035;
+        }
         gl_FragColor = vec4(col, 1.0);
       }`,
   });
@@ -679,6 +764,253 @@ function aurora(o: SceneOptions, k: number): Built {
     update(t, s) {
       uniforms.uTime.value = t * (0.6 + k);
       uniforms.uMouse.value.lerp(s.uv, 0.05);
+    },
+    dispose() {
+      mesh.geometry.dispose();
+      material.dispose();
+    },
+  };
+}
+
+/** photo-ring "wall": the photos as a floating gallery wall that ripples and tilts. */
+function photoWall(o: SceneOptions, k: number): Built {
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 100);
+  camera.position.set(0, 0, 9);
+  const urls = (o.images ?? []).filter(Boolean);
+  const cols = 4;
+  const rowsN = 2;
+  const pw = 2.1;
+  const ph = 2.6;
+  const gap = 0.35;
+  const group = new THREE.Group();
+  scene.add(group);
+  const geometry = new THREE.PlaneGeometry(pw, ph, 8, 8);
+  const materials: THREE.MeshBasicMaterial[] = [];
+  const textures = new Map<string, THREE.Texture>();
+  const tiles: { mesh: THREE.Mesh; phase: number }[] = [];
+  for (let r = 0; r < rowsN; r++)
+    for (let c = 0; c < cols; c++) {
+      const i = r * cols + c;
+      const url = urls.length ? urls[i % urls.length] : "";
+      const mat = new THREE.MeshBasicMaterial({ color: palette(o.colors, 3)[i % 3], side: THREE.DoubleSide });
+      if (url) {
+        const tex = textures.get(url) ?? loadTexture(url, (t) => { coverTexture(t, pw / ph); t.needsUpdate = true; });
+        tex.colorSpace = THREE.SRGBColorSpace;
+        textures.set(url, tex);
+        mat.map = tex;
+        mat.color.set("#ffffff");
+      }
+      materials.push(mat);
+      const mesh = new THREE.Mesh(geometry, mat);
+      mesh.position.set((c - (cols - 1) / 2) * (pw + gap) + (r % 2 ? 0.6 : -0.6), (0.5 - r) * (ph + gap), 0);
+      group.add(mesh);
+      tiles.push({ mesh, phase: i * 0.7 });
+    }
+  return {
+    scene,
+    camera,
+    resize(w, h) {
+      camera.aspect = w / h;
+      camera.position.z = w < h ? 16 : 9;
+      camera.updateProjectionMatrix();
+    },
+    update(t, s) {
+      for (const tile of tiles) tile.mesh.position.z = Math.sin(t * 0.8 + tile.phase) * 0.25 * (0.5 + k);
+      group.rotation.y += (s.pointer.x * 0.28 - group.rotation.y) * 0.06;
+      group.rotation.x += (-s.pointer.y * 0.16 - group.rotation.x) * 0.06;
+      group.position.x = -s.progress * 2.5;
+    },
+    dispose() {
+      geometry.dispose();
+      materials.forEach((m) => m.dispose());
+      textures.forEach((t) => t.dispose());
+    },
+  };
+}
+
+/** Soft, out-of-focus light circles drifting slowly — calm, warm, premium. */
+function bokeh(o: SceneOptions, k: number): Built {
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+  camera.position.z = 6;
+  const cols = palette(o.colors, 3);
+  const tint = o.variant === "cool" ? new THREE.Color("#e8f1ff") : new THREE.Color("#fff3df");
+  const n = 70;
+  const pos = new Float32Array(n * 3);
+  const col = new Float32Array(n * 3);
+  const size = new Float32Array(n);
+  const seed = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    pos.set([(Math.random() - 0.5) * 12, (Math.random() - 0.5) * 7, -Math.random() * 5], i * 3);
+    const c = cols[i % cols.length].clone().lerp(tint, 0.35 + Math.random() * 0.4);
+    col.set([c.r, c.g, c.b], i * 3);
+    size[i] = 40 + Math.random() * 130;
+    seed[i] = Math.random();
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+  geometry.setAttribute("aColor", new THREE.BufferAttribute(col, 3));
+  geometry.setAttribute("aSize", new THREE.BufferAttribute(size, 1));
+  geometry.setAttribute("aSeed", new THREE.BufferAttribute(seed, 1));
+  const uniforms = { uTime: { value: 0 }, uPointer: { value: new THREE.Vector2() }, uDpr: { value: Math.min(devicePixelRatio, 2) } };
+  const material = new THREE.ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    uniforms,
+    vertexShader: /* glsl */ `
+      uniform float uTime; uniform vec2 uPointer; uniform float uDpr;
+      attribute vec3 aColor; attribute float aSize; attribute float aSeed;
+      varying vec3 vColor; varying float vSeed;
+      void main(){
+        vec3 p = position;
+        p.x += cos(uTime * 0.15 + aSeed * 6.28) * 0.4 + uPointer.x * (0.2 + (p.z + 5.0) * 0.08);
+        p.y += sin(uTime * 0.2 + aSeed * 9.0) * 0.35 + uPointer.y * (0.15 + (p.z + 5.0) * 0.06);
+        vColor = aColor; vSeed = aSeed;
+        vec4 mv = modelViewMatrix * vec4(p, 1.0);
+        gl_PointSize = aSize * uDpr * (4.0 / -mv.z);
+        gl_Position = projectionMatrix * mv;
+      }`,
+    fragmentShader: /* glsl */ `
+      precision highp float;
+      varying vec3 vColor; varying float vSeed;
+      void main(){
+        float d = length(gl_PointCoord - 0.5);
+        if (d > 0.5) discard;
+        float body = smoothstep(0.5, 0.32, d) * (0.28 + vSeed * 0.22);
+        float rim = (smoothstep(0.5, 0.46, d) - smoothstep(0.46, 0.4, d)) * 0.12;
+        gl_FragColor = vec4(vColor, body + rim);
+      }`,
+  });
+  const points = new THREE.Points(geometry, material);
+  scene.add(points);
+  return {
+    scene,
+    camera,
+    resize(w, h) {
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    },
+    update(t, s) {
+      uniforms.uTime.value = t * (0.5 + k);
+      uniforms.uPointer.value.set(s.pointer.x, s.pointer.y);
+      points.position.y = s.progress * 1.5;
+    },
+    dispose() {
+      geometry.dispose();
+      material.dispose();
+    },
+  };
+}
+
+/** Long flowing ribbons of colour — elegant motion for fashion, beauty, music, wellness. */
+function ribbons(o: SceneOptions, k: number): Built {
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+  camera.position.z = 8;
+  const cols = palette(o.colors, 4);
+  const neon = o.variant === "neon";
+  const group = new THREE.Group();
+  scene.add(group);
+  const items: { mat: THREE.ShaderMaterial; geo: THREE.PlaneGeometry }[] = [];
+  const count = 6;
+  for (let i = 0; i < count; i++) {
+    const geo = new THREE.PlaneGeometry(16, neon ? 0.035 : 0.09 + i * 0.03, 260, 1);
+    const mat = new THREE.ShaderMaterial({
+      transparent: true,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+      blending: neon ? THREE.AdditiveBlending : THREE.NormalBlending,
+      uniforms: { uTime: { value: 0 }, uOff: { value: i * 1.37 }, uAmp: { value: 1 }, uColor: { value: vec3(cols[i % cols.length]) } },
+      vertexShader: /* glsl */ `
+        uniform float uTime; uniform float uOff; uniform float uAmp;
+        varying float vX;
+        ${NOISE}
+        void main(){
+          vec3 p = position;
+          float x = p.x;
+          p.y += sin(x * 0.45 + uTime * 0.5 + uOff) * 0.9 * uAmp + snoise(vec3(x * 0.16, uOff, uTime * 0.08)) * 1.3 * uAmp + (uOff - 3.4) * 0.28;
+          p.z += cos(x * 0.3 + uOff + uTime * 0.25) * 0.9;
+          vX = x;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
+        }`,
+      fragmentShader: /* glsl */ `
+        precision highp float;
+        uniform vec3 uColor; varying float vX;
+        void main(){ gl_FragColor = vec4(uColor, smoothstep(-8.0, -5.0, vX) * smoothstep(8.0, 5.0, vX) * ${neon ? "0.9" : "0.75"}); }`,
+    });
+    group.add(new THREE.Mesh(geo, mat));
+    items.push({ mat, geo });
+  }
+  group.rotation.z = -0.12;
+  return {
+    scene,
+    camera,
+    resize(w, h) {
+      camera.aspect = w / h;
+      camera.position.z = w < h ? 12 : 8;
+      camera.updateProjectionMatrix();
+    },
+    update(t, s) {
+      for (const it of items) {
+        it.mat.uniforms.uTime.value = t * (0.5 + k);
+        it.mat.uniforms.uAmp.value = 0.8 + s.speed * 0.8 + s.progress * 0.6;
+      }
+      group.rotation.x += (-s.pointer.y * 0.2 - group.rotation.x) * 0.05;
+      group.rotation.y += (s.pointer.x * 0.25 - group.rotation.y) * 0.05;
+    },
+    dispose() {
+      items.forEach((it) => (it.geo.dispose(), it.mat.dispose()));
+    },
+  };
+}
+
+/** Topographic contour lines that slowly shift — maps, outdoors, architecture, consulting. */
+function contours(o: SceneOptions, k: number): Built {
+  const scene = new THREE.Scene();
+  const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+  const [c1, c2] = palette(o.colors, 2);
+  const uniforms = {
+    uTime: { value: 0 },
+    uRes: { value: new THREE.Vector2(1, 1) },
+    uMouse: { value: new THREE.Vector2(0.5, 0.5) },
+    uC1: { value: vec3(c1) },
+    uC2: { value: vec3(c2) },
+    uBands: { value: o.variant === "fine" ? 22 : 12 },
+  };
+  const material = new THREE.ShaderMaterial({
+    transparent: true,
+    uniforms,
+    vertexShader: /* glsl */ `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`,
+    fragmentShader: /* glsl */ `
+      precision highp float;
+      uniform float uTime; uniform vec2 uRes; uniform vec2 uMouse; uniform vec3 uC1; uniform vec3 uC2; uniform float uBands;
+      varying vec2 vUv;
+      ${NOISE}
+      float fbm(vec3 p){ float a = 0.5; float s = 0.0; for (int i = 0; i < 4; i++){ s += a * snoise(p); p *= 2.0; a *= 0.5; } return s; }
+      void main(){
+        vec2 q = vUv; q.x *= uRes.x / uRes.y;
+        vec2 m = uMouse; m.x *= uRes.x / uRes.y;
+        float h = fbm(vec3(q * 1.3, uTime * 0.03)) + exp(-dot(q - m, q - m) * 6.0) * 0.25;
+        float v = h * uBands;
+        float band = abs(fract(v) - 0.5);
+        float line = 1.0 - smoothstep(0.02, 0.07, band);
+        float major = mod(floor(v + 0.5), 5.0) < 0.5 ? 1.0 : 0.0;
+        vec3 col = mix(uC1, uC2, smoothstep(-0.6, 0.6, h));
+        gl_FragColor = vec4(col, line * (0.6 + major * 0.35));
+      }`,
+  });
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
+  scene.add(mesh);
+  return {
+    scene,
+    camera,
+    resize(w, h) {
+      uniforms.uRes.value.set(w, h);
+    },
+    update(t, s) {
+      uniforms.uTime.value = t * (0.5 + k);
+      uniforms.uMouse.value.lerp(s.uv, 0.06);
     },
     dispose() {
       mesh.geometry.dispose();
@@ -726,7 +1058,10 @@ export function mountScene(hostEl: HTMLElement | null, opts: SceneOptions): Scen
   } catch {
     return null;
   }
-  const k = clamp(opts.intensity ?? 0.6);
+  const motion: SceneMotion = opts.motion === "calm" || opts.motion === "dramatic" ? opts.motion : "lively";
+  const k = clamp(opts.intensity ?? { calm: 0.3, lively: 0.6, dramatic: 0.9 }[motion]);
+  // Time runs slower for calm brands and faster for dramatic ones.
+  const tempo = { calm: 0.45, lively: 1, dramatic: 1.6 }[motion];
   // A color equal to the section's background would draw an invisible
   // scene; drop those (keeping at least one color).
   opts = { ...opts, colors: visibleOn(host, opts.colors) };
@@ -752,9 +1087,21 @@ export function mountScene(hostEl: HTMLElement | null, opts: SceneOptions): Scen
         built = particlesText(opts, k);
         break;
       case "photo-ring":
-        built = photoRing(opts, k, host);
-        canvas.style.pointerEvents = "none";
-        host.style.cursor = "grab";
+        if (opts.variant === "wall") built = photoWall(opts, k);
+        else {
+          built = photoRing(opts, k, host);
+          canvas.style.pointerEvents = "none";
+          host.style.cursor = "grab";
+        }
+        break;
+      case "bokeh":
+        built = bokeh(opts, k);
+        break;
+      case "ribbons":
+        built = ribbons(opts, k);
+        break;
+      case "contours":
+        built = contours(opts, k);
         break;
       case "waves":
         built = waves(opts, k);
@@ -827,7 +1174,7 @@ export function mountScene(hostEl: HTMLElement | null, opts: SceneOptions): Scen
       const r = host.getBoundingClientRect();
       state.progress = clamp(-r.top / Math.max(1, r.height));
     }
-    built.update(still ? 2 : (now - t0) / 1000, state);
+    built.update(still ? 2 : ((now - t0) / 1000) * tempo, state);
     renderer.render(built.scene, built.camera);
     if (!still && visible && !document.hidden) raf = requestAnimationFrame(frame);
   }
