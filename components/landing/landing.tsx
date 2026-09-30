@@ -1,5 +1,7 @@
 "use client";
 
+import { catalogTool, toolSlug } from "@/lib/tools/catalog";
+import { CATEGORY_ORDER as CATEGORY_ORDER_ALL } from "@/lib/tools/catalog";
 import { BusinessInfo } from "@/components/site/business-info";
 import { BrandMark } from "@/components/brand-mark";
 import { createContext, useContext, useEffect, useState } from "react";
@@ -9,7 +11,6 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ArrowRight, Check, FileText, GraduationCap, Image as ImageIcon, Link2, MessageSquareText, Plus, ShieldCheck, Sparkles, UserRound } from "lucide-react";
 import { listTools, getTool } from "@/lib/tools/registry";
 import { CATEGORY_LABELS } from "@/lib/tools/registry/categories";
-import { getToolContent } from "@/lib/tools/content";
 import { WORKFLOWS } from "@/lib/site/guides";
 import { PLANS } from "@/lib/site/plans";
 import { FAQ } from "@/lib/site/faq";
@@ -24,7 +25,7 @@ import { cn } from "@/lib/utils";
 // three structural differences), the tools, the flows, honest pricing,
 // answers, and one last invitation.
 
-const ORDER: CategoryId[] = ["ideas", "content", "design", "sales", "docs"];
+const ORDER: CategoryId[] = CATEGORY_ORDER_ALL;
 
 // WebGL — dynamically imported with no SSR (Canvas can't render server-
 // side) and it's purely decorative, so a late mount never blocks anything
@@ -187,7 +188,7 @@ function LandingBody() {
   const L = useBi();
   const { locale } = useLocale();
   const tools = listTools();
-  const [cat, setCat] = useState<CategoryId>("content");
+  const [cat, setCat] = useState<CategoryId>("campaign");
   const name = (id: string) => { const t = getTool(id)!; return locale === "en" ? t.name_en : t.name_ko; };
 
   return (
@@ -211,7 +212,7 @@ function LandingBody() {
               <span className="studio-gradient-type">{L({ ko: "마케팅은 됩니다.", en: "Still marketing." })}</span>
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-relaxed break-keep text-fg-muted">
-              {L({ ko: "무엇을 팔지 정하는 일부터 카피, 사진, 상세페이지, 사업계획서까지. 브리프 하나를 쓰면 18개 도구가 서로 결과를 이어받아 캠페인 전체를 만듭니다.", en: "From deciding what to sell to copy, photos, detail pages and business plans. Write one brief and 18 tools pass results to each other to build the whole campaign." })}
+              {L({ ko: "무엇을 팔지 정하는 일부터 카피, 사진, 상세페이지, 사업계획서까지. 브리프 하나를 쓰면 도구들이 서로 결과를 이어받아 캠페인 전체를 만듭니다.", en: "From deciding what to sell to copy, photos, detail pages and business plans. Write one brief and the tools pass results to each other to build the whole campaign." })}
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href={signedIn ? "/studio" : "/auth"} className={cn(primaryButton, "h-12 px-6 text-[15px]")}>{signedIn ? L({ ko: "스튜디오로 가기", en: "Go to Studio" }) : L({ ko: "무료로 시작하기", en: "Start free" })} <ArrowRight size={16} aria-hidden /></Link>
@@ -250,7 +251,7 @@ function LandingBody() {
           <div className="mt-10 grid gap-4 md:grid-cols-3">
             {[
               { icon: Link2, title: { ko: "결과가 다음 도구로 이어져요", en: "Results flow to the next tool" }, body: { ko: "수익화 발굴에서 고른 방향이 트렌드 분석과 13주 캘린더로 그대로 넘어갑니다. 파일을 내보냈다 다시 올릴 일이 없어요.", en: "The direction you pick in Monetization Finder goes straight into Trend Analysis and the 13-week calendar. No exporting and re-uploading." } },
-              { icon: UserRound, title: { ko: "한 번 쓰면 모든 도구가 기억해요", en: "Write it once; every tool remembers" }, body: { ko: "업종, 고객, 말투를 비즈니스 프로필에 한 번만 적으면 18개 도구가 모두 읽습니다. 매번 같은 설명을 반복하지 마세요.", en: "Industry, customers and voice go into one Business Profile that all 18 tools read. Stop repeating yourself." } },
+              { icon: UserRound, title: { ko: "한 번 쓰면 모든 도구가 기억해요", en: "Write it once; every tool remembers" }, body: { ko: "업종, 고객, 말투를 비즈니스 프로필에 한 번만 적으면 모든 도구가 읽습니다. 매번 같은 설명을 반복하지 마세요.", en: "Industry, customers and voice go into one Business Profile that every tool reads. Stop repeating yourself." } },
               { icon: ShieldCheck, title: { ko: "모르는 숫자는 모른다고 말해요", en: "Unknown numbers are labeled" }, body: { ko: "시장 규모와 통계에는 출처 링크가 붙고, 확인하지 못한 숫자에는 '추정' 배지가 붙습니다. 그럴듯한 가짜 숫자는 없어요.", en: "Market sizes and stats come with source links; anything unverified gets an estimate badge. No plausible-looking fakes." } },
             ].map((d, i) => (
               <motion.article key={d.title.en} {...reveal} transition={{ ...reveal.transition, delay: i * 0.08 }} className="glass glass-hover rounded-[28px] p-7">
@@ -276,10 +277,10 @@ function LandingBody() {
             <AnimatePresence mode="popLayout">
               {tools.filter((t) => t.category === cat).map((t, i) => (
                 <motion.div key={t.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97 }} transition={{ duration: 0.35, delay: i * 0.04 }}>
-                  <Link href={`/tools/${t.id}`} className="glass glass-hover flex h-full flex-col rounded-[24px] p-5">
+                  <Link href={`/tools/${toolSlug(t.id)}`} className="glass glass-hover flex h-full flex-col rounded-[24px] p-5">
                     <span className="studio-gradient-bg grid size-11 place-items-center rounded-2xl text-white"><t.icon size={19} aria-hidden /></span>
                     <span className="mt-5 font-semibold break-keep">{locale === "en" ? t.name_en : t.name_ko}</span>
-                    <span className="mt-1 text-sm leading-relaxed break-keep text-fg-muted">{L(getToolContent(t.id)!.tagline)}</span>
+                    <span className="mt-1 text-sm leading-relaxed break-keep text-fg-muted">{L(catalogTool(t.slug ?? t.id)?.promise ?? { ko: t.summary, en: t.name_en })}</span>
                   </Link>
                 </motion.div>
               ))}

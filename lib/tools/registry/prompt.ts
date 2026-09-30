@@ -6,9 +6,9 @@ import type { ToolManifest } from "../types";
 
 export const prompt: ToolManifest = {
   id: "prompt",
-  category: "ideas",
-  name_ko: "해봇 프롬프트 빌더",
-  name_en: "Prompt Builder",
+  category: "operate",
+  name_ko: "프롬프트 빌더 (종료)",
+  name_en: "Prompt builder (retired)",
   summary: "반복 업무를 재사용 가능한 프롬프트로 만듭니다.",
   icon: Terminal,
   inputs: [

@@ -7,9 +7,9 @@ import type { ToolManifest } from "../types";
 
 export const strategy: ToolManifest = {
   id: "strategy",
-  category: "ideas",
-  name_ko: "해봇 브랜드 전략",
-  name_en: "Brand Strategy",
+  category: "campaign",
+  name_ko: "캠페인 플래너",
+  name_en: "Campaign Planner",
   summary: "시장·고객·경쟁자를 분석해 포지셔닝, 상품·가격 제안, 캠페인 방향 3가지, 30/60/90일 실행 계획과 성과 지표까지 만듭니다.",
   icon: Compass,
   inputs: [

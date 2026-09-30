@@ -1,5 +1,6 @@
 "use client";
 
+import { toolSlug } from "@/lib/tools/catalog";
 import { StrategyCard, type AgentMeta } from "@/components/agent/strategy-card";
 import Link from "next/link";
 import { useState } from "react";
@@ -536,7 +537,7 @@ function RunResult({
 
       {agent ? <StrategyCard meta={agent} onRerun={onRerunWithStrategy} /> : null}
 
-      <AiOutputNotice design={manifest.category === "design"} />
+      <AiOutputNotice design={manifest.category === "brand"} />
 
       <DownloadPanel runId={runId} toolId={manifest.id} extras={extras} />
 
@@ -577,7 +578,7 @@ function RunResult({
       {chainTargets.length > 0 ? (
         <div className="mt-4 flex flex-wrap gap-2 border-t border-hairline pt-3">
           {chainTargets.map((target) => (
-            <Link key={target.id} href={`/tools/${target.id}/run?fromRun=${runId}`}>
+            <Link key={target.id} href={`/tools/${toolSlug(target.id)}/run?fromRun=${runId}`}>
               <Button variant="secondary" size="sm">
                 {t("chain_prefix")} {locale === "en" ? target.name_en : target.name_ko}
               </Button>

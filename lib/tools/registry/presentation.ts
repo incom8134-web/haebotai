@@ -7,9 +7,9 @@ import type { ToolManifest } from "../types";
 
 export const presentation: ToolManifest = {
   id: "presentation",
-  category: "docs",
-  name_ko: "해봇 발표자료",
-  name_en: "Presentation Builder",
+  category: "brand",
+  name_ko: "피치 비주얼 디렉터",
+  name_en: "Pitch Visual Director",
   summary: "브리프를 이야기 흐름이 있는 발표자료 구성과 발표 메모로 만듭니다.",
   icon: Presentation,
   inputs: [

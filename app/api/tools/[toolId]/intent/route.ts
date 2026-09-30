@@ -22,7 +22,7 @@ export const maxDuration = 30;
 export async function POST(request: NextRequest, { params }: { params: Promise<{ toolId: string }> }) {
   const { toolId } = await params;
   const manifest = getTool(toolId);
-  if (!manifest || manifest.comingSoon) return Response.json({ error: "알 수 없는 도구입니다" }, { status: 404 });
+  if (!manifest || manifest.comingSoon || manifest.retired) return Response.json({ error: "알 수 없는 도구입니다" }, { status: 404 });
 
   const supabase = await createClient();
   const {

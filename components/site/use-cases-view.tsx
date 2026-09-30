@@ -1,5 +1,6 @@
 "use client";
 
+import { toolSlug } from "@/lib/tools/catalog";
 import Link from "next/link";
 import { ArrowRight, Quote } from "lucide-react";
 import { PageHeader, primaryButton } from "@/components/site/page";
@@ -47,14 +48,14 @@ export function UseCasesView() {
             <ol className="mt-4 flex flex-wrap items-center gap-1.5 text-xs">
               {w.tools.map((id, i) => (
                 <li key={id} className="flex items-center gap-1.5">
-                  <Link href={`/tools/${id}`} className="rounded-full border border-hairline px-2.5 py-1 hover:border-studio-cyan hover:text-studio-cyan">
+                  <Link href={`/tools/${toolSlug(id)}`} className="rounded-full border border-hairline px-2.5 py-1 hover:border-studio-cyan hover:text-studio-cyan">
                     {i + 1}. {name(id)}
                   </Link>
                   {i < w.tools.length - 1 ? <ArrowRight size={12} className="text-fg-subtle" aria-hidden /> : null}
                 </li>
               ))}
             </ol>
-            <Link href={`/tools/${w.tools[0]}/run`} className="mt-5 inline-flex items-center gap-1 self-start text-sm font-medium text-studio-cyan hover:underline">
+            <Link href={`/tools/${toolSlug(w.tools[0])}/run`} className="mt-5 inline-flex items-center gap-1 self-start text-sm font-medium text-studio-cyan hover:underline">
               {L({ ko: `${name(w.tools[0])}부터 시작`, en: `Start with ${name(w.tools[0])}` })} <ArrowRight size={13} aria-hidden />
             </Link>
           </article>

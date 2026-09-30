@@ -1,5 +1,6 @@
 "use client";
 
+import { CATALOG, catalogTool, toolSlug } from "@/lib/tools/catalog";
 import { useState } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
@@ -33,6 +34,11 @@ function ToolHome({ toolId }: { toolId: string }) {
   const chainsTo = listTools().filter((t) => t.acceptsChainFrom?.includes(tool.id));
   const related = listTools().filter((t) => t.category === tool.category && t.id !== tool.id);
   const engines = getToolCapability(tool.id)?.providers ?? ["google"];
+  // Modes of this tool that still run on their own engine (catalog `hidden`),
+  // and the parent when this page is itself a mode.
+  const slug = tool.slug ?? tool.id;
+  const modes = CATALOG.filter((c) => c.hidden?.parent === slug);
+  const parent = catalogTool(slug)?.hidden ? catalogTool(catalogTool(slug)!.hidden!.parent) : undefined;
 
   async function copyPreset(i: number) {
     try {
@@ -95,7 +101,7 @@ function ToolHome({ toolId }: { toolId: string }) {
                 {L({ ko: "준비 중", en: "Coming soon" })}
               </span>
             ) : (
-              <Link href={`/tools/${tool.id}/run`} className={cn(primaryButton, "flex-1")}>
+              <Link href={`/tools/${toolSlug(tool.id)}/run`} className={cn(primaryButton, "flex-1")}>
                 <Play size={14} fill="currentColor" aria-hidden /> {L({ ko: "시작하기", en: "Start" })}
               </Link>
             )}
@@ -104,13 +110,26 @@ function ToolHome({ toolId }: { toolId: string }) {
             </button>
           </div>
 
+          {modes.length || parent ? (
+            <div className="mt-6 border-t border-hairline pt-5 text-sm">
+              <p className="text-fg-muted">{parent ? L({ ko: "이 모드가 속한 도구", en: "Part of" }) : L({ ko: "이 도구의 다른 모드", en: "Other modes of this tool" })}</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {(parent ? [parent] : modes).map((m) => (
+                  <Link key={m.slug} href={`/tools/${m.slug}`} className="inline-flex items-center gap-1.5 rounded-full border border-hairline px-3 py-1.5 text-xs hover:border-studio-cyan hover:text-studio-cyan">
+                    <m.icon size={13} aria-hidden /> {L(m.name)}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
           {chainsFrom.length || chainsTo.length ? (
             <div className="mt-6 border-t border-hairline pt-5 text-sm">
               {chainsFrom.length ? (
                 <p className="text-fg-muted">
                   {L({ ko: "이어받는 결과", en: "Takes results from" })}{" "}
                   {chainsFrom.map((t, i) => (
-                    <span key={t.id}>{i ? ", " : ""}<Link href={`/tools/${t.id}`} className="text-fg underline-offset-4 hover:underline">{name(t)}</Link></span>
+                    <span key={t.id}>{i ? ", " : ""}<Link href={`/tools/${toolSlug(t.id)}`} className="text-fg underline-offset-4 hover:underline">{name(t)}</Link></span>
                   ))}
                 </p>
               ) : null}
@@ -118,7 +137,7 @@ function ToolHome({ toolId }: { toolId: string }) {
                 <p className="mt-1.5 text-fg-muted">
                   {L({ ko: "다음으로 이어지는 도구", en: "Continues into" })}{" "}
                   {chainsTo.map((t, i) => (
-                    <span key={t.id}>{i ? ", " : ""}<Link href={`/tools/${t.id}`} className="text-fg underline-offset-4 hover:underline">{name(t)}</Link></span>
+                    <span key={t.id}>{i ? ", " : ""}<Link href={`/tools/${toolSlug(t.id)}`} className="text-fg underline-offset-4 hover:underline">{name(t)}</Link></span>
                   ))}
                 </p>
               ) : null}
@@ -152,7 +171,7 @@ function ToolHome({ toolId }: { toolId: string }) {
                     {presetLines(tool, p, locale, i).slice(0, 3).map((line) => <li key={line} className="truncate" title={line}>{line}</li>)}
                   </ul>
                   {tool.comingSoon ? null : (
-                    <Link href={`/tools/${tool.id}/run?preset=${i}`} className="mt-4 inline-flex items-center gap-1.5 self-start text-sm font-medium text-studio-cyan">
+                    <Link href={`/tools/${toolSlug(tool.id)}/run?preset=${i}`} className="mt-4 inline-flex items-center gap-1.5 self-start text-sm font-medium text-studio-cyan">
                       {L({ ko: "이 예시로 열기", en: "Open with this" })}
                       <ArrowRight size={14} className="transition-transform duration-500 ease-[var(--spring)] group-hover:translate-x-1" aria-hidden />
                     </Link>
@@ -208,7 +227,7 @@ function ToolHome({ toolId }: { toolId: string }) {
             <section className="flex flex-wrap items-center gap-2 pt-2">
               <span className="text-sm text-fg-subtle">{L({ ko: "같은 분야", en: "Same area" })}</span>
               {related.map((t) => (
-                <Link key={t.id} href={`/tools/${t.id}`} className="glass glass-hover inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-sm">
+                <Link key={t.id} href={`/tools/${toolSlug(t.id)}`} className="glass glass-hover inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-sm">
                   <t.icon size={14} className="text-studio-cyan" aria-hidden /> {name(t)}
                 </Link>
               ))}
