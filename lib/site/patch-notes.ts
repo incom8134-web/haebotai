@@ -4,6 +4,19 @@ export type NoteKind = "new" | "improved" | "fixed";
 
 export const PATCH_NOTES: { version: string; date: string; title: Bilingual; items: { kind: NoteKind; text: Bilingual }[] }[] = [
   {
+    version: "2.2.0",
+    date: "2026-09-30",
+    title: { ko: "브랜드·웹·세일즈: 브랜드 DNA 스튜디오와 도구별 새 결과 화면", en: "Brand, Web & Sales: Brand DNA Studio and new result screens" },
+    items: [
+      { kind: "new", text: { ko: "브랜드 DNA 스튜디오: 성격 비율, 대비를 계산한 팔레트, 실제 한글 서체 견본, 상황별 말투 예시, 태그라인을 한 장의 브랜드 보드로", en: "Brand DNA Studio: personality mix, a contrast-checked palette, real Korean font specimens, voice samples and taglines on one brand board" } },
+      { kind: "new", text: { ko: "브랜드 보드에서 로고·웹사이트·세일즈 페이지·광고로 이어가면 이름, 무드, 색, 서체, 포지셔닝이 채워져요", en: "Continue from the brand board to logo, website, sales page or ads with the name, mood, colours, fonts and positioning filled in" } },
+      { kind: "improved", text: { ko: "로고 디렉션 랩: 4가지 방향을 한눈에 비교하고, 16px 파비콘까지 크기 테스트와 즐겨찾기", en: "Logo Direction Lab: compare all four directions, size-test down to a 16px favicon, and star favourites" } },
+      { kind: "improved", text: { ko: "세일즈 페이지 설계소: 와이어프레임과 섹션별 카피·촬영 지시를 나란히, 완성 이미지는 따로 보기", en: "Sales Page Architect: a wireframe beside each section's copy and shot list, with the rendered page on its own tab" } },
+      { kind: "improved", text: { ko: "웹 익스피리언스 빌더: 섹션별 목적과 레이아웃이 보이는 사이트맵", en: "Web Experience Builder: a sitemap with each section's goal and layout" } },
+      { kind: "improved", text: { ko: "피치 비주얼 디렉터: 슬라이드별 레이아웃과 예상 발표 시간이 보이는 스토리보드", en: "Pitch Visual Director: a storyboard with each slide's layout and estimated speaking time" } },
+    ],
+  },
+  {
     version: "2.1.0",
     date: "2026-09-30",
     title: { ko: "발견·수익 설계 5개 도구 공개", en: "Five Discover & Monetize tools are live" },

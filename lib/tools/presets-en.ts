@@ -4,6 +4,11 @@
 // languages. Used when the UI is in English.
 
 export const PRESET_VALUES_EN: Record<string, Record<number, Record<string, string | string[]>>> = {
+  "brand-dna": {
+    0: { brand_name: "Onsaem Pediatric Clinic", offering: "A neighbourhood pediatric clinic with evening hours, for working parents of children under 10", target_customer: "Working parents in their 30s–40s", values: ["Explain clearly", "No rushing"], avoid: "Cold, hospital-like and intimidating" },
+    1: { brand_name: "Rawpress", offering: "Cold-pressed juice subscription delivered at dawn to office workers", target_customer: "Health-conscious office workers in their late 20s–30s", values: ["Nothing added", "Honest labels"], competitors: ["Supermarket juice", "Big juice brands"], avoid: "Preachy wellness talk" },
+    2: { brand_name: "Gyeol Woodwork", offering: "Made-to-order solid-wood furniture from a one-person workshop in Yangpyeong", target_customer: "Couples in their 30s–50s furnishing a new home", values: ["Slow craft", "Furniture that lasts decades"], existing_colors: ["#6B4F3A"], avoid: "Cheap, mass-produced feel" },
+  },
   "idea-radar": {
     0: { skills: "Ward nurse at a university hospital for 8 years; frequent discharge education and caregiver counselling", interests: ["Health education", "Content"], avoid: "Extra night shifts" },
     1: { skills: "12 years in 3PL logistics sales; managed 200 accounts of small manufacturers and online sellers", interests: ["Logistics", "Automation"], target_customer: "Online sellers shipping 500–3,000 orders a month" },

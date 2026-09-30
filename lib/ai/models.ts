@@ -26,6 +26,7 @@ const MAX_TOKENS_BY_TOOL: Record<string, number> = {
   "revenue-mapper": 10000,
   "offer-architect": 10000,
   "market-gap": 10000, // needs × solutions coverage + sources
+  "brand-dna": 10000,
 };
 const MAX_TOKENS_DEFAULT = 8000;
 

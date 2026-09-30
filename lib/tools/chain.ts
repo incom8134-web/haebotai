@@ -39,6 +39,8 @@ function seedFromDiscover(targetId: string, sourceId: string, source: unknown, p
         return { model: lines(description, s(o(idea.first_validation).action) && `첫 검증: ${s(o(idea.first_validation).action)}`) };
       case "strategy":
         return { context: description };
+      case "brand-dna":
+        return { offering: description, target_customer: who };
     }
     return {};
   }
@@ -77,6 +79,7 @@ function seedFromDiscover(targetId: string, sourceId: string, source: unknown, p
       };
     if (targetId === "copy")
       return { offer: lines(s(out.offer_name), s(out.core_promise), s(o(out.sales_message).short)), audience: s(target.who) };
+    if (targetId === "brand-dna") return { offering: lines(s(out.offer_name), s(out.core_promise)), target_customer: s(target.who) };
     return {};
   }
   if (sourceId === "market-gap") {
@@ -85,6 +88,38 @@ function seedFromDiscover(targetId: string, sourceId: string, source: unknown, p
     const idea = lines(`${s(gap.title)}: ${s(gap.opportunity)}`, s(gap.differentiation) && `차별화: ${s(gap.differentiation)}`);
     if (targetId === "mvp-blueprint") return { idea };
     if (targetId === "idea-radar") return { interests: [s(gap.title)].filter(Boolean), target_customer: s(arr(out.needs)[0]?.who) };
+    return {};
+  }
+  if (sourceId === "brand-dna") {
+    const essence = o(out.essence);
+    const pos = o(out.positioning);
+    const voice = o(out.voice);
+    const visual = o(out.visual);
+    const palette = arr(out.palette).map((c) => `${s(c.name)} ${s(c.hex)}`.trim()).filter(Boolean);
+    const brief = lines(
+      s(essence.one_line),
+      s(pos.statement) && `포지셔닝: ${s(pos.statement)}`,
+      Array.isArray(voice.tone_words) && `말투: ${(voice.tone_words as unknown[]).map(s).join(", ")}`,
+      palette.length > 0 && `브랜드 색: ${palette.join(", ")}`,
+      s(o(o(out.typography).heading).family) && `제목 서체: ${s(o(o(out.typography).heading).family)}`,
+    );
+    switch (targetId) {
+      case "logo":
+        return {
+          brand_name: s(o(out._source_input).brand_name),
+          keywords: [...(Array.isArray(visual.mood_words) ? (visual.mood_words as unknown[]).map(s) : []), ...(Array.isArray(voice.tone_words) ? (voice.tone_words as unknown[]).map(s) : [])]
+            .filter(Boolean)
+            .slice(0, 5),
+        };
+      case "homepage":
+        return { content: lines(s(o(out._source_input).brand_name) && `브랜드: ${s(o(out._source_input).brand_name)}`, brief) };
+      case "sangsepage":
+        return { target_customer: s(pos.for_whom) };
+      case "strategy":
+        return { context: brief };
+      case "copy":
+        return { offer: brief, audience: s(pos.for_whom) };
+    }
     return {};
   }
   if (sourceId === "mvp-blueprint") {

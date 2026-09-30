@@ -29,3 +29,22 @@ test("revenue-mapper seeds prices; market-gap seeds the chosen gap", () => {
 test("legacy pairs still work", () => {
   assert.deepEqual(seedFromChain("calendar", "money", { models: [{ name: "클래스" }] }), { model: "클래스" });
 });
+
+test("brand-dna carries the brand's rules into logo, site and ads", () => {
+  const dna = {
+    essence: { one_line: "서두르지 않는 소아과" },
+    positioning: { statement: "저녁에도 설명하는 소아과", for_whom: "맞벌이 부모" },
+    voice: { tone_words: ["다정한", "차분한"] },
+    visual: { mood_words: ["포근한"] },
+    palette: [{ name: "새벽 하늘", hex: "#3B6E8F" }],
+    typography: { heading: { family: "Gowun Dodum" } },
+    _source_input: { brand_name: "온샘소아과" },
+  };
+  assert.deepEqual(seedFromChain("logo", "brand-dna", dna).keywords, ["포근한", "다정한", "차분한"]);
+  assert.equal(seedFromChain("logo", "brand-dna", dna).brand_name, "온샘소아과");
+  const site = String(seedFromChain("homepage", "brand-dna", dna).content);
+  assert.match(site, /#3B6E8F/);
+  assert.match(site, /Gowun Dodum/);
+  assert.equal(seedFromChain("copy", "brand-dna", dna).audience, "맞벌이 부모");
+  assert.equal(seedFromChain("brand-dna", "idea-radar", radar, 0).target_customer, "보호자");
+});

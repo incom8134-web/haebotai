@@ -32,7 +32,7 @@ export const sangsepage: ToolManifest = {
     { kind: "text", id: "competitor", label: "경쟁 제품" },
   ],
   usesProfile: ["brand_name", "tone", "target_customer", "brand_colors"],
-  acceptsChainFrom: ["offer-architect", "keyword", "image"],
+  acceptsChainFrom: ["brand-dna", "offer-architect", "keyword", "image"],
   outputRenderer: "document",
   grounding: { requireSources: false, webSearch: true, estimateBadge: false },
   model: "gemini-3.1-pro-preview",
