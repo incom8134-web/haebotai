@@ -497,7 +497,7 @@ function RunResult({
   const t = useT();
   // The run's creative direction (lib/tools/directions.ts) is shown as a
   // chip, not as a result field.
-  const { creative_direction: direction, ...shown } = (output ?? {}) as Record<string, unknown> & { creative_direction?: { name?: string } };
+  const { creative_direction: direction, request_brief: brief, ...shown } = (output ?? {}) as Record<string, unknown> & { creative_direction?: { name?: string; reason?: string }; request_brief?: { tone?: string } };
   const extras = extraDownloads(shown, input, locale === "en");
   const chainTargets = listTools().filter((tool) => tool.acceptsChainFrom?.includes(manifest.id));
 
@@ -513,8 +513,13 @@ function RunResult({
           </Badge>
         ) : null}
         {direction?.name ? (
-          <Badge variant="outline" className="border-studio-violet/40 text-studio-violet" title={locale === "en" ? "This run's creative direction — the next run takes a different one" : "이번 결과의 창작 방향 — 다음 실행은 다른 방향으로 만들어요"}>
+          <Badge variant="outline" className="border-studio-violet/40 text-studio-violet" title={direction.reason || (locale === "en" ? "Chosen to fit this request's tone" : "이 요청의 톤에 맞춰 고른 방향")}>
             {locale === "en" ? "Direction" : "이번 방향"} · {direction.name}
+          </Badge>
+        ) : null}
+        {brief?.tone ? (
+          <Badge variant="outline" className="text-2xs" title={locale === "en" ? "The tone this result follows, read from your request" : "요청에서 읽은, 이 결과가 따르는 톤"}>
+            {locale === "en" ? "Tone" : "톤"} · {brief.tone}
           </Badge>
         ) : null}
         {manifest.grounding.estimateBadge ? (

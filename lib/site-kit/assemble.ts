@@ -29,7 +29,7 @@ const IMPORTS: Record<string, string> = {
   "gsap/Observer": `${CDN}/gsap@${SITE_PACKAGES.gsap}/Observer.js`,
   lenis: `${CDN}/lenis@${SITE_PACKAGES.lenis}/dist/lenis.mjs`,
 };
-export const KIT_SPECIFIER = "@haebot/kit";
+export const KIT_SPECIFIER = "@site/kit";
 export const ALLOWED_IMPORTS = [...Object.keys(IMPORTS).filter((k) => !k.endsWith("/")), "three/addons/…", KIT_SPECIFIER];
 
 let kitTs: string | null = null;
@@ -153,7 +153,7 @@ export function viteProject(finalHtml: string, mainTs: string, title: string): R
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-|-$/g, "");
-  const pkgName = /^[a-z][a-z0-9-]{2,}$/.test(name) ? name : "haebot-site";
+  const pkgName = /^[a-z][a-z0-9-]{2,}$/.test(name) ? name : "my-site";
   const pkg = {
     name: pkgName,
     private: true,
@@ -179,7 +179,7 @@ export function viteProject(finalHtml: string, mainTs: string, title: string): R
   const readme = [
     `# ${title}`,
     "",
-    "해봇 AI 홈페이지 생성기로 만든 사이트의 Vite + TypeScript 프로젝트입니다.",
+    "이 사이트의 Vite + TypeScript 프로젝트입니다.",
     "",
     "```bash",
     "npm install",

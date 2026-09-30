@@ -11,7 +11,7 @@ import { anthropicAdapter, runWithApiKey as runWithAnthropicKey } from "@/lib/ai
 import { renderSangsepage } from "./render/sangsepage";
 import { orderLike } from "./output-order";
 import { outputSchemaFor } from "./schemas";
-import { pickDirection } from "./directions";
+import { analyzeRequest } from "@/lib/ai/request-brief";
 
 // HAEBOT_A_TOOLS_SPEC.md §3.2 — real generation for all 15 tools. Thin
 // dispatcher: provider-specific logic (search grounding, image
@@ -69,17 +69,37 @@ export async function generateOutput(
   const adapter = ADAPTERS[provider];
   if (!adapter) throw new Error(`${provider} 엔진은 아직 지원하지 않습니다`);
 
-  // A creative direction this user hasn't had in their recent runs of the
-  // tool (lib/tools/directions.ts): every prompt below commits to it, and
-  // the result records it so the next run rotates to another.
-  // Not when the user asked to keep their own material's structure and
-  // only polish it: a creative direction would rebuild it.
+  // Read the request first (lib/tools/request-brief.ts): who it's for,
+  // the tone, and the creative direction that fits — chosen for the
+  // request, never at random. When the request is about another business
+  // or project, the account's saved profile stays out of the whole run.
+  // A "keep my structure" reference job gets the tone but no direction,
+  // since a direction would rebuild the user's own material.
   const keepStructure = KEEP_STRUCTURE_MODES.has(referenceOf(input)?.mode.id ?? "");
-  const direction = keepStructure ? null : pickDirection(manifest.id, await recentDirections(storage, manifest.id));
-  if (direction) input = { ...input, _direction: direction };
+  const { brief, usage: briefUsage } = await analyzeRequest(manifest, input, profile, await recentDirections(storage, manifest.id), abortSignal);
+  const plan = brief && keepStructure ? { ...brief, direction: null } : brief;
+  if (plan) input = { ...input, _brief: plan };
+  if (plan && !plan.usesProfile) profile = null;
   const result = await generateWith(manifest, input, profile, abortSignal, storage, provider, adapter);
-  return direction ? { ...result, output: { ...(result.output as Record<string, unknown>), creative_direction: { id: direction.id, name: direction.name } } } : result;
+  const usage = { inputTokens: sum(result.usage.inputTokens, briefUsage.inputTokens), outputTokens: sum(result.usage.outputTokens, briefUsage.outputTokens) };
+  const direction = plan?.direction;
+  return {
+    ...result,
+    usage,
+    // Kept with the run: the result page shows it, exports name the right
+    // business on the cover, and the next run can avoid a direction only
+    // when another fits the request equally well.
+    output: plan
+      ? {
+          ...(result.output as Record<string, unknown>),
+          request_brief: { subject: plan.subject, uses_profile: plan.usesProfile, tone: plan.tone },
+          ...(direction ? { creative_direction: { id: direction.id, name: direction.name, reason: plan.directionReason } } : {}),
+        }
+      : result.output,
+  };
 }
+
+const sum = (a: number | null, b: number | null) => (a === null && b === null ? null : (a ?? 0) + (b ?? 0));
 
 async function recentDirections(storage: ImageStorageContext, toolId: string): Promise<string[]> {
   const { data } = await storage.supabase

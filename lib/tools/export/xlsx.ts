@@ -30,7 +30,6 @@ export async function buildBusinessPlanXlsx(
   input: BusinessPlanInput,
 ): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = "해봇 AI";
 
   const assumptions = workbook.addWorksheet("가정");
   assumptions.columns = [

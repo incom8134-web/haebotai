@@ -29,6 +29,9 @@ const SCENE_LABEL: Record<string, { ko: string; en: string }> = {
   waves: { ko: "흐르는 3D 지형", en: "Flowing 3D terrain" },
   floating: { ko: "떠다니는 3D 오브젝트", en: "Floating 3D objects" },
   aurora: { ko: "살아 있는 그라데이션", en: "Living gradient" },
+  bokeh: { ko: "부드러운 빛망울", en: "Soft bokeh light" },
+  ribbons: { ko: "흐르는 리본", en: "Flowing ribbons" },
+  contours: { ko: "움직이는 등고선", en: "Moving contour lines" },
 };
 
 export function SitePreview({ html, design }: { html: string; design?: Design }) {
