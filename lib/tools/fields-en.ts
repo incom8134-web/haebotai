@@ -12,6 +12,23 @@ const COMMON: Record<string, FieldEn> = {
 };
 
 const FIELDS_EN: Record<string, Record<string, FieldEn>> = {
+  "hook-lab": {
+    topic: { label: "What the content is about" },
+    product: { label: "Product or service (optional)" },
+    audience: { label: "Who's watching" },
+    platforms: { label: "Where it goes", options: { reels: "Instagram Reels", shorts: "YouTube Shorts", tiktok: "TikTok", threads: "Threads", blog: "Blog opening", ad: "Ad first line" } },
+    goal: { label: "Goal", options: { awareness: "Get discovered", engagement: "Comments & saves", follow: "Follows", sales: "Sales & sign-ups" } },
+    tone: { label: "Tone", options: { calm: "Calm", witty: "Witty", bold: "Provocative", warm: "Warm" } },
+    proof: { label: "Facts or numbers you can use (optional)" },
+    avoid: { label: "Phrases to avoid" },
+  },
+  "content-transformer": {
+    source: { label: "Source content (article, script, notes)" },
+    source_type: { label: "Source type", options: { blog: "Blog / column", newsletter: "Newsletter", video_script: "Video script", notes: "Notes / lecture", product_page: "Product page" } },
+    targets: { label: "Versions to make", options: { instagram_carousel: "Instagram carousel", instagram_caption: "Instagram caption", threads: "Threads series", linkedin: "LinkedIn", shorts_script: "Shorts/Reels script", newsletter: "Newsletter", naver_blog: "Naver blog", kakao: "KakaoTalk channel" } },
+    audience: { label: "Readers" },
+    cta: { label: "Action at the end" },
+  },
   "brand-dna": {
     brand_name: { label: "Brand name" },
     offering: { label: "What you sell, and to whom" },

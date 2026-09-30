@@ -905,5 +905,237 @@
         }
       ]
     }
+  },
+  "hook-lab": {
+    "layout": "split",
+    "visual": "copy",
+    "hero": {
+      "title": {
+        "ko": "멈추게 하는 첫 3초",
+        "en": "The first 3 seconds that stop the scroll"
+      },
+      "story": {
+        "ko": "무엇을 누구에게 보여 줄지 알려 주세요. 서로 다른 심리로 여는 훅을 유형별로, 첫 장면까지 함께 만들어 드려요.",
+        "en": "Tell us what you're showing and to whom. You'll get hooks by family, each with its first scene."
+      }
+    },
+    "sections": [
+      {
+        "title": {
+          "ko": "무엇을 누구에게",
+          "en": "What and for whom"
+        },
+        "hint": {
+          "ko": "주제와 보는 사람",
+          "en": "Topic and audience"
+        },
+        "fields": [
+          "topic",
+          "product",
+          "audience"
+        ]
+      },
+      {
+        "title": {
+          "ko": "어디에, 어떻게",
+          "en": "Where and how"
+        },
+        "hint": {
+          "ko": "플랫폼·목표·말투",
+          "en": "Platform, goal, tone"
+        },
+        "fields": [
+          "platforms",
+          "goal",
+          "tone",
+          "proof",
+          "avoid"
+        ]
+      }
+    ],
+    "ui": {
+      "topic": {
+        "placeholder": {
+          "ko": "예: 처음 강아지 키우는 사람이 산책에서 하는 실수 3가지",
+          "en": "e.g. 3 mistakes new dog owners make on walks"
+        }
+      },
+      "platforms": {
+        "display": "toggles"
+      },
+      "goal": {
+        "display": "cards",
+        "options": {
+          "awareness": {
+            "icon": "megaphone",
+            "desc": {
+              "ko": "처음 알리기",
+              "en": "Get discovered"
+            }
+          },
+          "engagement": {
+            "icon": "message-square",
+            "desc": {
+              "ko": "댓글·저장",
+              "en": "Comments & saves"
+            }
+          },
+          "follow": {
+            "icon": "user-round",
+            "desc": {
+              "ko": "팔로우",
+              "en": "Follows"
+            }
+          },
+          "sales": {
+            "icon": "shopping-cart",
+            "desc": {
+              "ko": "구매·신청",
+              "en": "Sales"
+            }
+          }
+        }
+      },
+      "tone": {
+        "display": "segmented"
+      },
+      "proof": {
+        "placeholder": {
+          "ko": "Enter로 추가 — 예: 훈련사 경력 8년",
+          "en": "Press Enter — e.g. 8 years as a trainer"
+        }
+      }
+    },
+    "stage": {
+      "headline": {
+        "ko": "유형별 훅 카드",
+        "en": "Hook cards by family"
+      },
+      "story": {
+        "ko": "훅마다 화면 글자, 첫 장면, 이어지는 문장, 플랫폼별 변형까지.",
+        "en": "Each hook with on-screen text, first scene, follow-up line and platform versions."
+      },
+      "promises": [
+        {
+          "icon": "layers",
+          "text": {
+            "ko": "4~6개 유형",
+            "en": "4–6 families"
+          }
+        },
+        {
+          "icon": "clapperboard",
+          "text": {
+            "ko": "첫 장면",
+            "en": "First scene"
+          }
+        },
+        {
+          "icon": "trophy",
+          "text": {
+            "ko": "먼저 찍을 훅",
+            "en": "Shoot this first"
+          }
+        }
+      ]
+    }
+  },
+  "content-transformer": {
+    "layout": "split",
+    "visual": "article",
+    "hero": {
+      "title": {
+        "ko": "한 번 쓰고, 여러 곳에",
+        "en": "Write once, publish everywhere"
+      },
+      "story": {
+        "ko": "원본을 넣으면 플랫폼마다 그곳에서 읽히는 모양으로 다시 짜 드려요. 원본에 없는 사실은 더하지 않습니다.",
+        "en": "Paste the source and get versions shaped for each platform. Nothing is added that isn't in the source."
+      }
+    },
+    "sections": [
+      {
+        "title": {
+          "ko": "원본",
+          "en": "Source"
+        },
+        "hint": {
+          "ko": "글·대본·메모 그대로",
+          "en": "Article, script or notes as-is"
+        },
+        "fields": [
+          "source",
+          "source_type"
+        ]
+      },
+      {
+        "title": {
+          "ko": "어디에 올릴까요",
+          "en": "Where it goes"
+        },
+        "hint": {
+          "ko": "만들 버전과 마지막 행동",
+          "en": "Versions and the final action"
+        },
+        "fields": [
+          "targets",
+          "audience",
+          "cta"
+        ]
+      }
+    ],
+    "ui": {
+      "source": {
+        "placeholder": {
+          "ko": "여기에 원본을 붙여 넣으세요",
+          "en": "Paste your source here"
+        }
+      },
+      "source_type": {
+        "display": "segmented"
+      },
+      "targets": {
+        "display": "toggles"
+      },
+      "cta": {
+        "placeholder": {
+          "ko": "예: 매장에서 무료 보행 분석 예약",
+          "en": "e.g. book a free gait test"
+        }
+      }
+    },
+    "stage": {
+      "headline": {
+        "ko": "원본에서 뻗어 나가는 버전들",
+        "en": "Versions branching from the source"
+      },
+      "story": {
+        "ko": "가운데 핵심 메시지, 둘레에 플랫폼별 버전. 버전마다 글자 수와 복사 버튼이 있어요.",
+        "en": "The core message in the middle, platform versions around it — each with a length check and copy button."
+      },
+      "promises": [
+        {
+          "icon": "layers",
+          "text": {
+            "ko": "카드뉴스·대본",
+            "en": "Carousel & script"
+          }
+        },
+        {
+          "icon": "list-checks",
+          "text": {
+            "ko": "글자 수 확인",
+            "en": "Length check"
+          }
+        },
+        {
+          "icon": "shield-check",
+          "text": {
+            "ko": "원본에 있는 것만",
+            "en": "Source-only facts"
+          }
+        }
+      ]
+    }
   }
 }
