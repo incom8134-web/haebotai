@@ -123,6 +123,19 @@ export function strategyReport(o: Record<string, unknown>): Report {
     kicker: "실행",
     title: "단계별 실행 계획",
     blocks: keep([
+      objs(o.channel_plan).length > 0 && {
+        type: "chart",
+        title: "13주 채널별 일정",
+        chart: {
+          kind: "gantt",
+          scale: Array.from({ length: 13 }, (_, i) => `${i + 1}주`),
+          rows: objs(o.channel_plan).map((c) => {
+            const start = Math.max(1, Math.min(13, Math.round(num(c.start_week)) || 1));
+            const end = Math.max(start, Math.min(13, Math.round(num(c.end_week)) || start));
+            return { label: `${str(c.channel)} · ${str(c.activity)}`, start: start - 1, end, group: str(c.phase), note: str(c.kpi) };
+          }),
+        },
+      },
       {
         type: "cards",
         columns: 3,

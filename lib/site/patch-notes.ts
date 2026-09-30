@@ -4,6 +4,18 @@ export type NoteKind = "new" | "improved" | "fixed";
 
 export const PATCH_NOTES: { version: string; date: string; title: Bilingual; items: { kind: NoteKind; text: Bilingual }[] }[] = [
   {
+    version: "2.3.0",
+    date: "2026-09-30",
+    title: { ko: "캠페인·콘텐츠: 훅 연구소, 콘텐츠 변환기와 새 결과 화면", en: "Campaigns & Content: Hook Lab, Content Transformer and new result screens" },
+    items: [
+      { kind: "new", text: { ko: "훅 연구소: 질문·통념 뒤집기·숫자·전후 비교 등 유형별 훅 카드, 화면 글자와 첫 장면, 플랫폼별 변형", en: "Hook Lab: hook cards by family, with on-screen text, the first scene and a version per platform" } },
+      { kind: "new", text: { ko: "콘텐츠 변환기: 글 하나를 카드뉴스·쇼츠 대본·스레드·링크드인·뉴스레터·카카오톡으로 각각 다시, 글자 수 확인까지", en: "Content Transformer: one piece re-made as a carousel, Shorts script, Threads, LinkedIn, newsletter or KakaoTalk, with length checks" } },
+      { kind: "improved", text: { ko: "캠페인 플래너: 채널별 13주 타임라인이 추가됐어요 (PDF·PPT에도 들어가요)", en: "Campaign Planner: a 13-week timeline per channel (also in PDF and PowerPoint)" } },
+      { kind: "improved", text: { ko: "SEO 원고 컴포저: 원고를 바로 고치면 옆에서 SEO 점검 9가지가 다시 계산돼요", en: "SEO Content Composer: edit the draft and nine SEO checks re-run beside it" } },
+      { kind: "improved", text: { ko: "광고 크리에이티브 팩토리: 구매 동기별 광고 보드와 각도마다 A/B 두 안", en: "Ad Creative Factory: a board by buying motive with an A and B version of each ad" } },
+    ],
+  },
+  {
     version: "2.2.0",
     date: "2026-09-30",
     title: { ko: "브랜드·웹·세일즈: 브랜드 DNA 스튜디오와 도구별 새 결과 화면", en: "Brand, Web & Sales: Brand DNA Studio and new result screens" },

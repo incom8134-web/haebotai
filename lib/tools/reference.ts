@@ -198,6 +198,16 @@ export const REFERENCE_MODES: Record<string, ReferenceMode[]> = {
     },
   ],
   "mvp-blueprint": [REFERENCE, IMPROVE("기획서")],
+  "hook-lab": [
+    REFERENCE,
+    {
+      id: "my-top-posts",
+      label: { ko: "잘된 게시물 참고", en: "Learn from my best posts" },
+      hint: { ko: "반응 좋았던 게시물 첫 문장·대본을 붙여 넣기", en: "Paste openings of posts that did well" },
+      instruction: "참고 자료는 이 계정에서 반응이 좋았던 게시물입니다. 어떤 훅 유형과 말투가 통했는지 찾아 그 방향을 살리고, summary에 무엇을 참고했는지 밝히세요.",
+    },
+  ],
+  "content-transformer": [REFERENCE],
   "brand-dna": [
     REFERENCE,
     {
