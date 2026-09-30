@@ -653,6 +653,8 @@ export function assembleHomepage(input: Record<string, unknown>, plan: SitePlan,
   return {
     html,
     sections: plan.sections.map((s) => s.title),
+    // The site's plan, for the sitemap on the result page.
+    sitemap: plan.sections.map((s) => ({ title: s.title, goal: s.goal, layout: s.layout })),
     hero_image_prompt: plan.images[0]?.prompt ?? "",
     preview_url: "",
     zip_asset_id: "",

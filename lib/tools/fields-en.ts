@@ -12,6 +12,17 @@ const COMMON: Record<string, FieldEn> = {
 };
 
 const FIELDS_EN: Record<string, Record<string, FieldEn>> = {
+  "brand-dna": {
+    brand_name: { label: "Brand name" },
+    offering: { label: "What you sell, and to whom" },
+    target_customer: { label: "Most important customer" },
+    personality: { label: "Brand personality", options: { warm: "Warm neighbour", expert: "Trusted expert", bold: "Bold challenger", playful: "Playful friend", premium: "Refined craftsman", natural: "Honest natural" } },
+    styles: { label: "Visual styles you like (up to 3)", options: { minimal: "Minimal", warm: "Handmade warmth", bold: "High contrast", classic: "Classic", modern: "Modern tech", organic: "Organic", luxe: "Luxury", retro: "Retro" } },
+    values: { label: "Values to keep" },
+    competitors: { label: "Brands you're compared with (optional)" },
+    existing_colors: { label: "Colours you already use (optional, e.g. #1F4E79)" },
+    avoid: { label: "What the brand must never feel like" },
+  },
   "idea-radar": {
     skills: { label: "Skills & experience" },
     interests: { label: "Interests" },

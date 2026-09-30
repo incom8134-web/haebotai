@@ -3108,5 +3108,184 @@
       "ko": "Must: 예약·변경, 카톡 알림 · Later: 식단 사진 AI 분석\n단계: 1~2주 노코드 예약 → 3~4주 회원 20명 시범 → 5~6주 결제 연결\n가설: 회원의 60%가 앱으로 예약을 바꾼다",
       "en": "Must: booking and changes, KakaoTalk alerts · Later: AI meal-photo analysis\nStages: wk 1–2 no-code booking → wk 3–4 pilot with 20 members → wk 5–6 payments\nHypothesis: 60% of members reschedule in the app"
     }
+  },
+  "brand-dna": {
+    "tagline": {
+      "ko": "모든 결과물이 따를 브랜드의 기준, 한 장의 보드로",
+      "en": "Your brand's rules on one board, for everything you make"
+    },
+    "description": {
+      "ko": "성격·가치·포지셔닝·목소리·색·서체·시각 방향을 한 장의 브랜드 보드로 만듭니다. 색마다 역할과 글자 대비를, 서체는 실제 한글 폰트 견본을, 말투는 상황별 예시 문장을 보여 드려요. 완성한 기준은 로고·웹사이트·세일즈 페이지로 그대로 이어집니다.",
+      "en": "Build one brand board: personality, values, positioning, voice, colours, type and visual direction. Colours come with roles and contrast checks, type with real Korean font specimens, voice with sample lines for real situations — and the rules carry into your logo, website and sales page."
+    },
+    "features": [
+      {
+        "icon": "shapes",
+        "title": {
+          "ko": "성격을 숫자로",
+          "en": "Personality in numbers"
+        },
+        "body": {
+          "ko": "따뜻함·전문성·대담함·장난기·고급스러움의 비율을 보여 줍니다.",
+          "en": "See the mix of warmth, expertise, boldness, playfulness and premium."
+        }
+      },
+      {
+        "icon": "shield-check",
+        "title": {
+          "ko": "대비까지 확인한 색",
+          "en": "Contrast-checked colours"
+        },
+        "body": {
+          "ko": "색마다 흰 글자·검은 글자와의 대비를 계산해 읽히는 조합만 권합니다.",
+          "en": "Each colour's contrast with white and black text is calculated."
+        }
+      },
+      {
+        "icon": "link",
+        "title": {
+          "ko": "다음 결과물로",
+          "en": "Into everything next"
+        },
+        "body": {
+          "ko": "로고 디렉션 랩, 웹 익스피리언스 빌더, 세일즈 페이지 설계소로 바로 이어갑니다.",
+          "en": "Continue straight into Logo Lab, Web Builder or Sales Page."
+        }
+      }
+    ],
+    "presets": [
+      {
+        "title": {
+          "ko": "동네 소아과",
+          "en": "Neighbourhood pediatric clinic"
+        },
+        "tag": {
+          "ko": "의료",
+          "en": "Healthcare"
+        },
+        "values": {
+          "brand_name": "온샘소아과",
+          "offering": "맞벌이 부모를 위해 저녁 진료를 하는 동네 소아청소년과, 10세 이하 아이 대상",
+          "target_customer": "30~40대 맞벌이 부모",
+          "personality": "warm",
+          "styles": [
+            "minimal",
+            "warm"
+          ],
+          "values": [
+            "설명을 충분히",
+            "서두르지 않기"
+          ],
+          "avoid": "차갑고 병원 같은 위압감"
+        }
+      },
+      {
+        "title": {
+          "ko": "착즙 주스 구독",
+          "en": "Cold-pressed juice subscription"
+        },
+        "tag": {
+          "ko": "D2C",
+          "en": "D2C"
+        },
+        "values": {
+          "brand_name": "로프레스",
+          "offering": "직장인에게 새벽 배송하는 무첨가 착즙 주스 정기구독",
+          "target_customer": "건강을 챙기는 20대 후반~30대 직장인",
+          "personality": "bold",
+          "styles": [
+            "bold",
+            "modern"
+          ],
+          "values": [
+            "아무것도 더하지 않기",
+            "정직한 라벨"
+          ],
+          "competitors": [
+            "마트 주스",
+            "대기업 주스 브랜드"
+          ],
+          "avoid": "설교하는 웰빙 말투"
+        }
+      },
+      {
+        "title": {
+          "ko": "원목 가구 공방",
+          "en": "Solid-wood furniture workshop"
+        },
+        "tag": {
+          "ko": "공방",
+          "en": "Craft"
+        },
+        "values": {
+          "brand_name": "결공방",
+          "offering": "양평의 1인 공방에서 주문 제작하는 원목 가구",
+          "target_customer": "신혼집·새집을 꾸미는 30~50대 부부",
+          "personality": "premium",
+          "styles": [
+            "classic",
+            "organic"
+          ],
+          "values": [
+            "느린 손작업",
+            "수십 년 쓰는 가구"
+          ],
+          "existing_colors": [
+            "#6B4F3A"
+          ],
+          "avoid": "싸 보이는 대량 생산 느낌"
+        }
+      }
+    ],
+    "steps": [
+      {
+        "ko": "브랜드 이름과 무엇을 누구에게 파는지 적습니다.",
+        "en": "Enter the name and what you sell to whom."
+      },
+      {
+        "ko": "성격과 끌리는 스타일을 고릅니다.",
+        "en": "Pick a personality and styles you like."
+      },
+      {
+        "ko": "브랜드 보드를 확인하고 로고·사이트로 이어갑니다.",
+        "en": "Review the board, then continue to logo or site."
+      }
+    ],
+    "tips": [
+      {
+        "ko": "'되고 싶지 않은 모습'을 적으면 말투와 색이 훨씬 또렷해집니다.",
+        "en": "Saying what the brand must never feel like sharpens voice and colour."
+      },
+      {
+        "ko": "이미 쓰는 색이 있으면 넣으세요. 그 색을 살려 팔레트를 짭니다.",
+        "en": "Add colours you already use — the palette will build on them."
+      }
+    ],
+    "faq": [
+      {
+        "q": {
+          "ko": "서체는 무료인가요?",
+          "en": "Are the fonts free?"
+        },
+        "a": {
+          "ko": "구글 폰트에서 무료로 쓸 수 있는 한글 서체 중에서만 고릅니다. 상업적 이용 조건은 각 폰트의 라이선스(대부분 OFL)를 확인하세요.",
+          "en": "Only free Korean fonts from Google Fonts are used. Check each font's licence (mostly OFL) for commercial use."
+        }
+      },
+      {
+        "q": {
+          "ko": "로고도 만들어 주나요?",
+          "en": "Does it make a logo?"
+        },
+        "a": {
+          "ko": "로고는 로고 디렉션 랩에서 그립니다. 브랜드 보드에서 '로고 만들기'로 이어가면 이름과 무드가 채워져요.",
+          "en": "Logos are drawn in Logo Direction Lab. Continue from the board and the name and mood are filled in."
+        }
+      }
+    ],
+    "sample": {
+      "ko": "원형: 돌보는 사람 · 따뜻함 9 · 전문성 7 · 장난기 3\n포지셔닝: 퇴근 후에도 서두르지 않고 설명해 주는 동네 소아과\n색: 새벽 하늘 #3B6E8F · 크림 #FFF8EE · 살구 #F2A477\n서체: 제목 Gowun Dodum / 본문 Noto Sans KR",
+      "en": "Archetype: Caregiver · warmth 9 · expertise 7 · playfulness 3\nPositioning: the neighbourhood clinic that explains without rushing, even after work\nColours: dawn blue #3B6E8F · cream #FFF8EE · apricot #F2A477\nType: Gowun Dodum / Noto Sans KR"
+    }
   }
 }

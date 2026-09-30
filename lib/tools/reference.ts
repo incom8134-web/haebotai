@@ -198,6 +198,15 @@ export const REFERENCE_MODES: Record<string, ReferenceMode[]> = {
     },
   ],
   "mvp-blueprint": [REFERENCE, IMPROVE("기획서")],
+  "brand-dna": [
+    REFERENCE,
+    {
+      id: "existing-brand",
+      label: { ko: "지금 브랜드 다듬기", en: "Refine my current brand" },
+      hint: { ko: "쓰고 있는 소개글·가이드·게시물을 붙여 넣기", en: "Paste your current copy, guide or posts" },
+      instruction: "참고 자료는 이 브랜드가 지금 쓰고 있는 소개글·가이드·게시물입니다. 이미 잘 지켜지는 목소리와 색은 살리고, 서로 어긋나는 부분을 찾아 하나의 기준으로 정리하세요. 무엇을 바꿨는지 summary에 밝히세요.",
+    },
+  ],
   calendar: [REFERENCE, IMPROVE("실행 계획")],
   prompt: [
     REFERENCE,
