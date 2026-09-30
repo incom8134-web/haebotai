@@ -21,6 +21,11 @@ const MAX_TOKENS_BY_TOOL: Record<string, number> = {
   calendar: 10000, // 13 weeks x ~5 tasks — many small repeated objects
   trend: 10000, // up to 8 ideas, each with 8 scores + sources
   strategy: 12000, // market, segments, competitors, offers, 90-day plan, KPIs
+  "idea-radar": 12000, // up to 6 ideas, each a full card with scores and a test
+  "mvp-blueprint": 12000, // features, journey, stack, stages, checklist
+  "revenue-mapper": 10000,
+  "offer-architect": 10000,
+  "market-gap": 10000, // needs × solutions coverage + sources
 };
 const MAX_TOKENS_DEFAULT = 8000;
 

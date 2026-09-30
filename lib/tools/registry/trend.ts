@@ -37,7 +37,7 @@ export const trend: ToolManifest = {
     },
   ],
   usesProfile: ["industry"],
-  acceptsChainFrom: ["money"],
+  acceptsChainFrom: ["idea-radar", "money"],
   outputRenderer: "cards",
   grounding: { requireSources: true, webSearch: true, estimateBadge: true },
   model: "gemini-3.1-pro-preview",

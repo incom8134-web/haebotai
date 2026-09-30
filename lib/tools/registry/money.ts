@@ -6,8 +6,8 @@ import type { ToolManifest } from "../types";
 export const money: ToolManifest = {
   id: "money",
   category: "discover",
-  name_ko: "아이디어 레이더",
-  name_en: "Idea Radar",
+  name_ko: "수익화 방향 찾기 (이전 버전)",
+  name_en: "Monetization finder (legacy)",
   summary: "보유 기술과 상황에 맞는 수익화 방향 3가지를 찾습니다.",
   icon: Lightbulb,
   inputs: [

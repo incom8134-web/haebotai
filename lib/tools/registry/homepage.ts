@@ -48,7 +48,7 @@ export const homepage: ToolManifest = {
     { kind: "url", id: "reference_site", label: "참고 사이트" },
   ],
   usesProfile: ["industry", "brand_name", "brand_colors", "tone", "voice_examples", "target_customer", "region"],
-  acceptsChainFrom: [],
+  acceptsChainFrom: ["mvp-blueprint"],
   outputRenderer: "code",
   grounding: { requireSources: false, webSearch: true, estimateBadge: false },
   model: "gemini-3.8-flash",

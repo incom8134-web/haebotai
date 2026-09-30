@@ -17,12 +17,22 @@ import proposalSchema from "./proposal";
 import sangsepageSchema from "./sangsepage";
 import strategySchema from "./strategy";
 import trendSchema from "./trend";
+import ideaRadarSchema from "./idea-radar";
+import revenueMapperSchema from "./revenue-mapper";
+import offerArchitectSchema from "./offer-architect";
+import marketGapSchema from "./market-gap";
+import mvpBlueprintSchema from "./mvp-blueprint";
 
 // Each tool's output schema (zod), kept out of lib/tools/registry so the
 // registry — imported by the app shell, Studio, tool pages and the ⌘K
 // palette on the client — carries no zod. Only server code (generation,
 // validation, export, ordering) imports this.
 const OUTPUT_SCHEMAS: Record<string, z.ZodType> = {
+  "idea-radar": ideaRadarSchema,
+  "revenue-mapper": revenueMapperSchema,
+  "offer-architect": offerArchitectSchema,
+  "market-gap": marketGapSchema,
+  "mvp-blueprint": mvpBlueprintSchema,
   "blog": blogSchema,
   "brand-model": brandModelSchema,
   "business-plan": businessPlanSchema,

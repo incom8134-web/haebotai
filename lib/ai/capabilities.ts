@@ -30,6 +30,11 @@ export interface ToolCapability {
 // requirements rule out (checked against PROVIDER_CAPS by
 // capabilities.test.ts).
 export const TOOL_CAPABILITIES: Record<string, ToolCapability> = {
+  "idea-radar": { providers: ["google"], default: "google" }, // new in 2.0 — google-only until verified on Claude
+  "revenue-mapper": { providers: ["google"], default: "google" },
+  "offer-architect": { providers: ["google"], default: "google" },
+  "market-gap": { providers: ["google"], default: "google" },
+  "mvp-blueprint": { providers: ["google"], default: "google" },
   money: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 2
   trend: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 4
   strategy: { providers: ["google", "anthropic"], default: "google" },
