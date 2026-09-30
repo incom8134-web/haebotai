@@ -9,9 +9,9 @@ import type { ToolManifest } from "../types";
 
 export const place: ToolManifest = {
   id: "place",
-  category: "content",
-  name_ko: "해봇 플레이스 최적화",
-  name_en: "Place Optimization",
+  category: "campaign",
+  name_ko: "플레이스 최적화 (종료)",
+  name_en: "Place optimization (retired)",
   summary: "플레이스 정보와 운영 체크리스트를 최적화합니다.",
   icon: MapPin,
   inputs: [

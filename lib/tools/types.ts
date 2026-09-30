@@ -2,7 +2,7 @@ import type { LucideIcon } from "lucide-react";
 
 // HAEBOT_A_TOOLS_SPEC.md §3.1 / §3.3
 
-export type CategoryId = "ideas" | "content" | "design" | "sales" | "docs";
+export type CategoryId = "discover" | "brand" | "campaign" | "operate" | "research";
 
 export interface FieldOption {
   value: string;
@@ -35,7 +35,10 @@ export interface BusinessProfile {
 }
 
 export interface ToolManifest {
+  /** Internal engine id (what runs store as tool_id). */
   id: string;
+  /** Public URL slug (lib/tools/catalog.ts); set by the registry. */
+  slug?: string;
   category: CategoryId;
   name_ko: string;
   name_en: string;
@@ -60,4 +63,6 @@ export interface ToolManifest {
   /** Listed but not runnable yet — cards show 준비 중, the run page and run
    *  route refuse it before any credits are reserved. */
   comingSoon?: boolean;
+  /** A retired tool: past runs still render, new runs are refused and its URLs redirect. */
+  retired?: boolean;
 }

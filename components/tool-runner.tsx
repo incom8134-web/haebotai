@@ -1,5 +1,6 @@
 "use client";
 
+import { toolSlug } from "@/lib/tools/catalog";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { notFound, useRouter } from "next/navigation";
@@ -485,7 +486,7 @@ function ToolRunner({
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <Link href={`/tools/${manifest.id}`} className="hover:text-fg">
+            <Link href={`/tools/${toolSlug(manifest.id)}`} className="hover:text-fg">
               {locale === "en" ? "Overview" : "소개·예시"}
             </Link>
           </BreadcrumbItem>

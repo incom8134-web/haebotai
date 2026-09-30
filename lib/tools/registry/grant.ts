@@ -9,9 +9,9 @@ import type { ToolManifest } from "../types";
 
 export const grant: ToolManifest = {
   id: "grant",
-  category: "docs",
-  name_ko: "해봇 지원사업 매칭",
-  name_en: "Grant Matcher",
+  category: "operate",
+  name_ko: "지원사업 매칭 (종료)",
+  name_en: "Grant matching (retired)",
   summary: "사업 정보에 맞는 정부지원사업 후보와 서류 체크리스트를 찾습니다.",
   icon: Landmark,
   inputs: [

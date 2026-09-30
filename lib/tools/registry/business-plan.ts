@@ -7,9 +7,9 @@ import type { ToolManifest } from "../types";
 
 export const businessPlan: ToolManifest = {
   id: "business-plan",
-  category: "docs",
-  name_ko: "해봇 사업계획서",
-  name_en: "Business Plan",
+  category: "operate",
+  name_ko: "비즈니스 문서 스튜디오",
+  name_en: "Business Document Studio",
   summary: "투자·정부지원용 사업계획서와 재무 가정을 작성합니다.",
   icon: Briefcase,
   inputs: [

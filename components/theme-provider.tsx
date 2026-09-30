@@ -2,13 +2,13 @@
 
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 
-// Dark is the default: the Studio's liquid-glass look (cyan → violet over
-// deep navy) is designed dark-first. Light stays available via the toggle.
+// Light is the default: Haebot's identity is light-first (warm paper base,
+// one signature colour). Dark stays available via the toggle.
 function ThemeProvider({ children }: { children: React.ReactNode }) {
   return (
     <NextThemesProvider
       attribute="class"
-      defaultTheme="dark"
+      defaultTheme="light"
       themes={["light", "dark"]}
       enableSystem={false}
     >

@@ -1,5 +1,7 @@
 "use client";
 
+import { toolSlug } from "@/lib/tools/catalog";
+import { CATEGORY_ORDER as CATEGORY_ORDER_ALL } from "@/lib/tools/catalog";
 import { useMemo, useState, useTransition } from "react";
 import { OnboardingChecklist } from "@/components/studio/onboarding-checklist";
 import Link from "next/link";
@@ -48,7 +50,7 @@ const STATUS_KEY: Record<string, DictKey> = {
   error: "status_error",
 };
 
-const CATEGORY_ORDER: CategoryId[] = ["ideas", "content", "design", "sales", "docs"];
+const CATEGORY_ORDER: CategoryId[] = CATEGORY_ORDER_ALL;
 
 // Example briefs, keyed by tool id — shown as the textarea placeholder so
 // an empty brief still teaches what the tool wants. Korean first: tool
@@ -119,7 +121,7 @@ function StudioWorkspace({
 
   function generate() {
     const query = activeBriefField && brief.trim() ? `?brief=${encodeURIComponent(brief.trim())}` : "";
-    startOpening(() => router.push(`/tools/${active.id}/run${query}`));
+    startOpening(() => router.push(`/tools/${toolSlug(active.id)}/run${query}`));
   }
 
   return (

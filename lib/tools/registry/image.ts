@@ -6,9 +6,9 @@ import type { ToolManifest } from "../types";
 
 export const image: ToolManifest = {
   id: "image",
-  category: "design",
-  name_ko: "해봇 이미지 생성",
-  name_en: "Image Generator",
+  category: "campaign",
+  name_ko: "제품 사진 촬영",
+  name_en: "Product photo shoot",
   summary: "제품 이미지를 용도별 프리셋으로 4컷 생성합니다.",
   icon: ImageIcon,
   inputs: [

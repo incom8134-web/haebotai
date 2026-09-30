@@ -13,9 +13,9 @@ import type { ToolManifest } from "../types";
 
 export const brandModel: ToolManifest = {
   id: "brand-model",
-  category: "design",
-  name_ko: "해봇 브랜드 모델",
-  name_en: "Brand Model",
+  category: "campaign",
+  name_ko: "모델 룩북 촬영",
+  name_en: "Model lookbook",
   summary: "제품을 보여줄 일관된 AI 모델 컷을 생성합니다.",
   icon: UserRound,
   inputs: [

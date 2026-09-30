@@ -1,5 +1,6 @@
 "use client";
 
+import { toolSlug } from "@/lib/tools/catalog";
 import Link from "next/link";
 import { ArrowUpRight, BookOpenText, CircleGauge, CircleHelp, Crown, ExternalLink, Headset, Keyboard, LayoutGrid, Library, Sparkle, Sparkles, Star, UserRound } from "lucide-react";
 import { getTool } from "@/lib/tools/registry";
@@ -51,7 +52,7 @@ function QuickLinks({ recent }: { recent: { id: string; toolId: string; createdA
           {pinned.length ? (
             <div className="mt-4 grid gap-2 sm:grid-cols-2">
               {pinned.map((t) => (
-                <Link key={t.id} href={`/tools/${t.id}/run`} className="glass glass-hover flex items-center gap-3 rounded-2xl p-3">
+                <Link key={t.id} href={`/tools/${toolSlug(t.id)}/run`} className="glass glass-hover flex items-center gap-3 rounded-2xl p-3">
                   <span className="studio-gradient-bg grid size-9 shrink-0 place-items-center rounded-xl text-white"><t.icon size={16} aria-hidden /></span>
                   <span className="min-w-0 truncate text-sm font-medium">{locale === "en" ? t.name_en : t.name_ko}</span>
                 </Link>
@@ -93,7 +94,7 @@ function QuickLinks({ recent }: { recent: { id: string; toolId: string; createdA
         <h2 className="mb-3 text-lg font-semibold">{L({ ko: "흐름", en: "Flows" })}</h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {WORKFLOWS.map((w) => (
-            <Link key={w.id} href={`/tools/${w.tools[0]}/run`} className="glass glass-hover rounded-[20px] p-4">
+            <Link key={w.id} href={`/tools/${toolSlug(w.tools[0])}/run`} className="glass glass-hover rounded-[20px] p-4">
               <p className="text-sm font-semibold">{L(w.title)}</p>
               <p className="mt-1 text-2xs text-fg-muted">{w.tools.map(name).join(" → ")}</p>
             </Link>

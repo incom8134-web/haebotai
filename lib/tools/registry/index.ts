@@ -1,4 +1,5 @@
 import type { ToolManifest } from "../types";
+import { CATALOG, catalogTool, publicTools, RETIRED, type CatalogTool } from "../catalog";
 import { money } from "./money";
 import { trend } from "./trend";
 import { calendar } from "./calendar";
@@ -32,20 +33,61 @@ const withFreeRequest = (m: ToolManifest): ToolManifest =>
     ? m
     : { ...m, inputs: [...m.inputs, { kind: "textarea", id: FREE_REQUEST_ID, label: "원하는 대로 자유롭게 요청", rows: 3, max: 2000 }] };
 
-const registry = new Map<string, ToolManifest>(
-  [money, trend, strategy, calendar, prompt, blog, copy, keyword, place, image, logo, brandModel, sangsepage, homepage, proposal, presentation, businessPlan, grant].map(
-    (m) => [m.id, withFreeRequest(m)],
-  ),
-);
+// Engines, keyed by their internal id. The public side (slug, name,
+// category, promise) comes from lib/tools/catalog.ts and is laid over
+// each engine here; the catalog's tools without an engine get a
+// "coming soon" manifest so every page can list and explain them.
+const ENGINES = [money, trend, strategy, calendar, prompt, blog, copy, keyword, place, image, logo, brandModel, sangsepage, homepage, proposal, presentation, businessPlan, grant];
+
+function withCatalog(m: ToolManifest): ToolManifest {
+  const c = catalogTool(m.id);
+  if (!c) return { ...m, slug: m.id, retired: m.id in RETIRED };
+  return { ...m, slug: c.slug, category: c.category, name_ko: c.name.ko, name_en: c.name.en, summary: c.promise.ko };
+}
+
+function upcoming(c: CatalogTool): ToolManifest {
+  return {
+    id: c.slug,
+    slug: c.slug,
+    category: c.category,
+    name_ko: c.name.ko,
+    name_en: c.name.en,
+    summary: c.promise.ko,
+    icon: c.icon,
+    inputs: [],
+    usesProfile: [],
+    outputRenderer: "document",
+    grounding: { requireSources: false, webSearch: false, estimateBadge: false },
+    model: "gemini-3.1-pro-preview",
+    estimatedCredits: 0,
+    estimatedSeconds: 0,
+    comingSoon: true,
+  };
+}
+
+const registry = new Map<string, ToolManifest>([
+  ...ENGINES.map((m) => [m.id, withFreeRequest(withCatalog(m))] as const),
+  ...CATALOG.filter((c) => !c.engine).map((c) => [c.slug, upcoming(c)] as const),
+]);
+const bySlug = new Map([...registry.values()].map((m) => [m.slug ?? m.id, m]));
 
 export function registerTool(manifest: ToolManifest) {
-  registry.set(manifest.id, withFreeRequest(manifest));
+  const m = withFreeRequest(withCatalog(manifest));
+  registry.set(m.id, m);
+  bySlug.set(m.slug ?? m.id, m);
 }
 
+/** A tool by its engine id (as stored on runs) or its public slug. */
 export function getTool(id: string): ToolManifest | undefined {
-  return registry.get(id);
+  return registry.get(id) ?? bySlug.get(id);
 }
 
+/** The 25 public tools in catalog order (hidden modes and retired tools excluded). */
 export function listTools(): ToolManifest[] {
-  return [...registry.values()];
+  return publicTools().map((c) => getTool(c.slug)!);
+}
+
+/** Every runnable engine, hidden modes included (for routing and checks). */
+export function listEngines(): ToolManifest[] {
+  return [...registry.values()].filter((m) => !m.comingSoon && !m.retired);
 }

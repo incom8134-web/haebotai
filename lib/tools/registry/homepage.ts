@@ -8,9 +8,9 @@ import type { ToolManifest } from "../types";
 
 export const homepage: ToolManifest = {
   id: "homepage",
-  category: "sales",
-  name_ko: "해봇 홈페이지",
-  name_en: "Homepage Generator",
+  category: "brand",
+  name_ko: "웹 익스피리언스 빌더",
+  name_en: "Web Experience Builder",
   summary: "업종과 목적에 맞는 배포 가능한 홈페이지를 생성합니다.",
   icon: Globe,
   inputs: [

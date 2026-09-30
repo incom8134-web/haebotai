@@ -12,34 +12,34 @@
  */
 @theme {
   /* Surfaces */
-  --color-bg: #f7f9fc;
+  --color-bg: #faf8f5;
   --color-surface: #ffffff;
-  --color-surface-2: #eef1f6;
-  --color-hairline: rgba(23, 32, 51, 0.08);
-  --color-hairline-str: rgba(23, 32, 51, 0.14);
+  --color-surface-2: #f3efe9;
+  --color-hairline: rgba(43, 30, 18, 0.09);
+  --color-hairline-str: rgba(43, 30, 18, 0.16);
 
   /* Text — muted/subtle measured against bg, surface, and surface-2 to
      clear WCAG AA (4.5:1) on all three; the original slate-500/slate-400
      pairing read fine in isolation but measured as low as 2.4:1 on some
      surfaces. */
-  --color-fg: #172033;
-  --color-fg-muted: #475569;
-  --color-fg-subtle: #536279;
+  --color-fg: #1c1814;
+  --color-fg-muted: #554d45;
+  --color-fg-subtle: #675f57;
 
-  /* Brand accent — forest green */
-  --color-accent: #08703e;
-  --color-accent-hover: #076339;
-  --color-accent-dim: #e9f8f0;
+  /* Brand accent — Haebot Sun (deep sunrise orange; white text on it clears AA) */
+  --color-accent: #c2410c;
+  --color-accent-hover: #9a3412;
+  --color-accent-dim: #fff1e7;
 
-  /* AI / intelligence accent — cyan */
-  --color-ai: #06b6d4;
-  --color-ai-dim: #ecfeff;
+  /* AI / intelligence accent — deep teal */
+  --color-ai: #0f766e;
+  --color-ai-dim: #e6f6f3;
 
   /* Semantic — grounding is the product, it gets its own color */
-  --color-grounded: #22c55e;
+  --color-grounded: #15803d;
   --color-grounded-dim: rgba(34, 197, 94, 0.12);
   --color-warn: #f59e0b;
-  --color-danger: #be1446;
+  --color-danger: #be123c;
 
   /* Type scale — 11/12/13/14/16/20/26/34/48/64 */
   --text-2xs: 11px;
@@ -131,23 +131,23 @@
  * already-tuned dark values, carried forward as the `.dark` override now
  * that light is the primary target. */
 .dark {
-  --color-bg: #08090a;
-  --color-surface: #0e1011;
-  --color-surface-2: #16181a;
-  --color-hairline: rgba(255, 255, 255, 0.08);
-  --color-hairline-str: rgba(255, 255, 255, 0.14);
+  --color-bg: #13110f;
+  --color-surface: #1b1815;
+  --color-surface-2: #24201c;
+  --color-hairline: rgba(255, 244, 232, 0.09);
+  --color-hairline-str: rgba(255, 244, 232, 0.16);
 
-  --color-fg: #f2f4f5;
-  --color-fg-muted: #9ba1a6;
-  --color-fg-subtle: #8e959b;
-  --color-danger: #f4436c;
+  --color-fg: #f6f1ea;
+  --color-fg-muted: #b8afa5;
+  --color-fg-subtle: #a0978d;
+  --color-danger: #fb7185;
 
-  --color-accent: #0a7e46;
-  --color-accent-hover: #16b364;
-  --color-accent-dim: rgba(10, 126, 70, 0.18);
+  --color-accent: #c2410c;
+  --color-accent-hover: #ea580c;
+  --color-accent-dim: rgba(234, 88, 12, 0.16);
 
-  --color-ai: #22d3ee;
-  --color-ai-dim: rgba(34, 211, 238, 0.14);
+  --color-ai: #2dd4bf;
+  --color-ai-dim: rgba(45, 212, 191, 0.14);
 
   --color-grounded: #4ade80;
   --color-grounded-dim: rgba(74, 222, 128, 0.14);
@@ -169,32 +169,35 @@
  * exact palette; light values are tuned equivalents that clear AA on bg.
  */
 :root {
-  --studio-cyan: oklch(0.48 0.12 215);
-  --studio-violet: oklch(0.55 0.22 300);
-  --studio-success: oklch(0.62 0.16 160);
-  --studio-warning: oklch(0.72 0.16 78);
-  --studio-glass: oklch(1 0 0 / 72%);
-  --studio-card: oklch(0.985 0.004 250 / 85%);
-  --studio-grid: oklch(0.2 0.03 265 / 5%);
-  --studio-shadow: 0 30px 80px -30px oklch(0.25 0.05 265 / 28%), inset 0 1px 0 oklch(1 0 0 / 60%);
-  --studio-deck-from: oklch(0.95 0.02 250);
-  --studio-deck-to: oklch(0.9 0.04 290);
-  --studio-glow-a: oklch(0.66 0.21 305 / 14%);
-  --studio-glow-b: oklch(0.79 0.14 208 / 16%);
+  /* Haebot Sun: one signature colour (a deep sunrise orange) and its
+     darker ember for depth. The old cyan/violet names are kept as the
+     variable names so every component follows the new identity. */
+  --studio-cyan: oklch(0.55 0.18 45);
+  --studio-violet: oklch(0.47 0.15 38);
+  --studio-success: oklch(0.55 0.13 160);
+  --studio-warning: oklch(0.7 0.16 75);
+  --studio-glass: #ffffff;
+  --studio-card: #ffffff;
+  --studio-grid: oklch(0.3 0.03 50 / 4%);
+  --studio-shadow: 0 1px 2px oklch(0.3 0.03 50 / 8%), 0 12px 32px -18px oklch(0.3 0.04 50 / 22%);
+  --studio-deck-from: oklch(0.97 0.015 70);
+  --studio-deck-to: oklch(0.93 0.03 55);
+  --studio-glow-a: transparent;
+  --studio-glow-b: transparent;
 }
 .dark {
-  --studio-cyan: oklch(0.82 0.14 208);
-  --studio-violet: oklch(0.65 0.22 300);
+  --studio-cyan: oklch(0.75 0.16 55);
+  --studio-violet: oklch(0.64 0.18 42);
   --studio-success: oklch(0.79 0.17 160);
   --studio-warning: oklch(0.78 0.16 78);
-  --studio-glass: oklch(1 0 0 / 4.5%);
-  --studio-card: oklch(0.07 0.02 265 / 44%);
+  --studio-glass: #1b1815;
+  --studio-card: #1b1815;
   --studio-grid: oklch(1 0 0 / 2.5%);
-  --studio-shadow: 0 30px 80px oklch(0 0 0 / 35%), inset 0 1px 0 oklch(1 0 0 / 5%);
-  --studio-deck-from: oklch(0.21 0.055 264);
-  --studio-deck-to: oklch(0.12 0.04 287);
-  --studio-glow-a: oklch(0.66 0.21 305 / 22%);
-  --studio-glow-b: oklch(0.79 0.14 208 / 18%);
+  --studio-shadow: 0 1px 2px oklch(0 0 0 / 40%), 0 16px 40px -20px oklch(0 0 0 / 60%);
+  --studio-deck-from: oklch(0.24 0.03 50);
+  --studio-deck-to: oklch(0.18 0.025 40);
+  --studio-glow-a: transparent;
+  --studio-glow-b: transparent;
 }
 
 @keyframes studio-drift-one { 50% { transform: translate(24px, 18px); } }
@@ -212,18 +215,18 @@
   mask-image: linear-gradient(to bottom, black, transparent 85%);
   pointer-events: none;
 }
-.studio-ambient { position: absolute; z-index: -1; border-radius: 999px; filter: blur(120px); pointer-events: none; }
+.studio-ambient { display: none; }
 .studio-ambient-one { width: 430px; height: 430px; left: -190px; top: -160px; background: var(--studio-glow-a); animation: studio-drift-one 10s ease-in-out infinite; }
 .studio-ambient-two { width: 520px; height: 520px; right: -250px; top: 28%; background: var(--studio-glow-b); animation: studio-drift-two 12s ease-in-out infinite; }
 .studio-gradient-bg { background-image: linear-gradient(135deg, var(--studio-cyan), var(--studio-violet)); }
 .studio-gradient-type {
-  background-image: linear-gradient(90deg, var(--studio-cyan), oklch(0.66 0.16 240), var(--studio-violet));
+  background-image: linear-gradient(90deg, var(--studio-cyan), var(--studio-violet));
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
 }
-.studio-glass { background: var(--studio-glass); backdrop-filter: blur(24px); }
-.studio-panel { background: var(--studio-glass); backdrop-filter: blur(24px); box-shadow: var(--studio-shadow); }
+.studio-glass { background: var(--studio-glass); }
+.studio-panel { background: var(--studio-glass); box-shadow: var(--studio-shadow); border: 1px solid var(--color-hairline); }
 .studio-card { background: var(--studio-card); }
 .studio-tool-active {
   border-color: color-mix(in oklch, var(--studio-cyan) 45%, transparent);
@@ -247,22 +250,22 @@
  * where backdrop-filter isn't supported.
  */
 :root {
-  --glass-tint: oklch(1 0 0 / 55%);
-  --glass-tint-strong: oklch(1 0 0 / 72%);
-  --glass-rim: oklch(1 0 0 / 70%);
-  --glass-edge: oklch(0.3 0.04 265 / 10%);
-  --glass-sheen: oklch(1 0 0 / 55%);
-  --glass-shadow: 0 1px 1px oklch(0.2 0.03 265 / 6%), 0 18px 50px -24px oklch(0.25 0.06 265 / 35%);
+  --glass-tint: var(--color-surface);
+  --glass-tint-strong: var(--color-surface);
+  --glass-rim: transparent;
+  --glass-edge: var(--color-hairline);
+  --glass-sheen: transparent;
+  --glass-shadow: 0 1px 2px oklch(0.3 0.03 50 / 6%), 0 10px 28px -18px oklch(0.3 0.04 50 / 20%);
   --spring: cubic-bezier(0.22, 1.25, 0.36, 1);
   --ease-glide: cubic-bezier(0.22, 1, 0.36, 1);
 }
 .dark {
-  --glass-tint: oklch(0.26 0.04 265 / 38%);
-  --glass-tint-strong: oklch(0.22 0.04 265 / 62%);
-  --glass-rim: oklch(1 0 0 / 16%);
-  --glass-edge: oklch(1 0 0 / 9%);
-  --glass-sheen: oklch(1 0 0 / 9%);
-  --glass-shadow: 0 1px 1px oklch(0 0 0 / 30%), 0 24px 60px -24px oklch(0 0 0 / 70%);
+  --glass-tint: var(--color-surface);
+  --glass-tint-strong: var(--color-surface);
+  --glass-rim: transparent;
+  --glass-edge: var(--color-hairline);
+  --glass-sheen: transparent;
+  --glass-shadow: 0 1px 2px oklch(0 0 0 / 35%), 0 14px 36px -20px oklch(0 0 0 / 55%);
 }
 
 .glass,
@@ -272,10 +275,8 @@
   background: var(--glass-tint);
   border: 1px solid var(--glass-edge);
   box-shadow: inset 0 1px 0 var(--glass-rim), inset 0 -1px 0 oklch(1 0 0 / 3%), var(--glass-shadow);
-  backdrop-filter: blur(22px) saturate(170%);
-  -webkit-backdrop-filter: blur(22px) saturate(170%);
 }
-.glass-strong { background: var(--glass-tint-strong); backdrop-filter: blur(34px) saturate(190%); -webkit-backdrop-filter: blur(34px) saturate(190%); }
+.glass-strong { background: var(--glass-tint-strong); }
 .glass::before,
 .glass-strong::before {
   content: "";
@@ -311,7 +312,7 @@
   background-size: 64px 64px;
   mask-image: radial-gradient(ellipse at 40% 20%, black, transparent 75%);
 }
-.app-backdrop .orb { position: absolute; border-radius: 999px; filter: blur(110px); }
+.app-backdrop .orb { display: none; }
 .app-backdrop .orb-a { width: 520px; height: 520px; left: -160px; top: -180px; background: var(--studio-glow-a); animation: studio-drift-one 14s ease-in-out infinite; }
 .app-backdrop .orb-b { width: 620px; height: 620px; right: -220px; top: 30%; background: var(--studio-glow-b); animation: studio-drift-two 18s ease-in-out infinite; }
 .app-backdrop .orb-c { width: 420px; height: 420px; left: 30%; bottom: -220px; background: color-mix(in oklch, var(--studio-violet) 14%, transparent); animation: studio-drift-one 22s ease-in-out infinite reverse; }
@@ -394,9 +395,7 @@ p { text-wrap: pretty; }
    still and use a lighter blur below the desktop breakpoint. */
 @media (max-width: 1023px) {
   .app-backdrop .orb, .studio-ambient { animation: none; filter: blur(64px); }
-  .glass { backdrop-filter: blur(12px) saturate(150%); -webkit-backdrop-filter: blur(12px) saturate(150%); }
-  .glass-strong { backdrop-filter: blur(16px) saturate(160%); -webkit-backdrop-filter: blur(16px) saturate(160%); }
-  .studio-glass, .studio-panel { backdrop-filter: blur(12px); }
+
   /* With the lighter blur, page text showed through the tab bar. */
   .tab-bar { background: color-mix(in oklch, var(--color-bg) 92%, transparent); }
 }

@@ -7,9 +7,9 @@ import type { ToolManifest } from "../types";
 
 export const copy: ToolManifest = {
   id: "copy",
-  category: "content",
-  name_ko: "해봇 캠페인 카피",
-  name_en: "Campaign Copy",
+  category: "campaign",
+  name_ko: "광고 크리에이티브 팩토리",
+  name_en: "Ad Creative Factory",
   summary: "하나의 메시지를 채널과 고객 동기별 카피로 나눠 씁니다.",
   icon: MessageSquareText,
   inputs: [

@@ -65,7 +65,7 @@ function AuthCard() {
       <p className="mt-2 text-sm leading-relaxed break-keep text-fg-muted">
         {next !== "/studio"
           ? L({ ko: "로그인하면 보던 화면으로 바로 돌아가요.", en: "Sign in and you'll land right back where you were." })
-          : L({ ko: "Google 계정 하나로 18개 도구를 모두 씁니다.", en: "One Google account, all 18 tools." })}
+          : L({ ko: "Google 계정 하나로 모든 도구를 씁니다.", en: "One Google account, every tool." })}
       </p>
 
       {error || failed ? (

@@ -10,7 +10,7 @@ export const PLANS: { id: PlanId; name: Bilingual; price: Bilingual; note: Bilin
     note: { ko: "가입 즉시", en: "On sign-up" },
     credits: { ko: "500 크레딧 (1회)", en: "500 credits (one-time)" },
     features: [
-      { ko: "18개 도구 모두 사용", en: "All 18 tools" },
+      { ko: "모든 도구 사용", en: "Every tool" },
       { ko: "비즈니스 프로필·보관함", en: "Business Profile and Library" },
       { ko: "모든 형식 내보내기 (PDF·Word·PPT·Markdown 등)", en: "Every export format (PDF, Word, PPT, Markdown…)" },
       { ko: "내 API 키를 등록하면 크레딧 미차감", en: "No credits charged with your own API key" },
