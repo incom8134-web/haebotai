@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { sourceSchema } from "../registry/shared";
+import { sourceSchema } from "../registry/shared.ts";
 
 // Deliberately wide: a strategy a shop owner can act on needs the
 // market read, who exactly the customers are, where each competitor

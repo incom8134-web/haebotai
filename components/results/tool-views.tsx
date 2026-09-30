@@ -11,6 +11,11 @@ import { ContentBranches } from "./campaign/content-branches";
 import { HookBoard } from "./campaign/hook-board";
 import { SeoEditor } from "./campaign/seo-editor";
 import { GapMap } from "./discover/gap-map";
+import { ActionBoard } from "./operate/action-board";
+import { DocCanvas } from "./operate/doc-canvas";
+import { OpsBoard } from "./operate/ops-board";
+import { ProposalBuilder } from "./operate/proposal-builder";
+import { SopFlow } from "./operate/sop-flow";
 import { IdeaBoard } from "./discover/idea-board";
 import { MvpBoard } from "./discover/mvp-board";
 import { OfferBlocks } from "./discover/offer-blocks";
@@ -44,5 +49,10 @@ export const TOOL_VIEWS: Record<string, { match: (o: Record<string, unknown>) =>
   strategy: { match: (o) => has(o, "channel_plan"), View: CampaignBoard },
   blog: { match: (o) => typeof o.body_markdown === "string", View: SeoEditor },
   copy: { match: (o) => has(o, "angles"), View: AdBoard },
+  "sop-builder": { match: (o) => has(o, "steps"), View: SopFlow },
+  "meeting-action": { match: (o) => has(o, "actions") || has(o, "decisions"), View: ActionBoard },
+  "business-plan": { match: (o) => Boolean(o.sections), View: DocCanvas },
+  proposal: { match: (o) => typeof o.executive_summary === "string", View: ProposalBuilder },
+  calendar: { match: (o) => has(o, "weeks"), View: OpsBoard },
   presentation: { match: (o) => has(o, "slides") && (o.slides as { headline?: unknown }[]).some((s) => typeof s?.headline === "string"), View: Storyboard },
 };

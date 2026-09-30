@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { sourceSchema } from "../registry/shared";
+import { sourceSchema } from "../registry/shared.ts";
 
 const outputSchema = z.object({
   titles: z.array(z.string()).length(5),
