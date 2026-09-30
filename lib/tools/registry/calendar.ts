@@ -30,6 +30,6 @@ export const calendar: ToolManifest = {
   outputRenderer: "calendar",
   grounding: { requireSources: false, webSearch: false, estimateBadge: false },
   model: "gemini-3.1-pro-preview",
-  estimatedCredits: 35,
-  estimatedSeconds: 80,
+  estimatedCredits: 45,
+  estimatedSeconds: 170,
 };

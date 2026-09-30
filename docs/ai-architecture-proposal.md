@@ -1,6 +1,6 @@
 # AI architecture proposal: from tool prompts to request-driven agents
 
-Status: **proposal, awaiting approval, no code changed for it yet**
+Status: **approved and implemented** (decisions and what was built: see "Implementation" at the end)
 Scope: every generation tool (18 tools) in `lib/tools`, `lib/ai`, the run route, renderers and exports.
 
 ---
@@ -331,6 +331,26 @@ Each phase ships on its own and is judged by the harness. A tool moves to the ne
 3. **Credit cost**: OK to raise estimates ~20–60 % for the critique/revision loop?
 4. **Order**: start with homepage → presentation → business plan → logo (recommended), or a different priority?
 5. **Visibility**: show the strategy card, alternatives and step progress to users (recommended), or keep it internal?
+
+---
+
+## Implementation
+
+Decisions taken (§9): background jobs; questions only when critical (≤3, each with a default, "그냥 진행"); estimates raised 20–60 %; homepage → presentation → business plan → logo → the rest; strategy card, alternatives and live steps shown to members.
+
+| Layer | Where |
+| --- | --- |
+| Runtime: job state on the run row (`generations.output._agent`), stage loop, handoff to a fresh invocation (signed), cancel by row status, settle/refund | `lib/agents/runner.ts`, `store.ts`, `handoff.ts`; `app/api/tools/[toolId]/run` (starts the job with `after()`), `app/api/runs/[runId]/events` (NDJSON, reconnects, stale-run refund), `app/api/runs/[runId]/continue` |
+| Intent + questions | `lib/agents/intent.ts`, `app/api/tools/[toolId]/intent`, `components/agent/question-card.tsx` |
+| Strategy (≥3 approaches, blueprint, rubric) and per-agent libraries | `lib/agents/strategy.ts`, `lib/agents/library.ts` |
+| Critic (separate, never rewrites) and bounded revision keeping the best version | `lib/agents/critic.ts`, `lib/agents/specs/common.ts` |
+| Agents | `lib/agents/specs/`: `generic.ts` (every structured tool), `homepage.ts` (plan → build → critique → revise → assemble), `visual.ts` (logo plans critiqued before drawing; photo shoots follow the strategy), `legacy.ts` (other engines, grant) |
+| Business plan: chapters in the strategy's order, analysis blocks only when needed, financials computed from assumptions (document, charts and .xlsx agree) | `lib/tools/schemas/business-plan.ts`, `lib/tools/report/business-plan.ts`, `lib/tools/financial-model.ts`, `lib/tools/export/xlsx.ts` |
+| Diversity memory (fingerprints, sameness note to the critic, tie-breaks only) | `lib/agents/diversity.ts`, `output.agent.fingerprint` |
+| What members see | `components/agent/strategy-card.tsx`, `agent-timeline.tsx`; `output.agent` (`lib/agents/meta.ts`) |
+| Eval harness | `scripts/eval/golden.json`, `scripts/eval/run.mjs` |
+
+Agents run on Gemini (the platform engine and members' own Gemini keys). A member's own Claude key keeps the one-shot pipeline as a single background stage until that adapter exposes the same steps.
 
 ---
 

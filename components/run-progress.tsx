@@ -111,7 +111,9 @@ const NOTES: Record<string, Step[]> = {
 
 const DEFAULT_NOTES: Step[] = [
   { ko: "검색으로 확인한 내용만 사실로 쓰고, 출처를 함께 남겨요.", en: "Facts come from what the search found, with sources." },
-  { ko: "초안을 편집자가 한 번 더 읽고 뻔한 문장을 구체적으로 고쳐요.", en: "An editor pass rewrites anything generic." },
+  { ko: "여러 접근을 비교해 이 요청에 맞는 전략을 고른 뒤 만들어요.", en: "Several approaches are compared and the one that fits your request is chosen." },
+  { ko: "별도의 검토자가 점수를 매기고, 기준에 못 미치면 다시 써요.", en: "A separate reviewer scores the draft; below the bar, it's rewritten." },
+  { ko: "이 창을 닫아도 작업은 계속돼요. 결과는 보관함에 남아요.", en: "You can close this page — the run continues and lands in your Library." },
   { ko: "완성되면 PDF·Word·PowerPoint로 바로 받을 수 있어요.", en: "When it's done you can download PDF, Word or PowerPoint." },
 ];
 
@@ -122,7 +124,8 @@ function clock(sec: number, en: boolean): string {
   return m ? `${m}분 ${s}초` : `${s}초`;
 }
 
-export function RunProgress({ toolId, toolName, estimatedSeconds }: { toolId: string; toolName: string; estimatedSeconds: number }) {
+/** `live`: the run is reporting its real steps (components/agent/agent-timeline.tsx) — the guessed step list steps aside. */
+export function RunProgress({ toolId, toolName, estimatedSeconds, live = false }: { toolId: string; toolName: string; estimatedSeconds: number; live?: boolean }) {
   const { locale } = useLocale();
   const en = locale === "en";
   const [elapsed, setElapsed] = useState(0);
@@ -179,7 +182,7 @@ export function RunProgress({ toolId, toolName, estimatedSeconds }: { toolId: st
         </span>
       </div>
 
-      <ol className="mt-4 grid gap-1.5 sm:grid-cols-2">
+      {live ? null : <ol className="mt-4 grid gap-1.5 sm:grid-cols-2">
         {steps.map((s, i) => {
           const done = i < current;
           const active = i === current;
@@ -197,7 +200,7 @@ export function RunProgress({ toolId, toolName, estimatedSeconds }: { toolId: st
             </li>
           );
         })}
-      </ol>
+      </ol>}
 
       <p key={note.en} className="page-enter mt-3 border-t border-hairline pt-3 text-xs leading-relaxed text-fg-muted break-keep">
         {en ? note.en : note.ko}

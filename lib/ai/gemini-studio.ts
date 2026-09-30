@@ -481,23 +481,31 @@ async function writePage(system: string, prompt: string, abortSignal: AbortSigna
   return { html, usage };
 }
 
-export async function generateHomepage(
+/** The brief every homepage step reads: the request (with the agent's directives) and today's date. */
+function siteBrief(manifest: ToolManifest, input: Record<string, unknown>, profile: BusinessProfile | null): string {
+  const today = new Date().toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul", year: "numeric", month: "long", day: "numeric" });
+  return `${buildContext(manifest, input, profile)}\n\n오늘 날짜: ${today} (저작권 연도 등에 사용)`;
+}
+
+function siteSystem(manifest: ToolManifest, brief: string): string {
+  return [brief, "", "[Facts and quality rules from the product]", ...buildBaseInstruction(manifest).slice(1)].join("\n");
+}
+
+export type { SitePlan };
+
+/** Art direction: concept, palette, type, hero, sections, scene and shot list (Pro, fast model as backup). */
+export async function planSite(
   manifest: ToolManifest,
   input: Record<string, unknown>,
   profile: BusinessProfile | null,
   abortSignal: AbortSignal | undefined,
-  storage: ImageStorageContext,
-): Promise<{ output: unknown; sources: Source[]; usage: TokenUsage }> {
+): Promise<{ plan: SitePlan; usage: TokenUsage }> {
   // No web research step here: the art director and the Pro model know
   // what good brand sites look like, and the run needs the time budget
   // for the page and its photos.
-  const today = new Date().toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul", year: "numeric", month: "long", day: "numeric" });
-  const brief = `${buildContext(manifest, input, profile)}\n\n오늘 날짜: ${today} (저작권 연도 등에 사용)`;
-  let usage = ZERO;
-  const started = Date.now();
+  const brief = siteBrief(manifest, input, profile);
   // "참고 자료" images and PDFs (an old site's screenshot, a brochure).
   const refParts = await toGeminiParts(referenceParts(input, { documents: true }), abortSignal);
-
   // Design options the art director chooses from — by the request's tone
   // (the [요청 분석] block in the brief), never at random.
   const menu = {
@@ -545,71 +553,77 @@ export async function generateHomepage(
     console.warn("homepage: Pro plan failed, planning with the fast model", (err as Error).message);
     return planJson<SitePlan>(...planArgs, TEXT_MODEL);
   });
-  usage = sumUsage(usage, planUsage);
 
-  const palette = plan.palette;
+  if (!Array.isArray(plan.images) || !Array.isArray(plan.sections)) throw new Error("홈페이지 기획을 만들지 못했습니다");
+  return { plan, usage: planUsage };
+}
 
-  const system = [
-    SITE_BRIEF,
-    "",
-    "[Facts and quality rules from the product]",
-    ...buildBaseInstruction(manifest).slice(1),
-  ].join("\n");
+/** Starts the plan's photos (they're made while the page is written). */
+export function shootSite(plan: SitePlan, storage: ImageStorageContext, abortSignal: AbortSignal | undefined) {
+  return Promise.all(plan.images.map((img) => shoot(img.prompt, img.ratio, img.id, "homepage", storage, abortSignal)));
+}
 
-  // A random class prefix keeps the markup original, which also keeps
-  // Gemini's recitation filter (it blocks output that matches known
-  // code — common for portfolio templates) from emptying the reply.
-  const prefix = `h${Math.random().toString(36).slice(2, 5)}`;
+/** A random class prefix keeps the markup original, which also keeps
+ * Gemini's recitation filter (it blocks output that matches known
+ * code — common for portfolio templates) from emptying the reply. */
+export function sitePrefix(): string {
+  return `h${Math.random().toString(36).slice(2, 5)}`;
+}
+
+/** The designer's first full page for the plan. */
+export async function writeSite(
+  manifest: ToolManifest,
+  input: Record<string, unknown>,
+  profile: BusinessProfile | null,
+  plan: SitePlan,
+  prefix: string,
+  abortSignal: AbortSignal | undefined,
+): Promise<{ html: string; usage: TokenUsage }> {
+  const brief = siteBrief(manifest, input, profile);
+  const refParts = await toGeminiParts(referenceParts(input, { documents: true }), abortSignal);
   const pagePrompt = `[Art director's plan]\n${JSON.stringify(plan, null, 2)}\n\nSite prefix for every class, id and CSS variable: ${prefix}\n\n[Business input and profile]\n${brief}\n\nBuild the complete site now.`;
+  return writePage(siteSystem(manifest, SITE_BRIEF), pagePrompt, abortSignal, refParts);
+}
 
-  // Photos are made while the page is written and reviewed; the page only
-  // needs the placeholder names.
-  const photos = Promise.all(plan.images.map((img) => shoot(img.prompt, img.ratio, img.id, "homepage", storage, abortSignal)));
-  const page = await writePage(system, pagePrompt, abortSignal, refParts);
-  usage = sumUsage(usage, page.usage);
-  const firstMs = Date.now() - started;
+/**
+ * A second full pass over a page: the senior review against the plan and
+ * checklist, plus — from the agent's critic — the specific problems to fix.
+ */
+export async function reviseSite(
+  manifest: ToolManifest,
+  input: Record<string, unknown>,
+  profile: BusinessProfile | null,
+  plan: SitePlan,
+  prefix: string,
+  html: string,
+  critiqueText: string,
+  abortSignal: AbortSignal | undefined,
+): Promise<{ html: string; usage: TokenUsage }> {
+  const brief = siteBrief(manifest, input, profile);
+  return writePage(
+    siteSystem(manifest, REVIEW_BRIEF),
+    `[Art director's plan]\n${JSON.stringify(plan, null, 2)}\n\nSite prefix: ${prefix}\n\n[Business input and profile]\n${brief}${critiqueText ? `\n\n[Critique from the creative director — fix every point; restructure sections if the critique says so]\n${critiqueText}` : ""}\n\n[Draft page to review and improve]\n${html}`,
+    abortSignal,
+  );
+}
 
-  // Senior review: a second pass audits the draft against the plan and
-  // the checklist and returns the improved page. The better of the two
-  // (fewest problems: complete document, every photo, a TypeScript module
-  // that compiles, the 3D scene) is kept. The review is skipped when the
-  // draft took long, and cut off before the route's time limit.
-  const ids = plan.images.map((i) => i.id);
-  const needsScene = plan.experience?.scene !== "none";
-  const candidates: string[] = [page.html];
-  if (Date.now() - started < 140_000) {
-    const cutoff = new AbortController();
-    const onAbort = () => cutoff.abort();
-    abortSignal?.addEventListener("abort", onAbort);
-    const timer = setTimeout(() => cutoff.abort(), Math.max(10_000, 245_000 - (Date.now() - started)));
-    try {
-      const reviewed = await writePage(
-        [REVIEW_BRIEF, "", "[Facts and quality rules from the product]", ...buildBaseInstruction(manifest).slice(1)].join("\n"),
-        `[Art director's plan]\n${JSON.stringify(plan, null, 2)}\n\nSite prefix: ${prefix}\n\n[Business input and profile]\n${brief}\n\n[Draft page to review and improve]\n${page.html}`,
-        cutoff.signal,
-      );
-      usage = sumUsage(usage, reviewed.usage);
-      candidates.unshift(reviewed.html);
-    } catch (err) {
-      if (abortSignal?.aborted) throw err;
-      console.warn("homepage: review skipped", (err as Error).message);
-    } finally {
-      clearTimeout(timer);
-      abortSignal?.removeEventListener("abort", onAbort);
-    }
-  }
-  const scored = candidates.map((h) => ({ h, problems: pageProblems(h, ids, needsScene) }));
-  const best = scored.reduce((a, b) => (b.problems.length < a.problems.length ? b : a));
-  const shots = await photos;
-  shots.forEach((s) => (usage = sumUsage(usage, s.usage)));
-  console.info(`homepage: draft ${Math.round(firstMs / 1000)}s, total ${Math.round((Date.now() - started) / 1000)}s, photos ${shots.filter((s) => s.url).length}/${shots.length}, reviewed ${candidates.length > 1}, problems ${JSON.stringify(scored.map((c) => c.problems))}`);
+export function siteImageIds(plan: SitePlan): string[] {
+  return plan.images.map((i) => i.id);
+}
 
-  let html = best.h;
+export function siteProblems(plan: SitePlan, html: string): string[] {
+  return pageProblems(html, siteImageIds(plan), plan.experience?.scene !== "none");
+}
+
+/** Photos, fonts, price guard, TypeScript compile and import map → the tool's output. */
+export function assembleHomepage(input: Record<string, unknown>, plan: SitePlan, page: string, shots: { url: string | null }[]): Record<string, unknown> {
+  const palette = plan.palette;
+  let html = page;
   // Photos first (the TypeScript may read them from the page's <img>s or
   // name them directly), then fonts, then the TypeScript is compiled and
   // the import map added.
   plan.images.forEach((img, i) => {
-    const url = shots[i].url;
+    const url = shots[i]?.url;
     if (url) html = html.replaceAll(`{{IMG:${img.id}}}`, url);
   });
   html = fillMissingImages(html, palette);
@@ -635,34 +649,79 @@ export async function generateHomepage(
   } catch (err) {
     console.warn("homepage: project export skipped", (err as Error).message);
   }
-
+  const tone = (input._brief as { tone?: unknown } | undefined)?.tone;
   return {
-    output: {
-      html,
-      sections: plan.sections.map((s) => s.title),
-      hero_image_prompt: plan.images[0]?.prompt ?? "",
-      preview_url: "",
-      zip_asset_id: "",
-      design: {
-        concept: plan.concept,
-        mood: plan.mood,
-        palette: Object.values(palette).filter((c) => HEX.test(c)),
-        display_font: plan.display_font,
-        body_font: plan.body_font,
-        hero: plan.hero_archetype,
-        nav: plan.nav_style,
-        signature: plan.signature_elements,
-        big_idea: plan.big_idea,
-        scene: plan.experience?.scene,
-        scene_variant: plan.experience?.scene_variant,
-        tone: typeof (input._brief as { tone?: unknown } | undefined)?.tone === "string" ? (input._brief as { tone: string }).tone : undefined,
-        scroll: plan.experience?.scroll_moments,
-      },
-      ...(project ? { project_files: project } : {}),
+    html,
+    sections: plan.sections.map((s) => s.title),
+    hero_image_prompt: plan.images[0]?.prompt ?? "",
+    preview_url: "",
+    zip_asset_id: "",
+    design: {
+      concept: plan.concept,
+      mood: plan.mood,
+      palette: Object.values(palette).filter((c) => HEX.test(c)),
+      display_font: plan.display_font,
+      body_font: plan.body_font,
+      hero: plan.hero_archetype,
+      nav: plan.nav_style,
+      signature: plan.signature_elements,
+      big_idea: plan.big_idea,
+      scene: plan.experience?.scene,
+      scene_variant: plan.experience?.scene_variant,
+      tone: typeof tone === "string" ? tone : undefined,
+      scroll: plan.experience?.scroll_moments,
     },
-    sources: [],
-    usage,
+    ...(project ? { project_files: project } : {}),
   };
+}
+
+/** The one-shot pipeline (other engines' fallback path and the legacy runner): plan → page + photos → review → assemble. */
+export async function generateHomepage(
+  manifest: ToolManifest,
+  input: Record<string, unknown>,
+  profile: BusinessProfile | null,
+  abortSignal: AbortSignal | undefined,
+  storage: ImageStorageContext,
+): Promise<{ output: unknown; sources: Source[]; usage: TokenUsage }> {
+  let usage = ZERO;
+  const started = Date.now();
+  const { plan, usage: planUsage } = await planSite(manifest, input, profile, abortSignal);
+  usage = sumUsage(usage, planUsage);
+  const prefix = sitePrefix();
+  const photos = shootSite(plan, storage, abortSignal);
+  const page = await writeSite(manifest, input, profile, plan, prefix, abortSignal);
+  usage = sumUsage(usage, page.usage);
+  const firstMs = Date.now() - started;
+
+  // Senior review: a second pass audits the draft and returns the
+  // improved page. The better of the two (fewest problems) is kept. The
+  // review is skipped when the draft took long, and cut off before the
+  // route's time limit.
+  const candidates: string[] = [page.html];
+  if (Date.now() - started < 140_000) {
+    const cutoff = new AbortController();
+    const onAbort = () => cutoff.abort();
+    abortSignal?.addEventListener("abort", onAbort);
+    const timer = setTimeout(() => cutoff.abort(), Math.max(10_000, 245_000 - (Date.now() - started)));
+    try {
+      const reviewed = await reviseSite(manifest, input, profile, plan, prefix, page.html, "", cutoff.signal);
+      usage = sumUsage(usage, reviewed.usage);
+      candidates.unshift(reviewed.html);
+    } catch (err) {
+      if (abortSignal?.aborted) throw err;
+      console.warn("homepage: review skipped", (err as Error).message);
+    } finally {
+      clearTimeout(timer);
+      abortSignal?.removeEventListener("abort", onAbort);
+    }
+  }
+  const scored = candidates.map((h) => ({ h, problems: siteProblems(plan, h) }));
+  const best = scored.reduce((a, b) => (b.problems.length < a.problems.length ? b : a));
+  const shots = await photos;
+  shots.forEach((s) => (usage = sumUsage(usage, s.usage)));
+  console.info(`homepage: draft ${Math.round(firstMs / 1000)}s, total ${Math.round((Date.now() - started) / 1000)}s, photos ${shots.filter((s) => s.url).length}/${shots.length}, reviewed ${candidates.length > 1}, problems ${JSON.stringify(scored.map((c) => c.problems))}`);
+
+  return { output: assembleHomepage(input, plan, best.h, shots), sources: [], usage };
 }
 
 // ------------------------------------------------------------ presentation

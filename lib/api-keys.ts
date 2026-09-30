@@ -70,17 +70,27 @@ export async function getApiKeyStatus(): Promise<ApiKeyStatus> {
   return { enabled, connected, providers };
 }
 
-/** Decrypted keys for the current user, in priority order. Used by the run route only. */
+/** Decrypted keys for the current user, in priority order. Used by the run route. */
 export async function getUserApiKeys(provider: ApiKeyProvider, options?: { excludeBroken?: boolean }): Promise<string[]> {
-  const secret = env.API_KEY_ENCRYPTION_SECRET;
-  if (!secret) return [];
   const user = await getCurrentUser();
   if (!user) return [];
+  return getUserApiKeysFor(user.id, provider, options);
+}
+
+/**
+ * The same keys for a user id the caller already authenticated — the agent
+ * runtime's background stages and continuations (lib/agents/runner.ts)
+ * have no session cookie; their user id comes from the run row they were
+ * authorized to work on, never from request input.
+ */
+export async function getUserApiKeysFor(userId: string, provider: ApiKeyProvider, options?: { excludeBroken?: boolean }): Promise<string[]> {
+  const secret = env.API_KEY_ENCRYPTION_SECRET;
+  if (!secret) return [];
   const admin = createAdminClient();
   const { data } = await admin
     .from("user_api_keys")
     .select("ciphertext, broken")
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .eq("provider", provider)
     .order("priority", { ascending: true });
 

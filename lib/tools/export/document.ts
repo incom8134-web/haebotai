@@ -145,7 +145,7 @@ export function reportBlocks(report: Report): { blocks: Block[]; sources: Source
 }
 
 // Machine fields that mean nothing in a document.
-export const SKIP_KEYS = new Set(["asset_id", "seed", "zip_asset_id", "preview_url", "svg", "html", "negative_prompt", "refined_prompt", "data_source", "model_seed", "hero_image_prompt", "accent_color", "design", "creative_direction", "request_brief"]);
+export const SKIP_KEYS = new Set(["asset_id", "seed", "zip_asset_id", "preview_url", "svg", "html", "negative_prompt", "refined_prompt", "data_source", "model_seed", "hero_image_prompt", "accent_color", "design", "creative_direction", "request_brief", "agent", "financial_assumptions", "plan_type"]);
 // A string this short with no line break reads best as "label: value".
 const INLINE_MAX = 80;
 

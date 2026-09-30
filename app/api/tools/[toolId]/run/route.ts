@@ -1,23 +1,22 @@
-import type { NextRequest } from "next/server";
+import { after, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { hasCurrentConsent } from "@/lib/consent";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getTool } from "@/lib/tools/registry";
-import type { Source } from "@/lib/tools/registry/shared";
 import { buildInputSchema } from "@/lib/tools/runner";
 import { buildReference, referenceForStorage } from "@/lib/tools/reference-server";
-import { checkGrounding } from "@/lib/tools/grounding";
-import { checkToolPolicy, checkOutputSafety } from "@/lib/tools/policy";
-import { generateOutput, runWithApiKey } from "@/lib/tools/generate";
+import { checkToolPolicy } from "@/lib/tools/policy";
 import { ownKeyRequiredError, resolveCost, resolveRequestedProvider } from "@/lib/ai/resolve-provider";
-import { providerErrorMessage } from "@/lib/ai/provider-errors";
-import type { TokenUsage } from "@/lib/ai/types";
 import { getUserApiKeys } from "@/lib/api-keys";
 import { getMembership } from "@/lib/membership";
 import { getBusinessProfile } from "@/lib/profile";
-import { reserveCredits, releaseUnattachedReservation, settleGenerationCredits } from "@/lib/credits";
+import { reserveCredits, releaseUnattachedReservation } from "@/lib/credits";
 import { runLimiter, checkRateLimit } from "@/lib/rate-limit";
 import { checkSpend } from "@/lib/spend-guard";
+import { runAgent } from "@/lib/agents/runner";
+import { agentFor } from "@/lib/agents/specs";
+import { parseAgentRequest } from "@/lib/agents/request";
+import type { AgentRunState } from "@/lib/agents/types";
 
 // generations writes (insert/update) go through the service-role client
 // (supabase/migrations/0011 revoked insert/update from authenticated) —
@@ -25,23 +24,19 @@ import { checkSpend } from "@/lib/spend-guard";
 // bypasses RLS entirely; that ownership check no longer happens for free.
 const admin = createAdminClient();
 
-// Research + draft + editor pass (+ images for some tools) can run past
-// a minute; allow up to the Vercel plan maximum.
+// The first stages of the run happen in this invocation (after the
+// response); allow up to the Vercel plan maximum.
 export const maxDuration = 300;
 
-// HAEBOT_A_TOOLS_SPEC.md §3.2 / T2 — one code path for every tool:
-// validate → reserve credits → persist the run row → stream → settle.
-// The run row is written before generation starts, so a dropped
-// connection still leaves a real result in history (§Part 6, T2).
-//
-// Real generation (lib/tools/generate.ts) runs for every tool, including
-// `image`/`brand-model` — those upload to the `exports` storage bucket.
-
-function encodeEvent(event: unknown) {
-  return new TextEncoder().encode(JSON.stringify(event) + "\n");
-}
+// One code path for every tool: validate → reserve credits → persist the
+// run row with its starting agent state → return the run id. The work
+// itself is a background job (lib/agents/runner.ts, started with after()
+// below, continued across invocations when it needs more time); the page
+// follows it through /api/runs/[runId]/events, and a closed tab doesn't
+// stop it — the result lands in history.
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ toolId: string }> }) {
+  const startedAt = Date.now();
   const { toolId } = await params;
   const manifest = getTool(toolId);
   if (!manifest) {
@@ -97,25 +92,23 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const { provider } = providerResolution;
 
   // Pasted text and uploaded files from the "참고 자료" panel: validated
-  // and turned into text/parts here; the run row keeps only the text and
-  // file names, generation gets the whole bundle as input._reference.
-  // Reference files were uploaded straight to the user's own folder of the
-  // "inputs" bucket; read them with the user's session (storage RLS) and
-  // delete them once read.
+  // here; the run row keeps only the text and file names. Reference files
+  // were uploaded straight to the user's own folder of the "inputs"
+  // bucket (read here with the user's session, storage RLS); the run
+  // reads them again in the background and deletes them when it ends.
   const reference = await buildReference(manifest.id, rawReference, {
     prefix: `${user.id}/`,
     download: async (path) => {
       const { data } = await supabase.storage.from("inputs").download(path);
       return data ? Buffer.from(await data.arrayBuffer()) : null;
     },
-    remove: async (paths) => {
-      await supabase.storage.from("inputs").remove(paths);
-    },
+    // Kept until the run ends: every stage invocation reads them again
+    // (lib/agents/runner.ts deletes them when the run stops).
+    remove: async () => {},
   });
   if (!reference.ok) {
     return Response.json({ error: reference.error }, { status: 400 });
   }
-  const generationInput = reference.bundle ? { ...parsedInput.data, _reference: reference.bundle } : parsedInput.data;
   const storedInput = reference.bundle ? { ...parsedInput.data, _reference: referenceForStorage(reference.bundle) } : parsedInput.data;
 
   const policy = checkToolPolicy(manifest.id, parsedInput.data);
@@ -175,6 +168,42 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     );
   }
 
+  // Profile fields the member removed from this run (the chips above the form).
+  const excluded = new Set(Array.isArray(excludeProfile) ? excludeProfile.filter((k): k is string => typeof k === "string").slice(0, 32) : []);
+  const fullProfile = await getBusinessProfile();
+  const profile = fullProfile && excluded.size ? (Object.fromEntries(Object.entries(fullProfile).filter(([k]) => !excluded.has(k))) as typeof fullProfile) : fullProfile;
+
+  // The run's starting state (lib/agents/types.ts): the understanding the
+  // member already confirmed on the page (intent + answers), if any.
+  const agent = parseAgentRequest(body);
+  const now = new Date().toISOString();
+  const state: AgentRunState = {
+    v: 1,
+    toolId: manifest.id,
+    provider,
+    userId: user.id,
+    runId: "",
+    origin: request.nextUrl.origin,
+    ownKey: hasUsableKey,
+    referenceRaw: reference.bundle ? rawReference : null,
+    profile,
+    intent: agent.intent,
+    answers: agent.answers,
+    strategyOverride: agent.strategyOverride,
+    strategy: null,
+    stage: agentFor(manifest, provider).firstStage,
+    stagesDone: [],
+    retries: {},
+    work: {},
+    usage: { inputTokens: 0, outputTokens: 0 },
+    sources: [],
+    events: [],
+    invocations: 0,
+    startedAt: now,
+    heartbeatAt: now,
+    creditsReserved: cost,
+  };
+
   const { data: run, error: insertError } = await admin
     .from("generations")
     .insert({
@@ -186,6 +215,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       credits_reserved: cost,
       chained_from: chainedFrom,
       provider,
+      output: { _agent: state },
     })
     .select("id")
     .single();
@@ -198,171 +228,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }
 
   const runId: string = run.id;
-  // Profile fields the member removed from this run (the chips above the form).
-  const excluded = new Set(Array.isArray(excludeProfile) ? excludeProfile.filter((k): k is string => typeof k === "string").slice(0, 32) : []);
-  const fullProfile = await getBusinessProfile();
-  const profile = fullProfile && excluded.size ? (Object.fromEntries(Object.entries(fullProfile).filter(([k]) => !excluded.has(k))) as typeof fullProfile) : fullProfile;
-
-  // Local cancel: a client disconnect (request.signal, or the response
-  // stream being cancelled) aborts the model call where the runtime
-  // reports it. Vercel doesn't reliably report either, so the
-  // authoritative cancel is the run row itself — see
-  // app/api/runs/[runId]/cancel/route.ts and the conditional `done`
-  // update at the end.
-  const abort = new AbortController();
-  request.signal.addEventListener("abort", () => abort.abort());
-  // The platform kills the function at maxDuration without running any
-  // cleanup, which would leave the run "streaming" and its credits
-  // reserved. Stop a little earlier ourselves so the run fails cleanly
-  // and the reservation is refunded.
-  let timedOut = false;
-  const watchdog = setTimeout(() => {
-    timedOut = true;
-    abort.abort();
-  }, (maxDuration - 15) * 1000);
-  const isCancelled = () => abort.signal.aborted && !timedOut;
-
-  // Only a still-running row is failed; a row the cancel endpoint already
-  // marked cancelled (and refunded) keeps that status.
-  const fail = async (status: string, error: string) => {
-    await admin.from("generations").update({ status, error }).eq("id", runId).eq("user_id", user.id).in("status", ["pending", "streaming"]);
-    await settleGenerationCredits(runId, 0); // no output produced — refund the full reservation
-  };
-
-  const stream = new ReadableStream({
-    cancel() {
-      clearTimeout(watchdog);
-      abort.abort();
-    },
-    async start(controller) {
-      // After a client disconnect the stream is already closed — writing
-      // to it throws, and there's nobody left to read it anyway.
-      const send = (event: unknown) => {
-        try {
-          controller.enqueue(encodeEvent(event));
-        } catch {
-          /* client gone */
-        }
-      };
-      const close = () => {
-        clearTimeout(watchdog);
-        try {
-          controller.close();
-        } catch {
-          /* already closed */
-        }
-      };
-
-      await admin.from("generations").update({ status: "streaming" }).eq("id", runId).eq("user_id", user.id).eq("status", "pending");
-      send({ type: "status", status: "streaming", runId });
-
-      let output: unknown;
-      let sources: Source[];
-      let usage: TokenUsage;
-      try {
-        const result = await runWithApiKey(provider, user.id, userApiKeys, () =>
-          generateOutput(
-            manifest,
-            generationInput,
-            profile,
-            abort.signal,
-            { supabase, userId: user.id, runId },
-            provider,
-          ),
-        );
-        output = result.output;
-        sources = result.sources;
-        usage = result.usage;
-      } catch (err) {
-        if (timedOut) {
-          const message = "시간이 너무 오래 걸려 중단했습니다. 크레딧은 돌려드렸어요. 분량(슬라이드 수 등)을 줄이거나 잠시 후 다시 시도해 주세요.";
-          await fail("error", message);
-          send({ type: "error", error: message });
-          close();
-          return;
-        }
-        if (isCancelled()) {
-          await fail("cancelled", "사용자가 취소했습니다");
-          close();
-          return;
-        }
-        const message = providerErrorMessage(err) ?? (err instanceof Error ? err.message : "생성 중 오류가 발생했습니다");
-        await fail("error", message);
-        send({ type: "error", error: message });
-        close();
-        return;
-      }
-
-      if (isCancelled()) {
-        await fail("cancelled", "사용자가 취소했습니다");
-        close();
-        return;
-      }
-
-      const guard = checkGrounding(manifest, sources);
-      if (!guard.ok) {
-        await fail("error", guard.reason!);
-        send({ type: "error", error: guard.reason });
-        close();
-        return;
-      }
-
-      const outputSafety = checkOutputSafety(manifest.id, output, parsedInput.data);
-      if (!outputSafety.ok) {
-        await fail("error", outputSafety.reason!);
-        send({ type: "error", error: outputSafety.reason });
-        close();
-        return;
-      }
-      // logo: sanitizeSvg may have stripped unrecognized-but-harmless
-      // attributes — store and return that cleaned version, not the
-      // model's raw one (the cosmetic typing preview above already
-      // streamed the raw text, which is fine; nothing renders it as an
-      // image until this point).
-      if (outputSafety.output !== undefined) output = outputSafety.output;
-
-      const creditsUsed = cost;
-      // Finish only a row that is still streaming: if the cancel endpoint
-      // got there first, it already marked the row cancelled and refunded
-      // the reservation, so there is nothing to charge or return.
-      const { data: finished } = await admin
-        .from("generations")
-        .update({
-          status: "done",
-          output,
-          sources,
-          input_tokens: usage.inputTokens,
-          output_tokens: usage.outputTokens,
-        })
-        .eq("id", runId)
-        .eq("user_id", user.id)
-        .eq("status", "streaming")
-        .select("id");
-      if (!finished?.length) {
-        // Not "streaming" any more. Cancelled: the cancel route already
-        // refunded. Anything else (the pending→streaming update never
-        // applied): fail it and refund, and always tell the client — a
-        // silent close left its spinner running.
-        const { data: row } = await admin.from("generations").select("status").eq("id", runId).maybeSingle();
-        if (row?.status === "cancelled") {
-          send({ type: "cancelled" });
-        } else {
-          const { data: failed } = await admin.from("generations").update({ status: "error", error: "결과를 저장하지 못했습니다" }).eq("id", runId).in("status", ["pending", "streaming"]).select("id");
-          if (failed?.length) await settleGenerationCredits(runId, 0);
-          send({ type: "error", error: "결과를 저장하지 못했습니다. 다시 실행해 주세요. 크레딧은 돌려드렸어요." });
-        }
-        close();
-        return;
-      }
-      // Settles the ledger and stamps credits_used/credits_settled on the
-      // run row itself (idempotent — see settle_generation_credits in
-      // supabase/migrations/0011).
-      await settleGenerationCredits(runId, creditsUsed);
-
-      send({ type: "done", output, sources, creditsUsed, runId, provider });
-      close();
-    },
-  });
-
-  return new Response(stream, { headers: { "Content-Type": "application/x-ndjson" } });
+  // Work runs as a background job (lib/agents/runner.ts): this request
+  // records it and returns; the page follows /api/runs/[runId]/events.
+  after(() => runAgent(runId, startedAt));
+  return Response.json({ runId, provider });
 }
