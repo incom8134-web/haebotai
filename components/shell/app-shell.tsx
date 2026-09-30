@@ -1,5 +1,7 @@
 "use client";
 
+import { toolSlug } from "@/lib/tools/catalog";
+import { CATEGORY_ORDER as CATEGORY_ORDER_ALL } from "@/lib/tools/catalog";
 import { BrandMark } from "@/components/brand-mark";
 import { useMemo, useState, useSyncExternalStore, useTransition } from "react";
 import Link from "next/link";
@@ -46,7 +48,7 @@ const ITEMS: Item[] = [
 ];
 
 const MOBILE = ["/studio", "/tools", "/library", "/help", "/account"];
-const CATEGORY_ORDER: CategoryId[] = ["ideas", "content", "design", "sales", "docs"];
+const CATEGORY_ORDER: CategoryId[] = CATEGORY_ORDER_ALL;
 
 function useHelpBadge(answeredTickets: number) {
   const seen = useLocalList("haebot-help-seen");
@@ -201,7 +203,7 @@ function AppShell({ user, balance, plan, answeredTickets, children }: ShellProps
           id: tool.id,
           label: `${locale === "en" ? tool.name_en : tool.name_ko} — ${tool.summary}`,
           icon: tool.icon,
-          onSelect: () => router.push(`/tools/${tool.id}`),
+          onSelect: () => router.push(`/tools/${toolSlug(tool.id)}`),
         })),
       })),
       {

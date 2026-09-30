@@ -6,9 +6,9 @@ import type { ToolManifest } from "../types";
 
 export const keyword: ToolManifest = {
   id: "keyword",
-  category: "content",
-  name_ko: "해봇 키워드 전략",
-  name_en: "Keyword Strategy",
+  category: "campaign",
+  name_ko: "키워드 조사",
+  name_en: "Keyword research",
   summary: "메가·미드·마이크로 키워드 티어와 콘텐츠 공백을 찾습니다.",
   icon: Hash,
   inputs: [

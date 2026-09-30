@@ -6,9 +6,9 @@ import type { ToolManifest } from "../types";
 
 export const proposal: ToolManifest = {
   id: "proposal",
-  category: "docs",
-  name_ko: "해봇 제안서",
-  name_en: "Proposal Writer",
+  category: "operate",
+  name_ko: "제안서 포지",
+  name_en: "Proposal Forge",
   summary: "제안 대상과 내용으로 제안서 초안을 작성합니다.",
   icon: FileSignature,
   inputs: [

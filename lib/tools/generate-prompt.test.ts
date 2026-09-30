@@ -19,7 +19,7 @@ import type { ToolManifest, BusinessProfile } from "./types.ts";
 function fakeManifest(overrides: Partial<ToolManifest> = {}): ToolManifest {
   return {
     id: "test-tool",
-    category: "ideas",
+    category: "discover",
     name_ko: "테스트 도구",
     name_en: "Test Tool",
     summary: "테스트용 도구입니다.",

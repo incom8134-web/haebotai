@@ -5,9 +5,9 @@ import type { ToolManifest } from "../types";
 
 export const blog: ToolManifest = {
   id: "blog",
-  category: "content",
-  name_ko: "해봇 블로그 원고",
-  name_en: "Blog Draft",
+  category: "campaign",
+  name_ko: "SEO 원고 컴포저",
+  name_en: "SEO Content Composer",
   summary: "플랫폼에 맞는 블로그 원고를 근거와 함께 작성합니다.",
   icon: Newspaper,
   inputs: [
