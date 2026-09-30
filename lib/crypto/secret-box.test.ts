@@ -23,6 +23,10 @@ test("rejects tampering and wrong secrets", () => {
 test("refuses short secrets and validates key shape", () => {
   assert.throws(() => seal("x", "short"));
   assert.ok(looksLikeGoogleKey("AIza" + "a".repeat(35)));
+  assert.ok(looksLikeGoogleKey("AQ.Ab8RN6" + "x".repeat(44)), "the current AI Studio format");
+  assert.ok(looksLikeGoogleKey("  AQ.Ab8RN6" + "x".repeat(44) + "\n"), "stray whitespace is ignored");
+  assert.ok(!looksLikeGoogleKey("AQ."), "prefix alone");
+  assert.ok(!looksLikeGoogleKey("AQ.abc def" + "x".repeat(30)), "no spaces inside");
   assert.ok(!looksLikeGoogleKey("sk-not-a-google-key"));
   assert.ok(looksLikeAnthropicKey("sk-ant-" + "a".repeat(20)));
   assert.ok(!looksLikeAnthropicKey("sk-" + "a".repeat(20)));

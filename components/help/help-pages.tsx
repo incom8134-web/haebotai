@@ -73,14 +73,14 @@ export function HelpHome() {
 const STEPS = [
   { title: { ko: "Google AI Studio 열기", en: "Open Google AI Studio" }, body: { ko: "Google 계정으로 로그인합니다. 처음이면 약관 동의 화면이 한 번 나와요.", en: "Sign in with a Google account. First time, you'll accept the terms once." } },
   { title: { ko: "키 만들기", en: "Create a key" }, body: { ko: "왼쪽 메뉴 'Get API key' → 'Create API key'. 프로젝트를 물으면 기본 프로젝트를 고르면 됩니다.", en: "Left menu \"Get API key\" → \"Create API key\". If asked for a project, the default one is fine." } },
-  { title: { ko: "키 복사", en: "Copy the key" }, body: { ko: "'AIza'로 시작하는 39자 문자열이 키예요. 다른 사람에게 보여 주지 마세요.", en: "The key is a 39-character string starting with \"AIza\". Don't share it." } },
+  { title: { ko: "키 복사", en: "Copy the key" }, body: { ko: "'AQ.'로 시작하는 문자열이 키예요(예전에 만든 키는 'AIza'로 시작). 다른 사람에게 보여 주지 마세요.", en: "The key is a string starting with \"AQ.\" (older keys start with \"AIza\"). Don't share it." } },
   { title: { ko: "해봇에 등록", en: "Add it to Haebot" }, body: { ko: "계정 → 내 API 키에 붙여 넣고 '확인 후 저장'. Google에 실제로 확인한 뒤에만 저장돼요.", en: "Account → My API key, paste, \"Verify & save\". It's only saved after Google confirms it works." } },
   { title: { ko: "한도 설정 (권장)", en: "Set a limit (recommended)" }, body: { ko: "요금은 내 Google 계정에 청구돼요. Google Cloud 결제 화면에서 예산 알림을 걸어 두세요.", en: "Usage bills to your Google account. Add a budget alert in Google Cloud billing." } },
 ];
 
 const TROUBLE = [
   { q: { ko: "'Google이 이 키를 거절했어요'가 나와요", en: "\"Google rejected this key\"" }, a: { ko: "키를 삭제했거나 복사할 때 앞뒤가 잘렸을 수 있어요. 새 키를 만들어 다시 붙여 넣으세요. 회사 계정이라면 관리자가 Gemini API를 막아 뒀을 수 있어요.", en: "The key may be deleted or cut off when copying. Create a new one and paste again. On a work account, an admin may have blocked the Gemini API." } },
-  { q: { ko: "'형식이 아니에요'가 나와요", en: "\"Not a valid format\"" }, a: { ko: "OpenAI(sk-…) 등 다른 서비스 키가 아니라 Google AI Studio 키('AIza…')여야 해요. 앞뒤 공백도 확인하세요.", en: "It must be a Google AI Studio key (\"AIza…\"), not another provider's (e.g. sk-…). Check for stray spaces." } },
+  { q: { ko: "'형식이 아니에요'가 나와요", en: "\"Not a valid format\"" }, a: { ko: "OpenAI(sk-…) 등 다른 서비스 키가 아니라 Google AI Studio 키('AQ.…' 또는 'AIza…')여야 해요. 키 전체를 빠짐없이 복사했는지 확인하세요.", en: "It must be a Google AI Studio key (\"AQ.…\" or \"AIza…\"), not another provider's (e.g. sk-…). Make sure you copied the whole key." } },
   { q: { ko: "등록했는데 실행이 실패해요", en: "Runs fail after adding a key" }, a: { ko: "내 Google 계정의 무료 한도를 다 썼을 수 있어요. 계정 → 내 API 키에서 '확인'을 눌러 보고, 안 되면 키를 삭제하면 다시 크레딧으로 실행돼요.", en: "Your Google free quota may be used up. Press \"Test\" in Account → My API key; if it fails, delete the key and runs go back to credits." } },
   { q: { ko: "키를 바꾸고 싶어요", en: "I want to change keys" }, a: { ko: "새 키를 붙여 넣으면 기존 키를 덮어써요. 예전 키는 Google AI Studio에서 삭제하세요.", en: "Pasting a new key replaces the old one. Delete the old key in Google AI Studio." } },
 ];
@@ -113,12 +113,12 @@ export function ApiGuide() {
           <section className="glass rounded-[24px] p-6">
             <h2 className="text-lg font-semibold">{L({ ko: "키는 이렇게 생겼어요", en: "What a key looks like" })}</h2>
             <div className="mt-3 flex items-center gap-2 rounded-xl border border-hairline bg-bg/40 p-3 font-mono text-sm">
-              <span className="min-w-0 flex-1 truncate">AIzaSyD•••••••••••••••••••••••••••Qx8</span>
-              <button type="button" onClick={async () => { try { await navigator.clipboard.writeText("AIza"); setCopied(true); setTimeout(() => setCopied(false), 1400); } catch { /* ignore */ } }} className="grid size-8 place-items-center rounded-lg text-fg-subtle hover:text-fg" aria-label={L({ ko: "접두어 복사", en: "Copy prefix" })}>
+              <span className="min-w-0 flex-1 truncate">AQ.Ab8RN6•••••••••••••••••••••••••••••••••Qx8</span>
+              <button type="button" onClick={async () => { try { await navigator.clipboard.writeText("AQ."); setCopied(true); setTimeout(() => setCopied(false), 1400); } catch { /* ignore */ } }} className="grid size-8 place-items-center rounded-lg text-fg-subtle hover:text-fg" aria-label={L({ ko: "접두어 복사", en: "Copy prefix" })}>
                 {copied ? <Check size={14} className="text-studio-success" aria-hidden /> : <Copy size={14} aria-hidden />}
               </button>
             </div>
-            <p className="mt-2 text-xs text-fg-subtle">{L({ ko: "'AIza'로 시작, 총 39자", en: "Starts with \"AIza\", 39 characters" })}</p>
+            <p className="mt-2 text-xs text-fg-subtle">{L({ ko: "'AQ.'로 시작 (예전 키는 'AIza…', 39자)", en: "Starts with \"AQ.\" (older keys: \"AIza…\", 39 characters)" })}</p>
           </section>
           <section className="glass rounded-[24px] p-6">
             <h2 className="flex items-center gap-2 text-lg font-semibold"><ShieldCheck size={18} className="text-studio-success" aria-hidden /> {L({ ko: "보안", en: "Security" })}</h2>
