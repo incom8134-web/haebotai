@@ -50,7 +50,7 @@ const KEY_MSG: Record<string, { ko: string; en: string }> = {
 };
 
 const PROVIDER_INFO: Record<ApiKeyProvider, { name: string; placeholder: string }> = {
-  google: { name: "Google Gemini", placeholder: "AIza…" },
+  google: { name: "Google Gemini", placeholder: "AQ.… / AIza…" },
   anthropic: { name: "Anthropic (Claude)", placeholder: "sk-ant-…" },
   openai: { name: "ChatGPT (OpenAI)", placeholder: "sk-…" },
 };
