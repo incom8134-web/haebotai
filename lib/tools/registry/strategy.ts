@@ -19,7 +19,7 @@ export const strategy: ToolManifest = {
     { kind: "textarea", id: "customer_voice", label: "고객이 실제로 한 말", rows: 2, max: 600 },
   ],
   usesProfile: ["brand_name", "industry", "business_stage", "target_customer", "region", "tone", "budget_band"],
-  acceptsChainFrom: ["trend", "idea-radar", "money"],
+  acceptsChainFrom: ["brand-dna", "trend", "idea-radar", "money"],
   outputRenderer: "document",
   grounding: { requireSources: true, webSearch: true, estimateBadge: true },
   model: "gemini-3.1-pro-preview",

@@ -166,7 +166,7 @@ export const CATALOG: CatalogTool[] = [
     promise: b("성격·목소리·색·약속까지, 모든 결과물이 따를 브랜드의 기준", "Personality, voice, colour and promise every output will follow"),
     outputs: [b("브랜드 성격과 가치", "Personality and values"), b("포지셔닝과 메시지 원칙", "Positioning and messaging rules"), b("시각 방향 보드", "Visual direction board")],
     icon: Dna,
-    engine: null,
+    engine: "brand-dna",
     next: ["logo-lab", "web-builder", "campaign-planner"],
   },
   {

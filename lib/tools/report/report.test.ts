@@ -283,6 +283,29 @@ const SAMPLES: Record<string, { output: Record<string, unknown>; input?: Record<
       out_of_scope: ["리뷰"],
     },
   },
+  "brand-dna": {
+    input: { brand_name: "온샘소아과" },
+    output: {
+      summary: "요약",
+      essence: { one_line: "서두르지 않는 동네 소아과", purpose: "안심", promise: "충분한 설명" },
+      archetype: { name: "돌보는 사람", why: "부모의 불안" },
+      dimensions: { warmth: 9, expertise: 7, boldness: 2, playfulness: 3, premium: 4 },
+      traits: [{ trait: "다정함", means: "이름을 부른다", not: "과한 애교" }],
+      values: [{ value: "설명", in_practice: "5분 더" }],
+      positioning: { statement: "저녁에도 설명하는 소아과", for_whom: "맞벌이", category: "소아과", difference: "저녁 진료", reasons_to_believe: ["저녁 9시까지"] },
+      voice: { tone_words: ["다정한", "차분한", "명확한"], do: ["쉬운 말"], dont: ["전문용어 남발"], samples: [{ context: "공지", line: "오늘은 9시까지 봐요" }] },
+      palette: [
+        { name: "새벽 하늘", hex: "#3B6E8F", role: "primary", usage: "간판" },
+        { name: "크림", hex: "fff8ee", role: "background", usage: "배경" },
+        { name: "살구", hex: "#F2A477", role: "accent", usage: "버튼" },
+        { name: "잘못된 값", hex: "blue", role: "neutral", usage: "" },
+      ],
+      typography: { heading: { family: "Gowun Dodum", weight: "400", why: "둥근" }, body: { family: "Noto Sans KR", weight: "400", why: "가독성" } },
+      visual: { mood_words: ["포근한"], imagery: "자연광", shapes: "둥근 모서리", avoid: ["차가운 파랑"] },
+      messaging: { taglines: ["a", "b", "c"], elevator_pitch: "소개", key_messages: ["m1", "m2"] },
+      touchpoints: [{ touchpoint: "간판", apply: "크림 바탕" }],
+    },
+  },
 };
 
 function charts(report: Report) {

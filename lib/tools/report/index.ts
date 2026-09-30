@@ -1,3 +1,4 @@
+import { brandDnaReport } from "./brand-dna.ts";
 import { businessPlanReport } from "./business-plan.ts";
 import { calendarReport } from "./calendar.ts";
 import { grantReport } from "./grant.ts";
@@ -30,6 +31,7 @@ const BUILDERS: Record<string, (o: Record<string, unknown>, input: Record<string
   "offer-architect": offerArchitectReport,
   "market-gap": marketGapReport,
   "mvp-blueprint": mvpBlueprintReport,
+  "brand-dna": brandDnaReport,
 };
 
 export const hasReport = (toolId: string) => toolId in BUILDERS;

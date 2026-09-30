@@ -42,7 +42,7 @@ export const logo: ToolManifest = {
     },
   ],
   usesProfile: ["brand_name", "industry", "target_customer", "tone", "brand_colors"],
-  acceptsChainFrom: [],
+  acceptsChainFrom: ["brand-dna"],
   outputRenderer: "images",
   grounding: { requireSources: false, webSearch: false, estimateBadge: false },
   model: "gemini-3-pro-image",

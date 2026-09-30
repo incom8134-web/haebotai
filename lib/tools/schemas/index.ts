@@ -22,6 +22,7 @@ import revenueMapperSchema from "./revenue-mapper";
 import offerArchitectSchema from "./offer-architect";
 import marketGapSchema from "./market-gap";
 import mvpBlueprintSchema from "./mvp-blueprint";
+import brandDnaSchema from "./brand-dna";
 
 // Each tool's output schema (zod), kept out of lib/tools/registry so the
 // registry — imported by the app shell, Studio, tool pages and the ⌘K
@@ -33,6 +34,7 @@ const OUTPUT_SCHEMAS: Record<string, z.ZodType> = {
   "offer-architect": offerArchitectSchema,
   "market-gap": marketGapSchema,
   "mvp-blueprint": mvpBlueprintSchema,
+  "brand-dna": brandDnaSchema,
   "blog": blogSchema,
   "brand-model": brandModelSchema,
   "business-plan": businessPlanSchema,

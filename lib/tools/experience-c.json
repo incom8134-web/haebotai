@@ -729,5 +729,181 @@
         }
       ]
     }
+  },
+  "brand-dna": {
+    "layout": "steps",
+    "visual": "compass",
+    "hero": {
+      "title": {
+        "ko": "브랜드의 기준을 한 장에",
+        "en": "Your brand's rules, on one page"
+      },
+      "story": {
+        "ko": "무엇을 누구에게 파는지와 원하는 성격만 알려 주세요. 색, 서체, 말투, 약속까지 모든 결과물이 따를 기준을 만들어 드려요.",
+        "en": "Tell us what you sell, to whom, and the personality you want. We'll set the colours, type, voice and promise everything else follows."
+      }
+    },
+    "sections": [
+      {
+        "title": {
+          "ko": "무엇을 누구에게",
+          "en": "What and for whom"
+        },
+        "hint": {
+          "ko": "브랜드의 출발점",
+          "en": "Where the brand starts"
+        },
+        "fields": [
+          "brand_name",
+          "offering",
+          "target_customer"
+        ]
+      },
+      {
+        "title": {
+          "ko": "어떤 성격인가요",
+          "en": "Personality"
+        },
+        "hint": {
+          "ko": "하나만 고르세요",
+          "en": "Pick one"
+        },
+        "fields": [
+          "personality",
+          "values",
+          "avoid"
+        ]
+      },
+      {
+        "title": {
+          "ko": "눈에 보이는 모습",
+          "en": "How it looks"
+        },
+        "hint": {
+          "ko": "끌리는 스타일과 이미 쓰는 색",
+          "en": "Styles you like and colours you use"
+        },
+        "fields": [
+          "styles",
+          "existing_colors",
+          "competitors"
+        ]
+      }
+    ],
+    "ui": {
+      "brand_name": {
+        "placeholder": {
+          "ko": "예: 온샘소아과",
+          "en": "e.g. Onsaem Clinic"
+        }
+      },
+      "offering": {
+        "placeholder": {
+          "ko": "예: 맞벌이 부모를 위해 저녁 진료를 하는 동네 소아과",
+          "en": "e.g. a neighbourhood pediatric clinic open in the evening"
+        }
+      },
+      "personality": {
+        "display": "cards",
+        "options": {
+          "warm": {
+            "icon": "heart",
+            "desc": {
+              "ko": "다정하고 가까운",
+              "en": "Warm and close"
+            }
+          },
+          "expert": {
+            "icon": "graduation-cap",
+            "desc": {
+              "ko": "정확하고 믿음직한",
+              "en": "Precise and reliable"
+            }
+          },
+          "bold": {
+            "icon": "flame",
+            "desc": {
+              "ko": "날 서고 자신감 있는",
+              "en": "Sharp and confident"
+            }
+          },
+          "playful": {
+            "icon": "zap",
+            "desc": {
+              "ko": "가볍고 재치 있는",
+              "en": "Light and witty"
+            }
+          },
+          "premium": {
+            "icon": "gem",
+            "desc": {
+              "ko": "절제되고 품격 있는",
+              "en": "Restrained and refined"
+            }
+          },
+          "natural": {
+            "icon": "leaf",
+            "desc": {
+              "ko": "꾸밈없고 담백한",
+              "en": "Plain and honest"
+            }
+          }
+        }
+      },
+      "styles": {
+        "display": "toggles"
+      },
+      "values": {
+        "placeholder": {
+          "ko": "Enter로 추가 — 예: 설명을 충분히",
+          "en": "Press Enter — e.g. explain clearly"
+        }
+      },
+      "existing_colors": {
+        "placeholder": {
+          "ko": "Enter로 추가 — 예: #1F4E79",
+          "en": "Press Enter — e.g. #1F4E79"
+        }
+      },
+      "competitors": {
+        "placeholder": {
+          "ko": "Enter로 추가",
+          "en": "Press Enter"
+        }
+      }
+    },
+    "stage": {
+      "headline": {
+        "ko": "브랜드 보드 한 장",
+        "en": "One brand board"
+      },
+      "story": {
+        "ko": "성격 비율, 색과 대비, 실제 서체 견본, 상황별 말투 예시, 태그라인까지 한 장에 담아요.",
+        "en": "Personality mix, colours with contrast, real font specimens, sample lines and taglines on one board."
+      },
+      "promises": [
+        {
+          "icon": "shapes",
+          "text": {
+            "ko": "색·서체",
+            "en": "Colour & type"
+          }
+        },
+        {
+          "icon": "message-square",
+          "text": {
+            "ko": "말투 예시",
+            "en": "Voice samples"
+          }
+        },
+        {
+          "icon": "target",
+          "text": {
+            "ko": "포지셔닝",
+            "en": "Positioning"
+          }
+        }
+      ]
+    }
   }
 }
