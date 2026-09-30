@@ -21,7 +21,7 @@ const TONE: Record<Tone, string> = {
   neutral: "text-fg",
 };
 
-function Chart({ spec, palette, half }: { spec: ChartSpec; palette: string[]; half?: boolean }) {
+export function Chart({ spec, palette, half }: { spec: ChartSpec; palette: string[]; half?: boolean }) {
   // A half-width chart sits in a ~320px column on desktop too, so it uses the narrow layout there.
   const [narrow, wide] = useMemo(
     () => [renderChart(spec, { width: 340, palette, theme: WEB_THEME }), half ? "" : renderChart(spec, { width: 680, palette, theme: WEB_THEME })],

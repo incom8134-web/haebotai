@@ -2343,5 +2343,770 @@
       "ko": "스토리라인: 문제 → 기회 → 우리의 답 → 실행 → 요청\n슬라이드 3 — '주말엔 줄을 서는데, 평일 오전은 비어 있다'\n발표 메모: 지난달 시간대별 매출 그래프로 시작하세요",
       "en": "Storyline: problem → opportunity → our answer → plan → ask\nSlide 3 — \"Weekend queues, empty weekday mornings\"\nNotes: open with last month's sales-by-hour chart"
     }
+  },
+  "idea-radar": {
+    "tagline": {
+      "ko": "내가 가진 것으로 시작할 수 있는 사업, 점수로 나란히",
+      "en": "Businesses you can start with what you have, scored side by side"
+    },
+    "description": {
+      "ko": "경력·관심·자금·시간·위험 감수를 넣으면 서로 다른 형태의 사업 아이디어 4~6개를 적합도·수요·속도·자본·우위 다섯 축으로 비교합니다. 아이디어마다 고객, 문제, 수익 방식, MVP, 첫 검증 행동이 붙고, 고른 아이디어는 수익 구조 지도·MVP 설계도·시장 빈틈 탐지기로 바로 이어집니다.",
+      "en": "Enter your experience, interests, budget, time and risk appetite to get 4–6 business ideas of different kinds, compared on fit, demand, speed, capital and edge. Each idea comes with a customer, problem, revenue model, MVP and first validation step — and your pick flows straight into Revenue Mapper, MVP Blueprint or Market Gap Finder."
+    },
+    "features": [
+      {
+        "icon": "layers",
+        "title": {
+          "ko": "다섯 축 점수 비교",
+          "en": "Five-axis scores"
+        },
+        "body": {
+          "ko": "아이디어마다 적합도·수요·속도·자본·우위를 같은 기준으로 매겨 나란히 봅니다.",
+          "en": "Every idea is scored on the same five axes so you can compare them directly."
+        }
+      },
+      {
+        "icon": "zap",
+        "title": {
+          "ko": "첫 검증 행동까지",
+          "en": "Down to the first test"
+        },
+        "body": {
+          "ko": "돈을 거의 쓰지 않고 수요를 확인하는 행동과 성공 신호(숫자)를 줍니다.",
+          "en": "A near-free way to test demand, with a success signal in numbers."
+        }
+      },
+      {
+        "icon": "link",
+        "title": {
+          "ko": "다음 도구로 이어가기",
+          "en": "Continue in the next tool"
+        },
+        "body": {
+          "ko": "고른 아이디어를 수익 구조·MVP·시장 빈틈 분석에 그대로 넘깁니다.",
+          "en": "Send your pick to revenue, MVP or market-gap analysis with one click."
+        }
+      }
+    ],
+    "presets": [
+      {
+        "title": {
+          "ko": "간호사의 건강 콘텐츠 부업",
+          "en": "A nurse's health side business"
+        },
+        "tag": {
+          "ko": "부업",
+          "en": "Side income"
+        },
+        "values": {
+          "skills": "대학병원 병동 간호사 8년, 퇴원 교육·보호자 상담을 자주 함",
+          "interests": [
+            "건강 교육",
+            "콘텐츠"
+          ],
+          "business_types": [
+            "content",
+            "service"
+          ],
+          "channel": "online",
+          "budget": "3m",
+          "weekly_hours": 8,
+          "risk": "low",
+          "avoid": "야간 추가 근무"
+        }
+      },
+      {
+        "title": {
+          "ko": "물류 영업 12년차의 B2B 창업",
+          "en": "B2B launch after 12 years in logistics sales"
+        },
+        "tag": {
+          "ko": "창업",
+          "en": "Startup"
+        },
+        "values": {
+          "skills": "3PL 물류회사 영업 12년, 중소 제조사·온라인 셀러 거래처 200곳 관리",
+          "interests": [
+            "물류",
+            "자동화"
+          ],
+          "target_customer": "월 출고 500~3,000건 온라인 셀러",
+          "business_types": [
+            "b2b",
+            "service",
+            "platform"
+          ],
+          "channel": "hybrid",
+          "budget": "30m",
+          "weekly_hours": 45,
+          "risk": "mid"
+        }
+      },
+      {
+        "title": {
+          "ko": "뜨개 취미를 작은 브랜드로",
+          "en": "A knitting hobby into a small brand"
+        },
+        "tag": {
+          "ko": "소자본",
+          "en": "Low capital"
+        },
+        "values": {
+          "skills": "손뜨개 15년, 인스타그램 팔로워 2,300명, 도안 직접 제작",
+          "interests": [
+            "핸드메이드",
+            "클래스"
+          ],
+          "business_types": [
+            "product",
+            "content",
+            "local"
+          ],
+          "channel": "hybrid",
+          "budget": "3m",
+          "weekly_hours": 15,
+          "location": "대구 수성구",
+          "risk": "low"
+        }
+      }
+    ],
+    "steps": [
+      {
+        "ko": "할 줄 아는 것과 경력을 구체적으로 적습니다.",
+        "en": "Describe what you can do, concretely."
+      },
+      {
+        "ko": "원하는 형태, 자금, 시간, 위험 감수를 고릅니다.",
+        "en": "Pick the business type, budget, time and risk you can take."
+      },
+      {
+        "ko": "점수와 첫 검증 행동을 비교하고 하나를 골라 다음 도구로 이어갑니다.",
+        "en": "Compare scores and first tests, pick one and continue."
+      }
+    ],
+    "tips": [
+      {
+        "ko": "'요리 잘함'보다 '한식 조리기능사, 반찬가게 3년'처럼 쓰면 아이디어가 훨씬 구체적입니다.",
+        "en": "\"Korean-cuisine certified, 3 years at a side-dish shop\" beats \"good at cooking\"."
+      },
+      {
+        "ko": "피하고 싶은 일을 적으면 맞지 않는 아이디어가 빠집니다.",
+        "en": "Listing work you want to avoid removes poor fits."
+      }
+    ],
+    "faq": [
+      {
+        "q": {
+          "ko": "점수는 어떻게 매기나요?",
+          "en": "How are the scores set?"
+        },
+        "a": {
+          "ko": "입력한 조건과 검색으로 찾은 사례를 바탕으로 한 AI의 판단이며, 아이디어끼리 비교하기 위한 상대 점수입니다. 수요는 첫 검증 행동으로 직접 확인하세요.",
+          "en": "They're the AI's relative judgement from your inputs and web research, meant for comparing ideas. Confirm demand with the first validation step."
+        }
+      },
+      {
+        "q": {
+          "ko": "예전 '수익화 방향' 결과는 어떻게 되나요?",
+          "en": "What happened to my old monetization results?"
+        },
+        "a": {
+          "ko": "기록에 그대로 남아 있고 열어 볼 수 있습니다. 새 실행은 아이디어 레이더에서 합니다.",
+          "en": "They stay in your library. New runs use Idea Radar."
+        }
+      }
+    ],
+    "sample": {
+      "ko": "① 퇴원 후 2주 보호자 가이드 상담 — 적합도 9 · 속도 8 · 첫 검증: 맘카페에 무료 체크리스트, 7일 안에 신청 20건\n② 병동 간호 노하우 전자책 — 자본 9 · 수요 6\n③ 요양원 대상 보호자 교육 워크숍(B2B) — 우위 8 · 속도 5",
+      "en": "① Post-discharge caregiver coaching — fit 9 · speed 8 · first test: free checklist in parent forums, 20 sign-ups in 7 days\n② Ward-nursing e-book — capital 9 · demand 6\n③ Caregiver workshops for care homes (B2B) — edge 8 · speed 5"
+    }
+  },
+  "revenue-mapper": {
+    "tagline": {
+      "ko": "아이디어 하나가 벌 수 있는 모든 길, 한 장의 지도로",
+      "en": "Every way one idea can earn, on one map"
+    },
+    "description": {
+      "ko": "고객 세그먼트와 수익 흐름을 연결한 지도, 첫 계단부터 프리미엄까지의 가치 사다리, 고객 한 명이 남기는 가치를 계산하는 단위 경제성 틀을 만듭니다. 지금 시작할 조합과 미뤄야 할 것까지 이유와 함께 알려 드립니다.",
+      "en": "Get a map linking customer segments to revenue streams, a value ladder from the first step to premium, and a unit-economics frame showing what one customer is worth — plus the mix to start with now and what to postpone."
+    },
+    "features": [
+      {
+        "icon": "shapes",
+        "title": {
+          "ko": "세그먼트 × 수익 흐름 지도",
+          "en": "Segments × streams map"
+        },
+        "body": {
+          "ko": "누가 무엇에 돈을 내는지 선으로 이어 한눈에 봅니다.",
+          "en": "See who pays for what, connected at a glance."
+        }
+      },
+      {
+        "icon": "layers",
+        "title": {
+          "ko": "가치 사다리",
+          "en": "Value ladder"
+        },
+        "body": {
+          "ko": "처음 사는 고객이 다음 계단으로 올라가는 이유까지 설계합니다.",
+          "en": "Design why a first-time buyer climbs to the next step."
+        }
+      },
+      {
+        "icon": "shield-check",
+        "title": {
+          "ko": "가정은 가정이라고",
+          "en": "Assumptions are labelled"
+        },
+        "body": {
+          "ko": "모든 가격·비용은 추정이며 무엇을 가정했는지 따로 적습니다.",
+          "en": "Every price and cost is an estimate, with its assumptions listed."
+        }
+      }
+    ],
+    "presets": [
+      {
+        "title": {
+          "ko": "동네 필라테스 스튜디오",
+          "en": "Neighbourhood Pilates studio"
+        },
+        "tag": {
+          "ko": "오프라인",
+          "en": "Offline"
+        },
+        "values": {
+          "idea": "기구 4대 소그룹 필라테스 스튜디오, 30~40대 직장인 여성 대상",
+          "customers": "퇴근 후 운동하는 30~40대 직장인",
+          "assets": "강사 자격증 2개, 월세 180만원 20평 공간 계약 예정",
+          "preferred_models": [
+            "subscription",
+            "one_time",
+            "service"
+          ],
+          "target_price": 180000,
+          "monthly_goal": 12000000
+        }
+      },
+      {
+        "title": {
+          "ko": "반려견 수제 간식",
+          "en": "Handmade dog treats"
+        },
+        "tag": {
+          "ko": "제품",
+          "en": "Product"
+        },
+        "values": {
+          "idea": "국내산 원료 반려견 수제 간식, 노견용 저지방 라인",
+          "customers": "노견을 키우는 30~50대 보호자",
+          "assets": "식품 제조 공간(동물용 사료 제조업 등록 준비 중), 인스타 팔로워 1,200명",
+          "preferred_models": [
+            "one_time",
+            "subscription"
+          ],
+          "target_price": 15900,
+          "unit_cost": 5200
+        }
+      },
+      {
+        "title": {
+          "ko": "프리랜서 세무 도우미 앱",
+          "en": "Tax helper app for freelancers"
+        },
+        "tag": {
+          "ko": "디지털",
+          "en": "Digital"
+        },
+        "values": {
+          "idea": "프리랜서가 영수증 사진만 올리면 경비를 분류하고 종합소득세 신고 전 체크리스트를 주는 앱",
+          "customers": "연 수입 2천만~1억 원 프리랜서",
+          "preferred_models": [
+            "subscription",
+            "usage",
+            "commission"
+          ],
+          "monthly_goal": 20000000
+        }
+      }
+    ],
+    "steps": [
+      {
+        "ko": "아이디어와 주요 고객을 적습니다.",
+        "en": "Describe the idea and main customers."
+      },
+      {
+        "ko": "이미 가진 것과 가격·원가를 알면 넣습니다.",
+        "en": "Add what you have, and prices or costs if you know them."
+      },
+      {
+        "ko": "추천 조합으로 시작하고, 오퍼 설계소에서 판매 제안을 만듭니다.",
+        "en": "Start with the recommended mix, then build the offer."
+      }
+    ],
+    "tips": [
+      {
+        "ko": "원가를 넣으면 단위 경제성이 훨씬 정확해집니다.",
+        "en": "Adding your unit cost makes the unit economics far more accurate."
+      },
+      {
+        "ko": "아이디어 레이더 결과에서 이어 오면 고객과 문제가 자동으로 채워집니다.",
+        "en": "Coming from Idea Radar fills the customer and problem automatically."
+      }
+    ],
+    "faq": [
+      {
+        "q": {
+          "ko": "가격은 믿어도 되나요?",
+          "en": "Can I trust the prices?"
+        },
+        "a": {
+          "ko": "모두 추정입니다. 입력한 숫자는 그대로 쓰고, 나머지는 가정 목록에 근거를 적습니다. 실제 가격은 첫 판매로 확인하세요.",
+          "en": "They're estimates. Your numbers are kept as given, and every other figure is listed as an assumption. Confirm with real sales."
+        }
+      }
+    ],
+    "sample": {
+      "ko": "핵심: 월 8회 정기권 18만 원 · 첫 계단: 체험 1회 2만 원 · 업셀: 1:1 자세 교정 6만 원\n고객 1명 가치(추정): 18만 원 × 연 10회 × 1.5년 − 확보비 4만 원",
+      "en": "Core: 8-class monthly pass ₩180k · first step: ₩20k trial · upsell: ₩60k 1:1 posture session\nCustomer value (est.): ₩180k × 10/yr × 1.5 yrs − ₩40k acquisition"
+    }
+  },
+  "offer-architect": {
+    "tagline": {
+      "ko": "무엇을 얻고, 얼마이고, 왜 지금인지 한 번에 읽히는 제안",
+      "en": "An offer that says what you get, what it costs and why now"
+    },
+    "description": {
+      "ko": "핵심 약속, 가치 블록, 입문·핵심·프리미엄 3단 패키지, 보너스와 보증, 망설임별 답변, 버튼 문구까지 블록 단위로 설계합니다. 블록은 하나씩 복사해 상세페이지·광고·SNS에 바로 쓸 수 있습니다.",
+      "en": "Design the core promise, value blocks, a three-tier package, bonuses, guarantee, objection answers and CTA — block by block, each ready to copy into a product page, ad or post."
+    },
+    "features": [
+      {
+        "icon": "shapes",
+        "title": {
+          "ko": "블록 단위 설계",
+          "en": "Built in blocks"
+        },
+        "body": {
+          "ko": "약속·가치·패키지·보증을 따로 보고 필요한 블록만 복사합니다.",
+          "en": "See promise, value, packages and guarantee separately; copy only what you need."
+        }
+      },
+      {
+        "icon": "shield-check",
+        "title": {
+          "ko": "정직한 긴급성",
+          "en": "Honest urgency"
+        },
+        "body": {
+          "ko": "거짓 희소성이나 지킬 수 없는 보증은 쓰지 않습니다.",
+          "en": "No fake scarcity or guarantees you can't keep."
+        }
+      },
+      {
+        "icon": "link",
+        "title": {
+          "ko": "세일즈 페이지로",
+          "en": "On to the sales page"
+        },
+        "body": {
+          "ko": "완성한 오퍼를 세일즈 페이지 설계소와 광고 팩토리로 넘깁니다.",
+          "en": "Send the finished offer to the Sales Page Architect or Ad Factory."
+        }
+      }
+    ],
+    "presets": [
+      {
+        "title": {
+          "ko": "소상공인 인스타 운영 코칭",
+          "en": "Instagram coaching for shop owners"
+        },
+        "tag": {
+          "ko": "서비스",
+          "en": "Service"
+        },
+        "values": {
+          "product": "4주 동안 사장님이 직접 인스타그램을 운영할 수 있게 가르치는 1:4 소그룹 코칭",
+          "target_customer": "직원 5명 이하 동네 가게 사장님",
+          "problem": "대행을 맡기기엔 비싸고, 혼자 하려니 무엇을 올릴지 모름",
+          "outcome": "하루 15분으로 주 5회 게시",
+          "price_min": 190000,
+          "price_max": 590000,
+          "proof": [
+            "코칭 수강생 40명",
+            "카페 운영 5년"
+          ],
+          "channel": "sns"
+        }
+      },
+      {
+        "title": {
+          "ko": "전통주 시음 키트",
+          "en": "Traditional liquor tasting kit"
+        },
+        "tag": {
+          "ko": "제품",
+          "en": "Product"
+        },
+        "values": {
+          "product": "지역 양조장 막걸리·약주 4종 미니 병과 페어링 카드가 든 시음 키트",
+          "target_customer": "집들이·선물을 고르는 20~30대",
+          "outcome": "처음 마셔 보는 사람도 취향을 찾는 경험",
+          "price_min": 29000,
+          "price_max": 69000,
+          "differentiation": "양조장 대표 인터뷰 카드와 안주 페어링",
+          "channel": "smartstore"
+        }
+      },
+      {
+        "title": {
+          "ko": "초등 코딩 방과후 교실",
+          "en": "After-school coding for kids"
+        },
+        "tag": {
+          "ko": "교육",
+          "en": "Education"
+        },
+        "values": {
+          "product": "초등 3~6학년 대상 12주 게임 만들기 코딩 수업",
+          "target_customer": "맞벌이 학부모",
+          "problem": "학원은 멀고, 아이가 흥미를 금방 잃음",
+          "outcome": "12주 뒤 직접 만든 게임을 친구에게 보여 줌",
+          "price_min": 150000,
+          "price_max": 450000,
+          "channel": "offline"
+        }
+      }
+    ],
+    "steps": [
+      {
+        "ko": "제품과 고객, 고객이 얻는 결과를 적습니다.",
+        "en": "Describe the product, customer and outcome."
+      },
+      {
+        "ko": "가격대와 보여 줄 수 있는 근거를 넣습니다.",
+        "en": "Add a price range and any proof you have."
+      },
+      {
+        "ko": "블록을 복사하거나 세일즈 페이지로 이어갑니다.",
+        "en": "Copy blocks or continue to a sales page."
+      }
+    ],
+    "tips": [
+      {
+        "ko": "후기 수·경력 같은 근거는 실제 있는 것만 넣으세요. 없는 근거는 만들지 않습니다.",
+        "en": "Only add proof you really have — none is invented."
+      },
+      {
+        "ko": "가격대를 넓게 주면 3단 패키지 차이가 뚜렷해집니다.",
+        "en": "A wider price range makes the three tiers more distinct."
+      }
+    ],
+    "faq": [
+      {
+        "q": {
+          "ko": "보증을 꼭 넣어야 하나요?",
+          "en": "Do I need a guarantee?"
+        },
+        "a": {
+          "ko": "아닙니다. 감당할 수 있는 조건만 제안하고, 주의할 점을 함께 적습니다. 원치 않으면 빼세요.",
+          "en": "No. Only terms you can afford are suggested, with caveats. Leave it out if you prefer."
+        }
+      }
+    ],
+    "sample": {
+      "ko": "약속: 4주 뒤 하루 15분으로 주 5회 게시\n패키지: 입문 19만 원(녹화 강의) · 핵심 39만 원(소그룹 4주) · 프리미엄 59만 원(+1:1 2회)\n보증: 과제 4회 제출 시 5주차 코칭 무료",
+      "en": "Promise: post 5×/week in 15 minutes a day, in 4 weeks\nTiers: entry ₩190k · core ₩390k · premium ₩590k\nGuarantee: free week-5 coaching if all 4 tasks are submitted"
+    }
+  },
+  "market-gap": {
+    "tagline": {
+      "ko": "고객의 불편과 기존 해결책 사이, 비어 있는 자리",
+      "en": "Where customer pain and existing solutions don't meet"
+    },
+    "description": {
+      "ko": "시장의 니즈와 기존 해결책을 검색으로 찾아 니즈 × 해결책 지도로 그리고, 잘 풀리지 않는 칸에서 기회를 찾습니다. 검색으로 확인한 것, 입력한 것, 가설을 따로 표시하고 빈틈마다 검증 질문을 붙입니다.",
+      "en": "Research a market's needs and existing solutions, map them as needs × solutions, and find opportunities where coverage is thin. Searched facts, your inputs and hypotheses are labelled separately, and every gap comes with validation questions."
+    },
+    "features": [
+      {
+        "icon": "search",
+        "title": {
+          "ko": "검색 근거와 출처",
+          "en": "Sources from search"
+        },
+        "body": {
+          "ko": "리뷰·커뮤니티·경쟁 업체를 검색하고 출처를 붙입니다.",
+          "en": "Searches reviews, communities and competitors, with sources."
+        }
+      },
+      {
+        "icon": "shapes",
+        "title": {
+          "ko": "니즈 × 해결책 지도",
+          "en": "Needs × solutions map"
+        },
+        "body": {
+          "ko": "어떤 니즈가 누구에게 방치되는지 색으로 보여 줍니다.",
+          "en": "Colour shows which needs are left unserved."
+        }
+      },
+      {
+        "icon": "shield-check",
+        "title": {
+          "ko": "사실과 가설 구분",
+          "en": "Facts vs hypotheses"
+        },
+        "body": {
+          "ko": "확인한 것과 추론한 것을 라벨로 나눕니다.",
+          "en": "Verified and inferred findings are labelled apart."
+        }
+      }
+    ],
+    "presets": [
+      {
+        "title": {
+          "ko": "노견 돌봄",
+          "en": "Senior dog care"
+        },
+        "tag": {
+          "ko": "반려동물",
+          "en": "Pets"
+        },
+        "values": {
+          "market": "노령견 돌봄 서비스",
+          "customer": "10살 이상 반려견을 키우는 1인 가구·맞벌이",
+          "known_problems": "펫호텔이 투약·기저귀 관리를 꺼림",
+          "competitors": [
+            "펫호텔",
+            "펫시터 앱",
+            "동물병원 입원"
+          ],
+          "region": "서울",
+          "angle": "underserved"
+        }
+      },
+      {
+        "title": {
+          "ko": "1인 가구 소형 이사",
+          "en": "Small moves for one-person homes"
+        },
+        "tag": {
+          "ko": "생활 서비스",
+          "en": "Home services"
+        },
+        "values": {
+          "market": "원룸·오피스텔 소형 이사",
+          "customer": "20~30대 1인 가구",
+          "competitors": [
+            "용달 이사",
+            "포장 이사",
+            "당근 알바"
+          ],
+          "region": "수도권",
+          "angle": "price"
+        }
+      },
+      {
+        "title": {
+          "ko": "소규모 제조사 해외 판로",
+          "en": "Export channels for small makers"
+        },
+        "tag": {
+          "ko": "B2B",
+          "en": "B2B"
+        },
+        "values": {
+          "market": "직원 30명 이하 제조사의 해외 온라인 판매",
+          "customer": "수출 경험 없는 중소 제조사 대표",
+          "known_problems": "아마존 입점 대행은 비싸고 결과가 불확실",
+          "region": "한국 → 미국·일본",
+          "angle": "experience"
+        }
+      }
+    ],
+    "steps": [
+      {
+        "ko": "살펴볼 시장과 고객을 적습니다.",
+        "en": "Name the market and customer."
+      },
+      {
+        "ko": "알고 있는 불편과 경쟁을 넣으면 지도가 정확해집니다.",
+        "en": "Known pains and competitors sharpen the map."
+      },
+      {
+        "ko": "빈틈 하나를 골라 검증 질문으로 확인하고 아이디어 레이더나 MVP 설계도로 이어갑니다.",
+        "en": "Pick a gap, test it with the questions, then continue."
+      }
+    ],
+    "tips": [
+      {
+        "ko": "고객 리뷰나 인터뷰 메모를 참고 자료로 넣으면 니즈가 실제 목소리로 채워집니다.",
+        "en": "Add reviews or interview notes as reference to ground the needs in real voices."
+      },
+      {
+        "ko": "지역을 좁히면 검색 근거가 더 구체적입니다.",
+        "en": "A narrower region gives more specific evidence."
+      }
+    ],
+    "faq": [
+      {
+        "q": {
+          "ko": "검색 결과가 없으면 어떻게 되나요?",
+          "en": "What if search finds nothing?"
+        },
+        "a": {
+          "ko": "해당 항목은 가설로 표시되고 신뢰도가 낮게 나옵니다. 지어낸 근거는 쓰지 않습니다.",
+          "en": "Those findings are labelled as hypotheses with low confidence. No evidence is invented."
+        }
+      }
+    ],
+    "sample": {
+      "ko": "빈틈: 투약이 필요한 노견의 단기 방문 돌봄 — 니즈 강도 5, 펫호텔 0 · 펫시터 1 · 병원 입원 1\n검증: 동물병원 3곳에 '투약 때문에 맡길 곳 없다'는 문의가 월 몇 건인지",
+      "en": "Gap: short home visits for senior dogs needing medication — intensity 5; pet hotels 0 · sitters 1 · vet stays 1\nTest: ask three vets how often owners say they can't board a dog because of medication"
+    }
+  },
+  "mvp-blueprint": {
+    "tagline": {
+      "ko": "처음 내놓을 가장 작은 제품과, 출시까지의 순서",
+      "en": "The smallest first version and the order to launch it"
+    },
+    "description": {
+      "ko": "핵심 기능과 첫 버전에서 뺄 기능을 MoSCoW로 나누고, 사용자 여정, 실력·예산에 맞는 도구 조합, 기간 안에 끝나는 단계와 넘어가는 기준, 한국 출시 체크리스트까지 한 장의 설계도로 만듭니다.",
+      "en": "Split must-haves from later features, map the user journey, choose tools for your skill and budget, plan stages that fit your timeline with exit criteria, and get a Korean launch checklist — on one blueprint."
+    },
+    "features": [
+      {
+        "icon": "layers",
+        "title": {
+          "ko": "Must · Should · Later",
+          "en": "Must · Should · Later"
+        },
+        "body": {
+          "ko": "첫 버전에 꼭 필요한 것만 남기고 이유를 적습니다.",
+          "en": "Keep only what the first version needs, with reasons."
+        }
+      },
+      {
+        "icon": "calendar-days",
+        "title": {
+          "ko": "기간에 맞춘 단계",
+          "en": "Stages that fit your time"
+        },
+        "body": {
+          "ko": "단계마다 산출물과 다음으로 넘어가는 기준이 있습니다.",
+          "en": "Each stage has deliverables and exit criteria."
+        }
+      },
+      {
+        "icon": "shield-check",
+        "title": {
+          "ko": "출시 체크리스트",
+          "en": "Launch checklist"
+        },
+        "body": {
+          "ko": "통신판매업 신고, 개인정보 처리방침처럼 빠뜨리기 쉬운 것까지.",
+          "en": "Includes easy-to-miss items like e-commerce registration and a privacy policy."
+        }
+      }
+    ],
+    "presets": [
+      {
+        "title": {
+          "ko": "동네 헬스장 PT 예약",
+          "en": "PT booking for a local gym"
+        },
+        "tag": {
+          "ko": "웹·앱",
+          "en": "Web/app"
+        },
+        "values": {
+          "idea": "동네 헬스장 트레이너 3명의 PT 예약·출석·식단 피드백 서비스",
+          "target_user": "PT를 받는 30~40대 회원",
+          "product_type": "web",
+          "build_skill": "none",
+          "weeks": 6,
+          "budget": 1000000,
+          "must_have": "예약 변경, 카카오톡 알림"
+        }
+      },
+      {
+        "title": {
+          "ko": "수제 비누 정기구독",
+          "en": "Handmade soap subscription"
+        },
+        "tag": {
+          "ko": "실물",
+          "en": "Physical"
+        },
+        "values": {
+          "idea": "피부 타입별 수제 비누를 매달 2개 보내는 정기구독",
+          "target_user": "민감성 피부의 20~30대",
+          "product_type": "physical",
+          "build_skill": "some",
+          "weeks": 8,
+          "budget": 5000000
+        }
+      },
+      {
+        "title": {
+          "ko": "캠핑 장비 대여",
+          "en": "Camping gear rental"
+        },
+        "tag": {
+          "ko": "서비스",
+          "en": "Service"
+        },
+        "values": {
+          "idea": "초보 캠퍼에게 텐트·타프·조명 세트를 주말 단위로 빌려주는 서비스",
+          "target_user": "처음 캠핑을 가 보는 가족",
+          "product_type": "service",
+          "build_skill": "dev",
+          "weeks": 10,
+          "budget": 15000000,
+          "must_have": "재고 달력, 보증금 결제"
+        }
+      }
+    ],
+    "steps": [
+      {
+        "ko": "만들 제품과 처음 쓸 사람을 적습니다.",
+        "en": "Describe the product and its first users."
+      },
+      {
+        "ko": "형태, 만드는 사람, 기간, 예산을 고릅니다.",
+        "en": "Pick the form, builder, timeline and budget."
+      },
+      {
+        "ko": "단계대로 만들고, 운영 플래너로 주 단위 계획을 세웁니다.",
+        "en": "Build by stages and plan weekly in Ops Planner."
+      }
+    ],
+    "tips": [
+      {
+        "ko": "꼭 있어야 한다고 생각하는 기능을 적으면, 왜 첫 버전에서 빼도 되는지까지 답해 줍니다.",
+        "en": "List features you think are essential — you'll hear which can wait and why."
+      },
+      {
+        "ko": "개발을 못 해도 괜찮습니다. 노코드 도구 조합으로 설계합니다.",
+        "en": "No coding needed — the blueprint can use no-code tools."
+      }
+    ],
+    "faq": [
+      {
+        "q": {
+          "ko": "도구 비용은 정확한가요?",
+          "en": "Are tool costs exact?"
+        },
+        "a": {
+          "ko": "요금제는 자주 바뀌므로 추정입니다. 가입 전에 각 서비스의 요금 페이지를 확인하세요.",
+          "en": "Plans change often, so costs are estimates. Check each pricing page before signing up."
+        }
+      }
+    ],
+    "sample": {
+      "ko": "Must: 예약·변경, 카톡 알림 · Later: 식단 사진 AI 분석\n단계: 1~2주 노코드 예약 → 3~4주 회원 20명 시범 → 5~6주 결제 연결\n가설: 회원의 60%가 앱으로 예약을 바꾼다",
+      "en": "Must: booking and changes, KakaoTalk alerts · Later: AI meal-photo analysis\nStages: wk 1–2 no-code booking → wk 3–4 pilot with 20 members → wk 5–6 payments\nHypothesis: 60% of members reschedule in the app"
+    }
   }
 }

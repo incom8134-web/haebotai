@@ -79,6 +79,11 @@ export const PALETTES: Record<string, string[]> = {
   proposal: ["#4F46E5", "#14B8A6", "#F59E0B", "#EC4899", "#0EA5E9", "#64748B"],
   strategy: ["#7C3AED", "#F43F5E", "#0EA5E9", "#F59E0B", "#10B981", "#64748B"],
   grant: ["#0D9488", "#2563EB", "#F59E0B", "#DB2777", "#7C3AED", "#64748B"],
+  "idea-radar": ["#EA580C", "#0F766E", "#7C3AED", "#2563EB", "#DB2777", "#64748B"],
+  "revenue-mapper": ["#15803D", "#EA580C", "#0369A1", "#A21CAF", "#CA8A04", "#64748B"],
+  "offer-architect": ["#B45309", "#0F766E", "#BE123C", "#4338CA", "#0891B2", "#64748B"],
+  "market-gap": ["#0E7490", "#DC2626", "#CA8A04", "#7C3AED", "#16A34A", "#64748B"],
+  "mvp-blueprint": ["#9333EA", "#EA580C", "#0284C7", "#16A34A", "#E11D48", "#64748B"],
 };
 
 export const WEEKDAYS = ["월", "화", "수", "목", "금", "토", "일"];

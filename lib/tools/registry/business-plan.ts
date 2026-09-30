@@ -33,7 +33,7 @@ export const businessPlan: ToolManifest = {
     { kind: "number", id: "variable_cost_rate", label: "변동비율", unit: "%", min: 0, max: 100 },
   ],
   usesProfile: ["brand_name", "industry"],
-  acceptsChainFrom: ["trend"],
+  acceptsChainFrom: ["trend", "revenue-mapper"],
   outputRenderer: "document",
   grounding: { requireSources: true, webSearch: true, estimateBadge: true },
   model: "gemini-3.1-pro-preview",
