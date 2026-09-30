@@ -4,6 +4,31 @@
 // languages. Used when the UI is in English.
 
 export const PRESET_VALUES_EN: Record<string, Record<number, Record<string, string | string[]>>> = {
+  "idea-radar": {
+    0: { skills: "Ward nurse at a university hospital for 8 years; frequent discharge education and caregiver counselling", interests: ["Health education", "Content"], avoid: "Extra night shifts" },
+    1: { skills: "12 years in 3PL logistics sales; managed 200 accounts of small manufacturers and online sellers", interests: ["Logistics", "Automation"], target_customer: "Online sellers shipping 500–3,000 orders a month" },
+    2: { skills: "Hand-knitting for 15 years, 2,300 Instagram followers, designs my own patterns", interests: ["Handmade", "Classes"], location: "Suseong-gu, Daegu" },
+  },
+  "revenue-mapper": {
+    0: { idea: "Small-group Pilates studio with 4 reformers for working women in their 30s–40s", customers: "Office workers in their 30s–40s who exercise after work", assets: "Two instructor licences; about to lease a 66 m² space at ₩1.8M/month" },
+    1: { idea: "Handmade dog treats from Korean ingredients, with a low-fat line for senior dogs", customers: "Owners in their 30s–50s with senior dogs", assets: "Food production space (pet-food licence in progress), 1,200 Instagram followers" },
+    2: { idea: "An app where freelancers upload receipt photos, get expenses sorted and a checklist before filing income tax", customers: "Freelancers earning ₩20M–100M a year" },
+  },
+  "offer-architect": {
+    0: { product: "4-week small-group (1:4) coaching so owners can run their own Instagram", target_customer: "Owners of neighbourhood shops with 5 or fewer staff", problem: "An agency is too expensive, and alone they don't know what to post", outcome: "Post 5 times a week in 15 minutes a day", proof: ["40 coaching students", "5 years running a café"] },
+    1: { product: "Tasting kit with four mini bottles of makgeolli and yakju from local breweries, plus pairing cards", target_customer: "People in their 20s–30s choosing housewarming gifts", outcome: "Newcomers find their taste", differentiation: "Brewer interview cards and snack pairings" },
+    2: { product: "12-week game-making coding class for grades 3–6", target_customer: "Dual-income parents", problem: "Academies are far away and kids lose interest quickly", outcome: "After 12 weeks, kids show friends a game they made" },
+  },
+  "market-gap": {
+    0: { market: "Senior dog care", customer: "Single households and working couples with dogs over 10", known_problems: "Pet hotels are reluctant to handle medication and diapers", competitors: ["Pet hotels", "Pet-sitter apps", "Vet boarding"], region: "Seoul" },
+    1: { market: "Small moves for studios and officetels", customer: "Single households in their 20s–30s", competitors: ["Truck movers", "Full-service movers", "Karrot odd jobs"], region: "Seoul metro area" },
+    2: { market: "Overseas online sales for manufacturers with under 30 staff", customer: "Owners of small manufacturers with no export experience", known_problems: "Amazon onboarding agencies are expensive and results are uncertain", region: "Korea → US and Japan" },
+  },
+  "mvp-blueprint": {
+    0: { idea: "PT booking, attendance and diet feedback for three trainers at a local gym", target_user: "PT members in their 30s–40s", must_have: "Rescheduling, KakaoTalk alerts" },
+    1: { idea: "Monthly subscription of two handmade soaps matched to skin type", target_user: "People in their 20s–30s with sensitive skin" },
+    2: { idea: "Weekend rental of tent, tarp and lighting sets for beginner campers", target_user: "Families going camping for the first time", must_have: "Inventory calendar, deposit payment" },
+  },
   money: {
     0: { skills: "Pastry chef, 10 years; cakes and baked goods. Currently working in a shop.", interests: ["Classes", "Small-batch sales"], avoid: "Mass production" },
     1: { skills: "UI designer, 5 years; fluent in Figma and Illustrator", interests: ["Templates", "Online courses"] },

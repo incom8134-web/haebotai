@@ -1,9 +1,10 @@
 import a from "./experience-a.json";
 import b from "./experience-b.json";
+import c from "./experience-c.json";
 import type { Bilingual } from "./content";
 
 // Per-tool run-page experience: each tool gets its own layout, story,
-// grouped steps, control types and a live "stage" preview — so the 18
+// grouped steps, control types and a live "stage" preview — so the
 // tools don't all look like the same form. Field ids and option values
 // are checked against the manifests in experience.test.ts.
 
@@ -32,7 +33,7 @@ export interface Experience {
   stage: { headline: Bilingual; story: Bilingual; promises: { icon: string; text: Bilingual }[] };
 }
 
-const all = { ...a, ...b } as Record<string, Experience>;
+const all = { ...a, ...b, ...c } as Record<string, Experience>;
 
 export function getExperience(toolId: string): Experience | undefined {
   return all[toolId];

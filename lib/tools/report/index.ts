@@ -1,6 +1,11 @@
 import { businessPlanReport } from "./business-plan.ts";
 import { calendarReport } from "./calendar.ts";
 import { grantReport } from "./grant.ts";
+import { ideaRadarReport } from "./idea-radar.ts";
+import { marketGapReport } from "./market-gap.ts";
+import { mvpBlueprintReport } from "./mvp-blueprint.ts";
+import { offerArchitectReport } from "./offer-architect.ts";
+import { revenueMapperReport } from "./revenue-mapper.ts";
 import { keywordReport } from "./keyword.ts";
 import { moneyReport } from "./money.ts";
 import { placeReport } from "./place.ts";
@@ -20,6 +25,11 @@ const BUILDERS: Record<string, (o: Record<string, unknown>, input: Record<string
   proposal: proposalReport,
   strategy: strategyReport,
   grant: grantReport,
+  "idea-radar": ideaRadarReport,
+  "revenue-mapper": revenueMapperReport,
+  "offer-architect": offerArchitectReport,
+  "market-gap": marketGapReport,
+  "mvp-blueprint": mvpBlueprintReport,
 };
 
 export const hasReport = (toolId: string) => toolId in BUILDERS;

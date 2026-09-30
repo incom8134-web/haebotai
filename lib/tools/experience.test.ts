@@ -8,6 +8,7 @@ import { readFileSync, readdirSync } from "node:fs";
 const exp = {
   ...JSON.parse(readFileSync(new URL("./experience-a.json", import.meta.url), "utf8")),
   ...JSON.parse(readFileSync(new URL("./experience-b.json", import.meta.url), "utf8")),
+  ...JSON.parse(readFileSync(new URL("./experience-c.json", import.meta.url), "utf8")),
 };
 const dir = new URL("./registry/", import.meta.url);
 const manifests = new Map<string, Map<string, string[]>>();

@@ -23,7 +23,7 @@ export default async function ToolPage({
   searchParams,
 }: {
   params: Promise<{ toolId: string }>;
-  searchParams: Promise<{ fromRun?: string; brief?: string; preset?: string }>;
+  searchParams: Promise<{ fromRun?: string; pick?: string; brief?: string; preset?: string }>;
 }) {
   const { toolId: requested } = await params;
   const query = new URLSearchParams(Object.entries(await searchParams).filter((e): e is [string, string] => typeof e[1] === "string")).toString();
@@ -39,7 +39,7 @@ export default async function ToolPage({
   // Everything below works with the engine id (what runs store).
   const toolId = tool.id;
 
-  const [profile, { fromRun, brief, preset }, keyStatus, membership, balance] = await Promise.all([
+  const [profile, { fromRun, pick, brief, preset }, keyStatus, membership, balance] = await Promise.all([
     getBusinessProfile(),
     searchParams,
     getApiKeyStatus(),
@@ -57,12 +57,13 @@ export default async function ToolPage({
   const availableProviders = capability.providers.filter((p) => p === "google" || usable(p));
   const hasOwnKey = Object.fromEntries(capability.providers.map((p) => [p, usable(p)])) as Partial<Record<ProviderId, boolean>>;
 
-  let chainedFrom: { runId: string; toolId: string; output: unknown } | null = null;
+  let chainedFrom: { runId: string; toolId: string; output: unknown; pick?: number } | null = null;
   if (fromRun) {
     const supabase = await createClient();
     const { data } = await supabase.from("generations").select("tool_id, output").eq("id", fromRun).maybeSingle();
     if (data?.tool_id && data.output) {
-      chainedFrom = { runId: fromRun, toolId: data.tool_id, output: data.output };
+      const index = Number(pick);
+      chainedFrom = { runId: fromRun, toolId: data.tool_id, output: data.output, ...(Number.isInteger(index) && index >= 0 ? { pick: index } : {}) };
     }
   }
 

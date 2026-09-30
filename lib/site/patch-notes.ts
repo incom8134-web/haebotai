@@ -4,6 +4,19 @@ export type NoteKind = "new" | "improved" | "fixed";
 
 export const PATCH_NOTES: { version: string; date: string; title: Bilingual; items: { kind: NoteKind; text: Bilingual }[] }[] = [
   {
+    version: "2.1.0",
+    date: "2026-09-30",
+    title: { ko: "발견·수익 설계 5개 도구 공개", en: "Five Discover & Monetize tools are live" },
+    items: [
+      { kind: "new", text: { ko: "아이디어 레이더: 내 경력·자금·시간에 맞는 아이디어 4~6개를 다섯 축 점수로 비교하고, 즐겨찾기·비교·다음 도구로 이어가기", en: "Idea Radar: 4–6 ideas scored on five axes, with favourites, side-by-side compare and one-click hand-off to the next tool" } },
+      { kind: "new", text: { ko: "수익 구조 지도: 고객과 수익원을 잇는 흐름도, 가치 사다리, 숫자를 바꿔 보는 단위 경제성 계산", en: "Revenue Mapper: a segment-to-stream flow map, value ladder and an editable unit-economics calculator" } },
+      { kind: "new", text: { ko: "오퍼 설계소: 약속·패키지 3단·보증·망설임별 답변을 블록으로 고치고 복사", en: "Offer Architect: promise, three tiers, guarantee and objection answers as blocks you can edit and copy" } },
+      { kind: "new", text: { ko: "시장 빈틈 탐지기: 니즈 × 기존 해결책 지도, 검색 근거·입력·가설을 구분해 표시", en: "Market Gap Finder: a needs × solutions map with search evidence, your input and hypotheses labelled apart" } },
+      { kind: "new", text: { ko: "MVP 설계도: Must·Should·Later 보드, 사용자 여정, 기간에 맞춘 단계, 체크할 수 있는 출시 목록", en: "MVP Blueprint: a Must/Should/Later board, user journey, stages that fit your timeline and a tickable launch checklist" } },
+      { kind: "improved", text: { ko: "예전 '수익화 방향' 결과는 보관함에 그대로 남고, 새 실행은 아이디어 레이더로 연결", en: "Past monetization results stay in your library; new runs go to Idea Radar" } },
+    ],
+  },
+  {
     version: "2.0.0",
     date: "2026-09-30",
     title: { ko: "새 도구 체계: 5개 분야, 25개 도구", en: "New tool lineup: 5 areas, 25 tools" },

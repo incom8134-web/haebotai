@@ -103,6 +103,8 @@ interface ChainedFrom {
   runId: string;
   toolId: string;
   output: unknown;
+  /** Which item of the source result was chosen (?pick=), e.g. one idea card. */
+  pick?: number;
 }
 
 function ToolRunner({
@@ -148,7 +150,7 @@ function ToolRunner({
   const cost = manifest ? resolveCost(provider, !!hasOwnKey[provider], isStudent, manifest.estimatedCredits) : 0;
 
   const [values, setValues] = useState<ToolFormValues>(() => {
-    if (chainedFrom) return seedFromChain(toolId, chainedFrom.toolId, chainedFrom.output);
+    if (chainedFrom) return seedFromChain(toolId, chainedFrom.toolId, chainedFrom.output, chainedFrom.pick);
     const preset = initialPreset !== undefined ? getToolContent(toolId)?.presets[initialPreset] : undefined;
     if (preset) return { ...presetValues(toolId, initialPreset!, preset.values, locale) };
     const brief = manifest ? seedFromBrief(manifest, initialBrief) : {};
