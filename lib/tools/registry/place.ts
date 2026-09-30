@@ -25,6 +25,6 @@ export const place: ToolManifest = {
   outputRenderer: "document",
   grounding: { requireSources: false, webSearch: true, estimateBadge: false },
   model: "gemini-3.1-pro-preview",
-  estimatedCredits: 25,
-  estimatedSeconds: 80,
+  estimatedCredits: 32,
+  estimatedSeconds: 170,
 };

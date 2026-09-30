@@ -10,6 +10,10 @@ import type { BusinessProfile, ToolManifest } from "./types";
 import { getPlaybook, HOUSE_RULES } from "./playbooks.ts";
 import { referencePrompt, type ReferenceBundle } from "./reference.ts";
 import { briefBlock, type RequestBrief } from "./request-brief.ts";
+import { intentBlock } from "../agents/intent.ts";
+import { strategyBlock } from "../agents/strategy.ts";
+import { revisionBlock } from "../agents/critic.ts";
+import type { Critique, Intent, Strategy } from "../agents/types.ts";
 
 // Prompt-level enforcement for the hard guards documented in policy.ts —
 // that file's checks are the pre-flight/output-safety backstop; this is
@@ -137,10 +141,18 @@ export function buildContext(
   }
   const brief = input._brief as RequestBrief | undefined;
   if (brief?.tone) lines.push("", briefBlock(brief));
+  // Agent directives (lib/agents): the understood request, the chosen
+  // strategy's blueprint and rubric, and — on a revision — the critique.
+  const intent = input._intent as { intent: Intent; answers: { question: string; answer: string }[] } | undefined;
+  if (intent?.intent) lines.push("", intentBlock(intent.intent, intent.answers ?? []));
+  const strategy = input._strategy as Strategy | undefined;
+  if (strategy?.blueprint?.length) lines.push("", strategyBlock(strategy));
   const reference = referenceOf(input);
   if (reference) lines.push("", referencePrompt(reference));
   const free = typeof input.free_request === "string" ? input.free_request.trim() : "";
   if (free) lines.push("", freeRequestPrompt(free));
+  const revision = input._revision as { draft: string; critique: Critique } | undefined;
+  if (revision?.critique) lines.push("", "[이전 초안]", revision.draft, "", revisionBlock(revision.critique));
   return lines.join("\n");
 }
 

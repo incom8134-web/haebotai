@@ -52,6 +52,6 @@ export const homepage: ToolManifest = {
   outputRenderer: "code",
   grounding: { requireSources: false, webSearch: true, estimateBadge: false },
   model: "gemini-3.8-flash",
-  estimatedCredits: 180,
-  estimatedSeconds: 180,
+  estimatedCredits: 240,
+  estimatedSeconds: 420,
 };

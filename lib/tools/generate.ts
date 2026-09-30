@@ -10,6 +10,7 @@ import { guardDeckNumbers } from "./deck-guard";
 import { anthropicAdapter, runWithApiKey as runWithAnthropicKey } from "@/lib/ai/anthropic";
 import { renderSangsepage } from "./render/sangsepage";
 import { orderLike } from "./output-order";
+import { applyFinancialModel } from "./financial-model";
 import { outputSchemaFor } from "./schemas";
 import { analyzeRequest } from "@/lib/ai/request-brief";
 
@@ -141,7 +142,42 @@ async function generateWith(
   }
   if (!result) throw new Error("모델 응답을 받지 못했습니다");
 
-  let output = result.output;
+  const post = await finishStructured(manifest, result.output, input, profile, abortSignal, storage, provider, PHOTO_DEADLINE_MS - (Date.now() - started));
+  return {
+    output: post.output,
+    sources: result.sources,
+    usage: { inputTokens: (result.usage.inputTokens ?? 0) + (post.usage.inputTokens ?? 0), outputTokens: (result.usage.outputTokens ?? 0) + (post.usage.outputTokens ?? 0) },
+  };
+}
+
+/**
+ * What a structured tool's written result still needs after the text:
+ * the rendered product page, deck photos and accent, blog/ad/mood-board
+ * visuals, the deck number guard, the homepage image fallback. Shared by
+ * the one-shot path above and the agents (lib/agents/specs), which call it
+ * once on the best version. `photoBudgetMs`: how long deck photos may take.
+ */
+export async function finishStructured(
+  manifest: ToolManifest,
+  written: unknown,
+  input: Record<string, unknown>,
+  profile: BusinessProfile | null,
+  abortSignal: AbortSignal | undefined,
+  storage: ImageStorageContext,
+  provider: ProviderId,
+  photoBudgetMs: number,
+): Promise<{ output: unknown; usage: TokenUsage }> {
+  let output = written;
+  // The plan's numbers come from its assumptions, computed (lib/tools/financial-model.ts).
+  if (manifest.id === "business-plan" && output && typeof output === "object") {
+    const n = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : undefined);
+    output = applyFinancialModel(output as Record<string, unknown>, {
+      unit_price: n(input.unit_price),
+      monthly_sales_target: n(input.monthly_sales_target),
+      fixed_cost: n(input.fixed_cost),
+      variable_cost_rate: n(input.variable_cost_rate),
+    });
+  }
   // Real image rendering, not the model's job — satori/resvg already do
   // this for real (§4.11); the model only supplies the section copy.
   let extraUsage: TokenUsage = { inputTokens: 0, outputTokens: 0 };
@@ -190,10 +226,7 @@ async function generateWith(
     output = { ...page, rendered_images: signed ? [signed.signedUrl] : [] };
   }
 
-  let usage = {
-    inputTokens: (result.usage.inputTokens ?? 0) + (extraUsage.inputTokens ?? 0),
-    outputTokens: (result.usage.outputTokens ?? 0) + (extraUsage.outputTokens ?? 0),
-  };
+  let usage = { inputTokens: extraUsage.inputTokens ?? 0, outputTokens: extraUsage.outputTokens ?? 0 };
   // Homepage from another engine: no photos, so its image slots get a
   // brand-colored gradient instead of broken images.
   if (manifest.id === "homepage") {
@@ -212,7 +245,7 @@ async function generateWith(
   // (Gemini only, like every other platform-paid image).
   // Photos get only the time left in the run: a long deck that took most
   // of it is delivered without slide photos rather than cut off.
-  const remaining = PHOTO_DEADLINE_MS - (Date.now() - started);
+  const remaining = photoBudgetMs;
   if (manifest.id === "presentation" && provider === "google" && remaining > 45_000) {
     const budget = new AbortController();
     const stop = () => budget.abort();
@@ -248,5 +281,5 @@ async function generateWith(
     };
   }
 
-  return { output: orderLike(outputSchemaFor(manifest.id), output), sources: result.sources, usage };
+  return { output: orderLike(outputSchemaFor(manifest.id), output), usage };
 }

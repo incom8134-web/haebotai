@@ -410,6 +410,8 @@ interface LogoPlan {
   usage_notes: string;
 }
 
+export type { LogoPlan };
+
 // Plan four distinct directions with the text model, draw each symbol
 // with the image model, typeset the name beside it (render/logo.ts).
 async function generateLogo(
@@ -419,14 +421,30 @@ async function generateLogo(
   abortSignal: AbortSignal | undefined,
   storage: ImageStorageContext,
 ): Promise<GenerationResult> {
-  const ai = getClient();
+  const planned = await planLogo(manifest, input, profile, abortSignal);
+  const drawn = await drawLogo(manifest, input, profile, planned.plans, abortSignal, storage);
+  return { ...drawn, usage: { inputTokens: (planned.usage.inputTokens ?? 0) + (drawn.usage.inputTokens ?? 0), outputTokens: (planned.usage.outputTokens ?? 0) + (drawn.usage.outputTokens ?? 0) } };
+}
+
+function logoBrandName(input: Record<string, unknown>, profile: BusinessProfile | null): string {
   const brandName = String(input.brand_name ?? profile?.brand_name ?? "").trim();
   if (!brandName) throw new Error("브랜드명을 입력해주세요");
+  return brandName;
+}
+
+/** Four logo directions (the agent critiques them before anything is drawn). */
+export async function planLogo(
+  manifest: ToolManifest,
+  input: Record<string, unknown>,
+  profile: BusinessProfile | null,
+  abortSignal: AbortSignal | undefined,
+): Promise<{ plans: LogoPlan[]; usage: TokenUsage }> {
+  const ai = getClient();
+  logoBrandName(input, profile);
   const contextText = buildContext(manifest, input, profile);
   // "참고 자료" images: the planner sees them; for a refresh, every new
   // symbol is also drawn from the old logo so it stays recognizable.
   const refs = referenceParts(input, { documents: false });
-  const refresh = referenceOf(input)?.mode.id === "refresh" && refs.length > 0;
 
   const planRes = await ai.models.generateContent({
     model: TEXT_MODEL,
@@ -446,7 +464,7 @@ async function generateLogo(
       abortSignal,
     },
   });
-  let usage = addUsage({ inputTokens: 0, outputTokens: 0 }, planRes.usageMetadata);
+  const usage = addUsage({ inputTokens: 0, outputTokens: 0 }, planRes.usageMetadata);
   let plans: LogoPlan[];
   try {
     plans = (JSON.parse(planRes.text ?? "") as { concepts: LogoPlan[] }).concepts.slice(0, 4);
@@ -454,6 +472,22 @@ async function generateLogo(
     throw new Error("로고 콘셉트를 만들지 못했습니다");
   }
   if (plans.length < 4) throw new Error("로고 콘셉트를 만들지 못했습니다");
+  return { plans, usage };
+}
+
+/** Draws each planned symbol, typesets the name beside it, uploads both. */
+export async function drawLogo(
+  manifest: ToolManifest,
+  input: Record<string, unknown>,
+  profile: BusinessProfile | null,
+  plans: LogoPlan[],
+  abortSignal: AbortSignal | undefined,
+  storage: ImageStorageContext,
+): Promise<GenerationResult> {
+  const brandName = logoBrandName(input, profile);
+  const refs = referenceParts(input, { documents: false });
+  const refresh = referenceOf(input)?.mode.id === "refresh" && refs.length > 0;
+  let usage: TokenUsage = { inputTokens: 0, outputTokens: 0 };
 
   const upload = async (path: string, bytes: Buffer, contentType = "image/png") => {
     const { error } = await storage.supabase.storage.from("exports").upload(path, bytes, { contentType, upsert: true });
@@ -610,7 +644,15 @@ async function* generateStructured(
   let usage: TokenUsage = { inputTokens: 0, outputTokens: 0 };
   let sources: Source[] = [];
   let groundingBlock = "";
-  if (manifest.grounding.webSearch) {
+  // Agents (lib/agents/specs) research once in their own stage and pass
+  // the findings to every draft and revision.
+  const research = input._research as { findings: string; sources: Source[] } | undefined;
+  if (manifest.grounding.webSearch && research) {
+    sources = research.sources;
+    groundingBlock = `\n\n[검색 근거]\n${research.findings || "(검색 결과 없음)"}\n\n[사용 가능한 출처]\n${
+      sources.map((s) => `- ${s.title} — ${s.url}`).join("\n") || "(없음)"
+    }`;
+  } else if (manifest.grounding.webSearch) {
     const grounded = await searchGrounding(manifest, contextText, abortSignal);
     sources = grounded.sources;
     usage = addUsage(usage, { promptTokenCount: grounded.usage.inputTokens ?? 0, candidatesTokenCount: grounded.usage.outputTokens ?? 0 });
@@ -664,7 +706,8 @@ async function* generateStructured(
   // Editor pass: a strict reviewer rewrites the weak parts of the draft
   // against the tool's bar. Drafts read fine but generic; this is where
   // they get specific. Best effort — the draft stands if it fails.
-  if (getPlaybook(manifest.id)?.revise) {
+  // Agents run their own critique → revise loop instead (_noEditor).
+  if (getPlaybook(manifest.id)?.revise && !input._noEditor) {
     try {
       // Same model as the draft, so the editor never writes below it;
       // light thinking, since the draft already did the reasoning.

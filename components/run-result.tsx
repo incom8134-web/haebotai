@@ -1,5 +1,6 @@
 "use client";
 
+import { StrategyCard, type AgentMeta } from "@/components/agent/strategy-card";
 import Link from "next/link";
 import { useState } from "react";
 import {
@@ -484,6 +485,7 @@ function RunResult({
   creditsUsed,
   provider,
   runId,
+  onRerunWithStrategy,
 }: {
   manifest: ToolManifest;
   input?: Record<string, unknown>;
@@ -492,12 +494,15 @@ function RunResult({
   creditsUsed: number | null;
   provider?: ProviderId | null;
   runId: string;
+  /** Re-run the same inputs asking for a strategy other than this one. */
+  onRerunWithStrategy?: (chosen: string) => void;
 }) {
   const { locale } = useLocale();
   const t = useT();
   // The run's creative direction (lib/tools/directions.ts) is shown as a
   // chip, not as a result field.
-  const { creative_direction: direction, request_brief: brief, ...shown } = (output ?? {}) as Record<string, unknown> & { creative_direction?: { name?: string; reason?: string }; request_brief?: { tone?: string } };
+  // How it was made (lib/agents/meta.ts) goes in the strategy card.
+  const { creative_direction: direction, request_brief: brief, agent, ...shown } = (output ?? {}) as Record<string, unknown> & { creative_direction?: { name?: string; reason?: string }; request_brief?: { tone?: string }; agent?: AgentMeta };
   const extras = extraDownloads(shown, input, locale === "en");
   const chainTargets = listTools().filter((tool) => tool.acceptsChainFrom?.includes(manifest.id));
 
@@ -528,6 +533,8 @@ function RunResult({
           </Badge>
         ) : null}
       </div>
+
+      {agent ? <StrategyCard meta={agent} onRerun={onRerunWithStrategy} /> : null}
 
       <AiOutputNotice design={manifest.category === "design"} />
 
