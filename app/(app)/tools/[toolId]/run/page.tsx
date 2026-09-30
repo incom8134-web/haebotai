@@ -60,10 +60,13 @@ export default async function ToolPage({
   let chainedFrom: { runId: string; toolId: string; output: unknown; pick?: number } | null = null;
   if (fromRun) {
     const supabase = await createClient();
-    const { data } = await supabase.from("generations").select("tool_id, output").eq("id", fromRun).maybeSingle();
+    const { data } = await supabase.from("generations").select("tool_id, output, input").eq("id", fromRun).maybeSingle();
     if (data?.tool_id && data.output) {
       const index = Number(pick);
-      chainedFrom = { runId: fromRun, toolId: data.tool_id, output: data.output, ...(Number.isInteger(index) && index >= 0 ? { pick: index } : {}) };
+      // The source run's own inputs ride along (e.g. the brand name a
+      // brand board was made for), under a key no output uses.
+      const output = data.output && typeof data.output === "object" ? { ...(data.output as object), _source_input: data.input ?? {} } : data.output;
+      chainedFrom = { runId: fromRun, toolId: data.tool_id, output, ...(Number.isInteger(index) && index >= 0 ? { pick: index } : {}) };
     }
   }
 

@@ -322,7 +322,9 @@ export function SlideDeck({ deck }: { deck: DeckOutput }) {
 
       <div className="grid gap-5">
         {deck.slides.map((s, i) => (
-          <SlideCard key={i} slide={s} index={i} accent={accent} />
+          <div key={i} id={`slide-${i + 1}`} className="scroll-mt-20">
+            <SlideCard slide={s} index={i} accent={accent} />
+          </div>
         ))}
       </div>
 

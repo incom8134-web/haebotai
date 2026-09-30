@@ -35,76 +35,17 @@ import { BlogArticle, type BlogOutput } from "@/components/results/blog-article"
 import { AdCreatives, type CopyOutput } from "@/components/results/ad-creatives";
 import { MoodBoard } from "@/components/results/mood-board";
 import { ReportView } from "@/components/results/report-view";
-import { DISCOVER_VIEWS } from "@/components/results/discover";
+import { TOOL_VIEWS } from "@/components/results/tool-views";
 import { buildReport } from "@/lib/tools/report";
 import { useBi, useLocale, useT } from "@/lib/i18n/context";
 import type { Source } from "@/lib/tools/registry/shared";
 import type { ToolManifest } from "@/lib/tools/types";
 import { PROVIDER_LABEL, type ProviderId } from "@/lib/ai/types";
-import { toast } from "sonner";
+import { downloadFromUrl, downloadProject, downloadText, DownloadLink, guessImageExt } from "@/components/results/download";
 
 // Shared between the live "done" state in tool-runner.tsx and the
 // library run-detail page — a stored run and a just-finished run render
 // identically, since both are just { manifest, output, sources, credits }.
-
-function downloadBlob(filename: string, blob: Blob) {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  // Safari starts the download asynchronously; revoking at once can cancel it.
-  setTimeout(() => URL.revokeObjectURL(url), 2000);
-}
-
-function downloadText(filename: string, text: string, mimeType: string) {
-  downloadBlob(filename, new Blob([text], { type: mimeType }));
-}
-
-// Works for both signed Storage URLs and data: URIs — fetch() handles
-// both, so this is the one path for "save whatever's behind this src".
-// The homepage's Vite + TypeScript project, zipped in the browser.
-async function downloadProject(filename: string, files: Record<string, string>) {
-  const { default: JSZip } = await import("jszip");
-  const zip = new JSZip();
-  for (const [path, text] of Object.entries(files)) zip.file(path, text);
-  downloadBlob(filename, await zip.generateAsync({ type: "blob" }));
-}
-
-// An expired signed URL (old Library runs) answers with an XML error —
-// never save that as "image-1.png"; say so instead.
-async function downloadFromUrl(filename: string, url: string) {
-  try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    downloadBlob(filename, await res.blob());
-  } catch {
-    const en = document.documentElement.lang === "en";
-    toast.error(en ? "Couldn't download the file. Refresh the page and try again." : "파일을 받지 못했어요. 페이지를 새로고침한 뒤 다시 시도해 주세요.");
-  }
-}
-
-function guessImageExt(url: string): string {
-  const dataMatch = /^data:image\/([a-z0-9]+);/i.exec(url);
-  if (dataMatch) return dataMatch[1] === "jpeg" ? "jpg" : dataMatch[1];
-  const pathMatch = /\.([a-z0-9]+)(?:\?|$)/i.exec(url.split("?")[0] ?? "");
-  return pathMatch?.[1] ?? "png";
-}
-
-function DownloadLink({ label, onClick }: { label: string; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="inline-flex items-center gap-1 rounded-full border border-hairline px-2.5 py-1 text-xs text-fg-muted transition-colors hover:border-accent/50 hover:text-fg"
-    >
-      <Download className="size-3" aria-hidden />
-      {label}
-    </button>
-  );
-}
 
 // Every finished run downloads as PDF / Word / PowerPoint / Markdown,
 // generated server-side from the stored run (app/api/export/[runId],
@@ -331,8 +272,8 @@ function OutputPreview({ output, toolId, input, runId }: { output: unknown; tool
   const L = useBi();
   const o = output as Record<string, unknown>;
 
-  const View = toolId ? DISCOVER_VIEWS[toolId] : undefined;
-  if (View && o && typeof o === "object") return <View output={o} runId={runId} />;
+  const view = toolId && o && typeof o === "object" ? TOOL_VIEWS[toolId] : undefined;
+  if (view?.match(o)) return <view.View output={o} input={input} runId={runId} />;
 
   const report = toolId ? buildReport(toolId, o, input) : null;
   if (report) {
