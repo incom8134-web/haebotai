@@ -34,9 +34,14 @@ export function businessPlanReport(o: Record<string, unknown>): Report {
   const matrix = list(o.competitor_matrix).map((row) => list(row).map(str));
   const last = yearly[yearly.length - 1];
 
-  const sections: ReportSection[] = [];
+  // Built as named blocks, then ordered: the plan's own chapters (its
+  // strategy's order) with the analysis a chapter asked for right after
+  // it; analysis no chapter placed follows in the reviewer's usual order.
+  // Older runs (no chapters) keep the classic fixed order.
+  const byId = new Map<string, ReportSection>();
+  const add = (section: ReportSection) => byId.set(section.id, section);
 
-  sections.push({
+  add({
     id: "summary",
     kicker: "01 · 사업 개요",
     title: "무엇을, 누구에게, 왜 지금",
@@ -48,7 +53,7 @@ export function businessPlanReport(o: Record<string, unknown>): Report {
     ]),
   });
 
-  sections.push({
+  add({
     id: "model",
     kicker: "02 · 제품과 비즈니스 모델",
     title: "어떻게 돈을 버는가",
@@ -72,7 +77,7 @@ export function businessPlanReport(o: Record<string, unknown>): Report {
     ]),
   });
 
-  sections.push({
+  add({
     id: "market",
     kicker: "03 · 시장 분석",
     title: "시장은 충분히 큰가",
@@ -97,7 +102,7 @@ export function businessPlanReport(o: Record<string, unknown>): Report {
     ]),
   });
 
-  sections.push({
+  add({
     id: "competition",
     kicker: "04 · 경쟁 분석",
     title: "왜 우리가 이기는가",
@@ -123,7 +128,7 @@ export function businessPlanReport(o: Record<string, unknown>): Report {
 
   // Older runs stored pl_3yr as bare number rows.
   const legacyPl = list(fin.pl_3yr).map((r) => list(r).map(num));
-  sections.push({
+  add({
     id: "financials",
     kicker: "05 · 재무 계획",
     title: "언제 돈이 남는가",
@@ -179,7 +184,7 @@ export function businessPlanReport(o: Record<string, unknown>): Report {
     ]),
   });
 
-  sections.push({
+  add({
     id: "funding",
     kicker: "06 · 자금 계획",
     title: "필요한 돈과 쓰는 곳",
@@ -202,7 +207,7 @@ export function businessPlanReport(o: Record<string, unknown>): Report {
     ]),
   });
 
-  sections.push({
+  add({
     id: "roadmap",
     kicker: "07 · 실행 로드맵",
     title: "언제 무엇을 증명하는가",
@@ -216,7 +221,7 @@ export function businessPlanReport(o: Record<string, unknown>): Report {
     ]),
   });
 
-  sections.push({
+  add({
     id: "risks",
     kicker: "08 · 리스크",
     title: "무엇이 잘못될 수 있는가",
@@ -245,6 +250,47 @@ export function businessPlanReport(o: Record<string, unknown>): Report {
       },
     ]),
   });
+
+  const chapters = objs(o.chapters).filter((c) => str(c.title));
+  const DATA_ID: Record<string, string> = { market: "market", competition: "competition", revenue: "model", financials: "financials", funding: "funding", roadmap: "roadmap", risks: "risks" };
+  const sections: ReportSection[] = [];
+  const used = new Set<string>();
+  const place = (id: string) => {
+    const section = byId.get(id);
+    if (!section || used.has(id)) return;
+    used.add(id);
+    // Between the plan's own numbered chapters, analysis blocks drop the classic numbering.
+    sections.push(chapters.length && section.kicker ? { ...section, kicker: section.kicker.replace(/^\d+ · /, "") } : section);
+  };
+  if (chapters.length) {
+    // The one-liner opens the plan; the classic summary/model texts only
+    // appear when the plan still has them.
+    if (str(o.one_liner)) sections.push({ id: "one-liner", title: str(o.plan_type) || "한 줄 요약", blocks: [{ type: "callout", label: "한 줄 요약", text: str(o.one_liner) }] });
+    used.add("summary");
+    chapters.forEach((c, i) => {
+      const table = obj(c.table);
+      const header = list(table.header).map(str);
+      const rows = list(table.rows).map((r) => list(r).map(str));
+      // `purpose` is the writer's note on what the chapter proves; readers get the title.
+      const title = str(c.title).replace(/^\s*\d+[.)]\s*/, "");
+      sections.push({
+        id: `chapter-${i + 1}`,
+        kicker: String(i + 1).padStart(2, "0"),
+        title,
+        blocks: keep([
+          { type: "text", text: str(c.body) },
+          has(c.points) && { type: "bullets", items: strs(c.points) },
+          header.length > 0 && rows.length > 0 && { type: "table", header, rows },
+        ]),
+      });
+      const data = DATA_ID[str(c.data)];
+      if (data) place(data);
+    });
+    // Revenue mix without the classic product/model texts: keep just the charts.
+    for (const id of ["market", "competition", "model", "financials", "funding", "roadmap", "risks"]) place(id);
+  } else {
+    for (const id of ["summary", "model", "market", "competition", "financials", "funding", "roadmap", "risks"]) place(id);
+  }
 
   const sources = sourcesOf(market.sources);
   if (sources.length) sections.push({ id: "sources", title: "출처", blocks: [{ type: "sources", items: sources }] });

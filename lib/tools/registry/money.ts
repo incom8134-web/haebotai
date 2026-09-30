@@ -42,6 +42,6 @@ export const money: ToolManifest = {
   outputRenderer: "cards",
   grounding: { requireSources: false, webSearch: true, estimateBadge: false },
   model: "gemini-3.1-pro-preview",
-  estimatedCredits: 25,
-  estimatedSeconds: 95,
+  estimatedCredits: 32,
+  estimatedSeconds: 190,
 };

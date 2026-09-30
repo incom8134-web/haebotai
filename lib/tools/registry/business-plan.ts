@@ -37,6 +37,6 @@ export const businessPlan: ToolManifest = {
   outputRenderer: "document",
   grounding: { requireSources: true, webSearch: true, estimateBadge: true },
   model: "gemini-3.1-pro-preview",
-  estimatedCredits: 80,
-  estimatedSeconds: 115,
+  estimatedCredits: 110,
+  estimatedSeconds: 260,
 };

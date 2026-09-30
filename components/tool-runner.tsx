@@ -17,6 +17,9 @@ import { Segmented } from "@/components/site/page";
 import type { ToolFormValues } from "@/components/tool-form";
 import { RunResult } from "@/components/run-result";
 import { RunProgress } from "@/components/run-progress";
+import { AgentTimeline } from "@/components/agent/agent-timeline";
+import { QuestionCard } from "@/components/agent/question-card";
+import type { AgentEvent, Intent, Question } from "@/lib/agents/types";
 import { emptyReference, ReferencePanel, uploadReferenceFiles, type ReferenceValue } from "@/components/tools/reference-panel";
 import { getTool } from "@/lib/tools/registry";
 import { CATEGORY_LABELS } from "@/lib/tools/registry/categories";
@@ -68,7 +71,7 @@ function formatProfileValue(
   return String(value);
 }
 
-type RunPhase = "idle" | "streaming" | "done" | "cancelled" | "error";
+type RunPhase = "idle" | "understanding" | "asking" | "streaming" | "done" | "cancelled" | "error";
 
 function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -191,6 +194,11 @@ function ToolRunner({
   // that there is nothing to cancel (and nothing to refund) on the server.
   const [activeRunId, setActiveRunId] = useState<string | null>(null);
   const [cancelNote, setCancelNote] = useState<string | null>(null);
+  // The run's live steps, the understood request, and pending questions.
+  const [steps, setSteps] = useState<AgentEvent[]>([]);
+  const [understood, setUnderstood] = useState("");
+  const [asking, setAsking] = useState<{ intent: Intent | null; questions: Question[]; base: Record<string, unknown>; serialized: ToolFormValues } | null>(null);
+  const lastIntent = useRef<Intent | null>(null);
   const router = useRouter();
   const abortRef = useRef<AbortController | null>(null);
   const formTopRef = useRef<HTMLDivElement | null>(null);
@@ -226,7 +234,7 @@ function ToolRunner({
       <Button onClick={startNew} className="studio-gradient-bg h-10 rounded-2xl px-4 text-white">
         <SquarePen className="size-4" aria-hidden /> {L({ ko: "새로 만들기", en: "Start new" })}
       </Button>
-      <Button variant="secondary" onClick={handleRun} className="h-10 rounded-2xl px-4">
+      <Button variant="secondary" onClick={() => handleRun()} className="h-10 rounded-2xl px-4">
         <RotateCcw className="size-4" aria-hidden /> {L({ ko: "같은 조건으로 다시 만들기", en: "Run again with the same inputs" })}
       </Button>
       <span className="text-2xs text-fg-subtle">{L({ ko: `다시 만들기는 크레딧 ${cost}가 다시 들어요`, en: `Running again uses ${cost} credits` })}</span>
@@ -242,23 +250,25 @@ function ToolRunner({
         )
     : [];
 
-  async function handleRun() {
-    if (phase === "streaming") return;
-    setPhase("streaming");
+  // A run: read the request (understanding + at most three questions,
+  // only when something critical is missing) → start the job → follow its
+  // steps. The job runs on the server whether or not this page stays open.
+  async function handleRun(opts?: { strategyOverride?: string }) {
+    if (phase === "streaming" || phase === "understanding") return;
     setFinal(null);
     setErrorMsg(null);
     setShowCancel(false);
     setCancelNote(null);
     setActiveRunId(null);
-    let finished = false;
+    setSteps([]);
+    setAsking(null);
+    setUnderstood("");
 
-    const controller = new AbortController();
-    abortRef.current = controller;
-    runIdRef.current = null;
-    const cancelTimer = setTimeout(() => setShowCancel(true), 5000);
-
+    let serialized: ToolFormValues;
+    let referencePayload: { mode: string; text: string; files: { name: string; path: string }[] } | undefined;
     try {
-      const serialized = await serializeValues(values);
+      setPhase("understanding");
+      serialized = await serializeValues(values);
       // "참고 자료": sent beside the form values; the server validates it,
       // reads the documents and keeps only text and file names on the run.
       let referenceFiles: { name: string; path: string }[] = [];
@@ -270,76 +280,153 @@ function ToolRunner({
         setErrorMsg({ ko: msg, en: "Couldn't upload the reference files. Please try again." });
         return;
       }
-      const referencePayload =
+      referencePayload =
         reference.text.trim() || reference.files.length
           ? { mode: reference.mode, text: reference.text, files: referenceFiles }
           : undefined;
+    } catch {
+      setPhase("error");
+      setErrorMsg({ ko: t("network_error"), en: t("network_error") });
+      return;
+    }
+
+    const base = {
+      values: serialized,
+      provider,
+      ...(excludedProfileKeys.size ? { excludeProfile: [...excludedProfileKeys] } : {}),
+      ...(referencePayload ? { reference: referencePayload } : {}),
+    };
+    // Understanding first. Never blocks the run: on any failure the run
+    // works it out itself.
+    let intent: Intent | null = null;
+    let questions: Question[] = [];
+    if (!opts?.strategyOverride) {
+      try {
+        const res = await fetch(`/api/tools/${toolId}/intent`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(base),
+          signal: AbortSignal.timeout(30_000),
+        });
+        if (res.ok) {
+          const data = (await res.json()) as { intent: Intent | null; questions: Question[] };
+          intent = data.intent;
+          questions = data.questions ?? [];
+        }
+      } catch {
+        /* run without it */
+      }
+    } else {
+      intent = lastIntent.current;
+    }
+    lastIntent.current = intent;
+    if (intent?.summary) setUnderstood(intent.summary);
+    if (questions.length) {
+      setAsking({ intent, questions, base, serialized });
+      setPhase("asking");
+      return;
+    }
+    await startRun(base, serialized, { intent, answers: [], strategyOverride: opts?.strategyOverride ?? null });
+  }
+
+  async function startRun(
+    base: Record<string, unknown>,
+    serialized: ToolFormValues,
+    agent: { intent: Intent | null; answers: { question: string; answer: string }[]; strategyOverride: string | null },
+  ) {
+    setAsking(null);
+    setPhase("streaming");
+    const controller = new AbortController();
+    abortRef.current = controller;
+    runIdRef.current = null;
+    const cancelTimer = setTimeout(() => setShowCancel(true), 5000);
+    let finished = false;
+    try {
       const res = await fetch(`/api/tools/${toolId}/run`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          values: serialized,
-          provider,
-          ...(excludedProfileKeys.size ? { excludeProfile: [...excludedProfileKeys] } : {}),
-          ...(referencePayload ? { reference: referencePayload } : {}),
-          ...(chainedFrom ? { chainedFromRunId: chainedFrom.runId } : {}),
-        }),
+        body: JSON.stringify({ ...base, agent, ...(chainedFrom ? { chainedFromRunId: chainedFrom.runId } : {}) }),
         signal: controller.signal,
       });
-
-      if (!res.ok || !res.body) {
-        const data = await res.json().catch(() => ({ error: null }));
+      const started = (await res.json().catch(() => ({}))) as { runId?: string; provider?: ProviderId; error?: string };
+      if (!res.ok || !started.runId) {
         setPhase("error");
-        setErrorMsg(data.error ? mapRunError(data.error) : { ko: t("run_failed"), en: t("run_failed") });
+        setErrorMsg(started.error ? mapRunError(started.error) : { ko: t("run_failed"), en: t("run_failed") });
         return;
       }
+      const runId = started.runId;
+      runIdRef.current = runId;
+      setActiveRunId(runId);
 
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() ?? "";
-        for (const line of lines) {
-          if (!line) continue;
-          let event;
-          try {
-            event = JSON.parse(line);
-          } catch {
-            continue;
+      // Follow the job. Each connection lasts a few minutes; reconnect
+      // from the last seen step until the run ends.
+      let since = 0;
+      let failures = 0;
+      while (!finished && !controller.signal.aborted) {
+        let res2: Response;
+        try {
+          res2 = await fetch(`/api/runs/${runId}/events?since=${since}`, { signal: controller.signal, cache: "no-store" });
+        } catch {
+          if (controller.signal.aborted) break;
+          if (++failures > 6) break;
+          await new Promise((r) => setTimeout(r, 1500 * failures));
+          continue;
+        }
+        if (!res2.ok || !res2.body) {
+          if (++failures > 6) break;
+          await new Promise((r) => setTimeout(r, 1500 * failures));
+          continue;
+        }
+        failures = 0;
+        const reader = res2.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split("\n");
+            buffer = lines.pop() ?? "";
+            for (const line of lines) {
+              if (!line) continue;
+              let event;
+              try {
+                event = JSON.parse(line);
+              } catch {
+                continue;
+              }
+              if (event.type === "step" && event.event) {
+                since += 1;
+                setSteps((prev) => [...prev, event.event as AgentEvent]);
+              } else if (event.type === "done") {
+                finished = true;
+                setPhase("done");
+                setFinal({
+                  input: serialized,
+                  output: event.output,
+                  sources: event.sources ?? [],
+                  creditsUsed: event.creditsUsed,
+                  runId: event.runId,
+                  provider: event.provider ?? provider,
+                });
+              } else if (event.type === "error") {
+                finished = true;
+                setPhase("error");
+                setErrorMsg(mapRunError(event.error));
+              } else if (event.type === "cancelled") {
+                finished = true;
+                setPhase("cancelled");
+              }
+            }
           }
-          if (event.type === "status" && event.runId) {
-            runIdRef.current = event.runId;
-            setActiveRunId(event.runId);
-          } else if (event.type === "done") {
-            finished = true;
-            setPhase("done");
-            setFinal({
-              input: serialized,
-              output: event.output,
-              sources: event.sources ?? [],
-              creditsUsed: event.creditsUsed,
-              runId: event.runId,
-              provider: event.provider ?? provider,
-            });
-          } else if (event.type === "error") {
-            finished = true;
-            setPhase("error");
-            setErrorMsg(mapRunError(event.error));
-          } else if (event.type === "cancelled") {
-            finished = true;
-            setPhase("cancelled");
-          }
+        } catch {
+          if (controller.signal.aborted) break;
         }
       }
-      // The stream ended without a final event (connection cut, or the
-      // server stopped): don't leave the spinner running forever.
-      if (!finished) {
+      if (!finished && !controller.signal.aborted) {
         setPhase("error");
-        setErrorMsg({ ko: "연결이 끊겨 결과를 받지 못했어요. 보관함에서 결과를 확인하거나 다시 실행해 주세요. 실패한 실행의 크레딧은 자동으로 돌아가요.", en: "The connection dropped before the result arrived. Check the Library, or run again — failed runs are refunded automatically." });
+        setErrorMsg({ ko: "연결이 끊겨 진행 상황을 받지 못했어요. 작업은 계속되니 잠시 뒤 보관함에서 결과를 확인해 주세요. 실패한 실행의 크레딧은 자동으로 돌아가요.", en: "Lost the connection to the run. It keeps going — check the Library shortly. Failed runs are refunded automatically." });
       }
     } catch {
       setPhase(controller.signal.aborted ? "cancelled" : "error");
@@ -356,9 +443,8 @@ function ToolRunner({
     }
   }
 
-  // Record the cancel on the server first (that's what refunds — a
-  // dropped connection alone isn't reliably seen by the run route), then
-  // stop reading the stream.
+  // Record the cancel on the server first (that's what stops the job and
+  // refunds), then stop following it.
   async function handleCancel() {
     const runId = runIdRef.current;
     if (!runId) return;
@@ -367,13 +453,13 @@ function ToolRunner({
     const data = res ? ((await res.json().catch(() => ({}))) as { cancelled?: boolean }) : {};
     if (data.cancelled) {
       abortRef.current?.abort();
+      setPhase("cancelled");
       return;
     }
     // Too late to cancel (already finishing): let the result arrive rather
     // than claim a refund that didn't happen.
     setCancelNote(L({ ko: "이미 거의 끝나서 취소할 수 없어요. 결과가 곧 나와요.", en: "It's nearly done, so it can't be cancelled — the result is on its way." }));
   }
-
 
   const side = (
     <aside className="min-w-0 space-y-4 lg:sticky lg:top-24">
@@ -545,8 +631,8 @@ function ToolRunner({
       <div className="mt-6 flex items-center gap-2">
         <Button
           data-run-button
-          onClick={handleRun}
-          loading={phase === "streaming"}
+          onClick={() => handleRun()}
+          loading={phase === "streaming" || phase === "understanding"}
           shortcut="⌘↵"
           className="studio-gradient-bg h-11 rounded-2xl px-5 text-white shadow-[inset_0_1px_0_oklch(1_0_0/30%),0_12px_32px_-12px_var(--studio-violet)] transition-transform duration-500 ease-[var(--spring)] hover:-translate-y-0.5"
         >
@@ -560,12 +646,35 @@ function ToolRunner({
       </div>
       {phase === "streaming" && cancelNote ? <p role="status" className="mt-2 text-xs text-fg-muted">{cancelNote}</p> : null}
 
-      {phase === "streaming" ? (
-        <RunProgress
-          toolId={manifest.id}
-          toolName={locale === "en" ? manifest.name_en : manifest.name_ko}
-          estimatedSeconds={manifest.estimatedSeconds}
+      {phase === "understanding" ? (
+        <p role="status" className="mt-4 text-sm text-fg-muted">
+          {L({ ko: "요청을 읽고 있어요…", en: "Reading your request…" })}
+        </p>
+      ) : null}
+
+      {phase === "asking" && asking ? (
+        <QuestionCard
+          summary={understood}
+          questions={asking.questions}
+          onSubmit={(answers) => startRun(asking.base, asking.serialized, { intent: asking.intent, answers, strategyOverride: null })}
+          onCancel={() => {
+            setAsking(null);
+            setPhase("idle");
+          }}
         />
+      ) : null}
+
+      {phase === "streaming" ? (
+        <>
+          <RunProgress
+            toolId={manifest.id}
+            toolName={locale === "en" ? manifest.name_en : manifest.name_ko}
+            estimatedSeconds={manifest.estimatedSeconds}
+            live={steps.length > 0}
+          />
+          {understood ? <p className="mt-3 text-xs break-keep text-fg-muted">{L({ ko: `이해한 요청: ${understood}`, en: `Understood: ${understood}` })}</p> : null}
+          <AgentTimeline events={steps} />
+        </>
       ) : null}
 
       {phase === "done" && final ? (
@@ -579,6 +688,7 @@ function ToolRunner({
             creditsUsed={final.creditsUsed}
             runId={final.runId}
             provider={final.provider}
+            onRerunWithStrategy={(chosen) => handleRun({ strategyOverride: chosen })}
           />
           <div className="mt-5 glass rounded-[20px] p-4">
             <p className="mb-2.5 text-sm font-medium">{L({ ko: "다음은 무엇을 할까요?", en: "What next?" })}</p>

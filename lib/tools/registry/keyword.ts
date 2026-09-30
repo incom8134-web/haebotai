@@ -41,6 +41,6 @@ export const keyword: ToolManifest = {
   outputRenderer: "table",
   grounding: { requireSources: false, webSearch: true, estimateBadge: true },
   model: "gemini-3.1-pro-preview",
-  estimatedCredits: 20,
-  estimatedSeconds: 75,
+  estimatedCredits: 26,
+  estimatedSeconds: 160,
 };

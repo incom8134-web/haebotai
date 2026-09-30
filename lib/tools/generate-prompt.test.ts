@@ -105,7 +105,7 @@ test("buildContext only includes profile fields the manifest actually declares u
     brand_colors: [],
   };
   const context = buildContext(manifest, {}, profile);
-  assert.match(context, /\[비즈니스 프로필\] 업종: 카페/);
+  assert.match(context, /비즈니스 프로필 — 이번 요청의 대상과 같은 사업일 때만 참고\]\n- 업종: 카페/);
   assert.doesNotMatch(context, /브랜드명/, "brand_name isn't in usesProfile, must not leak into the prompt");
 });
 

@@ -107,6 +107,13 @@ const EXT_MIME: Record<string, string> = {
   html: "text/html",
 };
 
+/** Storage paths of the uploaded reference files in a raw "참고 자료" payload (for cleanup when a run ends). */
+export function referencePaths(raw: unknown, prefix: string): string[] {
+  const parsed = referenceSchema.safeParse(raw);
+  if (!parsed.success) return [];
+  return (parsed.data?.files ?? []).flatMap((f) => ("path" in f && f.path.startsWith(prefix) ? [f.path] : []));
+}
+
 export async function buildReference(
   toolId: string,
   raw: unknown,

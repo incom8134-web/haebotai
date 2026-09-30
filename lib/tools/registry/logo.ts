@@ -46,6 +46,6 @@ export const logo: ToolManifest = {
   outputRenderer: "images",
   grounding: { requireSources: false, webSearch: false, estimateBadge: false },
   model: "gemini-3-pro-image",
-  estimatedCredits: 45,
-  estimatedSeconds: 45,
+  estimatedCredits: 60,
+  estimatedSeconds: 110,
 };

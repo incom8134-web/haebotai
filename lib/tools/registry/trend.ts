@@ -41,6 +41,6 @@ export const trend: ToolManifest = {
   outputRenderer: "cards",
   grounding: { requireSources: true, webSearch: true, estimateBadge: true },
   model: "gemini-3.1-pro-preview",
-  estimatedCredits: 50,
-  estimatedSeconds: 115,
+  estimatedCredits: 65,
+  estimatedSeconds: 230,
 };

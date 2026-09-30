@@ -1,10 +1,9 @@
-// Creative directions: why two runs of the same tool no longer look
-// alike. Each creative tool has a pool of genuinely different approaches
-// (a site's layout archetype, a deck's story framework, an ad framework,
-// a blog format, a strategic lens, a logo or photo aesthetic). Every run
-// takes one this user hasn't seen in their recent runs of the tool, the
-// prompt is told to commit to it, and the result records it — so the
-// rotation continues and the user sees which direction they got.
+// Creative directions: each creative tool's menu of genuinely different
+// approaches (a site's design language, a deck's story framework, an ad
+// framework, a blog format, a strategic lens, a logo or photo aesthetic).
+// The request analysis (lib/tools/request-brief.ts) picks the one that
+// fits the request's tone, audience and purpose — or none — and the
+// result records it. Nothing here is chosen at random.
 
 export interface Direction {
   id: string;
@@ -25,6 +24,10 @@ export const DIRECTIONS: Record<string, Direction[]> = {
     { id: "dark-luxe", name: "다크 럭셔리", brief: "깊은 어두운 배경에 금속·보석 톤 포인트, 절제된 세리프와 넓은 자간, 여백이 많은 고급스러운 호흡." },
     { id: "story-scroll", name: "스토리 스크롤", brief: "처음부터 끝까지 하나의 이야기처럼 이어지는 세로 흐름. 단계 번호, 타임라인, 장면 전환이 있는 내러티브 구성." },
     { id: "playful", name: "플레이풀 스티커", brief: "경쾌한 색, 살짝 기울어진 카드, 스티커 같은 배지와 말풍선, 둥근 산세리프. 친근하고 재미있는 동네 브랜드 톤." },
+    { id: "calm-trust", name: "차분한 신뢰", brief: "밝은 배경과 넓은 여백, 절제된 한두 가지 색, 또렷한 정보 위계와 부드러운 움직임. 병원·법률·세무·금융·교육처럼 신뢰와 안심이 먼저인 곳의 차분한 톤." },
+    { id: "heritage", name: "전통과 장인", brief: "한지·먹·나무 같은 질감, 차분한 먹색과 자연 안료 색, 세로쓰기나 낙관 같은 한국적 디테일, 품위 있는 세리프. 노포·한식·공방·전통 브랜드의 깊이 있는 톤." },
+    { id: "product-tech", name: "제품·테크 쇼케이스", brief: "제품 화면이나 기능을 주인공으로 보여 주는 정밀한 UI 톤: 선명한 대비, 기능별 섹션, 숫자와 비교표, 미세한 인터랙션. 앱·SaaS·기기·기술 서비스에 맞는 톤." },
+    { id: "catalog", name: "쇼핑 카탈로그", brief: "상품 사진과 가격·옵션이 주인공인 깔끔한 커머스 구성: 카테고리 필터, 상품 그리드, 장바구니·구매 버튼, 배송·교환 안내가 또렷한 톤." },
   ],
   presentation: [
     { id: "scqa", name: "SCQA 구조", brief: "상황(Situation) → 문제(Complication) → 질문(Question) → 답(Answer) 순서로 설득하는 컨설팅식 구조. 사진은 차분한 다큐멘터리 톤." },
@@ -146,22 +149,3 @@ export const DIRECTIONS: Record<string, Direction[]> = {
     { id: "easy", name: "준비 부담 적은 순", brief: "서류와 조건이 간단해 이번 달 안에 신청할 수 있는 사업부터 정리하고, 첫 신청 경험을 쌓는 순서를 제안합니다." },
   ],
 };
-
-/** A direction this user hasn't had in their recent runs of the tool. */
-export function pickDirection(toolId: string, recentIds: string[], random: () => number = Math.random): Direction | null {
-  const pool = DIRECTIONS[toolId];
-  if (!pool?.length) return null;
-  const avoid = new Set(recentIds.slice(0, Math.max(0, Math.min(pool.length - 1, 4))));
-  const fresh = pool.filter((d) => !avoid.has(d.id));
-  const choices = fresh.length ? fresh : pool;
-  return choices[Math.floor(random() * choices.length)];
-}
-
-/** The prompt block for the chosen direction. */
-export function directionPrompt(d: Direction): string {
-  return [
-    `[이번 결과의 창작 방향: ${d.name}]`,
-    d.brief,
-    "이 방향에 확실히 맞춰 이전 결과들과 구조·표현·시각이 뚜렷하게 다르게 만드세요. 다만 사용자가 입력한 조건, 사실 규칙, 참고 자료 작업 지시와 충돌하면 그쪽을 우선하세요.",
-  ].join("\n");
-}

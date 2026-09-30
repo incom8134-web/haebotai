@@ -141,7 +141,7 @@ function StudioMock() {
     <div className="glass-strong relative rounded-[32px] p-5 sm:p-6">
       <div className="flex items-center justify-between">
         <span className="flex items-center gap-2 text-sm font-semibold"><span className="size-2 rounded-full bg-studio-success" aria-hidden /> {L({ ko: "스튜디오", en: "Studio" })}</span>
-        <span className="font-mono text-2xs text-fg-subtle">{L({ ko: "해봇 베이커리", en: "Haebot Bakery" })}</span>
+        <span className="font-mono text-2xs text-fg-subtle">{L({ ko: "달빛 베이커리", en: "Moonlight Bakery" })}</span>
       </div>
       <div className="mt-4 min-h-[76px] rounded-2xl border border-hairline bg-bg/40 p-4 text-sm leading-relaxed break-keep">
         {brief.slice(0, typed)}

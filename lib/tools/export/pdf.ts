@@ -17,7 +17,7 @@ const SIZES = { 1: 16, 2: 13, 3: 11.5 } as const;
 export async function buildPdf(doc: ExportDoc): Promise<Buffer> {
   const images = await fetchAll(doc.blocks.flatMap((b) => (b.type === "image" ? [b.url] : [])));
   const { regular, bold } = pretendard();
-  const pdf = new PDFDocument({ size: "A4", margins: { top: 56, bottom: 56, left: 56, right: 56 }, bufferPages: true, info: { Title: doc.title, Producer: "해봇 AI" } });
+  const pdf = new PDFDocument({ size: "A4", margins: { top: 56, bottom: 56, left: 56, right: 56 }, bufferPages: true, info: { Title: doc.title } });
   pdf.registerFont("ko", regular);
   pdf.registerFont("ko-bold", bold);
   const width = pdf.page.width - 112;
