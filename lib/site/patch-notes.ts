@@ -4,6 +4,17 @@ export type NoteKind = "new" | "improved" | "fixed";
 
 export const PATCH_NOTES: { version: string; date: string; title: Bilingual; items: { kind: NoteKind; text: Bilingual }[] }[] = [
   {
+    version: "2.9.0",
+    date: "2026-10-01",
+    title: { ko: "새 로그인·요금 화면과 새로 쓴 도움말", en: "New sign-in and pricing pages, rewritten help" },
+    items: [
+      { kind: "new", text: { ko: "요금 페이지: 플랜, 크레딧이 쓰이는 방식, 가입 크레딧 500으로 할 수 있는 것, 25개 도구의 예상 크레딧을 한곳에", en: "Pricing page: plans, how credits work, what 500 sign-up credits cover, and every tool's estimated credits in one place" } },
+      { kind: "improved", text: { ko: "로그인: 만들 수 있는 것, 다시 온 분을 위한 안내, 계정·데이터를 어떻게 다루는지 버튼 옆에서 바로", en: "Sign-in: what you can build, a word for returning members, and how your account and data are handled, right beside the button" } },
+      { kind: "improved", text: { ko: "자주 묻는 질문: 프로젝트·버전 주제를 추가하고, 시작하기와 내보내기 형식 답변을 지금 기능에 맞게 고쳤어요", en: "FAQ: a new Projects & versions topic, and the getting-started and export answers updated to match today's features" } },
+      { kind: "improved", text: { ko: "크레딧·한도 화면의 도구별 비용표가 25개 도구 기준으로 바뀌었어요", en: "The per-tool cost table under Credits & limits now lists the 25 tools" } },
+    ],
+  },
+  {
     version: "2.8.0",
     date: "2026-10-01",
     title: { ko: "처음 시작하기와 새 대시보드", en: "Getting started and a new dashboard" },
