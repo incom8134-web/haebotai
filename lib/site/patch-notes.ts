@@ -4,6 +4,17 @@ export type NoteKind = "new" | "improved" | "fixed";
 
 export const PATCH_NOTES: { version: string; date: string; title: Bilingual; items: { kind: NoteKind; text: Bilingual }[] }[] = [
   {
+    version: "2.7.0",
+    date: "2026-10-01",
+    title: { ko: "새 홈페이지 — 아이디어에서 매출까지 이어지는 작업실", en: "A new homepage — one workshop from idea to revenue" },
+    items: [
+      { kind: "new", text: { ko: "프로젝트가 아이디어→오퍼→브랜드→훅으로 이어지며 정보를 기억하는 모습을 실제 화면처럼 보여 주는 첫 화면", en: "A hero that shows a project carrying what it learns from idea to offer to brand to hooks, drawn from the real screens" } },
+      { kind: "new", text: { ko: "IDEA·BUILD·BRAND·SELL·OPERATE·GROW 단계별로 25개 도구 모두 보기, 분야별 결과 화면 미리보기", en: "All 25 tools by stage — Idea, Build, Brand, Sell, Operate, Grow — and a preview of each area's result screen" } },
+      { kind: "new", text: { ko: "오퍼 설계소의 실제 실행 결과로 보는 전후 비교, 사용 방법 5단계, 이런 분께 추천하는 도구", en: "A before/after from a real Offer Architect run, five steps to get started, and tools picked for each kind of business" } },
+      { kind: "improved", text: { ko: "더 가볍게: 3D 배경과 옛 데모 영상을 빼서 휴대폰에서도 빠르게 열려요", en: "Lighter: the 3D background and old demo video are gone, so the page opens fast on phones" } },
+    ],
+  },
+  {
     version: "2.6.0",
     date: "2026-10-01",
     title: { ko: "프로젝트와 버전 — 한 번 입력한 내용을 계속 이어서", en: "Projects and versions — keep building on what you've entered" },
