@@ -106,3 +106,35 @@ export function PriceTable() {
     </div>
   );
 }
+
+/** A few real per-tool prices and the full range, for the landing page. */
+export function CreditPreview({ signupCredits = 500 }: { signupCredits?: number }) {
+  const L = useBi();
+  const prices = toolPrices().sort((a, b) => a.credits - b.credits);
+  if (!prices.length) return null;
+  const min = prices[0].credits;
+  const max = prices[prices.length - 1].credits;
+  // One per category, so the sample spans the catalogue.
+  const sample = CATEGORY_ORDER.map((c) => prices.find((p) => p.tool.category === c)).filter((p) => !!p).slice(0, 5);
+  return (
+    <div className="rounded-[22px] border border-hairline bg-surface p-5">
+      <p className="text-sm font-semibold text-fg">
+        {L({ ko: `도구 1회 실행 ${min}~${max} 크레딧`, en: `${min}–${max} credits per tool run` })}
+        <span className="ml-2 text-xs font-normal text-fg-muted">
+          {L({ ko: `가입 크레딧 ${signupCredits}이면 가장 가벼운 도구로 ${Math.floor(signupCredits / Math.max(1, min))}번`, en: `${signupCredits} sign-up credits = ${Math.floor(signupCredits / Math.max(1, min))} runs of the lightest tool` })}
+        </span>
+      </p>
+      <ul className="mt-3 flex flex-wrap gap-2">
+        {sample.map(({ tool, credits }) => (
+          <li key={tool.slug}>
+            <Link href={`/tools/${tool.slug}`} className="flex items-center gap-1.5 rounded-full border border-hairline px-3 py-1.5 text-xs text-fg hover:border-accent/50">
+              <tool.icon size={13} className="text-accent" aria-hidden />
+              <span className="break-keep">{L(tool.name)}</span>
+              <span className="font-mono text-fg-muted">{credits}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}

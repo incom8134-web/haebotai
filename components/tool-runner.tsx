@@ -227,6 +227,33 @@ function ToolRunner({
   const formTopRef = useRef<HTMLDivElement | null>(null);
   const runIdRef = useRef<string | null>(null);
 
+  // Chained from the image tool into the detail page: the generated images
+  // become the product photos (a File field, so they're fetched once here).
+  useEffect(() => {
+    if (chainedFrom?.toolId !== "image" || toolId !== "sangsepage") return;
+    const images = (chainedFrom.output as { images?: { url?: string }[] } | null)?.images ?? [];
+    const urls = images.map((i) => i?.url).filter((u): u is string => typeof u === "string" && u.length > 0).slice(0, 4);
+    if (urls.length === 0) return;
+    let cancelled = false;
+    Promise.all(
+      urls.map(async (url, i) => {
+        const res = await fetch(url);
+        if (!res.ok) return null;
+        const blob = await res.blob();
+        return new File([blob], `image-${i + 1}.${blob.type === "image/jpeg" ? "jpg" : "png"}`, { type: blob.type || "image/png" });
+      }),
+    )
+      .then((files) => {
+        const ok = files.filter((f): f is File => !!f);
+        if (cancelled || ok.length === 0) return;
+        setValues((p) => (Array.isArray(p.product_photos) && p.product_photos.length > 0 ? p : { ...p, product_photos: ok }));
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [chainedFrom, toolId]);
+
   // ⌘/Ctrl + Enter runs the tool from anywhere on the page (the Run button shows the hint).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

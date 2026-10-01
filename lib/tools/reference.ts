@@ -1,5 +1,6 @@
 import type { Bilingual } from "./content";
 import type { ImagePart } from "./generate-prompt";
+import type { SourceDoc } from "../agents/core/source";
 
 // "참고 자료" on every tool: the user pastes text or uploads images and
 // documents, then picks what the tool should do with them. Each tool has
@@ -311,6 +312,12 @@ export interface ReferenceBundle {
   documents: ImagePart[];
   /** Slides in an uploaded PowerPoint, when there was one (a deck to keep "as is" keeps this count). */
   slideCount?: number;
+  /**
+   * Every uploaded document (and pasted text) as a structured source —
+   * outline, sections, pages, tables — with nothing cut off
+   * (lib/agents/core/source.ts). Rebuilt each invocation, never stored.
+   */
+  sources?: SourceDoc[];
 }
 
 /** The prompt block every tool adds when the user gave reference material. */

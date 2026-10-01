@@ -1,6 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { toast } from "sonner";
+import { upsertBusinessProfile } from "@/lib/profile";
 import { useBi } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
 import { contrast, DIMENSIONS, readPalette, ROLE_LABELS, textOn } from "@/lib/tools/report/brand-dna";
@@ -19,9 +21,25 @@ const ROLE_EN: Record<string, string> = { primary: "Primary", secondary: "Second
 const fontHref = (families: string[]) =>
   `https://fonts.googleapis.com/css2?${families.map((f) => `family=${f.replace(/ /g, "+")}:wght@400;700`).join("&")}&display=swap`;
 
-export function BrandBoard({ output, input }: { output: Record<string, unknown>; input?: Record<string, unknown> }) {
+export function BrandBoard({ output, input, runId }: { output: Record<string, unknown>; input?: Record<string, unknown>; runId?: string }) {
   const L = useBi();
   const palette = useMemo(() => readPalette(output), [output]);
+  const [applied, setApplied] = useState<"idle" | "saving" | "done">("idle");
+
+  // The palette becomes the brand colours on /brand, so later runs use it.
+  async function applyPalette() {
+    if (applied !== "idle") return;
+    setApplied("saving");
+    const hex = [...new Set(palette.map((c) => c.hex.toUpperCase()))].slice(0, 6);
+    const result = await upsertBusinessProfile({ brand_colors: hex }).catch(() => ({ ok: false as const, error: "" }));
+    if (result.ok) {
+      setApplied("done");
+      toast.success(L({ ko: "브랜드 컬러를 프로필에 저장했어요", en: "Saved the palette to your brand profile" }));
+    } else {
+      setApplied("idle");
+      toast.error(L({ ko: "프로필에 저장하지 못했어요", en: "Couldn't save to your profile" }));
+    }
+  }
   const essence = obj(output.essence);
   const arche = obj(output.archetype);
   const dims = obj(output.dimensions);
@@ -139,6 +157,16 @@ export function BrandBoard({ output, input }: { output: Record<string, unknown>;
           <div className="flex items-end gap-2">
             <SectionTitle kicker={L({ ko: "색", en: "Colour" })} title={L({ ko: "팔레트와 글자 대비", en: "Palette and text contrast" })} />
             <CopyButton text={cssVars} label={L({ ko: "CSS 변수로 복사", en: "Copy as CSS" })} className="mb-3 ml-auto" />
+            {runId ? (
+              <button
+                type="button"
+                onClick={applyPalette}
+                disabled={applied !== "idle"}
+                className="mb-3 inline-flex items-center rounded-full border border-accent/40 bg-accent-dim px-2.5 py-1 text-xs font-medium text-accent disabled:opacity-60"
+              >
+                {applied === "done" ? L({ ko: "프로필에 저장됨", en: "Saved to profile" }) : applied === "saving" ? L({ ko: "저장 중…", en: "Saving…" }) : L({ ko: "내 브랜드 컬러로 저장", en: "Use as my brand colours" })}
+              </button>
+            ) : null}
           </div>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {palette.map((c, i) => {

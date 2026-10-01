@@ -105,3 +105,17 @@ test("a trend radar idea carries into a business plan", () => {
   const seed = seedFromChain("business-plan", "trend", { ideas: [{ name: "AI 코칭", one_liner: "학부모용", target_customer: "초등 학부모" }] });
   assert.equal(seed.item, "AI 코칭\n학부모용\n대상: 초등 학부모");
 });
+
+test("the previously empty pairs now carry data across", () => {
+  const keyword = { summary: "동네 카페 검색은 '분위기'가 많아요", combinations: ["해운대 카페", "해운대 디저트"] };
+  assert.match(String(seedFromChain("copy", "keyword", keyword).offer), /해운대 카페, 해운대 디저트/);
+
+  const strategy = { positioning_statement: "출근길 3분 커피", promise: "줄 없이", territories: [{ name: "속도", idea: "주문 앱" }], recommended_territory: "속도", segments: [{ name: "직장인" }] };
+  const deck = seedFromChain("presentation", "strategy", strategy);
+  assert.match(String(deck.brief), /출근길 3분 커피/);
+  assert.equal(deck.audience, "직장인");
+
+  const trend = { summary: "요약", recommended: "B", ideas: [{ name: "A", one_liner: "a" }, { name: "B", one_liner: "b", target_customer: "20대", differentiation_angles: ["x", "y", "z"] }] };
+  assert.match(String(seedFromChain("strategy", "trend", trend).context), /^B — b/);
+  assert.match(String(seedFromChain("presentation", "trend", trend).brief), /- A: a/);
+});
