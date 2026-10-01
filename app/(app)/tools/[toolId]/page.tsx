@@ -4,6 +4,7 @@ import { ToolUpcoming } from "@/components/tools/tool-upcoming";
 import { getTool } from "@/lib/tools/registry";
 import { getToolContent } from "@/lib/tools/content";
 import { redirectFor } from "@/lib/tools/catalog";
+import { toolPack } from "@/lib/tools/pack";
 
 // Tool overview page: what the tool makes, presets to start from, sample
 // output, how-to, tips, chaining and FAQ. Running happens at ./run.
@@ -26,5 +27,5 @@ export default async function ToolHomePage({ params }: { params: Promise<{ toolI
   if (tool.slug && tool.slug !== toolId) permanentRedirect(`/tools/${tool.slug}`);
   if (tool.comingSoon) return <ToolUpcoming slug={tool.slug ?? toolId} />;
   if (!getToolContent(tool.id)) notFound();
-  return <ToolHome toolId={tool.id} />;
+  return <ToolHome toolId={tool.id} pack={toolPack(tool.id)} />;
 }
