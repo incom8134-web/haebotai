@@ -208,6 +208,15 @@ export const REFERENCE_MODES: Record<string, ReferenceMode[]> = {
     },
   ],
   "content-transformer": [REFERENCE],
+  "sop-builder": [REFERENCE, IMPROVE("매뉴얼")],
+  "meeting-action": [
+    {
+      id: "transcript",
+      label: { ko: "녹취·회의록 파일", en: "Transcript or minutes file" },
+      hint: { ko: "녹취 텍스트나 회의록 파일을 올리기", en: "Upload a transcript or minutes file" },
+      instruction: "참고 자료는 회의 녹취 또는 회의록입니다. 메모 칸의 내용과 함께 읽고, 결정·할 일·열린 질문은 이 자료에 나온 것만 쓰세요.",
+    },
+  ],
   "brand-dna": [
     REFERENCE,
     {

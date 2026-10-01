@@ -334,6 +334,37 @@ const SAMPLES: Record<string, { output: Record<string, unknown>; input?: Record<
       dropped: ["통계"],
     },
   },
+  "sop-builder": {
+    output: {
+      summary: "요약",
+      purpose: "주문을 당일 발송",
+      scope: { starts_when: "9시", ends_when: "4시 집하", not_covered: ["반품"] },
+      roles: [{ role: "사장", responsibility: "CS" }, { role: "알바", responsibility: "포장" }],
+      steps: [
+        { id: "s1", title: "주문 확인", role: "사장", type: "task", action: "확인", tools: "스마트스토어", output: "목록", minutes: 10, if_no: "" },
+        { id: "s2", title: "옵션 맞나?", role: "알바", type: "decision", action: "대조", tools: "", output: "", minutes: 5, if_no: "사장에게 카톡" },
+      ],
+      quality_checks: [{ step_id: "s2", check: "라벨", standard: "사진 1장" }],
+      exceptions: [{ situation: "재고 없음", response: "고객 연락", escalate_to: "사장" }],
+      kpis: [{ metric: "오배송", target: "0건", how: "주간 집계" }],
+      training_tips: ["첫날은 옆에서"],
+    },
+  },
+  "meeting-action": {
+    output: {
+      title: "주간 회의",
+      summary: "요약",
+      decisions: [{ decision: "목요일 촬영", rationale: "사진 없음", owner: "민지" }],
+      actions: [
+        { task: "작가 섭외", owner: "준호", due: "", due_note: "마감 정하기 필요", priority: "high", done_when: "확정", from_note: "준호가 섭외" },
+        { task: "수수료 조사", owner: "소라", due: "2026-10-13", due_note: "", priority: "medium", done_when: "표", from_note: "화요일까지" },
+      ],
+      open_questions: [{ question: "배달앱?", who_answers: "소라" }],
+      risks: [],
+      next_agenda: ["배달앱 결정"],
+      follow_up_message: "정리",
+    },
+  },
 };
 
 function charts(report: Report) {

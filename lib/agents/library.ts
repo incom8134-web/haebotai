@@ -117,6 +117,25 @@ export const AGENT_GUIDES: Record<string, AgentGuide> = {
       { id: "expert-note", name: "전문가 노트", when: "링크드인·뉴스레터처럼 신뢰가 먼저일 때", structure: "관점 한 줄 → 근거 → 실무 팁 → 대화 유도" },
     ],
   },
+  "sop-builder": {
+    objective: "처음 온 사람도 이 문서만 보고 같은 품질로 일을 끝낼 수 있는 절차서",
+    decide: ["업무의 시작과 끝", "판단이 필요한 지점과 그 기준", "품질을 확인할 지점"],
+    approaches: [
+      { id: "linear", name: "순서대로 한 줄", when: "한 사람이 처음부터 끝까지 하는 일", structure: "시작 조건 → 단계 순서 → 단계별 확인 → 완료 기준" },
+      { id: "swimlane", name: "역할별 넘기기", when: "여러 사람이 이어받는 일", structure: "역할 정의 → 역할별 단계 → 넘기는 지점과 확인 → 예외 시 연락" },
+      { id: "decision-tree", name: "판단 분기", when: "상황에 따라 처리가 달라지는 일(환불, 클레임)", structure: "입력 확인 → 판단 질문 → 경우별 처리 → 기록" },
+      { id: "checklist-first", name: "체크리스트 중심", when: "빠뜨리기 쉬운 항목이 많은 일(오픈·마감)", structure: "준비물 → 순서별 체크 항목 → 품질 기준 → 마감 확인" },
+    ],
+  },
+  "meeting-action": {
+    objective: "회의가 끝나자마자 누가 무엇을 언제까지 할지 보이는 정리, 지어낸 것 없이",
+    decide: ["결정과 논의의 구분", "할 일의 크기와 담당", "열린 질문을 누가 풀지"],
+    approaches: [
+      { id: "by-owner", name: "사람별", when: "참석자가 여럿이고 역할이 나뉠 때", structure: "결정 → 담당자별 할 일과 마감 → 열린 질문 → 다음 안건" },
+      { id: "by-deadline", name: "마감순", when: "일정이 빠듯한 프로젝트 회의", structure: "결정 → 마감이 가까운 순서의 할 일 → 막힌 것 → 다음 안건" },
+      { id: "client-recap", name: "고객 미팅 요약", when: "외부 고객·거래처와의 미팅", structure: "합의 사항 → 우리가 할 일 → 고객이 할 일 → 확인 필요 사항 → 보낼 요약 메시지" },
+    ],
+  },
   homepage: {
     objective: "방문자가 이 사업을 신뢰하고 한 가지 행동(예약·문의·구매·방문)으로 이어지는, 이 사업에만 맞는 사이트",
     decide: [

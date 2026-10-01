@@ -4,6 +4,14 @@
 // languages. Used when the UI is in English.
 
 export const PRESET_VALUES_EN: Record<string, Record<number, Record<string, string | string[]>>> = {
+  "sop-builder": {
+    0: { process: "Smart Store order to shipping: check new orders at 9am, pack items, print labels on the courier site, enter tracking numbers in Smart Store, ship at 4pm pickup. Part-timer packs, owner handles CS.", standard: "Same-day shipping for orders before 2pm, zero wrong items", roles: ["Owner", "Part-timer"], tools: ["Smart Store", "Courier site", "KakaoTalk"], problems: "Wrong colour options sent, tracking numbers not entered so customers ask" },
+    1: { process: "Café opening: unlock at 7:30, machine warm-up, calibrate espresso, check pastries delivery, stock the counter, open POS at 8.", roles: ["Morning barista"], tools: ["POS", "Espresso machine"], problems: "Espresso tastes sour on busy mornings because calibration is skipped" },
+  },
+  "meeting-action": {
+    0: { notes: "Weekly meeting. Minji: spring menu photos not ready. Decided to shoot this Thursday at the store. Junho will book the photographer. Price of the strawberry set stays at 18,000 won. Open question: do we do delivery apps for the spring menu? Sora to check commission rates by next Tuesday. Instagram posting — Minji will try 3 reels this week.", participants: ["Minji", "Junho", "Sora"] },
+    1: { notes: "Call with client (Hanbit Academy). They want the landing page by end of April. They'll send the logo files and course list. We send wireframes first. Budget not confirmed — they'll check internally. They asked if we can add a consultation booking form.", participants: ["Hanbit Academy (Director Kim)", "Us (Yuna)"] },
+  },
   "hook-lab": {
     0: { topic: "Three things new dog owners get wrong on walks", product: "1:1 dog walking training", audience: "Owners in their 20s–30s with a dog under a year old", proof: ["Trainer with 8 years' experience"] },
     1: { topic: "Why our bakery's bread is sold out by 3pm", audience: "Office workers in their 20s–40s nearby", avoid: "'Delicious', 'the best'" },
