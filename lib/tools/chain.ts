@@ -129,7 +129,14 @@ function seedFromDiscover(targetId: string, sourceId: string, source: unknown, p
       const t = arr(out.territories).find((x) => s(x.name) === s(out.recommended_territory)) ?? arr(out.territories)[0];
       return { topic: lines(s(t?.idea), s(t?.example_line) && `예: ${s(t?.example_line)}`), audience: s(arr(out.segments)[0]?.name) };
     }
-    if (sourceId === "brand-dna") return { product: s(o(out.essence).one_line), audience: s(o(out.positioning).for_whom) };
+    if (sourceId === "brand-dna")
+      return {
+        // topic is the form's required field: what the brand promises and
+        // its first key message are what hooks should be about.
+        topic: lines(s(o(out.essence).promise), s(([] as unknown[]).concat(o(out.messaging).key_messages ?? [])[0])),
+        product: s(o(out.essence).one_line),
+        audience: s(o(out.positioning).for_whom),
+      };
     if (sourceId === "offer-architect") return { topic: s(out.core_promise), product: s(out.offer_name), audience: s(o(out.target).who) };
   }
   if (targetId === "content-transformer") {
@@ -188,6 +195,27 @@ function seedFromDiscover(targetId: string, sourceId: string, source: unknown, p
       };
     return {};
   }
+  if (sourceId === "market-desk") {
+    // The decision the research was for, and what it concluded.
+    const business = lines(s(out.decision), s(out.summary));
+    if (targetId === "competitor-lens" || targetId === "persona-mapper") return { business };
+    return {};
+  }
+  if (sourceId === "business-plan") {
+    const sections = o(out.sections);
+    const kind = s(out.plan_type);
+    const reader = /정부|지원/.test(kind) ? "정부지원사업 심사위원" : /투자|IR/i.test(kind) ? "투자자" : /대출|은행/.test(kind) ? "금융기관 심사역" : "";
+    const summary = lines(
+      s(out.title),
+      s(out.one_liner),
+      s(sections.problem) && `문제: ${s(sections.problem)}`,
+      s(sections.solution) && `해결: ${s(sections.solution)}`,
+      arr(out.revenue_streams).length > 0 && `수익: ${arr(out.revenue_streams).map((r) => s(r.name)).filter(Boolean).join(", ")}`,
+    );
+    if (targetId === "presentation") return { brief: summary, audience: reader, purpose: "pitch" };
+    if (targetId === "proposal") return { target: reader, content: summary };
+    return {};
+  }
   return null;
 }
 
@@ -206,6 +234,11 @@ export function seedFromChain(targetId: string, sourceId: string, sourceOutput: 
 
   if (targetId === "calendar" && sourceId === "money") {
     return { model: output.models?.[0]?.name ?? "" };
+  }
+
+  if (targetId === "business-plan" && sourceId === "trend") {
+    const top = (sourceOutput as { ideas?: { name?: string; one_liner?: string; target_customer?: string }[] }).ideas?.[0];
+    return top ? { item: [top.name, top.one_liner, top.target_customer && `대상: ${top.target_customer}`].filter(Boolean).join("\n") } : {};
   }
 
   if (targetId === "calendar" && sourceId === "trend") {

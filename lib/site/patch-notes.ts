@@ -4,6 +4,19 @@ export type NoteKind = "new" | "improved" | "fixed";
 
 export const PATCH_NOTES: { version: string; date: string; title: Bilingual; items: { kind: NoteKind; text: Bilingual }[] }[] = [
   {
+    version: "2.10.0",
+    date: "2026-10-01",
+    title: { ko: "출시 전 점검 — 휴대폰 화면, 이어서 만들기, 접근성", en: "Pre-release checks — phone layouts, hand-offs, accessibility" },
+    items: [
+      { kind: "fixed", text: { ko: "캠페인 플래너·운영 플래너·트렌드 레이더 화면이 계속 로딩되던 문제", en: "Campaign Planner, Operations Planner and Trend Radar pages that never finished loading" } },
+      { kind: "fixed", text: { ko: "휴대폰에서 예시 카드, 사업계획서, API 키 설명서가 화면 밖으로 넘치던 문제", en: "Example cards, business plans and the API key guide spilling off phone screens" } },
+      { kind: "improved", text: { ko: "브랜드 보드 → 훅 연구소, 사업계획서 → 발표자료·제안서, 시장 리서치 → 경쟁사·페르소나, 트렌드 → 사업계획서로 이어 만들 때 필수 칸이 채워져요", en: "Hand-offs now fill the required fields: brand board → Hook Lab, business plan → deck and proposal, market research → competitors and personas, trends → business plan" } },
+      { kind: "improved", text: { ko: "스튜디오의 '이 결과로 이어서 만들기'가 결과 화면과 같은 도구를 추천해요", en: "The Studio's \"carry this result into\" now offers the same tools as the result page" } },
+      { kind: "improved", text: { ko: "다크 모드 글자 대비, 그래프 대체 텍스트, 제목 순서 등 접근성 개선", en: "Accessibility: dark-mode text contrast, chart text alternatives and heading order" } },
+      { kind: "improved", text: { ko: "필수 칸이 비었을 때 어느 칸인지 한국어로 알려 드려요", en: "A clear message naming the field when a required one is empty" } },
+    ],
+  },
+  {
     version: "2.9.0",
     date: "2026-10-01",
     title: { ko: "새 로그인·요금 화면과 새로 쓴 도움말", en: "New sign-in and pricing pages, rewritten help" },

@@ -124,7 +124,7 @@ export function FlowSection() {
             <span
               className={cn(
                 "block font-mono text-[11px] tracking-wider",
-                i === active ? "text-white/80" : "text-fg-subtle",
+                i === active ? "text-white" : "text-fg-subtle",
               )}
             >
               {String(i + 1).padStart(2, "0")} · {s.label}
@@ -135,7 +135,7 @@ export function FlowSection() {
             <span
               className={cn(
                 "mt-0.5 block text-2xs",
-                i === active ? "text-white/80" : "text-fg-subtle",
+                i === active ? "text-white" : "text-fg-subtle",
               )}
             >
               {L({

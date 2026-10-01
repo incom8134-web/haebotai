@@ -14,7 +14,7 @@ export function DocCanvas({ output, input }: { output: Record<string, unknown>; 
   const report = useMemo(() => buildReport("business-plan", output, input), [output, input]);
   if (!report) return null;
   return (
-    <div className="mt-3 grid gap-4 lg:grid-cols-[13rem_minmax(0,1fr)]">
+    <div className="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-[13rem_minmax(0,1fr)]">
       <nav aria-label={L({ ko: "문서 목차", en: "Document outline" })} className="lg:sticky lg:top-20 lg:self-start">
         <p className="text-2xs font-semibold text-fg-subtle">{L({ ko: "목차", en: "Outline" })}</p>
         <ol className="mt-2 flex gap-1.5 overflow-x-auto pb-1 lg:flex-col lg:gap-0.5 lg:overflow-visible">

@@ -538,3 +538,8 @@ test("a business plan with chapters follows them, with analysis placed where a c
   assert.equal(first.title, "사업 개요", "readers see the chapter title, not the writer's purpose note");
   assert.ok(!report.sections.some((s) => s.id === "market" || s.id === "competition"), "analysis the plan left out stays out");
 });
+
+test("every chart carries a text alternative", () => {
+  const svg = renderChart({ kind: "donut", slices: [{ label: "구독", value: 60 }, { label: "<워크숍>", value: 40 }], unit: "%" }, { width: 340, palette: ["#000"], theme: PRINT_THEME });
+  assert.match(svg, /<svg[^>]*role="img"><title>비율 그래프: 구독 60%, &lt;워크숍&gt; 40%<\/title>/);
+});

@@ -19,7 +19,7 @@ export function PlanCards({ signedIn }: { signedIn: boolean }) {
       {PLANS.map((p) => (
         <article key={p.id} className={cn("relative flex flex-col rounded-[24px] border bg-surface p-6", p.highlight ? "border-accent/50" : "border-hairline")}>
           {p.id === "student" ? (
-            <span className="absolute -top-3 left-6 flex items-center gap-1.5 rounded-full bg-ai px-3 py-1 text-2xs font-semibold text-white">
+            <span className="absolute -top-3 left-6 flex items-center gap-1.5 rounded-full bg-ai px-3 py-1 text-2xs font-semibold text-white dark:text-[#04211f]">
               <GraduationCap size={12} aria-hidden /> {L({ ko: "학생 무제한", en: "Unlimited for students" })}
             </span>
           ) : null}
