@@ -1,5 +1,6 @@
 "use client";
 
+import { Cited } from "@/components/results/cited";
 import { useMemo, useState } from "react";
 import { useBi } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
@@ -34,7 +35,7 @@ export function GapMap({ output }: { output: Record<string, unknown> }) {
 
   return (
     <div className="mt-3 flex flex-col gap-6">
-      {output.market_summary ? <p className="text-sm leading-relaxed text-fg-muted break-keep">{String(output.market_summary)}</p> : null}
+      {output.market_summary ? <p className="text-sm leading-relaxed text-fg-muted break-keep"><Cited text={String(output.market_summary)} /></p> : null}
 
       <section>
         <SectionTitle kicker={L({ ko: "지도", en: "Map" })} title={L({ ko: "니즈 × 기존 해결책", en: "Needs × existing solutions" })} lead={L({ ko: "빨간 칸이 아무도 제대로 풀지 못하는 자리예요.", en: "Red cells are needs nobody serves well." })} />

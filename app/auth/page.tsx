@@ -10,9 +10,10 @@ import { CATEGORIES, CATEGORY_ORDER, toolsIn } from "@/lib/tools/catalog";
 import { createClient } from "@/lib/supabase/client";
 import { useBi } from "@/lib/i18n/context";
 import { ThemeLangControls } from "@/components/shell/app-shell";
+import { AUTH_PROVIDERS, type AuthProvider } from "@/lib/auth-providers";
 
-// Sign-in (docs/redesign-plan.md §5). Google only — email sign-up was
-// closed on purpose. Next to the one button: what you can build (from the
+// Sign-in (docs/redesign-plan.md §5). Google, plus Kakao when it's switched
+// on (lib/auth-providers.ts) — email sign-up was closed on purpose. Next to the one button: what you can build (from the
 // catalog), a word for returning members, and what happens to your
 // account data. Honest terms — 500 credits on sign-up, no card, students
 // unlimited after verification (lib/site/plans.ts).
@@ -34,31 +35,32 @@ function AuthCard() {
   const params = useSearchParams();
   const error = params.get("error");
   const next = safeNext(params.get("next"));
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<AuthProvider | null>(null);
   const [failed, setFailed] = useState(false);
   const returning = useReturning();
+  const hasKakao = AUTH_PROVIDERS.includes("kakao");
 
   // Coming back from Google with the Back button restores this page from
   // the back/forward cache with the button still stuck on "Opening Google…".
   useEffect(() => {
     const reset = (e: PageTransitionEvent) => {
-      if (e.persisted) setLoading(false);
+      if (e.persisted) setLoading(null);
     };
     window.addEventListener("pageshow", reset);
     return () => window.removeEventListener("pageshow", reset);
   }, []);
 
-  async function signIn() {
+  async function signIn(provider: AuthProvider) {
     if (loading) return;
-    setLoading(true);
+    setLoading(provider);
     setFailed(false);
     const supabase = createClient();
     const { error: err } = await supabase.auth.signInWithOAuth({
-      provider: "google",
+      provider,
       options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` },
     });
     if (err) {
-      setLoading(false);
+      setLoading(null);
       setFailed(true);
     }
   }
@@ -77,22 +79,22 @@ function AuthCard() {
           ? L({ ko: "로그인하면 보던 화면으로 바로 돌아가요.", en: "Sign in and you'll land right back where you were." })
           : returning
             ? L({ ko: "다시 오셨네요. 로그인하면 하던 작업과 프로젝트로 바로 돌아가요.", en: "Welcome back. Sign in to pick up your work and projects." })
-            : L({ ko: "Google 계정 하나로 25개 도구를 모두 써요. 처음이면 목표와 프로젝트를 정하는 짧은 안내부터 시작해요.", en: "One Google account, all 25 tools. First time? A short setup picks your goal and project." })}
+            : L({ ko: hasKakao ? "Google이나 카카오 계정 하나로 25개 도구를 모두 써요. 처음이면 목표와 프로젝트를 정하는 짧은 안내부터 시작해요." : "Google 계정 하나로 25개 도구를 모두 써요. 처음이면 목표와 프로젝트를 정하는 짧은 안내부터 시작해요.", en: hasKakao ? "One Google or Kakao account, all 25 tools. First time? A short setup picks your goal and project." : "One Google account, all 25 tools. First time? A short setup picks your goal and project." })}
       </p>
 
       {error || failed ? (
         <p role="alert" className="mt-5 rounded-2xl bg-danger/10 px-4 py-3 text-sm break-keep text-danger">
-          {L({ ko: "로그인하지 못했어요. 잠시 후 다시 시도하거나 다른 Google 계정을 써 보세요.", en: "Sign-in didn't go through. Try again shortly or use another Google account." })}
+          {L({ ko: "로그인하지 못했어요. 잠시 후 다시 시도하거나 다른 계정을 써 보세요.", en: "Sign-in didn't go through. Try again shortly or use another account." })}
         </p>
       ) : null}
 
       <button
         type="button"
-        onClick={signIn}
-        disabled={loading}
+        onClick={() => signIn("google")}
+        disabled={!!loading}
         className="mt-7 flex h-13 w-full items-center justify-center gap-3 rounded-2xl border border-hairline bg-white text-[15px] font-semibold text-[#1f1f1f] shadow-[0_10px_30px_-12px_rgba(0,0,0,0.35)] transition-[transform,box-shadow] duration-500 ease-[var(--spring)] hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-70 disabled:hover:translate-y-0"
       >
-        {loading ? (
+        {loading === "google" ? (
           <LoaderCircle size={18} className="animate-spin" aria-hidden />
         ) : (
           <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden>
@@ -102,8 +104,25 @@ function AuthCard() {
             <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 38.2 44 33 44 24c0-1.3-.1-2.4-.4-3.5z" />
           </svg>
         )}
-        {loading ? L({ ko: "Google로 이동하는 중…", en: "Opening Google…" }) : L({ ko: "Google로 계속하기", en: "Continue with Google" })}
+        {loading === "google" ? L({ ko: "Google로 이동하는 중…", en: "Opening Google…" }) : L({ ko: "Google로 계속하기", en: "Continue with Google" })}
       </button>
+      {hasKakao ? (
+        <button
+          type="button"
+          onClick={() => signIn("kakao")}
+          disabled={!!loading}
+          className="mt-3 flex h-13 w-full items-center justify-center gap-3 rounded-2xl bg-[#FEE500] text-[15px] font-semibold text-black/85 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.35)] transition-[transform,box-shadow] duration-500 ease-[var(--spring)] hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-70 disabled:hover:translate-y-0"
+        >
+          {loading === "kakao" ? (
+            <LoaderCircle size={18} className="animate-spin" aria-hidden />
+          ) : (
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
+              <path fill="#000" d="M12 3C6.48 3 2 6.53 2 10.88c0 2.8 1.86 5.26 4.66 6.65l-.95 3.48c-.08.3.26.54.52.37l4.15-2.75c.53.07 1.07.11 1.62.11 5.52 0 10-3.53 10-7.86S17.52 3 12 3z" />
+            </svg>
+          )}
+          {loading === "kakao" ? L({ ko: "카카오로 이동하는 중…", en: "Opening Kakao…" }) : L({ ko: "카카오로 계속하기", en: "Continue with Kakao" })}
+        </button>
+      ) : null}
 
       <ul className="mt-7 space-y-3 border-t border-hairline pt-6 text-sm">
         {[
@@ -121,7 +140,7 @@ function AuthCard() {
       <div className="mt-6 rounded-2xl bg-surface-2 px-4 py-3">
         <p className="flex items-center gap-1.5 text-xs font-semibold text-fg"><LockKeyhole size={13} className="text-grounded" aria-hidden /> {L({ ko: "계정과 데이터", en: "Your account and data" })}</p>
         <ul className="mt-1.5 space-y-1 text-2xs leading-relaxed break-keep text-fg-muted">
-          <li>{L({ ko: "Google로만 로그인해요. 비밀번호를 만들거나 저장하지 않아요.", en: "Google sign-in only — no password is created or stored." })}</li>
+          <li>{hasKakao ? L({ ko: "Google·카카오 계정으로만 로그인해요. 비밀번호를 만들거나 저장하지 않아요.", en: "Google or Kakao sign-in only — no password is created or stored." }) : L({ ko: "Google로만 로그인해요. 비밀번호를 만들거나 저장하지 않아요.", en: "Google sign-in only — no password is created or stored." })}</li>
           <li>{L({ ko: "이름과 이메일만 쓰고, 프로필 사진은 저장하지 않아요.", en: "We use your name and email; your profile photo isn't kept." })}</li>
           <li>{L({ ko: "입력과 결과는 AI 학습에 쓰지 않아요. 계정에서 언제든 지울 수 있어요.", en: "Inputs and results are never used for training, and you can delete them any time." })}</li>
         </ul>

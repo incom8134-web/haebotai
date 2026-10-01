@@ -37,5 +37,5 @@ test("markdown export reads as a document", () => {
   assert.match(md, /## 핵심 메시지\n\n퇴근길 한 조각/);
   assert.match(md, /- 최고/);
   assert.match(md, /- 1일차 공지/);
-  assert.match(md, /## 출처\n\n- \[A\]\(https:\/\/a\.example\)/);
+  assert.match(md, /## 출처\n\n1\. \[A\]\(https:\/\/a\.example\)/);
 });

@@ -181,6 +181,13 @@ export function buildBaseInstruction(manifest: ToolManifest, opts: { houseRules?
   return parts;
 }
 
+// Grounded tools whose results are read as reports: their sentences carry
+// "[n]" marks pointing at the numbered sources (components/results/cited.tsx).
+// Not the blog — its text is published as-is.
+export const CITED_TOOLS = new Set(["market-desk", "market-gap", "trend", "competitor-lens", "business-plan", "strategy"]);
+const CITE_RULE =
+  "검색 근거로 뒷받침한 문장이나 수치 바로 뒤에 [사용 가능한 출처]의 번호를 [1] 또는 [1, 3]처럼 붙이세요. 목록에 있는 번호만 쓰고, 근거가 없는 문장에는 붙이지 마세요. 제목·이름·짧은 라벨에는 붙이지 마세요.";
+
 export function buildSystemInstruction(manifest: ToolManifest): string {
   const parts = buildBaseInstruction(manifest);
   parts.splice(1, 0, "반드시 한국어로 작성하세요.");
@@ -189,6 +196,7 @@ export function buildSystemInstruction(manifest: ToolManifest): string {
     parts.push(
       "사실 주장(통계, 시장 규모, 가격 등)에는 근거가 필요합니다. 아래 [검색 근거]에 있는 내용만 사실 주장에 사용하고, 그 출처 URL만 사용하세요. 검색 근거에 없는 출처를 지어내지 마세요.",
     );
+    if (CITED_TOOLS.has(manifest.id)) parts.push(CITE_RULE);
   }
   return parts.join("\n");
 }
@@ -239,6 +247,7 @@ export function buildReviseInstruction(manifest: ToolManifest): string {
   );
   if (manifest.grounding.requireSources) {
     parts.push("사실 주장에는 [검색 근거]의 내용과 그 출처 URL만 사용하세요. 출처를 지어내지 마세요.");
+    if (CITED_TOOLS.has(manifest.id)) parts.push(`${CITE_RULE} 초안의 출처 번호는 그대로 두세요.`);
   }
   return parts.join("\n");
 }

@@ -160,11 +160,10 @@ export async function buildGenericDocx(doc: ExportDoc): Promise<Buffer> {
 
   if (doc.sources.length) {
     children.push(new Paragraph({ heading: HeadingLevel.HEADING_1, spacing: { before: 320, after: 100 }, children: [run("출처", { bold: true })] }));
-    for (const s of doc.sources) {
+    for (const [i, s] of doc.sources.entries()) {
       children.push(
         new Paragraph({
-          bullet: { level: 0 },
-          children: [new ExternalHyperlink({ link: s.url, children: [new TextRun({ text: s.title, style: "Hyperlink", font: KO_FONT })] })],
+          children: [run(`[${i + 1}] `, { color: "888888" }), new ExternalHyperlink({ link: s.url, children: [new TextRun({ text: s.title, style: "Hyperlink", font: KO_FONT })] })],
         }),
       );
     }
