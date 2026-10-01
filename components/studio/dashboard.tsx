@@ -14,6 +14,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { catalogTool, publicTools } from "@/lib/tools/catalog";
+import { routeBrief } from "@/lib/tools/route-brief";
 import { chainTargets, getTool } from "@/lib/tools/registry";
 import { briefField } from "@/lib/tools/brief";
 import { formatDateTime } from "@/lib/format-date";
@@ -121,12 +122,20 @@ function QuickCreate({
   );
   const [brief, setBrief] = useState("");
   const [project, setProject] = useState(projects[0]?.id ?? "");
+  // The brief suggests tools as it's typed; the suggestion drives the
+  // picker until the member chooses a tool themselves.
+  const [picked, setPicked] = useState(false);
+  const suggested = useMemo(
+    () => routeBrief(brief, tools.map((t) => t.slug)),
+    [brief, tools],
+  );
+  const chosen = !picked && suggested[0] ? suggested[0] : slug;
   const go = () => {
     const q = new URLSearchParams();
     if (brief.trim()) q.set("brief", brief.trim());
     if (project) q.set("project", project);
     const qs = q.toString();
-    start(() => router.push(`/tools/${slug}/run${qs ? `?${qs}` : ""}`));
+    start(() => router.push(`/tools/${chosen}/run${qs ? `?${qs}` : ""}`));
   };
   return (
     <Card title={L({ ko: "바로 시작하기", en: "Quick start" })}>
@@ -149,12 +158,41 @@ function QuickCreate({
           })}
           className="rounded-xl border border-hairline bg-bg px-3 py-2.5 text-sm text-fg outline-none placeholder:text-fg-subtle focus:border-accent"
         />
+        {suggested.length ? (
+          <div className="flex flex-wrap items-center gap-1.5" aria-label={L({ ko: "추천 도구", en: "Suggested tools" })}>
+            <span className="text-2xs text-fg-subtle">{L({ ko: "이런 도구가 맞아요", en: "Good fits" })}</span>
+            {suggested.map((s) => {
+              const t = tools.find((x) => x.slug === s);
+              if (!t) return null;
+              return (
+                <button
+                  key={s}
+                  type="button"
+                  aria-pressed={chosen === s}
+                  onClick={() => {
+                    setSlug(s);
+                    setPicked(true);
+                  }}
+                  className={cn(
+                    "rounded-full border px-2.5 py-1 text-xs transition-colors",
+                    chosen === s ? "border-accent bg-accent-dim text-accent" : "border-hairline text-fg-muted hover:text-fg",
+                  )}
+                >
+                  {L(t.name)}
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
         <div className="flex flex-wrap items-center gap-2">
           <label className="flex min-w-0 flex-1 items-center gap-1.5 text-xs text-fg-muted">
             <span className="shrink-0">{L({ ko: "도구", en: "Tool" })}</span>
             <select
-              value={slug}
-              onChange={(e) => setSlug(e.target.value)}
+              value={chosen}
+              onChange={(e) => {
+                setSlug(e.target.value);
+                setPicked(true);
+              }}
               className="min-w-0 flex-1 rounded-lg border border-hairline bg-bg px-2 py-1.5 text-sm text-fg"
             >
               {tools.map((t) => (
@@ -185,7 +223,7 @@ function QuickCreate({
           ) : null}
           <button
             type="submit"
-            disabled={pending || !slug}
+            disabled={pending || !chosen}
             className={cn(primaryButton, "h-9 px-4 disabled:opacity-60")}
           >
             {pending ? (

@@ -35,6 +35,7 @@ import { BlogArticle, type BlogOutput } from "@/components/results/blog-article"
 import { AdCreatives, type CopyOutput } from "@/components/results/ad-creatives";
 import { MoodBoard } from "@/components/results/mood-board";
 import { ReportView } from "@/components/results/report-view";
+import { CitationsProvider } from "@/components/results/cited";
 import { TOOL_VIEWS } from "@/components/results/tool-views";
 import { buildReport } from "@/lib/tools/report";
 import { useBi, useLocale, useT } from "@/lib/i18n/context";
@@ -268,7 +269,16 @@ interface LogoConcept {
   symbol_image?: { url: string };
 }
 
-function OutputPreview({ output, toolId, input, runId }: { output: unknown; toolId?: string; input?: Record<string, unknown>; runId?: string }) {
+function OutputPreview({ output, toolId, input, runId, sources }: { output: unknown; toolId?: string; input?: Record<string, unknown>; runId?: string; sources?: Source[] }) {
+  // "[n]" marks in the text link to the numbered sources below the result.
+  return (
+    <CitationsProvider sources={sources ?? []}>
+      <OutputBody output={output} toolId={toolId} input={input} runId={runId} />
+    </CitationsProvider>
+  );
+}
+
+function OutputBody({ output, toolId, input, runId }: { output: unknown; toolId?: string; input?: Record<string, unknown>; runId?: string }) {
   const L = useBi();
   const o = output as Record<string, unknown>;
 
@@ -488,7 +498,7 @@ function RunResult({
 
       {/* Outline: the page's h1 is the tool; result views use h3 sections. */}
       <h2 className="sr-only">{locale === "en" ? "Result" : "결과"}</h2>
-      <OutputPreview output={shown} toolId={manifest.id} input={input} runId={runId} />
+      <OutputPreview output={shown} toolId={manifest.id} input={input} runId={runId} sources={sources} />
 
       <DownloadPanel runId={runId} toolId={manifest.id} extras={extras} compact />
 
@@ -509,16 +519,17 @@ function RunResult({
           <p className="font-mono text-2xs text-fg-subtle">
             {t("sources")} ({sources.length})
           </p>
-          <ul className="mt-2 flex flex-col gap-1.5">
+          <ol className="mt-2 flex flex-col gap-1.5">
             {sources.map((s, i) => (
-              <li key={i} className="text-xs">
+              <li key={i} id={`src-${i + 1}`} className="text-xs">
+                <span className="mr-1.5 font-mono text-fg-subtle">[{i + 1}]</span>
                 <a href={s.url} target="_blank" rel="noreferrer" className="text-accent hover:underline">
                   {s.title}
                 </a>
                 {s.domain ? <span className="ml-1.5 text-fg-subtle">{s.domain}</span> : null}
               </li>
             ))}
-          </ul>
+          </ol>
         </div>
       ) : null}
 

@@ -1,8 +1,12 @@
 // Referral program constants and pure helpers (the ledger lives in
-// supabase/migrations/0014_referrals.sql).
+// supabase/migrations/0014_referrals.sql and 0017). An invite is claimed
+// at sign-up and pays out after the new member's first successful run.
 
 export const REFERRAL = {
-  bonus: 100,
+  /** Credits for the new member. */
+  refereeBonus: 100,
+  /** Credits for the member who invited them. */
+  referrerBonus: 200,
   maxRewardedInvites: 10,
   cookie: "ref",
   cookieMaxAgeDays: 30,

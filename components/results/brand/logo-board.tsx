@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Star } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { BadgeCheck, Star } from "lucide-react";
+import { toast } from "sonner";
 import { useBi } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
 import { obj, objs, str, strs } from "@/lib/tools/report/util";
@@ -27,14 +29,31 @@ export function LogoBoard({ output, runId }: { output: Record<string, unknown>; 
       type: obj(c.type_spec),
       usage: str(c.usage_notes),
       image: str(obj(c.image).url),
+      imageAsset: str(obj(c.image).asset_id),
       symbolImage: str(obj(c.symbol_image).url),
     }))
     .filter((c) => c.image);
   const [favs, toggle] = useLocalSet(`haebot-logo-fav-${runId ?? "draft"}`);
   const [focus, setFocus] = useState(0);
+  const router = useRouter();
+  const [savingLogo, setSavingLogo] = useState(false);
+  const [savedLogo, setSavedLogo] = useState<number | null>(null);
   const c = concepts[Math.min(focus, concepts.length - 1)];
   if (!c) return null;
   const mark = c.symbolImage || c.image;
+
+  // Make this direction the brand logo (/brand), so every tool that reads
+  // the profile carries it from now on.
+  async function saveAsBrandLogo() {
+    if (!c.imageAsset || savingLogo) return;
+    setSavingLogo(true);
+    const res = await fetch("/api/brand/logo", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ assetId: c.imageAsset }) }).catch(() => null);
+    setSavingLogo(false);
+    if (res?.ok) {
+      setSavedLogo(focus);
+      toast.success(L({ ko: "브랜드 로고로 저장했어요", en: "Saved as your brand logo" }), { action: { label: L({ ko: "프로필 보기", en: "View profile" }), onClick: () => router.push("/brand") } });
+    } else toast.error(L({ ko: "로고를 저장하지 못했어요", en: "Couldn't save the logo" }));
+  }
 
   return (
     <div className="mt-3 flex flex-col gap-5">
@@ -128,6 +147,17 @@ export function LogoBoard({ output, runId }: { output: Record<string, unknown>; 
           <div className="mt-auto flex flex-wrap gap-2 border-t border-hairline pt-3">
             <DownloadLink label={L({ ko: "로고 PNG", en: "Logo PNG" })} onClick={() => downloadFromUrl(`logo-${focus + 1}.png`, c.image)} />
             {c.symbolImage ? <DownloadLink label={L({ ko: "심볼만", en: "Symbol only" })} onClick={() => downloadFromUrl(`logo-${focus + 1}-symbol.${guessImageExt(c.symbolImage)}`, c.symbolImage)} /> : null}
+            {c.imageAsset && runId ? (
+              <button
+                type="button"
+                onClick={saveAsBrandLogo}
+                disabled={savingLogo || savedLogo === focus}
+                className="inline-flex items-center gap-1 rounded-full border border-accent/40 bg-accent-dim px-2.5 py-1 text-xs font-medium text-accent disabled:opacity-60"
+              >
+                <BadgeCheck className="size-3.5" aria-hidden />
+                {savedLogo === focus ? L({ ko: "브랜드 로고로 저장됨", en: "Saved as brand logo" }) : savingLogo ? L({ ko: "저장 중…", en: "Saving…" }) : L({ ko: "브랜드 로고로 저장", en: "Save as brand logo" })}
+              </button>
+            ) : null}
           </div>
         </div>
       </article>

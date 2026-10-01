@@ -3,7 +3,7 @@
 import { toolSlug } from "@/lib/tools/catalog";
 import { CATEGORY_ORDER as CATEGORY_ORDER_ALL } from "@/lib/tools/catalog";
 import { BrandMark } from "@/components/brand-mark";
-import { useMemo, useState, useSyncExternalStore, useTransition } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore, useTransition } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "motion/react";
@@ -13,7 +13,7 @@ import { CommandPalette, type CommandPaletteGroup } from "@/components/command-p
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { signOut } from "@/lib/actions/auth";
 import { PLANS } from "@/lib/site/plans";
-import { listTools } from "@/lib/tools/registry";
+import { getTool, listTools } from "@/lib/tools/registry";
 import { CATEGORY_LABELS } from "@/lib/tools/registry/categories";
 import { PATCH_NOTES } from "@/lib/site/patch-notes";
 import { useLocalList, useLocalValue } from "@/lib/hooks/use-local-list";
@@ -194,6 +194,22 @@ function AppShell({ user, balance, plan, answeredTickets, children }: ShellProps
   const [paletteOpen, setPaletteOpen] = useState(false);
   const help = useHelpBadge(answeredTickets);
 
+  // Recent results for the palette, fetched each time it opens.
+  const [recent, setRecent] = useState<{ id: string; tool_id: string; title?: string | null; pinned?: boolean }[]>([]);
+  useEffect(() => {
+    if (!paletteOpen) return;
+    let live = true;
+    fetch("/api/runs/recent")
+      .then((r) => (r.ok ? r.json() : { runs: [] }))
+      .then((j: { runs?: typeof recent }) => {
+        if (live) setRecent(j.runs ?? []);
+      })
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, [paletteOpen]);
+
   const paletteGroups: CommandPaletteGroup[] = useMemo(() => {
     const byCat = new Map<CategoryId, ToolManifest[]>();
     for (const tool of listTools()) byCat.set(tool.category, [...(byCat.get(tool.category) ?? []), tool]);
@@ -211,8 +227,25 @@ function AppShell({ user, balance, plan, answeredTickets, children }: ShellProps
         heading: locale === "en" ? "Go to" : "이동",
         items: ITEMS.map((item) => ({ id: item.href, label: item.label[locale], icon: item.icon, onSelect: () => router.push(item.href) })),
       },
+      ...(recent.length
+        ? [
+            {
+              heading: locale === "en" ? "Recent results" : "최근 결과",
+              items: recent.map((run) => {
+                const tool = getTool(run.tool_id);
+                const toolName = tool ? (locale === "en" ? tool.name_en : tool.name_ko) : run.tool_id;
+                return {
+                  id: `run-${run.id}`,
+                  label: `${run.pinned ? "★ " : ""}${run.title ? `${run.title} — ${toolName}` : toolName}`,
+                  icon: tool?.icon ?? Library,
+                  onSelect: () => router.push(`/library/${run.id}`),
+                };
+              }),
+            },
+          ]
+        : []),
     ];
-  }, [locale, router]);
+  }, [locale, router, recent]);
 
   const credits = plan === "student" ? "∞" : balance !== null ? balance.toLocaleString() : "—";
 

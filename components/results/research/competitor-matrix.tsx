@@ -1,5 +1,6 @@
 "use client";
 
+import { Cited } from "@/components/results/cited";
 import { useBi } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
 import { obj, objs, str, strs } from "@/lib/tools/report/util";
@@ -26,7 +27,7 @@ export function CompetitorMatrix({ output }: { output: Record<string, unknown> }
 
   return (
     <div className="mt-3 flex flex-col gap-6">
-      {str(output.summary) ? <p className="text-sm leading-relaxed text-fg-muted break-keep">{str(output.summary)}</p> : null}
+      {str(output.summary) ? <p className="text-sm leading-relaxed text-fg-muted break-keep"><Cited text={str(output.summary)} /></p> : null}
 
       {matrix.length ? (
         <section>
@@ -97,7 +98,7 @@ export function CompetitorMatrix({ output }: { output: Record<string, unknown> }
                   <Origin origin={str(c.origin)} />
                   {str(c.price) ? <span className="ml-auto text-2xs text-fg-muted">{str(c.price)}</span> : null}
                 </div>
-                <p className="mt-0.5 text-xs text-fg-muted break-keep">{str(c.positioning)}</p>
+                <p className="mt-0.5 text-xs text-fg-muted break-keep"><Cited text={str(c.positioning)} /></p>
                 <p className="mt-1 text-2xs text-grounded break-keep">+ {strs(c.strengths).join(" · ")}</p>
                 <p className="text-2xs text-danger break-keep">− {strs(c.weaknesses).join(" · ")}</p>
               </li>
@@ -113,7 +114,7 @@ export function CompetitorMatrix({ output }: { output: Record<string, unknown> }
             {objs(output.opportunities).map((o, i) => (
               <article key={i} className="rounded-2xl border border-accent/30 bg-accent-dim p-4">
                 <p className="text-base font-bold text-fg break-keep">{str(o.title)}</p>
-                <p className="mt-1.5 text-xs text-fg break-keep"><b className="font-semibold">{L({ ko: "빈자리", en: "Gap" })}</b> {str(o.gap)}</p>
+                <p className="mt-1.5 text-xs text-fg break-keep"><b className="font-semibold">{L({ ko: "빈자리", en: "Gap" })}</b> <Cited text={str(o.gap)} /></p>
                 <p className="mt-1 text-xs text-fg break-keep"><b className="font-semibold">{L({ ko: "할 일", en: "Move" })}</b> {str(o.move)}</p>
                 {str(o.risk) ? <p className="mt-1 text-2xs text-fg-muted break-keep">{L({ ko: "위험", en: "Risk" })}: {str(o.risk)}</p> : null}
               </article>

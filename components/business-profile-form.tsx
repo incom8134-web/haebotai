@@ -17,6 +17,8 @@ import { upsertBusinessProfile } from "@/lib/profile";
 import { useT } from "@/lib/i18n/context";
 import type { DictKey } from "@/lib/i18n/dictionaries";
 import type { BusinessProfile } from "@/lib/tools/types";
+import { LogoField } from "@/components/brand/logo-field";
+import { BrandNextSteps } from "@/components/brand/next-steps";
 
 // HAEBOT_A_TOOLS_SPEC.md §3.3 — set once, read by every tool form.
 
@@ -56,11 +58,13 @@ function Field({
   );
 }
 
-function BusinessProfileForm({ initial }: { initial: BusinessProfile | null }) {
+function BusinessProfileForm({ initial, logoUrl = null }: { initial: BusinessProfile | null; logoUrl?: string | null }) {
   const [profile, setProfile] = useState<BusinessProfile>(
     initial ?? EMPTY_PROFILE,
   );
   const [pending, startTransition] = useTransition();
+  const [saved, setSaved] = useState(false);
+  const [hasLogo, setHasLogo] = useState(!!logoUrl);
   const t = useT();
 
   function set<K extends keyof BusinessProfile>(
@@ -68,13 +72,20 @@ function BusinessProfileForm({ initial }: { initial: BusinessProfile | null }) {
     value: BusinessProfile[K],
   ) {
     setProfile((p) => ({ ...p, [key]: value }));
+    setSaved(false);
   }
 
   function handleSave() {
     startTransition(async () => {
-      const result = await upsertBusinessProfile(profile);
-      if (result.ok) toast.success(t("saved"));
-      else toast.error(result.error);
+      // The logo is saved on its own (app/api/brand/logo), so it's left
+      // out here rather than written back from a stale copy.
+      const { logo_asset_id: _logo, ...rest } = profile;
+      void _logo;
+      const result = await upsertBusinessProfile(rest);
+      if (result.ok) {
+        toast.success(t("saved"));
+        setSaved(true);
+      } else toast.error(result.error);
     });
   }
 
@@ -146,6 +157,10 @@ function BusinessProfileForm({ initial }: { initial: BusinessProfile | null }) {
           />
         </Field>
 
+        <Field label={t("profile_logo")}>
+          <LogoField initialUrl={logoUrl} onColors={(hex) => set("brand_colors", hex)} onChange={setHasLogo} />
+        </Field>
+
         <Field label={t("profile_brand_colors")}>
           <TagList
             values={profile.brand_colors}
@@ -182,6 +197,7 @@ function BusinessProfileForm({ initial }: { initial: BusinessProfile | null }) {
           {t("save")}
         </Button>
       </div>
+      {saved ? <BrandNextSteps hasLogo={hasLogo} /> : null}
     </div>
   );
 }

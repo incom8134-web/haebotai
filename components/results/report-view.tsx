@@ -5,6 +5,7 @@ import { renderChart, WEB_THEME, type ChartSpec } from "@/lib/tools/report/chart
 import type { Report, ReportBlock, ReportCard, Tone } from "@/lib/tools/report/types";
 import { cn } from "@/lib/utils";
 import { useBi } from "@/lib/i18n/context";
+import { Cited } from "@/components/results/cited";
 
 // The data tools' result page (business plan, trend, 90-day plan, money
 // models, keywords, place, proposal, strategy, grants): the report model
@@ -91,7 +92,7 @@ function Card({ card }: { card: ReportCard }) {
           {card.facts.map((f, i) => (
             <div key={i} className="contents">
               <dt className="text-fg-subtle">{f.label}</dt>
-              <dd className="font-medium break-keep text-fg">{f.value}</dd>
+              <dd className="font-medium break-keep text-fg"><Cited text={f.value} /></dd>
             </div>
           ))}
         </dl>
@@ -100,7 +101,7 @@ function Card({ card }: { card: ReportCard }) {
         <ul className="mt-3 flex flex-col gap-1.5 border-t border-hairline pt-3">
           {card.lines.map((l, i) => (
             <li key={i} className="text-xs leading-relaxed break-keep text-fg-muted">
-              {l}
+              <Cited text={l} />
             </li>
           ))}
         </ul>
@@ -193,14 +194,14 @@ function Block({ block, palette, half }: { block: ReportBlock; palette: string[]
       return (
         <div>
           <BlockTitle title={block.title} />
-          <p className="text-sm leading-relaxed whitespace-pre-wrap break-keep text-fg-muted">{block.text}</p>
+          <p className="text-sm leading-relaxed whitespace-pre-wrap break-keep text-fg-muted"><Cited text={block.text} /></p>
         </div>
       );
     case "callout":
       return (
         <div className={cn("rounded-2xl border-l-4 p-4", block.tone === "warn" ? "border-warn bg-warn/10" : "border-[var(--rp)] bg-[var(--rp-soft)]")}>
           <p className={cn("text-2xs font-semibold", block.tone === "warn" ? "text-warn" : "text-[var(--rp)]")}>{block.label}</p>
-          <p className="mt-1 text-sm leading-relaxed font-medium whitespace-pre-wrap break-keep text-fg">{block.text}</p>
+          <p className="mt-1 text-sm leading-relaxed font-medium whitespace-pre-wrap break-keep text-fg"><Cited text={block.text} /></p>
         </div>
       );
     case "bullets":
@@ -211,7 +212,7 @@ function Block({ block, palette, half }: { block: ReportBlock; palette: string[]
             {block.items.map((item, i) => (
               <li key={i} className="flex gap-2 text-sm leading-relaxed break-keep text-fg-muted">
                 <span className="mt-px shrink-0 font-mono text-xs font-semibold text-[var(--rp)]">{block.style === "num" ? String(i + 1).padStart(2, "0") : block.style === "check" ? "✓" : "•"}</span>
-                <span>{item}</span>
+                <span><Cited text={item} /></span>
               </li>
             ))}
           </ul>
@@ -241,7 +242,7 @@ function Block({ block, palette, half }: { block: ReportBlock; palette: string[]
                 <ul className="mt-2 flex flex-col gap-1">
                   {cell.items.map((it, j) => (
                     <li key={j} className="text-xs leading-relaxed break-keep text-fg-muted">
-                      · {it}
+                      · <Cited text={it} />
                     </li>
                   ))}
                 </ul>

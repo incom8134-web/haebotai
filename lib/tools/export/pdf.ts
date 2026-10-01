@@ -189,10 +189,10 @@ export async function buildPdf(doc: ExportDoc): Promise<Buffer> {
     pdf.moveDown(0.6);
     pdf.font("ko-bold").fontSize(SIZES[1]).fillColor(ACCENT).text("출처", 56, undefined, { width });
     pdf.moveDown(0.35);
-    for (const s of doc.sources) {
+    for (const [i, s] of doc.sources.entries()) {
       // Search-grounding links are long redirect URLs: show the site, keep the link.
       const site = s.domain ?? (() => { try { return new URL(s.url).hostname; } catch { return ""; } })();
-      pdf.font("ko").fontSize(9.5).fillColor(INK).text(s.title, 56, undefined, { width, lineGap: 2, link: s.url });
+      pdf.font("ko").fontSize(9.5).fillColor(INK).text(`[${i + 1}] ${s.title}`, 56, undefined, { width, lineGap: 2, link: s.url });
       if (site && site !== s.title && !site.includes("vertexaisearch")) pdf.fillColor(accent).fontSize(8.5).text(site, { width, link: s.url, lineGap: 2 });
       pdf.moveDown(0.3);
     }
