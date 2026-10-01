@@ -7,7 +7,7 @@ import { motion } from "motion/react";
 import { ArrowLeft, ArrowRight, Check, Copy, Lightbulb, Play, Plus, Star } from "lucide-react";
 import { getTool, listTools } from "@/lib/tools/registry";
 import { CATEGORY_LABELS } from "@/lib/tools/registry/categories";
-import { getToolContent } from "@/lib/tools/content";
+import type { ToolPack } from "@/lib/tools/pack";
 import { presetLines } from "@/lib/tools/preset-lines";
 import { useFavorites } from "@/lib/hooks/use-local-list";
 import { getToolCapability } from "@/lib/ai/capabilities";
@@ -21,13 +21,13 @@ import { cn } from "@/lib/utils";
 // (what it is, what it costs, start), and a scrolling column on the right
 // with examples, the path from input to result, a sample, tips and FAQ.
 
-function ToolHome({ toolId }: { toolId: string }) {
+function ToolHome({ toolId, pack }: { toolId: string; pack: ToolPack }) {
   const L = useBi();
   const { locale } = useLocale();
   const favorites = useFavorites();
   const [copied, setCopied] = useState<number | null>(null);
   const tool = getTool(toolId)!;
-  const c = getToolContent(toolId)!;
+  const c = pack.content!;
   const name = (t: ToolManifest) => (locale === "en" ? t.name_en : t.name_ko);
   const fav = favorites.has(tool.id);
   // Link only to tools that are in the public catalog: an engine that's
@@ -49,7 +49,7 @@ function ToolHome({ toolId }: { toolId: string }) {
 
   async function copyPreset(i: number) {
     try {
-      await navigator.clipboard.writeText(presetLines(tool, c.presets[i], locale, i).join("\n"));
+      await navigator.clipboard.writeText(presetLines(tool, c.presets[i], locale, i, pack).join("\n"));
       setCopied(i);
       setTimeout(() => setCopied(null), 1600);
     } catch {
@@ -175,7 +175,7 @@ function ToolHome({ toolId }: { toolId: string }) {
                   </div>
                   <h3 className="mt-3 font-semibold">{L(p.title)}</h3>
                   <ul className="mt-2 flex-1 space-y-1 text-sm text-fg-muted">
-                    {presetLines(tool, p, locale, i).slice(0, 3).map((line) => <li key={line} className="truncate" title={line}>{line}</li>)}
+                    {presetLines(tool, p, locale, i, pack).slice(0, 3).map((line) => <li key={line} className="truncate" title={line}>{line}</li>)}
                   </ul>
                   {tool.comingSoon ? null : (
                     <Link href={`/tools/${toolSlug(tool.id)}/run?preset=${i}`} className="mt-4 inline-flex items-center gap-1.5 self-start text-sm font-medium text-studio-cyan">

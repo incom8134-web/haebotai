@@ -139,10 +139,14 @@ Fixes:
 - The dashboard's project-count query now runs in parallel with the others
   instead of after them.
 
-**Follow-ups (not done here):**
-1. **Per-tool content split.** The run page ships every tool's content,
-   form experience and English presets (~84 k Korean characters, ~570 KB
-   of one chunk, uncompressed). Loading only the open tool's content would
-   bring the run page's JS closer to the other pages (~380–470 KB).
-2. **Unused assets.** `public/videos/demo.mp4` and its poster are no longer
-   referenced and can be deleted.
+**Follow-ups, done after this report:**
+1. **Per-tool content.**
+   - Tool pages now receive one tool's content, run-page experience and
+     English strings from the server (`lib/tools/pack.ts`), so the client no
+     longer imports all 25 tools' JSON.
+   - Result views load per tool (`next/dynamic`, still server-rendered).
+   - The run page went from 755 KB to 653 KB of JS (−13.5%), and a result
+     page from 468 KB to 446 KB. That is less than estimated above: most of
+     the run page's weight is the shared app code itself (the form, agent
+     UI, zod and report builders), not the tool data.
+2. **Unused assets.** `public/videos/demo.mp4` and its poster are deleted.
