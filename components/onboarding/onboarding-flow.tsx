@@ -10,6 +10,7 @@ import { ONBOARDING_GOALS, type GoalId } from "@/lib/site/onboarding";
 import { useBi } from "@/lib/i18n/context";
 import { primaryButton, secondaryButton } from "@/components/site/page";
 import { cn } from "@/lib/utils";
+import { seedBusinessProfile } from "@/lib/profile";
 
 // First visit (docs/redesign-plan.md §5): what are you building → the
 // project's basics → recommended tools and a first task. Three short
@@ -53,15 +54,18 @@ export function OnboardingFlow({ name }: { name: string | null }) {
         ["target_customer", project.target],
       ].filter(([, v]) => v.trim());
       // Memory is a convenience: a fact that fails to save doesn't stop onboarding.
-      await Promise.all(
-        facts.map(([key, value]) =>
+      await Promise.all([
+        // The brand profile too, where it's still empty, so tools run
+        // outside this project start from the same basics.
+        seedBusinessProfile({ brand_name: project.name, target_customer: project.target }).catch(() => null),
+        ...facts.map(([key, value]) =>
           fetch(`/api/projects/${json.id}/facts`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ key, value: value.trim() }),
           }).catch(() => null),
         ),
-      );
+      ]);
       setProjectId(json.id);
       setStep(2);
     } catch (err) {

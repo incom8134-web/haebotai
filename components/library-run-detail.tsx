@@ -45,6 +45,7 @@ function LibraryRunDetail({
   childRunIds = [],
   projects = [],
   versioned = false,
+  shareToken,
 }: {
   toolId: string;
   runId: string;
@@ -62,6 +63,8 @@ function LibraryRunDetail({
   childRunIds?: string[];
   projects?: { id: string; name: string }[];
   versioned?: boolean;
+  /** The live public link's token; null for none, undefined before migration 0017. */
+  shareToken?: string | null;
 }) {
   const { locale } = useLocale();
   const t = useT();
@@ -106,6 +109,7 @@ function LibraryRunDetail({
         parentRunId={parentRunId}
         childRunIds={childRunIds}
         versioned={versioned}
+        shareToken={shareToken}
       />
 
       <div className="mt-6">

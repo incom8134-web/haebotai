@@ -8,6 +8,7 @@ import { providerErrorMessage } from "@/lib/ai/provider-errors";
 import { getUserApiKeysFor } from "@/lib/api-keys";
 import { settleGenerationCredits } from "@/lib/credits";
 import { writeRunFacts } from "@/lib/projects/server";
+import { payReferralAfterRun } from "@/lib/referral-server";
 import type { TokenUsage } from "@/lib/ai/types";
 import { agentDb, failRun, loadRun, pushEvent, runStatus, saveState } from "./store";
 import { MAX_INVOCATIONS, requestContinuation } from "./handoff";
@@ -230,6 +231,8 @@ export async function runAgent(runId: string, startedAt: number): Promise<void> 
     if (finished?.length) {
       await settleGenerationCredits(s.runId, s.creditsReserved);
       await writeRunFacts(db, { runId: s.runId, userId: s.userId, toolId: manifest!.id, input: values, output: clean });
+      // An invited member's first finished run pays both sides (0017).
+      await payReferralAfterRun(s.userId);
     }
     await cleanup(db, s);
   }

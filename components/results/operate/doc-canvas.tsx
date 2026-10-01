@@ -9,9 +9,9 @@ import { ReportView } from "@/components/results/report-view";
 // table of contents (tap to jump) beside the rendered plan, so a long
 // business plan reads like a document rather than one long scroll.
 
-export function DocCanvas({ output, input }: { output: Record<string, unknown>; input?: Record<string, unknown> }) {
+export function DocCanvas({ output, input, toolId = "business-plan" }: { output: Record<string, unknown>; input?: Record<string, unknown>; toolId?: string }) {
   const L = useBi();
-  const report = useMemo(() => buildReport("business-plan", output, input), [output, input]);
+  const report = useMemo(() => buildReport(toolId, output, input), [toolId, output, input]);
   if (!report) return null;
   return (
     <div className="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-[13rem_minmax(0,1fr)]">

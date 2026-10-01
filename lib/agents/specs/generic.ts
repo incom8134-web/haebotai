@@ -6,7 +6,7 @@ import type { Source } from "@/lib/tools/registry/shared";
 import type { TokenUsage } from "@/lib/ai/types";
 import { pickBest } from "../critic";
 import { guideFor } from "../library";
-import { directives, runCritic, strategizeStage, understandStage } from "./common";
+import { contractResearch, contractStageFor, directives, runCritic, sourceStage, strategizeStage, understandStage } from "./common";
 import type { AgentRunState, AgentSpec, Critique, Stage, StageContext } from "../types";
 
 // The writing agent for every structured tool (plans, decks, copy, blogs,
@@ -56,7 +56,10 @@ const versions = (state: AgentRunState) => ((state.work.versions as Version[] | 
 
 export function genericSpec(toolId: string): AgentSpec {
   const stages: Record<string, Stage> = {
-    understand: understandStage("strategize"),
+    understand: understandStage("analyze"),
+    // Shared core layers (lib/agents/core): the whole uploaded source, then the task contract.
+    analyze: sourceStage("contract"),
+    contract: contractStageFor("strategize"),
     strategize: strategizeStage("research", (ctx) =>
       ctx.manifest.id === "presentation"
         ? `[덱 조건] 슬라이드 수: ${String(ctx.input.slide_count ?? "도구 기본")}. 설계도의 각 부분은 슬라이드 한 장(또는 몇 장)이며, 장마다 주장 하나와 그 근거의 형식(사진, 차트, 표, 큰 숫자, 비교, 절차)을 notes에 적으세요.`
@@ -67,9 +70,11 @@ export function genericSpec(toolId: string): AgentSpec {
     research: {
       id: "research",
       label: { ko: "자료 조사", en: "Researching" },
-      maxSeconds: 60,
+      maxSeconds: 110,
       optional: { skipTo: "draft" },
       async run(ctx) {
+        // The contract's research questions first; the tool's own search otherwise.
+        if (await contractResearch(ctx)) return { next: "draft" };
         if (!ctx.manifest.grounding.webSearch) return { next: "draft" };
         const context = buildContext(ctx.manifest, directives(ctx.state, ctx.input), ctx.state.profile);
         const r = await searchGrounding(ctx.manifest, context, ctx.signal);

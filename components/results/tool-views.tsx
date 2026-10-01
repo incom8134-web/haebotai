@@ -62,7 +62,8 @@ export const TOOL_VIEWS: Record<string, { match: (o: Record<string, unknown>) =>
   "sop-builder": { match: (o) => has(o, "steps"), View: SopFlow },
   "meeting-action": { match: (o) => has(o, "actions") || has(o, "decisions"), View: ActionBoard },
   "business-plan": { match: (o) => Boolean(o.sections), View: DocCanvas },
-  proposal: { match: (o) => typeof o.executive_summary === "string", View: ProposalBuilder },
+  // A document-agent proposal (output.document) reads as a document with its outline; older ones keep the section builder.
+  proposal: { match: (o) => Boolean(o.document) || typeof o.executive_summary === "string", View: (p) => (p.output.document ? <DocCanvas {...p} toolId="proposal" /> : <ProposalBuilder {...p} />) },
   calendar: { match: (o) => has(o, "weeks"), View: OpsBoard },
   "market-desk": { match: (o) => has(o, "questions"), View: ResearchDesk },
   "competitor-lens": { match: (o) => has(o, "competitors"), View: CompetitorMatrix },
