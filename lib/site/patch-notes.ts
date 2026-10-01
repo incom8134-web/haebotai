@@ -4,6 +4,14 @@ export type NoteKind = "new" | "improved" | "fixed";
 
 export const PATCH_NOTES: { version: string; date: string; title: Bilingual; items: { kind: NoteKind; text: Bilingual }[] }[] = [
   {
+    version: "2.10.1",
+    date: "2026-10-01",
+    title: { ko: "도구 화면이 조금 더 가볍게", en: "Lighter tool pages" },
+    items: [
+      { kind: "improved", text: { ko: "도구 화면과 결과 화면이 그 도구에 필요한 내용만 내려받아요", en: "Tool and result pages download only what that tool needs" } },
+    ],
+  },
+  {
     version: "2.10.0",
     date: "2026-10-01",
     title: { ko: "출시 전 점검 — 휴대폰 화면, 이어서 만들기, 접근성", en: "Pre-release checks — phone layouts, hand-offs, accessibility" },

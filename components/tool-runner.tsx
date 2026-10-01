@@ -27,14 +27,12 @@ import { CATEGORY_LABELS } from "@/lib/tools/registry/categories";
 import { seedFromChain } from "@/lib/tools/chain";
 import { ProjectPicker } from "@/components/projects/project-picker";
 import { seedFromBrief } from "@/lib/tools/brief";
-import { getToolContent } from "@/lib/tools/content";
 import { RunGuide } from "@/components/tools/run-guide";
-import { getExperience } from "@/lib/tools/experience";
 import { cn } from "@/lib/utils";
 import { ExField } from "@/components/tools/experience/controls";
 import { FreeRequest } from "@/components/tools/free-request";
-import { localizeField } from "@/lib/tools/fields-en";
-import { presetValues } from "@/lib/tools/presets-en";
+import { localizeWith, presetValuesWith } from "@/lib/tools/localize";
+import type { ToolPack } from "@/lib/tools/pack";
 import { mergeProjectFill } from "@/lib/projects/facts";
 import { Stage } from "@/components/tools/experience/stage";
 import { useLocale, useT, useBi } from "@/lib/i18n/context";
@@ -111,6 +109,7 @@ interface ChainedFrom {
 
 function ToolRunner({
   toolId,
+  pack,
   profile,
   chainedFrom,
   initialBrief,
@@ -126,6 +125,8 @@ function ToolRunner({
   initialValues,
 }: {
   toolId: string;
+  /** This tool's content, experience and English strings (lib/tools/pack.ts). */
+  pack: ToolPack;
   profile: BusinessProfile | null;
   chainedFrom: ChainedFrom | null;
   /** Free-text brief handed over from the Studio (?brief=). */
@@ -149,7 +150,7 @@ function ToolRunner({
   initialValues?: ToolFormValues;
 }) {
   const manifest = getTool(toolId);
-  const exp = getExperience(toolId);
+  const exp = (pack.experience ?? undefined);
   const { locale } = useLocale();
   const t = useT();
   const L = useBi();
@@ -167,8 +168,8 @@ function ToolRunner({
   const [values, setValues] = useState<ToolFormValues>(() => {
     if (initialValues) return { ...initialValues };
     if (chainedFrom) return seedFromChain(toolId, chainedFrom.toolId, chainedFrom.output, chainedFrom.pick);
-    const preset = initialPreset !== undefined ? getToolContent(toolId)?.presets[initialPreset] : undefined;
-    if (preset) return { ...presetValues(toolId, initialPreset!, preset.values, locale) };
+    const preset = initialPreset !== undefined ? pack.content?.presets[initialPreset] : undefined;
+    if (preset) return { ...presetValuesWith(pack.presetsEn, initialPreset!, preset.values, locale) };
     const brief = manifest ? seedFromBrief(manifest, initialBrief) : {};
     if (Object.keys(brief).length) return brief;
     if (startsInProject) return {};
@@ -176,7 +177,7 @@ function ToolRunner({
     // tool's first example pre-filled rather than blank fields — same
     // promise ToolHome's example gallery already makes ("opens with the
     // form filled in"), just honored on a direct /run visit too.
-    return { ...presetValues(toolId, 0, getToolContent(toolId)?.presets[0]?.values ?? {}, locale) };
+    return { ...presetValuesWith(pack.presetsEn, 0, pack.content?.presets[0]?.values ?? {}, locale) };
   });
   // The language is read on the client after the first render, so a form
   // seeded with a preset in Korean switches to the English sample values
@@ -186,7 +187,7 @@ function ToolRunner({
   const projectFilled = useRef<Set<string>>(new Set());
   if (seeded.current === null && !chainedFrom && !initialBrief && !startsInProject) {
     const index = initialPreset ?? 0;
-    const preset = getToolContent(toolId)?.presets[index];
+    const preset = pack.content?.presets[index];
     if (preset) seeded.current = { index, values: { ...preset.values } };
   }
   useEffect(() => {
@@ -194,7 +195,7 @@ function ToolRunner({
     if (!seed || locale !== "en") return;
     setValues((current) => {
       const untouched = Object.keys(seed.values).every((k) => JSON.stringify(current[k]) === JSON.stringify(seed.values[k]));
-      return untouched ? { ...current, ...presetValues(toolId, seed.index, seed.values, "en") } : current;
+      return untouched ? { ...current, ...presetValuesWith(pack.presetsEn, seed.index, seed.values, "en") } : current;
     });
   }, [locale, toolId]);
   const [excludedProfileKeys, setExcludedProfileKeys] = useState<Set<string>>(
@@ -489,9 +490,10 @@ function ToolRunner({
       {exp && exp.layout !== "steps" ? <Stage exp={exp} values={values} /> : null}
       <RunGuide
         toolId={toolId}
+        pack={pack}
         onPreset={(i) => {
-          const preset = getToolContent(toolId)?.presets[i];
-          if (preset) setValues({ ...presetValues(toolId, i, preset.values, locale) });
+          const preset = pack.content?.presets[i];
+          if (preset) setValues({ ...presetValuesWith(pack.presetsEn, i, preset.values, locale) });
         }}
       />
     </aside>
@@ -586,7 +588,7 @@ function ToolRunner({
               // Still the untouched example → replace it, so none of the
               // example's answers ride along with the project's facts.
               const seed = seeded.current;
-              const untouched = !!seed && Object.keys(seed.values).every((k) => JSON.stringify(prev[k]) === JSON.stringify(presetValues(toolId, seed.index, seed.values, locale)[k]));
+              const untouched = !!seed && Object.keys(seed.values).every((k) => JSON.stringify(prev[k]) === JSON.stringify(presetValuesWith(pack.presetsEn, seed.index, seed.values, locale)[k]));
               if (untouched) {
                 projectFilled.current = new Set(Object.keys(v));
                 return { ...v };
@@ -655,7 +657,7 @@ function ToolRunner({
                 {section.fields.filter((fid) => fid !== "free_request").map((fid) => {
                   const field = manifest.inputs.find((f) => f.id === fid);
                   if (!field) return null;
-                  return <ExField key={fid} field={localizeField(toolId, field, locale)} ui={exp.ui[fid]} value={values[fid]} onChange={(v) => setValues((p) => ({ ...p, [fid]: v }))} />;
+                  return <ExField key={fid} field={localizeWith(pack.fieldsEn, field, locale)} ui={exp.ui[fid]} value={values[fid]} onChange={(v) => setValues((p) => ({ ...p, [fid]: v }))} />;
                 })}
               </div>
             </li>
@@ -667,7 +669,7 @@ function ToolRunner({
             {manifest.inputs
               .filter((f) => f.id !== "free_request")
               .map((field) => (
-                <ExField key={field.id} field={localizeField(toolId, field, locale)} value={values[field.id]} onChange={(v) => setValues((p) => ({ ...p, [field.id]: v }))} />
+                <ExField key={field.id} field={localizeWith(pack.fieldsEn, field, locale)} value={values[field.id]} onChange={(v) => setValues((p) => ({ ...p, [field.id]: v }))} />
               ))}
           </div>
         </div>

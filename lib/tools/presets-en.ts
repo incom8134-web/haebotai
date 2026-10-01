@@ -1,3 +1,5 @@
+import { presetValuesWith, type PresetsEn } from "./localize";
+
 // English versions of the example presets' sample text (lib/tools/
 // content.json keeps the Korean). Keyed by tool id, then preset index;
 // only the text values are here — option values are the same in both
@@ -141,7 +143,10 @@ export const PRESET_VALUES_EN: Record<string, Record<number, Record<string, stri
 
 /** A preset's values in the UI's language. */
 export function presetValues<T extends Record<string, unknown>>(toolId: string, index: number, values: T, locale: string): T {
-  if (locale !== "en") return values;
-  const en = PRESET_VALUES_EN[toolId]?.[index];
-  return en ? ({ ...values, ...en } as T) : values;
+  return presetValuesWith(PRESET_VALUES_EN[toolId], index, values, locale);
+}
+
+/** This tool's English preset text, for a client-side pack. */
+export function presetsEnFor(toolId: string): PresetsEn {
+  return PRESET_VALUES_EN[toolId] ?? {};
 }
