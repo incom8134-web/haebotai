@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { getTool } from "@/lib/tools/registry";
 import { useLocale, useT } from "@/lib/i18n/context";
 import type { DictKey } from "@/lib/i18n/dictionaries";
+import { formatDateTime } from "@/lib/format-date";
 
 export interface LibraryRun {
   id: string;
@@ -87,9 +88,7 @@ function LibraryList({ runs: all, projects = [] }: { runs: LibraryRun[]; project
                     ) : null}
                   </p>
                   <p className="font-mono text-2xs text-fg-subtle">
-                    {new Date(run.createdAt).toLocaleString(
-                      locale === "en" ? "en-US" : "ko-KR",
-                    )}
+                    {formatDateTime(run.createdAt, locale)}
                   </p>
                 </div>
               </div>

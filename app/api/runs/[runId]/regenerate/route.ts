@@ -14,7 +14,7 @@ import { resolveCost } from "@/lib/ai/resolve-provider";
 import { reserveCredits, releaseUnattachedReservation, settleGenerationCredits } from "@/lib/credits";
 import { runLimiter, checkRateLimit } from "@/lib/rate-limit";
 import { checkSpend } from "@/lib/spend-guard";
-import { regenerateCost, regeneratableSections } from "@/lib/projects/regenerate";
+import { regenerateCost, regeneratableSections, versionTitle } from "@/lib/projects/regenerate";
 import { writeRunFacts } from "@/lib/projects/server";
 
 // Rewrite one part of a finished result (POST { section, instruction }).
@@ -127,7 +127,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       provider: "google",
       parent_run_id: run.id,
       project_id: run.project_id,
-      title: run.title,
+      title: versionTitle(run.title),
       input_tokens: result.usage?.promptTokenCount ?? null,
       output_tokens: result.usage?.candidatesTokenCount ?? null,
     })

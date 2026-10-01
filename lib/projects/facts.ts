@@ -68,7 +68,7 @@ export function factsFromRun(toolId: string, input: Obj, output: Obj): Facts {
       put("key_message", ss(o(output.messaging).taglines)[0] ?? "");
       put("brand_voice", [ss(voice.tone_words).join(", "), ...ss(voice.do).slice(0, 2)].filter(Boolean).join(" / "));
       put("palette", a(output.palette).map((c) => `${s(c.name)} ${s(c.hex)}`.trim()).filter(Boolean).join(", "));
-      put("fonts", [s(o(type.heading).family), s(o(type.body).family)].filter(Boolean).join(" / "));
+      put("fonts", [...new Set([s(o(type.heading).family), s(o(type.body).family)].filter(Boolean))].join(" / "));
       break;
     }
     case "offer-architect":

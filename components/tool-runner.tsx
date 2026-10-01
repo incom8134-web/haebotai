@@ -160,6 +160,9 @@ function ToolRunner({
   const cost = manifest ? resolveCost(provider, !!hasOwnKey[provider], isStudent, manifest.estimatedCredits) : 0;
 
   const [projectId, setProjectId] = useState(initialProject && projects.some((p) => p.id === initialProject) ? initialProject : "");
+  // Opened inside a project: the form fills from the project's memory, so
+  // it starts empty rather than with another business's example.
+  const startsInProject = !!projectId && !initialValues && !chainedFrom && initialPreset === undefined && !initialBrief;
   const [values, setValues] = useState<ToolFormValues>(() => {
     if (initialValues) return { ...initialValues };
     if (chainedFrom) return seedFromChain(toolId, chainedFrom.toolId, chainedFrom.output, chainedFrom.pick);
@@ -167,6 +170,7 @@ function ToolRunner({
     if (preset) return { ...presetValues(toolId, initialPreset!, preset.values, locale) };
     const brief = manifest ? seedFromBrief(manifest, initialBrief) : {};
     if (Object.keys(brief).length) return brief;
+    if (startsInProject) return {};
     // A cold visit (no chain, no ?preset=, no brief) opens with the
     // tool's first example pre-filled rather than blank fields — same
     // promise ToolHome's example gallery already makes ("opens with the
@@ -177,7 +181,7 @@ function ToolRunner({
   // seeded with a preset in Korean switches to the English sample values
   // once English is known — only while the user hasn't edited it.
   const seeded = useRef<{ index: number; values: ToolFormValues } | null>(null);
-  if (seeded.current === null && !chainedFrom && !initialBrief) {
+  if (seeded.current === null && !chainedFrom && !initialBrief && !startsInProject) {
     const index = initialPreset ?? 0;
     const preset = getToolContent(toolId)?.presets[index];
     if (preset) seeded.current = { index, values: { ...preset.values } };
@@ -574,7 +578,15 @@ function ToolRunner({
           value={projectId}
           onChange={setProjectId}
           inputs={manifest.inputs}
-          onFill={(v) => setValues((prev) => ({ ...prev, ...v }))}
+          onFill={(v) =>
+            setValues((prev) => {
+              // Still the untouched example → replace it, so none of the
+              // example's answers ride along with the project's facts.
+              const seed = seeded.current;
+              const untouched = !!seed && Object.keys(seed.values).every((k) => JSON.stringify(prev[k]) === JSON.stringify(presetValues(toolId, seed.index, seed.values, locale)[k]));
+              return untouched ? { ...v } : { ...prev, ...v };
+            })
+          }
         />
       ) : null}
 
