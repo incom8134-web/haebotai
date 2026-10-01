@@ -1,30 +1,35 @@
 "use client";
 
-import { BrandBoard } from "./brand/brand-board";
-import { LogoBoard } from "./brand/logo-board";
-import { SalesPageBoard } from "./brand/sales-page-board";
-import { SiteBoard } from "./brand/site-board";
-import { Storyboard } from "./brand/storyboard";
-import { AdBoard } from "./campaign/ad-board";
-import { CampaignBoard } from "./campaign/campaign-board";
-import { ContentBranches } from "./campaign/content-branches";
-import { HookBoard } from "./campaign/hook-board";
-import { SeoEditor } from "./campaign/seo-editor";
-import { GapMap } from "./discover/gap-map";
-import { ActionBoard } from "./operate/action-board";
-import { CompetitorMatrix } from "./research/competitor-matrix";
-import { InsightBoard } from "./research/insight-board";
-import { PersonaMap } from "./research/persona-map";
-import { ResearchDesk } from "./research/research-desk";
-import { TrendRadar } from "./research/trend-radar";
-import { DocCanvas } from "./operate/doc-canvas";
-import { OpsBoard } from "./operate/ops-board";
-import { ProposalBuilder } from "./operate/proposal-builder";
-import { SopFlow } from "./operate/sop-flow";
-import { IdeaBoard } from "./discover/idea-board";
-import { MvpBoard } from "./discover/mvp-board";
-import { OfferBlocks } from "./discover/offer-blocks";
-import { RevenueMap } from "./discover/revenue-map";
+import dynamic from "next/dynamic";
+
+// Each view loads on its own: a result page downloads only the view it
+// shows, not all 25 (they stay server-rendered — dynamic() keeps SSR).
+const BrandBoard = dynamic(() => import("./brand/brand-board").then((m) => m.BrandBoard));
+const LogoBoard = dynamic(() => import("./brand/logo-board").then((m) => m.LogoBoard));
+const SalesPageBoard = dynamic(() => import("./brand/sales-page-board").then((m) => m.SalesPageBoard));
+const SiteBoard = dynamic(() => import("./brand/site-board").then((m) => m.SiteBoard));
+const Storyboard = dynamic(() => import("./brand/storyboard").then((m) => m.Storyboard));
+const AdBoard = dynamic(() => import("./campaign/ad-board").then((m) => m.AdBoard));
+const CampaignBoard = dynamic(() => import("./campaign/campaign-board").then((m) => m.CampaignBoard));
+const ContentBranches = dynamic(() => import("./campaign/content-branches").then((m) => m.ContentBranches));
+const HookBoard = dynamic(() => import("./campaign/hook-board").then((m) => m.HookBoard));
+const SeoEditor = dynamic(() => import("./campaign/seo-editor").then((m) => m.SeoEditor));
+const GapMap = dynamic(() => import("./discover/gap-map").then((m) => m.GapMap));
+const ActionBoard = dynamic(() => import("./operate/action-board").then((m) => m.ActionBoard));
+const CompetitorMatrix = dynamic(() => import("./research/competitor-matrix").then((m) => m.CompetitorMatrix));
+const InsightBoard = dynamic(() => import("./research/insight-board").then((m) => m.InsightBoard));
+const PersonaMap = dynamic(() => import("./research/persona-map").then((m) => m.PersonaMap));
+const ResearchDesk = dynamic(() => import("./research/research-desk").then((m) => m.ResearchDesk));
+const TrendRadar = dynamic(() => import("./research/trend-radar").then((m) => m.TrendRadar));
+const DocCanvas = dynamic(() => import("./operate/doc-canvas").then((m) => m.DocCanvas));
+const OpsBoard = dynamic(() => import("./operate/ops-board").then((m) => m.OpsBoard));
+const ProposalBuilder = dynamic(() => import("./operate/proposal-builder").then((m) => m.ProposalBuilder));
+const SopFlow = dynamic(() => import("./operate/sop-flow").then((m) => m.SopFlow));
+const IdeaBoard = dynamic(() => import("./discover/idea-board").then((m) => m.IdeaBoard));
+const MvpBoard = dynamic(() => import("./discover/mvp-board").then((m) => m.MvpBoard));
+const OfferBlocks = dynamic(() => import("./discover/offer-blocks").then((m) => m.OfferBlocks));
+const RevenueMap = dynamic(() => import("./discover/revenue-map").then((m) => m.RevenueMap));
+
 
 // Each tool's own result view, keyed by engine id. `match` guards against
 // runs saved in an older shape, which fall back to the generic renderers
@@ -38,7 +43,7 @@ export interface ViewProps {
 
 const has = (o: Record<string, unknown>, key: string) => Array.isArray(o[key]) && (o[key] as unknown[]).length > 0;
 
-export const TOOL_VIEWS: Record<string, { match: (o: Record<string, unknown>) => boolean; View: (p: ViewProps) => React.ReactNode }> = {
+export const TOOL_VIEWS: Record<string, { match: (o: Record<string, unknown>) => boolean; View: React.ComponentType<ViewProps> }> = {
   "idea-radar": { match: (o) => has(o, "ideas"), View: IdeaBoard },
   "revenue-mapper": { match: (o) => has(o, "streams"), View: RevenueMap },
   "offer-architect": { match: (o) => has(o, "packages") || typeof o.core_promise === "string", View: OfferBlocks },

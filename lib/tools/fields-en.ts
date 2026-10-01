@@ -1,11 +1,11 @@
 import type { ToolField } from "./types";
+import { localizeWith, type FieldEn, type FieldsEn } from "./localize";
 
 // English labels for every tool's form. The manifests in
 // lib/tools/registry keep Korean labels (they also feed the model
 // prompt); the run page and the tool pages swap in these when the UI
 // is in English. Option *values* never change, only what's shown.
 
-type FieldEn = { label: string; placeholder?: string; unit?: string; options?: Record<string, string> };
 
 const COMMON: Record<string, FieldEn> = {
   free_request: { label: "Ask for anything, in your own words" },
@@ -266,19 +266,14 @@ const FIELDS_EN: Record<string, Record<string, FieldEn>> = {
 };
 
 /** The field as it should read in the UI's language (labels and option labels only). */
-export function localizeField(toolId: string, field: ToolField, locale: string): ToolField {
-  if (locale !== "en") return field;
-  const en = FIELDS_EN[toolId]?.[field.id] ?? COMMON[field.id];
-  if (!en) return field;
-  const out = { ...field, label: en.label } as ToolField & { placeholder?: string; unit?: string };
-  if (en.placeholder && "placeholder" in field) out.placeholder = en.placeholder;
-  if (en.unit && field.kind === "number") (out as { unit?: string }).unit = en.unit;
-  if ("options" in field && en.options) {
-    (out as { options: { value: string; label: string }[] }).options = field.options.map((o) => ({ ...o, label: en.options![o.value] ?? o.label }));
-  }
-  return out;
+/** This tool's English strings (shared ones included), for a client-side pack. */
+export function fieldsEnFor(toolId: string): FieldsEn {
+  return { ...COMMON, ...FIELDS_EN[toolId] };
 }
 
+export function localizeField(toolId: string, field: ToolField, locale: string): ToolField {
+  return localizeWith(fieldsEnFor(toolId), field, locale);
+}
 export function localizeFields(toolId: string, fields: ToolField[], locale: string): ToolField[] {
   return fields.map((f) => localizeField(toolId, f, locale));
 }

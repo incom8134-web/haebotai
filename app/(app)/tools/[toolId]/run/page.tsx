@@ -10,6 +10,7 @@ import { getBalance } from "@/lib/credits";
 import { listProjects } from "@/lib/projects/server";
 import { createClient } from "@/lib/supabase/server";
 import type { ProviderId } from "@/lib/ai/types";
+import { toolPack } from "@/lib/tools/pack";
 
 // HAEBOT_A_TOOLS_SPEC.md §5.2 / Part 6 T4 — tool page anatomy: header,
 // profile chips, form (seeded from a chained run when ?fromRun is
@@ -85,6 +86,7 @@ export default async function ToolPage({
 
   return (
     <ToolRunner
+      pack={toolPack(toolId)}
       projects={projects.map((p) => ({ id: p.id, name: p.name }))}
       initialProject={project}
       initialValues={initialValues}

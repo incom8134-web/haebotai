@@ -5,7 +5,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight, BookOpen, Check, Copy, Headset, Lightbulb, Plus, WandSparkles } from "lucide-react";
 import { getTool } from "@/lib/tools/registry";
-import { getToolContent } from "@/lib/tools/content";
+import type { ToolPack } from "@/lib/tools/pack";
 import { presetLines } from "@/lib/tools/preset-lines";
 import { useBi, useLocale } from "@/lib/i18n/context";
 
@@ -15,17 +15,17 @@ import { useBi, useLocale } from "@/lib/i18n/context";
 // cards mirror ToolHome's example gallery (same presetLines + copy
 // pattern) so the run page isn't thinner than the overview page it links
 // from.
-export function RunGuide({ toolId, onPreset }: { toolId: string; onPreset: (index: number) => void }) {
+export function RunGuide({ toolId, pack, onPreset }: { toolId: string; pack: ToolPack; onPreset: (index: number) => void }) {
   const L = useBi();
   const { locale } = useLocale();
-  const c = getToolContent(toolId);
+  const c = pack.content;
   const tool = getTool(toolId);
   const [copied, setCopied] = useState<number | null>(null);
   if (!c || !tool) return null;
 
   async function copyPreset(i: number) {
     try {
-      await navigator.clipboard.writeText(presetLines(tool!, c!.presets[i], locale, i).join("\n"));
+      await navigator.clipboard.writeText(presetLines(tool!, c!.presets[i], locale, i, pack).join("\n"));
       setCopied(i);
       setTimeout(() => setCopied(null), 1600);
     } catch {
@@ -57,7 +57,7 @@ export function RunGuide({ toolId, onPreset }: { toolId: string; onPreset: (inde
                   <Plus size={13} className="shrink-0 text-fg-subtle transition-transform duration-500 ease-[var(--spring)] group-hover:rotate-90 group-hover:text-studio-cyan" aria-hidden />
                 </span>
                 <ul className="mt-1.5 space-y-0.5">
-                  {presetLines(tool, p, locale, i).slice(0, 2).map((line) => (
+                  {presetLines(tool, p, locale, i, pack).slice(0, 2).map((line) => (
                     <li key={line} className="truncate text-2xs text-fg-subtle" title={line}>{line}</li>
                   ))}
                 </ul>
