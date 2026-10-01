@@ -38,3 +38,8 @@ test("prefill fills only the fields a tool has, splitting chips", () => {
   assert.deepEqual(values, { business: "필라테스", competitors: ["A짐", "B스튜디오"] });
   assert.deepEqual(filled, ["business", "competitors"]);
 });
+
+test("one font for heading and body is stored once", () => {
+  const f = factsFromRun("brand-dna", {}, { typography: { heading: { family: "IBM Plex Sans KR" }, body: { family: "IBM Plex Sans KR" } } });
+  assert.equal(f.fonts, "IBM Plex Sans KR");
+});

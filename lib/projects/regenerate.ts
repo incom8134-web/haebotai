@@ -27,3 +27,11 @@ export const REGENERATE_PRESETS = [
   { ko: "완전히 다른 방향으로", en: "A completely different direction" },
   { ko: "초보자도 이해하기 쉽게", en: "Easier for beginners" },
 ];
+
+/** A revision's title: the member's name for the result, marked as revised
+ *  (once, however many revisions deep), or none if it had no name. */
+export function versionTitle(title: string | null | undefined): string | null {
+  if (!title) return null;
+  const base = title.replace(/ · 고친 버전$/, "");
+  return `${base.slice(0, 120 - 8)} · 고친 버전`;
+}

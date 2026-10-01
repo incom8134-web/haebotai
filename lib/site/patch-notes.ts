@@ -12,6 +12,8 @@ export const PATCH_NOTES: { version: string; date: string; title: Bilingual; ite
       { kind: "new", text: { ko: "프로젝트를 고르고 도구를 열면 저장된 정보로 입력칸이 채워지고, 결과가 나오면 메모리가 자동으로 업데이트돼요", en: "Pick a project and a tool's form fills from its memory; finished results update the memory automatically" } },
       { kind: "new", text: { ko: "이 부분만 다시 만들기: 결과 중 한 부분을 골라 원하는 방향으로 다시 — 새 버전으로 저장되고 이전 결과는 그대로", en: "Redo one part: rewrite a single section of a result your way — saved as a new version, the original kept" } },
       { kind: "improved", text: { ko: "보관함: 결과 이름 바꾸기, 프로젝트로 옮기기, 같은 입력으로 다시 실행, 삭제, 버전 사이 이동, 프로젝트별 필터", en: "Library: rename, move to a project, run again with the same inputs, delete, step between versions, filter by project" } },
+      { kind: "fixed", text: { ko: "브랜드 DNA 결과가 글꼴을 불러오지 못하는 환경에서도 바로 표시돼요", en: "Brand DNA results show right away even where web fonts can't load" } },
+      { kind: "fixed", text: { ko: "보관함의 결과 시간이 한국 시간 기준으로 일정하게 표시돼요", en: "Result times in the library are shown consistently in Korea time" } },
     ],
   },
   {

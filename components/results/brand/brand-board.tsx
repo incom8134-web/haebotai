@@ -46,7 +46,10 @@ export function BrandBoard({ output, input }: { output: Record<string, unknown>;
 
   return (
     <div className="mt-3 flex flex-col gap-6">
-      {families.length ? <link rel="stylesheet" href={fontHref(families)} precedence="default" /> : null}
+      {/* No `precedence`: React would hold the page until Google Fonts
+          loads, and where it's blocked the whole result re-renders on the
+          client. The specimens just swap in when the font arrives. */}
+      {families.length ? <link rel="stylesheet" href={fontHref(families)} /> : null}
 
       <header
         className="relative overflow-hidden rounded-2xl border border-hairline-str p-6 md:p-8"

@@ -18,6 +18,7 @@ import { useLocale, useT } from "@/lib/i18n/context";
 import type { DictKey } from "@/lib/i18n/dictionaries";
 import type { Source } from "@/lib/tools/registry/shared";
 import type { ProviderId } from "@/lib/ai/types";
+import { formatDateTime } from "@/lib/format-date";
 
 const STATUS_KEY: Record<string, DictKey> = {
   pending: "status_pending",
@@ -91,7 +92,7 @@ function LibraryRunDetail({
         </h1>
         {/* Fixed to Korea time so the server (UTC) and the browser render the same text. */}
         <span className="shrink-0 font-mono text-2xs text-fg-subtle" suppressHydrationWarning>
-          {new Date(createdAt).toLocaleString(locale === "en" ? "en-US" : "ko-KR", { timeZone: "Asia/Seoul" })}
+          {formatDateTime(createdAt, locale)}
         </span>
       </div>
 
