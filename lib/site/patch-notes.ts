@@ -4,6 +4,17 @@ export type NoteKind = "new" | "improved" | "fixed";
 
 export const PATCH_NOTES: { version: string; date: string; title: Bilingual; items: { kind: NoteKind; text: Bilingual }[] }[] = [
   {
+    version: "2.8.0",
+    date: "2026-10-01",
+    title: { ko: "처음 시작하기와 새 대시보드", en: "Getting started and a new dashboard" },
+    items: [
+      { kind: "new", text: { ko: "처음 시작하기: 목표 고르기 → 프로젝트 만들기 → 추천 도구와 첫 작업, 세 화면이면 끝. 적은 내용은 프로젝트가 기억해서 첫 도구에 미리 채워져요", en: "Getting started: pick a goal → create a project → recommended tools and a first task, in three screens. What you enter is remembered and pre-filled in the first tool" } },
+      { kind: "new", text: { ko: "대시보드: 이어서 하기, 바로 시작하기, 다음에 해 볼 도구, 프로젝트, 최근 결과, 실제 크레딧 사용량을 한 화면에", en: "Dashboard: continue working, quick start, what to try next, projects, recent results and real credit usage on one screen" } },
+      { kind: "fixed", text: { ko: "프로젝트를 고르면 직접 쓴 내용이나 대시보드에서 쓴 한 줄 요청을 덮어쓰지 않고, 비어 있는 칸만 채워요", en: "Choosing a project fills only empty fields — it never overwrites what you typed or a brief from the dashboard" } },
+      { kind: "fixed", text: { ko: "로그인하지 않으면 프로젝트 화면 대신 로그인으로 안내해요", en: "Signed-out visitors to Projects are sent to sign in" } },
+    ],
+  },
+  {
     version: "2.7.0",
     date: "2026-10-01",
     title: { ko: "새 홈페이지 — 아이디어에서 매출까지 이어지는 작업실", en: "A new homepage — one workshop from idea to revenue" },

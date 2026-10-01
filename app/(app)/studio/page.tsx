@@ -1,44 +1,148 @@
-import { StudioWorkspace, type StudioRun } from "@/components/studio/studio-workspace";
-import { getBusinessProfile } from "@/lib/profile";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { Dashboard, type DashboardRun } from "@/components/studio/dashboard";
+import { getBalance } from "@/lib/credits";
+import { listProjects } from "@/lib/projects/server";
+import { displayName } from "@/lib/site/display-name";
+import { isGoal, recommendTools } from "@/lib/site/onboarding";
+import { catalogTool } from "@/lib/tools/catalog";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/supabase/user";
 
-// The Studio — the "one brief, a whole campaign" workspace (design ported
-// from the haebot-ai-studio prototype). Server side only gathers plain
-// data: the Business Profile for grounding chips and the latest runs for
-// the right-hand panel. Tool manifests stay client-side (icons and zod
-// schemas aren't serializable), read straight from the registry.
+export const metadata = { title: "스튜디오 — 해봇 AI" };
+
+// The member's home (docs/redesign-plan.md §5): continue working,
+// projects, recent results, what to run next, a quick start and real
+// credit usage. A brand-new member — no projects, no runs, onboarding
+// never seen — goes through onboarding first.
+
+const DAY = 86_400_000;
+const daysAgo = (n: number) => new Date(Date.now() - n * DAY).toISOString();
 
 export default async function StudioPage() {
   const supabase = await createClient();
   const user = await getCurrentUser();
+  const store = await cookies();
+  const goalCookie = store.get("haebot-goal")?.value;
+  const goal = isGoal(goalCookie) ? goalCookie : null;
 
-  const [profile, runsResult, doneResult] = await Promise.all([
-    getBusinessProfile(),
+  const since = daysAgo(30);
+  const [projects, balance, recent, month, used] = await Promise.all([
+    listProjects(),
+    getBalance(),
     user
       ? supabase
           .from("generations")
-          .select("id, tool_id, status, credits_used, credits_reserved, created_at")
+          .select("id, tool_id, status, title, project_id, created_at")
           .eq("user_id", user.id)
           .not("tool_id", "is", null)
           .order("created_at", { ascending: false })
-          .limit(4)
-      : Promise.resolve({ data: [] as never[] }),
-    // For the getting-started checklist: which tools have ever finished
-    // (not just the last few runs, or a step could un-tick itself).
+          .limit(8)
+      : Promise.resolve({ data: [] as never[], error: null }),
     user
-      ? supabase.from("generations").select("tool_id").eq("user_id", user.id).eq("status", "done").not("tool_id", "is", null).order("created_at", { ascending: false }).limit(100)
+      ? supabase
+          .from("generations")
+          .select("credits_used")
+          .eq("user_id", user.id)
+          .eq("status", "done")
+          .gte("created_at", since)
+          .limit(1000)
+      : Promise.resolve({ data: [] as never[] }),
+    user
+      ? supabase
+          .from("generations")
+          .select("tool_id")
+          .eq("user_id", user.id)
+          .eq("status", "done")
+          .not("tool_id", "is", null)
+          .order("created_at", { ascending: false })
+          .limit(200)
       : Promise.resolve({ data: [] as never[] }),
   ]);
-  const doneTools = (doneResult.data ?? []).map((r) => r.tool_id as string);
 
-  const recentRuns: StudioRun[] = (runsResult.data ?? []).map((run) => ({
-    id: run.id,
-    toolId: run.tool_id as string,
-    status: run.status,
-    credits: run.credits_used ?? run.credits_reserved ?? null,
-    createdAt: run.created_at,
+  // Before migration 0016 the title/project columns don't exist; fall back.
+  let rows = (recent.data ?? []) as {
+    id: string;
+    tool_id: string;
+    status: string;
+    title?: string | null;
+    project_id?: string | null;
+    created_at: string;
+  }[];
+  if (recent.error && user) {
+    const { data } = await supabase
+      .from("generations")
+      .select("id, tool_id, status, created_at")
+      .eq("user_id", user.id)
+      .not("tool_id", "is", null)
+      .order("created_at", { ascending: false })
+      .limit(8);
+    rows = data ?? [];
+  }
+
+  if (
+    !projects.length &&
+    !rows.length &&
+    store.get("haebot-onboarded")?.value !== "1"
+  )
+    redirect("/onboarding");
+
+  const counts: Record<string, number> = {};
+  if (projects.length) {
+    const { data } = await supabase
+      .from("generations")
+      .select("project_id")
+      .in(
+        "project_id",
+        projects.slice(0, 6).map((p) => p.id),
+      );
+    for (const r of data ?? [])
+      if (r.project_id) counts[r.project_id] = (counts[r.project_id] ?? 0) + 1;
+  }
+
+  const runs: DashboardRun[] = rows.map((r) => ({
+    id: r.id,
+    toolId: r.tool_id,
+    status: r.status,
+    title: r.title ?? null,
+    projectId: r.project_id ?? null,
+    createdAt: r.created_at,
   }));
+  const usedTools = [
+    ...new Set((used.data ?? []).map((r) => r.tool_id as string)),
+  ];
+  const lastDone = runs.find((r) => r.status === "done");
+  const monthRuns = month.data ?? [];
 
-  return <StudioWorkspace profile={profile} recentRuns={recentRuns} progress={{ runs: doneTools.length, distinctTools: new Set(doneTools).size }} />;
+  return (
+    <Dashboard
+      name={displayName(user?.user_metadata)}
+      projects={projects
+        .slice(0, 6)
+        .map((p) => ({
+          id: p.id,
+          name: p.name,
+          description: p.description,
+          runs: counts[p.id] ?? 0,
+        }))}
+      projectCount={projects.length}
+      runs={runs}
+      // "Continue" already offers the last result's hand-offs; this row
+      // adds the goal's tools and a default spread, minus those.
+      recommended={recommendTools({
+        usedTools: [
+          ...usedTools,
+          ...(lastDone ? (catalogTool(lastDone.toolId)?.next ?? []) : []),
+        ],
+        goal,
+        limit: 3,
+      })}
+      lastTool={lastDone?.toolId ?? null}
+      usage={{
+        balance,
+        used30: monthRuns.reduce((s, r) => s + (r.credits_used ?? 0), 0),
+        runs30: monthRuns.length,
+      }}
+    />
+  );
 }
