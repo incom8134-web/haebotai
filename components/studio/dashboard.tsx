@@ -14,7 +14,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { catalogTool, publicTools } from "@/lib/tools/catalog";
-import { getTool } from "@/lib/tools/registry";
+import { chainTargets, getTool } from "@/lib/tools/registry";
 import { briefField } from "@/lib/tools/brief";
 import { formatDateTime } from "@/lib/format-date";
 import { useBi, useLocale } from "@/lib/i18n/context";
@@ -233,6 +233,18 @@ export function Dashboard({
     ? projects.find((p) => p.id === latest.projectId)
     : projects[0];
   const last = lastTool ? catalogTool(lastTool) : undefined;
+  // The same hand-offs a result page offers (ones that carry the result
+  // in), in the catalog's preferred order.
+  const rank = (slug: string) => {
+    const i = last?.next.indexOf(slug) ?? -1;
+    return i < 0 ? 99 : i;
+  };
+  const handoffs = lastTool
+    ? chainTargets(lastTool)
+        .map((m) => catalogTool(m.id))
+        .filter((t): t is NonNullable<typeof t> => !!t && !!t.engine && !t.hidden)
+        .sort((a, b) => rank(a.slug) - rank(b.slug))
+    : [];
   const low = usage.balance !== null && usage.balance < 100;
 
   return (
@@ -305,7 +317,7 @@ export function Dashboard({
                   aria-hidden
                 />
               </Link>
-              {!live && last?.next.length ? (
+              {!live && handoffs.length ? (
                 <div>
                   <p className="text-2xs text-fg-subtle">
                     {L({
@@ -314,9 +326,9 @@ export function Dashboard({
                     })}
                   </p>
                   <div className="mt-1.5 flex flex-wrap gap-1.5">
-                    {last.next.slice(0, 3).map((slug) => {
-                      const t = catalogTool(slug);
-                      return t?.engine ? (
+                    {handoffs.slice(0, 3).map((t) => {
+                      const slug = t.slug;
+                      return t.engine ? (
                         <Link
                           key={slug}
                           href={`/tools/${slug}/run?fromRun=${latest.id}${latest.projectId ? `&project=${latest.projectId}` : ""}`}

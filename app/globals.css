@@ -154,6 +154,13 @@
   --color-warn: #f5a524;
 }
 
+/* In dark mode the deep accent stays for fills (white text on it clears
+   AA) but is too dark as text on the dark surfaces (3.4–3.6:1). Accent
+   text, links and icons use a lighter sunrise orange there (≈8:1). */
+.dark :is(.text-accent, .hover\:text-accent:hover, .group:hover .group-hover\:text-accent) {
+  color: #fb923c;
+}
+
 /*
  * Everything custom below lives in @layer components so Tailwind utilities
  * (fixed, sticky, absolute, …) always win over it. Unlayered, `.glass
@@ -346,6 +353,15 @@ p { text-wrap: pretty; }
 }
 
 @layer base {
+  /* A grid with only responsive columns (md:grid-cols-2…) is one implicit
+     auto column below that breakpoint, and an auto column grows to its
+     widest unbreakable child — truncated lines, long words — pushing the
+     page sideways on phones. Give those grids one shrinkable column; any
+     grid-cols-* utility (utilities layer) still wins where it applies. */
+  :where(.grid:not([class^="grid-cols-"]):not([class*=" grid-cols-"])) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   * {
     @apply border-border outline-ring/50;
   }

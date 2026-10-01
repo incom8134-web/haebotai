@@ -6,6 +6,7 @@ import { listProjects } from "@/lib/projects/server";
 import { displayName } from "@/lib/site/display-name";
 import { isGoal, recommendTools } from "@/lib/site/onboarding";
 import { catalogTool } from "@/lib/tools/catalog";
+import { chainTargets } from "@/lib/tools/registry";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/supabase/user";
 
@@ -27,7 +28,7 @@ export default async function StudioPage() {
   const goal = isGoal(goalCookie) ? goalCookie : null;
 
   const since = daysAgo(30);
-  const [projects, balance, recent, month, used] = await Promise.all([
+  const [projects, balance, recent, month, used, inProjects] = await Promise.all([
     listProjects(),
     getBalance(),
     user
@@ -57,6 +58,15 @@ export default async function StudioPage() {
           .not("tool_id", "is", null)
           .order("created_at", { ascending: false })
           .limit(200)
+      : Promise.resolve({ data: [] as never[] }),
+    // Result counts per project, fetched alongside instead of after.
+    user
+      ? supabase
+          .from("generations")
+          .select("project_id")
+          .eq("user_id", user.id)
+          .not("project_id", "is", null)
+          .limit(5000)
       : Promise.resolve({ data: [] as never[] }),
   ]);
 
@@ -88,17 +98,8 @@ export default async function StudioPage() {
     redirect("/onboarding");
 
   const counts: Record<string, number> = {};
-  if (projects.length) {
-    const { data } = await supabase
-      .from("generations")
-      .select("project_id")
-      .in(
-        "project_id",
-        projects.slice(0, 6).map((p) => p.id),
-      );
-    for (const r of data ?? [])
-      if (r.project_id) counts[r.project_id] = (counts[r.project_id] ?? 0) + 1;
-  }
+  for (const r of (inProjects.data ?? []) as { project_id: string | null }[])
+    if (r.project_id) counts[r.project_id] = (counts[r.project_id] ?? 0) + 1;
 
   const runs: DashboardRun[] = rows.map((r) => ({
     id: r.id,
@@ -132,7 +133,9 @@ export default async function StudioPage() {
       recommended={recommendTools({
         usedTools: [
           ...usedTools,
-          ...(lastDone ? (catalogTool(lastDone.toolId)?.next ?? []) : []),
+          ...(lastDone
+            ? chainTargets(lastDone.toolId).map((m) => catalogTool(m.id)?.slug ?? m.id)
+            : []),
         ],
         goal,
         limit: 3,

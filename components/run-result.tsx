@@ -486,6 +486,8 @@ function RunResult({
 
       <DownloadPanel runId={runId} toolId={manifest.id} extras={extras} />
 
+      {/* Outline: the page's h1 is the tool; result views use h3 sections. */}
+      <h2 className="sr-only">{locale === "en" ? "Result" : "결과"}</h2>
       <OutputPreview output={shown} toolId={manifest.id} input={input} runId={runId} />
 
       <DownloadPanel runId={runId} toolId={manifest.id} extras={extras} compact />
