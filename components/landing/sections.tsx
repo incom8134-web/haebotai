@@ -103,7 +103,7 @@ export function FlowSection() {
       <div
         role="tablist"
         aria-label={L({ ko: "단계", en: "Stages" })}
-        className="mt-10 grid grid-cols-3 gap-1.5 sm:grid-cols-6"
+        className="mt-10 grid grid-cols-2 gap-1.5 sm:grid-cols-5"
       >
         {FLOW.map((s, i) => (
           <button
