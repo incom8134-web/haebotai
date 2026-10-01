@@ -308,7 +308,7 @@ export function ReportView({ report }: { report: Report }) {
       {report.sections.map((s) => {
         const numbered = s.kicker ? ++n : n;
         return (
-          <section key={s.id} className="rounded-[24px] border border-hairline bg-surface/40 p-5 md:p-6">
+          <section key={s.id} id={`r-${s.id}`} className="scroll-mt-20 rounded-[24px] border border-hairline bg-surface/40 p-5 md:p-6">
             {s.kicker ? (
               <p className="font-mono text-2xs tracking-wide text-[var(--rp)] uppercase">
                 {/^\d/.test(s.kicker) ? s.kicker : `${String(numbered).padStart(2, "0")} · ${s.kicker}`}

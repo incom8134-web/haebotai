@@ -3570,5 +3570,266 @@
       "ko": "핵심: 러닝화는 디자인보다 발에 맞는지가 먼저\n카드뉴스 1/7 '예쁜 러닝화가 무릎을 망치는 이유' · 쇼츠 0~3초 '신발장 앞, 두 켤레를 들고 고민하는 손'",
       "en": "Core: fit beats looks for running shoes\nCarousel 1/7 'Why pretty running shoes hurt your knees' · Shorts 0–3s 'two pairs held up at the shoe rack'"
     }
+  },
+  "sop-builder": {
+    "tagline": {
+      "ko": "누가 해도 같은 결과가 나오는 업무 매뉴얼",
+      "en": "A procedure anyone can follow to the same result"
+    },
+    "description": {
+      "ko": "지금 하는 방식을 편하게 적어 주면 역할별 흐름도, 단계마다의 품질 기준, 예외 상황 대응, 잘 되고 있는지 볼 지표까지 한 장의 매뉴얼로 만들어 드려요. 체크리스트는 화면에서 바로 체크하며 쓸 수 있어요.",
+      "en": "Describe how you do it now and get a manual: a flow by role, a quality standard per step, what to do when things go wrong, and how to tell it's working. Tick the checklist right on screen."
+    },
+    "features": [
+      {
+        "icon": "layers",
+        "title": {
+          "ko": "역할별 흐름도",
+          "en": "Flow by role"
+        },
+        "body": {
+          "ko": "누가 어느 단계를 맡는지 줄별로 한눈에 봅니다.",
+          "en": "See who owns each step at a glance."
+        }
+      },
+      {
+        "icon": "shield-check",
+        "title": {
+          "ko": "눈으로 확인하는 기준",
+          "en": "Visible quality standards"
+        },
+        "body": {
+          "ko": "'꼼꼼히'가 아니라 사진·숫자·체크 항목으로 기준을 씁니다.",
+          "en": "Standards as photos, numbers and checks — not 'carefully'."
+        }
+      },
+      {
+        "icon": "zap",
+        "title": {
+          "ko": "예외 대응까지",
+          "en": "Exceptions covered"
+        },
+        "body": {
+          "ko": "재고 없음, 고객 부재 같은 상황에 누가 무엇을 할지.",
+          "en": "Who does what when stock runs out or a customer is away."
+        }
+      }
+    ],
+    "presets": [
+      {
+        "title": {
+          "ko": "스마트스토어 주문→발송",
+          "en": "Smart Store order to shipping"
+        },
+        "tag": {
+          "ko": "커머스",
+          "en": "E-commerce"
+        },
+        "values": {
+          "process": "스마트스토어 주문 확인부터 발송까지: 오전 9시에 신규 주문 확인, 상품 포장, 택배사 사이트에서 송장 출력, 스마트스토어에 송장 번호 입력, 오후 4시 집하. 포장은 알바, 고객 문의는 사장이 담당.",
+          "standard": "오후 2시 전 주문은 당일 발송, 오배송 0건",
+          "roles": [
+            "사장",
+            "알바"
+          ],
+          "frequency": "daily",
+          "tools": [
+            "스마트스토어",
+            "택배사 사이트",
+            "카카오톡"
+          ],
+          "problems": "색상 옵션을 잘못 보냄, 송장 번호 입력 누락으로 고객 문의",
+          "detail": "standard"
+        }
+      },
+      {
+        "title": {
+          "ko": "카페 오픈 준비",
+          "en": "Café opening routine"
+        },
+        "tag": {
+          "ko": "매장",
+          "en": "Store"
+        },
+        "values": {
+          "process": "카페 오픈: 7시 30분 문 열기, 머신 예열, 에스프레소 추출 점검, 페이스트리 입고 확인, 쇼케이스 진열, 8시 POS 오픈.",
+          "roles": [
+            "오픈 바리스타"
+          ],
+          "frequency": "daily",
+          "tools": [
+            "POS",
+            "에스프레소 머신"
+          ],
+          "problems": "바쁜 아침에 추출 점검을 건너뛰어 커피가 시큼함",
+          "detail": "detailed"
+        }
+      }
+    ],
+    "steps": [
+      {
+        "ko": "지금 하는 방식을 편하게 적습니다.",
+        "en": "Describe how you do it now."
+      },
+      {
+        "ko": "역할, 도구, 자주 생기는 실수를 넣습니다.",
+        "en": "Add roles, tools and common mistakes."
+      },
+      {
+        "ko": "매뉴얼을 확인하고 체크리스트로 씁니다.",
+        "en": "Review the manual and use the checklist."
+      }
+    ],
+    "tips": [
+      {
+        "ko": "자주 생기는 실수를 적으면 그 실수를 막는 확인 단계가 들어가요.",
+        "en": "Listing common mistakes adds checks that prevent them."
+      },
+      {
+        "ko": "'신입 교육용'을 고르면 단계가 더 잘게 나뉘어요.",
+        "en": "'Detailed, for training' breaks steps down further."
+      }
+    ],
+    "faq": [
+      {
+        "q": {
+          "ko": "우리가 안 쓰는 도구를 넣지는 않나요?",
+          "en": "Will it add tools we don't use?"
+        },
+        "a": {
+          "ko": "입력한 도구만 씁니다. 새 도구가 필요하면 제안이라고 따로 표시해요.",
+          "en": "Only the tools you list. Anything new is marked as a suggestion."
+        }
+      }
+    ],
+    "sample": {
+      "ko": "s1 신규 주문 확인 (사장 · 10분) → s2 옵션 대조 (알바 · 판단: 주문서와 라벨이 같은가? 아니오 → 사장에게 카톡) → s3 포장 …\n확인: 박스 사진 1장을 주문 채팅에 남긴다",
+      "en": "s1 Check new orders (owner · 10 min) → s2 Match options (part-timer · decision: does the label match? No → message owner) → s3 Pack …\nCheck: leave one box photo in the order chat"
+    }
+  },
+  "meeting-action": {
+    "tagline": {
+      "ko": "회의가 끝나면 바로 움직이는 실행 보드",
+      "en": "Meeting notes into an action board you can run with"
+    },
+    "description": {
+      "ko": "회의 메모나 녹취 텍스트를 붙여 넣으면 결정된 것, 담당자별 할 일과 마감, 아직 열린 질문을 나눠 정리합니다. 메모에 없는 담당자·날짜는 만들지 않고 '미정'으로 남겨요. 참석자에게 보낼 정리 메시지와 캘린더 파일도 함께 드려요.",
+      "en": "Paste notes or a transcript and get decisions, actions by owner with due dates, and open questions. Owners and dates not in the notes stay 'unassigned' — never invented. Includes a follow-up message and a calendar file."
+    },
+    "features": [
+      {
+        "icon": "user-round",
+        "title": {
+          "ko": "담당자별 보드",
+          "en": "Board by owner"
+        },
+        "body": {
+          "ko": "사람별·마감순으로 바꿔 보고, 끝낸 일은 체크합니다.",
+          "en": "Switch between owner and deadline views, tick off what's done."
+        }
+      },
+      {
+        "icon": "shield-check",
+        "title": {
+          "ko": "지어낸 것 없이",
+          "en": "Nothing invented"
+        },
+        "body": {
+          "ko": "할 일마다 근거가 된 메모 구절을 붙여 둡니다.",
+          "en": "Each action shows the line of the notes it came from."
+        }
+      },
+      {
+        "icon": "calendar-days",
+        "title": {
+          "ko": "캘린더로 바로",
+          "en": "Straight to your calendar"
+        },
+        "body": {
+          "ko": "마감이 있는 일은 캘린더 파일로 받아 구글·애플 캘린더에 넣어요.",
+          "en": "Actions with dates download as a calendar file."
+        }
+      }
+    ],
+    "presets": [
+      {
+        "title": {
+          "ko": "매장 주간 회의",
+          "en": "Store weekly meeting"
+        },
+        "tag": {
+          "ko": "팀 회의",
+          "en": "Team"
+        },
+        "values": {
+          "notes": "주간 회의. 민지: 봄 메뉴 사진이 아직 없음. 이번 주 목요일에 매장에서 촬영하기로 결정. 준호가 사진작가 섭외. 딸기 세트 가격은 18,000원 유지. 열린 질문: 봄 메뉴 배달앱도 할지? 소라가 다음 주 화요일까지 수수료 알아보기. 인스타는 민지가 이번 주에 릴스 3개 올려 보기로.",
+          "meeting_date": "2026-10-05",
+          "participants": [
+            "민지",
+            "준호",
+            "소라"
+          ],
+          "meeting_type": "team"
+        }
+      },
+      {
+        "title": {
+          "ko": "고객사 통화 정리",
+          "en": "Client call recap"
+        },
+        "tag": {
+          "ko": "고객 미팅",
+          "en": "Client"
+        },
+        "values": {
+          "notes": "한빛학원 통화. 4월 말까지 랜딩페이지 원함. 로고 파일과 강좌 목록은 학원에서 보내 주기로. 우리는 와이어프레임 먼저 보내기. 예산은 아직 확정 안 됨 — 내부 확인 후 알려 준다고 함. 상담 예약 폼 추가 가능한지 물어봄.",
+          "participants": [
+            "한빛학원 김원장",
+            "우리 유나"
+          ],
+          "meeting_type": "client"
+        }
+      }
+    ],
+    "steps": [
+      {
+        "ko": "회의 메모나 녹취 텍스트를 붙여 넣습니다.",
+        "en": "Paste the notes or transcript."
+      },
+      {
+        "ko": "회의 날짜와 참석자를 넣으면 마감 날짜가 정확해집니다.",
+        "en": "Add the date and participants for accurate due dates."
+      },
+      {
+        "ko": "보드를 확인하고 정리 메시지를 참석자에게 보냅니다.",
+        "en": "Check the board and send the recap."
+      }
+    ],
+    "tips": [
+      {
+        "ko": "'다음 주 금요일' 같은 표현은 회의 날짜가 있어야 날짜로 바뀝니다.",
+        "en": "Relative dates like 'next Friday' need the meeting date."
+      },
+      {
+        "ko": "녹취 파일 텍스트를 참고 자료로 올려도 돼요.",
+        "en": "You can upload a transcript as reference."
+      }
+    ],
+    "faq": [
+      {
+        "q": {
+          "ko": "담당자가 안 적혀 있으면요?",
+          "en": "What if no owner is written?"
+        },
+        "a": {
+          "ko": "'미정'으로 남기고 다음 회의 안건에 올려 드려요. 추측해서 채우지 않습니다.",
+          "en": "It stays unassigned and goes on the next agenda. Nothing is guessed."
+        }
+      }
+    ],
+    "sample": {
+      "ko": "결정: 목요일 매장 촬영 · 딸기 세트 18,000원 유지\n준호 — 사진작가 섭외 (마감: 미정)\n소라 — 배달앱 수수료 조사 (2026-10-13)\n열린 질문: 봄 메뉴 배달앱 입점 여부",
+      "en": "Decided: shoot Thursday · strawberry set stays ₩18,000\nJunho — book photographer (due: unassigned)\nSora — delivery app fees (2026-10-13)\nOpen: list the spring menu on delivery apps?"
+    }
   }
 }

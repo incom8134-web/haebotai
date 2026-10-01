@@ -9,12 +9,15 @@ import mvpBlueprint from "../tools/schemas/mvp-blueprint.ts";
 import brandDna from "../tools/schemas/brand-dna.ts";
 import hookLab from "../tools/schemas/hook-lab.ts";
 import contentTransformer from "../tools/schemas/content-transformer.ts";
+import sopBuilder from "../tools/schemas/sop-builder.ts";
+import meetingAction from "../tools/schemas/meeting-action.ts";
 
 // Gemini's structured output answers 400 "invalid argument" to schemas it
-// finds too complex. Found live on hook-lab: arrays nested three deep, and
-// a list of rich objects allowed up to 20 items, were both rejected; two
-// levels and maxItems ≤ 16 were accepted. The new tools' schemas stay
-// inside those limits.
+// finds too complex. The limit is on overall complexity and isn't
+// documented; these are the two shapes found to fail (hook-lab: arrays
+// nested three deep, a rich list allowed 20 items). Passing this test is
+// necessary, not sufficient — scripts/check-gemini-schemas.mts asks
+// Gemini itself (sop-builder failed there with five bounded lists).
 function maxItems(node: unknown): number {
   if (!node || typeof node !== "object") return 0;
   const n = node as Record<string, unknown>;
@@ -38,7 +41,7 @@ function arrayDepth(node: unknown): number {
   return here + deepest;
 }
 
-const NEW_TOOLS = { "idea-radar": ideaRadar, "revenue-mapper": revenueMapper, "offer-architect": offerArchitect, "market-gap": marketGap, "mvp-blueprint": mvpBlueprint, "brand-dna": brandDna, "hook-lab": hookLab, "content-transformer": contentTransformer };
+const NEW_TOOLS = { "idea-radar": ideaRadar, "revenue-mapper": revenueMapper, "offer-architect": offerArchitect, "market-gap": marketGap, "mvp-blueprint": mvpBlueprint, "brand-dna": brandDna, "hook-lab": hookLab, "content-transformer": contentTransformer, "sop-builder": sopBuilder, "meeting-action": meetingAction };
 
 test("new tool schemas stay inside what Gemini accepts", () => {
   for (const [id, schema] of Object.entries(NEW_TOOLS)) {

@@ -12,6 +12,21 @@ const COMMON: Record<string, FieldEn> = {
 };
 
 const FIELDS_EN: Record<string, Record<string, FieldEn>> = {
+  "sop-builder": {
+    process: { label: "What the work is and how you do it now" },
+    standard: { label: "What 'done well' looks like" },
+    roles: { label: "People and roles involved" },
+    frequency: { label: "How often", options: { per_order: "Per order / request", daily: "Daily", weekly: "Weekly", monthly: "Monthly" } },
+    tools: { label: "Tools used (e.g. Smart Store, KakaoTalk)" },
+    problems: { label: "Common mistakes or problems" },
+    detail: { label: "Level of detail", options: { simple: "One-page summary", standard: "Standard", detailed: "Detailed, for training" } },
+  },
+  "meeting-action": {
+    notes: { label: "Meeting notes or transcript" },
+    meeting_date: { label: "Meeting date" },
+    participants: { label: "Participants" },
+    meeting_type: { label: "Meeting type", options: { team: "Team meeting", client: "Client meeting", planning: "Planning session", review: "Review / retro" } },
+  },
   "hook-lab": {
     topic: { label: "What the content is about" },
     product: { label: "Product or service (optional)" },

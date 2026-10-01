@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { sourceSchema } from "../registry/shared";
+import { sourceSchema } from "../registry/shared.ts";
 
 const scoreSchema = z.object({
   market_size: z.number(),

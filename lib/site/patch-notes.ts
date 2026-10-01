@@ -4,6 +4,18 @@ export type NoteKind = "new" | "improved" | "fixed";
 
 export const PATCH_NOTES: { version: string; date: string; title: Bilingual; items: { kind: NoteKind; text: Bilingual }[] }[] = [
   {
+    version: "2.4.0",
+    date: "2026-09-30",
+    title: { ko: "문서·운영: 업무 매뉴얼 빌더, 회의→실행 보드와 새 결과 화면", en: "Documents & Operations: SOP Builder, Meeting-to-Action and new result screens" },
+    items: [
+      { kind: "new", text: { ko: "업무 매뉴얼 빌더: 역할별 흐름도, 판단 지점, 체크할 수 있는 품질 체크리스트, 예외 대응", en: "SOP Builder: a flow by role, decision points, a tickable quality checklist and exception handling" } },
+      { kind: "new", text: { ko: "회의→실행 보드: 결정·담당자·마감·열린 질문으로 정리, 메모에 없는 담당자와 날짜는 지어내지 않고, 마감은 캘린더 파일로", en: "Meeting-to-Action: decisions, owners, deadlines and open questions — nothing invented — with deadlines as a calendar file" } },
+      { kind: "improved", text: { ko: "비즈니스 문서 스튜디오: 목차를 눌러 바로 이동하는 문서 화면", en: "Business Document Studio: a document view with a clickable outline" } },
+      { kind: "improved", text: { ko: "제안서 포지: 섹션 순서 바꾸기·빼기 후 한 번에 복사, 부가세까지 계산하는 견적표", en: "Proposal Forge: reorder or hide sections and copy in that order; a pricing table with VAT" } },
+      { kind: "improved", text: { ko: "운영 플래너: 칸반·타임라인·체크리스트를 오가며 진행 상태 체크", en: "Operations Planner: switch between kanban, timeline and checklist while tracking progress" } },
+    ],
+  },
+  {
     version: "2.3.0",
     date: "2026-09-30",
     title: { ko: "캠페인·콘텐츠: 훅 연구소, 콘텐츠 변환기와 새 결과 화면", en: "Campaigns & Content: Hook Lab, Content Transformer and new result screens" },

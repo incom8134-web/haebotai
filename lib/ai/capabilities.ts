@@ -38,6 +38,8 @@ export const TOOL_CAPABILITIES: Record<string, ToolCapability> = {
   "brand-dna": { providers: ["google"], default: "google" },
   "hook-lab": { providers: ["google"], default: "google" },
   "content-transformer": { providers: ["google"], default: "google" },
+  "sop-builder": { providers: ["google"], default: "google" },
+  "meeting-action": { providers: ["google"], default: "google" },
   money: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 2
   trend: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 4
   strategy: { providers: ["google", "anthropic"], default: "google" },
