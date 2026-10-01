@@ -1,5 +1,5 @@
 {
- "mean": 0.545,
+ "mean": 0.621,
  "pairs": [
   {
    "tool": "business-plan",
@@ -12,21 +12,21 @@
    "tool": "copy",
    "a": "copy_funeral",
    "b": "copy_truck",
-   "shape": 0.57,
+   "shape": 0.79,
    "plan": 0.24
   },
   {
    "tool": "copy",
    "a": "copy_funeral",
    "b": "truck_other",
-   "shape": 0.52,
+   "shape": 0.69,
    "plan": 0
   },
   {
    "tool": "copy",
    "a": "copy_truck",
    "b": "truck_other",
-   "shape": 0.67,
+   "shape": 0.89,
    "plan": 0
   },
   {

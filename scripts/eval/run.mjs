@@ -113,7 +113,14 @@ if (OFFLINE) {
   for (let i = 0; i < keys.length; i += 3) results.push(...(await Promise.all(keys.slice(i, i + 3).map(runCase))));
 }
 const outputs = Object.fromEntries(
-  results.map((r) => [r.key, r.output ?? null]),
+  results.map((r) => {
+    if (r.output) return [r.key, r.output];
+    try {
+      return [r.key, JSON.parse(readFileSync(new URL(`${r.key}.json`, OUT), "utf8")).output ?? null];
+    } catch {
+      return [r.key, null];
+    }
+  }),
 );
 console.table(results.map((r) => ({ case: r.key, status: r.status ?? r.error, s: r.seconds, credits: r.credits, strategy: r.strategy, scores: r.scores?.join("→"), asked: r.questions?.length, handoffs: r.handoffs, "해봇": r.guards?.serviceName })));
 

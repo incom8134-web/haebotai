@@ -146,11 +146,19 @@ export async function strategize(opts: {
       const again = await jsonCall({ model: TEXT_MODEL, system: STRATEGY_SYSTEM, prompt: prompt(problem), schema, signal: opts.signal, thinking: ThinkingLevel.MEDIUM, timeoutMs: 40_000 });
       usage = sumUsage(usage, again.usage);
       const retried = parseStrategy(again.data, guide, directions, domain);
-      if (retried && !budgetProblem(retried.strategy)) parsed = retried;
+      const fixed = Boolean(retried && !budgetProblem(retried.strategy));
+      if (fixed) parsed = retried;
+      console.info(`strategy budget retry (${opts.manifest.id}): ${fixed ? "fixed" : "kept the first answer"} — ${problem}`);
     } catch (err) {
       if (opts.signal.aborted) throw err;
       console.warn("strategy retry skipped:", (err as Error).message);
     }
+  }
+  // The default still won without its own reason: show the rationale as
+  // the reason, so the strategy card is honest about it.
+  if (parsed) {
+    const chosen = parsed.strategy.considered.find((c) => c.name === parsed!.strategy.chosen);
+    if (chosen?.isDefault && !parsed.strategy.defaultReason && parsed.strategy.rationale) parsed.strategy.defaultReason = parsed.strategy.rationale;
   }
   return { strategy: parsed?.strategy ?? null, direction: parsed?.direction ?? null, usage };
 }
