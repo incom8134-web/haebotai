@@ -7,6 +7,7 @@ import { getBusinessProfile } from "@/lib/profile";
 import { getApiKeyStatus } from "@/lib/api-keys";
 import { getMembership } from "@/lib/membership";
 import { getBalance } from "@/lib/credits";
+import { listProjects } from "@/lib/projects/server";
 import { createClient } from "@/lib/supabase/server";
 import type { ProviderId } from "@/lib/ai/types";
 
@@ -23,7 +24,7 @@ export default async function ToolPage({
   searchParams,
 }: {
   params: Promise<{ toolId: string }>;
-  searchParams: Promise<{ fromRun?: string; pick?: string; brief?: string; preset?: string }>;
+  searchParams: Promise<{ fromRun?: string; pick?: string; brief?: string; preset?: string; project?: string; fromInput?: string }>;
 }) {
   const { toolId: requested } = await params;
   const query = new URLSearchParams(Object.entries(await searchParams).filter((e): e is [string, string] => typeof e[1] === "string")).toString();
@@ -39,12 +40,13 @@ export default async function ToolPage({
   // Everything below works with the engine id (what runs store).
   const toolId = tool.id;
 
-  const [profile, { fromRun, pick, brief, preset }, keyStatus, membership, balance] = await Promise.all([
+  const [profile, { fromRun, pick, brief, preset, project, fromInput }, keyStatus, membership, balance, projects] = await Promise.all([
     getBusinessProfile(),
     searchParams,
     getApiKeyStatus(),
     getMembership(),
     getBalance(),
+    listProjects(),
   ]);
 
   // Which engines this run page actually offers: google is always
@@ -70,8 +72,22 @@ export default async function ToolPage({
     }
   }
 
+  // "같은 입력으로 다시": the inputs of one of the member's earlier runs of
+  // this tool (reference files aren't kept, so they aren't carried over).
+  let initialValues: Record<string, unknown> | undefined;
+  if (fromInput && !chainedFrom) {
+    const supabase = await createClient();
+    const { data } = await supabase.from("generations").select("tool_id, input").eq("id", fromInput).maybeSingle();
+    if (data?.tool_id === toolId && data.input && typeof data.input === "object") {
+      initialValues = Object.fromEntries(Object.entries(data.input as Record<string, unknown>).filter(([k]) => !k.startsWith("_")));
+    }
+  }
+
   return (
     <ToolRunner
+      projects={projects.map((p) => ({ id: p.id, name: p.name }))}
+      initialProject={project}
+      initialValues={initialValues}
       toolId={toolId}
       profile={profile}
       chainedFrom={chainedFrom}
