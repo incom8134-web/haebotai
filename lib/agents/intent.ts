@@ -55,12 +55,18 @@ export const INTENT_SCHEMA = {
         required: ["question", "options", "default_index"],
       },
     },
+    memo: {
+      type: "string",
+      description:
+        "작업 메모 (당신 자신을 위한 3~6문장): 이 요청에서 특이하거나 중요한 점, 이런 요청에 AI가 흔히 내놓는 뻔한 기본 결과물과 그것이 여기서 왜 틀린지, 이 결과물이 성공했다고 말할 수 있는 모습. 양식 채우기가 아니라 실제 판단을 쓰세요",
+    },
     summary: { type: "string", description: "이해한 요청 한 문장 (예: 강남 이혼 전문 법률사무소의 신뢰 중심 상담 예약 사이트)" },
   },
-  required: ["subject", "uses_profile", "kind", "audience", "goal", "positioning", "tone_words", "formality", "energy", "must_include", "avoid", "unknowns", "questions", "summary"],
+  required: ["subject", "uses_profile", "kind", "audience", "goal", "positioning", "tone_words", "formality", "energy", "must_include", "avoid", "unknowns", "questions", "memo", "summary"],
 } as const;
 
 export const INTENT_SYSTEM = [
+  "필드를 채우기 전에 요청을 실제로 이해하세요. memo에는 이 요청만의 특이점과, 이 종류의 요청에 나오는 뻔한 기본 결과물이 여기서 왜 맞지 않는지(또는 왜 맞는지)를 솔직하게 씁니다.",
   "당신은 시니어 크리에이티브 디렉터이자 전략가입니다. 작업을 시작하기 전에 요청을 읽고, 무엇을 누구를 위해 왜 만드는지, 어떤 톤이어야 하는지, 무엇이 반드시 들어가야 하는지 정리합니다.",
   "요청에 적힌 대상이 저장된 프로필과 다른 사업·프로젝트라면 프로필은 이번 작업과 무관합니다.",
   "모르는 것은 unknowns에 적고 가정을 붙이되, 가정은 작업 방식(분량, 형식, 강조점, 채널, 대상의 범위)에 대해서만 세우세요. 사업에 관한 사실(시설, 위치·거리, 혜택·이벤트, 가격, 경력·연혁, 인증, 수치, 후기)은 절대 가정하지 마세요 — 그런 항목의 assumption은 '사실로 쓰지 않고 [입력 필요]로 표시'입니다.",
@@ -109,6 +115,7 @@ export function parseIntent(raw: unknown): { intent: Intent; questions: Question
     avoid: strs(r.avoid, 6),
     unknowns,
     summary: str(r.summary, 160),
+    ...(str(r.memo, 1200) ? { memo: str(r.memo, 1200) } : {}),
   };
   const hasCritical = unknowns.some((u) => u.critical);
   const questions: Question[] = hasCritical && Array.isArray(r.questions)
@@ -160,6 +167,7 @@ export function intentBlock(intent: Intent, answers: { question: string; answer:
     intent.audience.length ? `- 판단할 사람: ${intent.audience.join(", ")}` : "",
     intent.positioning ? `- 포지셔닝: ${intent.positioning}` : "",
     intent.mustInclude.length ? `- 반드시 담을 것: ${intent.mustInclude.join(" / ")}` : "",
+    intent.memo ? `- 작업 메모(이 요청만의 판단): ${intent.memo}` : "",
     ...answers.map((a) => `- 사용자 답변 — ${a.question}: ${a.answer}`),
     assumptions.length ? `- 작업 방식의 가정(요청에 없어 이렇게 진행): ${assumptions.map((u) => `${u.item} → ${u.assumption}`).join(" / ")}` : "",
     "- 요청·참고 자료에 없는 사업의 사실(시설, 혜택, 가격, 위치, 경력, 실적 수치, 후기)은 결과에 사실처럼 쓰지 마세요. 꼭 필요하면 [입력 필요: …]로 남깁니다. 단, 계획의 추정치(재무 가정, 목표, 예상 효과)는 '가정'·'목표'로 밝히고 근거와 함께 제시하는 것이 맞습니다.",

@@ -633,3 +633,41 @@ covers longer plans.
 
 On approval I start with phase 0 (measurement) and phase 1 (plan as
 data, no behaviour change) as the first PR.
+
+---
+
+## Implementation status
+
+Decisions taken (§10), on the owner's "do it":
+
+- **Pilot tools:** presentation, business plan and sales page first.
+- **Shape freedom:** accepted.
+- **Cost:** up to +30% tokens, with credits unchanged until eval shows the
+  real numbers.
+- **The "obvious default" card:** shown on the strategy card.
+- **Members' own Claude keys:** stay one-shot until phase 5.
+
+| Phase | State | Where |
+| --- | --- | --- |
+| 0. Measure | done | `lib/agents/skeleton.ts` (shape + similarity); `scripts/eval/run.mjs` reports `shape` per same-tool pair and re-scores saved runs (`--offline`); v1 baseline in `scripts/eval/baseline-v1.json` |
+| 1. Plan as data | done | `lib/agents/plan.ts` (plans, flows, default plans with the v1 step ids); `lib/agents/capabilities/*` (the v1 stages as capabilities); `lib/agents/specs/index.ts` builds the runner's stages from the run's plan |
+| 2. Intent memo + strategy space + planner | done | `intent.ts` (`memo`); `space.ts` (domains, dimensions, distance check); `strategy.ts` (coordinates, named default, `budgetProblem` → one retry, `rejectedDefault`); `planner.ts` + `plan_workflow` capability (research mix, revision budget, critic focus; invalid → default); new research capabilities `analyze_competitors`, `research_audience`; critic template check + shape memory (`diversity.ts` `shapeNote`); strategy card shows the default and the workflow |
+| 3. Block document | next | pilot: presentation, business plan, sales page |
+| 4. Critic panel + block revision | — | |
+| 5. Rest of the tools | — | |
+| 6. Retire v1 paths | — | |
+
+**v1 baseline** (`scripts/eval/baseline-v1.json`). Shape similarity of
+contrasting same-tool requests (1.00 = the same template):
+
+| Tool | Pair | Shape similarity |
+| --- | --- | --- |
+| presentation | client deck vs teaching deck | 0.70 |
+| copy | 3 pairs | 0.52–0.67 |
+| homepage | 3 pairs | 0.50–0.56 |
+| business plan | loan vs VC | 0.34 |
+| **Mean** | | **0.54** |
+
+Over the same pairs, the strategies' blueprints overlapped about 0.03.
+The plans differed while the results kept the same shape, which is the
+diagnosis in §3.

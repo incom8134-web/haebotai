@@ -46,6 +46,13 @@ export interface Intent {
   unknowns: { item: string; critical: boolean; assumption: string }[];
   /** Short understanding the page shows: "법률사무소의 신뢰 중심 예약 사이트". */
   summary: string;
+  /**
+   * The model's own working memo (docs/ai-architecture-v2.md §4.1): what
+   * is unusual about this request, what the lazy default would be and why
+   * it's wrong here, what success looks like. Read verbatim by the
+   * strategist, planner, writer and critic. Absent on runs from before v2.
+   */
+  memo?: string;
 }
 
 export interface Question {
@@ -59,7 +66,16 @@ export interface Question {
 
 /** How this request will be solved (lib/agents/strategy.ts). */
 export interface Strategy {
-  considered: { name: string; summary: string; fit: number; why: string }[];
+  considered: {
+    name: string;
+    summary: string;
+    fit: number;
+    why: string;
+    /** Position on the domain's dimensions (lib/agents/space.ts), in dimension order. */
+    coords?: string[];
+    /** The strategist's honest "this is what AI usually produces for this kind of request". */
+    isDefault?: boolean;
+  }[];
   chosen: string;
   rationale: string;
   /** The structure decided for THIS request, in order. */
@@ -70,6 +86,11 @@ export interface Strategy {
   omit: string[];
   /** Named strategy from the agent's library, if the chosen one is from it. */
   libraryId?: string;
+  /** The strategy space it was placed in (lib/agents/space.ts) and its dimension ids. */
+  domain?: string;
+  dimensions?: string[];
+  /** Why the obvious default was chosen, when it was. */
+  defaultReason?: string;
 }
 
 export interface CritiqueIssue {

@@ -203,8 +203,9 @@ export function buildImageSystemInstruction(manifest: ToolManifest): string {
 }
 
 /** What the web search step looks for: the tool's research brief, else a generic fact search. */
-export function buildResearchPrompt(manifest: ToolManifest, contextText: string): string {
-  const research = getPlaybook(manifest.id)?.research;
+export function buildResearchPrompt(manifest: ToolManifest, contextText: string, focus?: string): string {
+  // A planner-chosen research step (lib/agents/capabilities) brings its own focus.
+  const research = focus ?? getPlaybook(manifest.id)?.research;
   return research
     ? `"${toolLabel(manifest)}" 작업 전에 웹 검색으로 다음을 조사하세요: ${research}. 찾은 사실은 수치·이름·날짜를 살려 출처와 함께 한국어로 정리하고, 찾지 못한 것은 찾지 못했다고 쓰세요.\n\n${contextText}`
     : `"${toolLabel(manifest)}" 요청에 필요한 최신 사실 정보를 웹 검색으로 조사하세요. 찾은 핵심 사실과 수치를 근거와 함께 한국어로 요약하세요.\n\n${contextText}`;

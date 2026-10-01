@@ -124,3 +124,16 @@ export function skeletonSignature(s: Skeleton, max = 16): string[] {
   }
   return out.slice(0, max);
 }
+
+/** Similarity of two signatures (expanded back to sequences): common subsequence over the longer, 0…1. */
+export function signatureSimilarity(a: string[], b: string[]): number {
+  const expand = (sig: string[]) =>
+    sig.flatMap((k) => {
+      const m = /^(.*)×(\d+)$/.exec(k);
+      return m ? new Array<string>(Number(m[2])).fill(m[1]) : [k];
+    });
+  const A = expand(a);
+  const B = expand(b);
+  const longest = Math.max(A.length, B.length);
+  return longest === 0 ? 1 : Math.round((lcs(A, B) / longest) * 100) / 100;
+}

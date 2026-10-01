@@ -9,7 +9,9 @@ import { PRO_TEXT_MODEL } from "@/lib/ai/gemini-studio";
 import type { TokenUsage } from "@/lib/ai/types";
 import { INTENT_SCHEMA, INTENT_SYSTEM, intentBlock, intentPrompt, parseIntent } from "./intent";
 import { guideFor } from "./library";
-import { parseStrategy, STRATEGY_SYSTEM, strategyPrompt, strategySchema } from "./strategy";
+import { budgetProblem, parseStrategy, STRATEGY_SYSTEM, strategyPrompt, strategySchema } from "./strategy";
+import { domainFor } from "./space";
+import { parsePlanChoice, plannerSchema, PLANNER_SYSTEM, plannerPrompt, type PlanChoice } from "./planner";
 import { clip, CRITIC_SYSTEM, CRITIQUE_SCHEMA, criticPrompt, parseCritique } from "./critic";
 import { recentLabels, type Fingerprint } from "./diversity";
 import type { Critique, Intent, Question, Strategy } from "./types";
@@ -115,10 +117,10 @@ export async function strategize(opts: {
 }): Promise<{ strategy: Strategy | null; direction: Direction | null; usage: TokenUsage }> {
   const guide = guideFor(opts.manifest.id);
   const directions = DIRECTIONS[opts.manifest.id] ?? [];
-  const { data, usage } = await smartCall({
-    model: PRO_TEXT_MODEL,
-    system: STRATEGY_SYSTEM,
-    prompt: strategyPrompt({
+  const domain = domainFor(opts.manifest.id);
+  const started = Date.now();
+  const prompt = (retry?: string) =>
+    strategyPrompt({
       toolName: toolLabel(opts.manifest),
       guide,
       directions,
@@ -127,14 +129,67 @@ export async function strategize(opts: {
       recent: recentLabels(opts.recent),
       override: opts.override,
       extra: opts.extra,
-    }),
-    schema: strategySchema(guide.approaches.map((a) => a.id), directions.map((d) => d.id)),
-    signal: opts.signal,
-    thinking: ThinkingLevel.LOW,
-    timeoutMs: 90_000,
-  });
-  const parsed = parseStrategy(data, guide, directions);
+      domain,
+      recentCoords: opts.recent.map((f) => f.coords).filter((c): c is string[] => Boolean(c?.some(Boolean))),
+      retry,
+    });
+  const schema = strategySchema(guide.approaches.map((a) => a.id), directions.map((d) => d.id), domain);
+  const first = await smartCall({ model: PRO_TEXT_MODEL, system: STRATEGY_SYSTEM, prompt: prompt(), schema, signal: opts.signal, thinking: ThinkingLevel.LOW, timeoutMs: 90_000 });
+  let usage = first.usage;
+  let parsed = parseStrategy(first.data, guide, directions, domain);
+  // The creative budget, checked in code: candidates too close in the
+  // space, or no honest default named → one retry on the fast model when
+  // the stage still has time. The first answer stands if the retry fails.
+  const problem = parsed ? budgetProblem(parsed.strategy) : null;
+  if (parsed && problem && Date.now() - started < 50_000) {
+    try {
+      const again = await jsonCall({ model: TEXT_MODEL, system: STRATEGY_SYSTEM, prompt: prompt(problem), schema, signal: opts.signal, thinking: ThinkingLevel.MEDIUM, timeoutMs: 40_000 });
+      usage = sumUsage(usage, again.usage);
+      const retried = parseStrategy(again.data, guide, directions, domain);
+      if (retried && !budgetProblem(retried.strategy)) parsed = retried;
+    } catch (err) {
+      if (opts.signal.aborted) throw err;
+      console.warn("strategy retry skipped:", (err as Error).message);
+    }
+  }
   return { strategy: parsed?.strategy ?? null, direction: parsed?.direction ?? null, usage };
+}
+
+const sumUsage = (a: TokenUsage, b: TokenUsage): TokenUsage => ({
+  inputTokens: (a.inputTokens ?? 0) + (b.inputTokens ?? 0),
+  outputTokens: (a.outputTokens ?? 0) + (b.outputTokens ?? 0),
+});
+
+/** The planner (lib/agents/planner.ts): this request's workflow, on the fast model. Null keeps the default plan. */
+export async function planWorkflow(opts: {
+  manifest: ToolManifest;
+  intent: Intent | null;
+  answers: { question: string; answer: string }[];
+  strategy: Strategy | null;
+  signal: AbortSignal;
+}): Promise<{ choice: PlanChoice | null; usage: TokenUsage }> {
+  const webSearch = Boolean(opts.manifest.grounding.webSearch);
+  const s = opts.strategy;
+  const strategyText = s
+    ? [`[선택한 전략: ${s.chosen}]`, s.rationale, "[설계도]", ...s.blueprint.map((b, i) => `${i + 1}. ${b.part} — ${b.purpose}`), "[완성 기준]", ...s.rubric.map((r) => `- ${r}`)].join("\n")
+    : "(전략 없음 — 요청에서 판단)";
+  try {
+    const { data, usage } = await jsonCall({
+      model: TEXT_MODEL,
+      system: PLANNER_SYSTEM,
+      prompt: plannerPrompt({ toolName: toolLabel(opts.manifest), intentText: opts.intent ? intentBlock(opts.intent, opts.answers) : "", strategyText, webSearch }),
+      schema: plannerSchema(webSearch),
+      signal: opts.signal,
+      thinking: ThinkingLevel.LOW,
+      timeoutMs: 30_000,
+      maxOutputTokens: 2048,
+    });
+    return { choice: parsePlanChoice(data, webSearch), usage };
+  } catch (err) {
+    if (opts.signal.aborted) throw err;
+    console.warn("planner skipped:", (err as Error).message);
+    return { choice: null, usage: ZERO };
+  }
 }
 
 export async function critique(opts: {
@@ -147,6 +202,8 @@ export async function critique(opts: {
   strategy: Strategy | null;
   draft: string;
   sameness?: string | null;
+  focus?: string[];
+  avoidDefault?: { name: string; summary: string } | null;
   signal: AbortSignal;
   parts?: Part[];
 }): Promise<{ critique: Critique | null; usage: TokenUsage }> {
@@ -161,6 +218,8 @@ export async function critique(opts: {
         strategy: opts.strategy,
         draft: clip(opts.draft),
         sameness: opts.sameness ?? undefined,
+        focus: opts.focus,
+        avoidDefault: opts.avoidDefault,
       }),
       schema: CRITIQUE_SCHEMA,
       signal: opts.signal,

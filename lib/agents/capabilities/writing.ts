@@ -5,6 +5,8 @@ import { finishStructured } from "@/lib/tools/generate";
 import type { Source } from "@/lib/tools/registry/shared";
 import type { TokenUsage } from "@/lib/ai/types";
 import { pickBest } from "../critic";
+import { RESEARCH } from "../planner";
+import { skeletonOf, skeletonSignature } from "../skeleton";
 import { directives, runCritic } from "../specs/common";
 import type { AgentRunState, Critique, StageContext } from "../types";
 import type { Capability } from "./types";
@@ -63,11 +65,43 @@ export const researchTopic: Capability = {
     const context = buildContext(ctx.manifest, directives(ctx.state, ctx.input), ctx.state.profile);
     const r = await searchGrounding(ctx.manifest, context, ctx.signal);
     ctx.addUsage(r.usage);
-    ctx.state.work.research = { findings: r.findings, sources: r.sources };
+    addResearch(ctx, RESEARCH.research_topic.name, r.findings, r.sources);
     ctx.emit({ kind: "note", stage: flow.step.id, status: "done", label: { ko: `출처 ${r.sources.length}개 확인`, en: `${r.sources.length} sources` } });
     return flow.next;
   },
 };
+
+/** Merges a research step's findings into the run's research (every draft and revision reads it). */
+function addResearch(ctx: StageContext, title: string, findings: string, sources: Source[]) {
+  const prev = ctx.state.work.research as { findings: string; sources: Source[] } | undefined;
+  const seen = new Set((prev?.sources ?? []).map((s) => s.url));
+  ctx.state.work.research = {
+    findings: [prev?.findings ?? "", findings ? `[${title}]\n${findings}` : ""].filter(Boolean).join("\n\n"),
+    sources: [...(prev?.sources ?? []), ...sources.filter((s) => !seen.has(s.url))],
+  };
+}
+
+/** A focused research step the planner can add (competition, the customers' own language). */
+function focusedResearch(id: "analyze_competitors" | "research_audience", label: { ko: string; en: string }): Capability {
+  return {
+    id,
+    label,
+    maxSeconds: () => 60,
+    skipTo: (flow) => flow.next,
+    async run(ctx, flow) {
+      if (!ctx.manifest.grounding.webSearch) return flow.next;
+      const context = buildContext(ctx.manifest, directives(ctx.state, ctx.input), ctx.state.profile);
+      const r = await searchGrounding(ctx.manifest, context, ctx.signal, RESEARCH[id].focus);
+      ctx.addUsage(r.usage);
+      addResearch(ctx, RESEARCH[id].name, r.findings, r.sources);
+      ctx.emit({ kind: "note", stage: flow.step.id, status: "done", label: { ko: `${RESEARCH[id].name}: 출처 ${r.sources.length}개`, en: `${label.en}: ${r.sources.length} sources` } });
+      return flow.next;
+    },
+  };
+}
+
+export const analyzeCompetitors = focusedResearch("analyze_competitors", { ko: "경쟁·대안 분석", en: "Analyzing competitors" });
+export const researchAudience = focusedResearch("research_audience", { ko: "고객 언어 조사", en: "Researching customers' language" });
 
 export const writeDraft: Capability = {
   id: "write_draft",
@@ -87,16 +121,19 @@ export const critiqueOutput: Capability = {
   label: { ko: "검토", en: "Reviewing" },
   maxSeconds: () => 80,
   skipTo: (flow) => flow.after("revise_output"),
-  async run(ctx, flow) {
+  async run(ctx, flow, step) {
     const list = versions(ctx.state);
     const latest = list[list.length - 1];
     const exit = flow.after("revise_output");
-    const c = await runCritic(ctx, JSON.stringify(latest.output), list.length - 1);
+    const focus = Array.isArray(step.args?.focus) ? (step.args.focus as string[]) : undefined;
+    const c = await runCritic(ctx, JSON.stringify(latest.output), list.length - 1, { focus, shape: skeletonSignature(skeletonOf(latest.output)) });
     if (!c) return exit;
     latest.score = c.score;
     const revisions = list.length - 1;
     const revise = flow.find("revise_output");
-    return c.verdict === "pass" || !revise || revisions >= maxRevisions(ctx.state, ctx.input) ? exit : revise;
+    // The planner's revision budget, never above the tool's own cap.
+    const budget = Math.min(Number(step.args?.maxRevisions ?? 2), maxRevisions(ctx.state, ctx.input));
+    return c.verdict === "pass" || !revise || revisions >= budget ? exit : revise;
   },
 };
 

@@ -75,8 +75,8 @@ export function agenticFor(toolId: string, provider: string): boolean {
 }
 
 /**
- * The tool's standard workflow — exactly the v1 agent specs, step ids
- * included. Members' own Claude keys and the grant lookup keep the
+ * The tool's standard workflow — the v1 agent specs, step ids included,
+ * plus the planning step for the writing tools. Members' own Claude keys and the grant lookup keep the
  * one-shot pipeline as one step.
  */
 export function defaultPlan(toolId: string, provider: string): Plan {
@@ -105,7 +105,8 @@ export function defaultPlan(toolId: string, provider: string): Plan {
     v: 1,
     source: "default",
     finalize: "brief",
-    steps: [...head, step("research", "research_topic"), step("draft", "write_draft"), step("critique", "critique_output"), step("revise", "revise_output"), step("polish", "finish_output")],
+    // "planning" (v2 phase 2) may reshape the steps after it for this request.
+    steps: [...head, step("planning", "plan_workflow"), step("research", "research_topic"), step("draft", "write_draft"), step("critique", "critique_output"), step("revise", "revise_output"), step("polish", "finish_output")],
   };
 }
 
