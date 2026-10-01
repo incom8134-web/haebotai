@@ -14,6 +14,7 @@ import { FAQ } from "@/lib/site/faq";
 import { useBi } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
 import { HeroMock } from "./hero-mock";
+import { ConceptFilm } from "./concept-film";
 import {
   BeforeAfterSection,
   CategorySection,
@@ -372,6 +373,7 @@ function Landing({ signedIn = false }: { signedIn?: boolean }) {
         <Nav />
         <main id="main">
           <Hero />
+          <ConceptFilm />
           <FlowSection />
           <CategorySection />
           <StepsSection />

@@ -14,6 +14,7 @@ export const PATCH_NOTES: { version: string; date: string; title: Bilingual; ite
       { kind: "new", text: { ko: "결과 고치기: '디자인만 더 고급스럽게'는 문장을 건드리지 않고 무료로, '5장을 더 기술적으로'는 그 섹션만 고쳐요", en: "Follow-ups: \"make the design more premium\" changes no words and is free; \"make section 5 more technical\" rewrites only that section" } },
       { kind: "improved", text: { ko: "모든 도구가 조사할 질문을 먼저 정해 하나씩 검색하고, 올린 자료와 다른 조사 결과는 알려 드려요", en: "Every tool plans its research questions and searches them one by one, and flags research that disagrees with your files" } },
       { kind: "improved", text: { ko: "PDF 내보내기에 표지·목차가 생기고, 발표자료는 제목·카드·장 구성이 더 깔끔해졌어요. 수익 구조 지도는 수익원별 상세까지 담아요", en: "PDF exports get a cover and contents; decks have cleaner titles, cards and sections; Revenue Mapper exports include each stream's details" } },
+      { kind: "new", text: { ko: "홈페이지: 첫 화면 바로 아래에 10초 콘셉트 영상 — 소리 없이, 화면에 보일 때만 재생돼요", en: "Homepage: a 10-second concept film right below the hero — silent, playing only while it's on screen" } },
       { kind: "improved", text: { ko: "스튜디오: 한 줄 입력으로 시작하는 큰 화면, 분야별 도구, 추천 작업 흐름, 결과 예시, 소식과 혜택", en: "Studio: a one-line composer up front, tools by area, ready-made workflows, example results, news and perks" } },
     ],
   },
