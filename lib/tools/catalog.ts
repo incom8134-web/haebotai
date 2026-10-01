@@ -337,7 +337,7 @@ export const CATALOG: CatalogTool[] = [
     promise: b("확인된 사실과 가설을 구분한 시장 조사 틀", "Market research that separates verified facts from hypotheses"),
     outputs: [b("조사 질문과 가설", "Research questions and assumptions"), b("출처가 붙은 근거 블록", "Evidence blocks with sources"), b("추가로 확인할 것", "What to verify next")],
     icon: ChartColumn,
-    engine: null,
+    engine: "market-desk",
     next: ["competitor-lens", "persona-mapper"],
   },
   {
@@ -348,7 +348,7 @@ export const CATALOG: CatalogTool[] = [
     promise: b("경쟁사를 나란히 놓고 우리가 설 자리를 찾는 비교", "Competitors side by side, and where you can stand apart"),
     outputs: [b("비교 매트릭스", "Comparison matrix"), b("포지셔닝 맵", "Positioning map"), b("차별화 기회", "Differentiation opportunities")],
     icon: ScanEye,
-    engine: null,
+    engine: "competitor-lens",
     next: ["brand-dna", "offer-architect"],
   },
   {
@@ -359,7 +359,7 @@ export const CATALOG: CatalogTool[] = [
     promise: b("고객 한 사람의 목표·망설임·구매 계기와 여정을 한 장에", "One customer's goals, doubts, triggers and journey on a page"),
     outputs: [b("페르소나 카드", "Persona card"), b("구매 여정 지도", "Journey map"), b("메시지 제안", "Messaging recommendations")],
     icon: UserRound,
-    engine: null,
+    engine: "persona-mapper",
     next: ["campaign-planner", "hook-lab"],
   },
   {
@@ -381,7 +381,7 @@ export const CATALOG: CatalogTool[] = [
     promise: b("리뷰·설문·인터뷰에서 반복되는 주제와 고객의 진짜 요구를 캐내기", "Recurring themes and real needs, mined from reviews and interviews"),
     outputs: [b("주제 묶음과 감성", "Theme clusters and sentiment"), b("불만·칭찬·요청", "Complaints, praise and requests"), b("대표 인용과 기회", "Representative quotes and opportunities")],
     icon: Pickaxe,
-    engine: null,
+    engine: "insight-miner",
     next: ["offer-architect", "persona-mapper"],
   },
 

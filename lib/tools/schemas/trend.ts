@@ -17,7 +17,18 @@ const scoreSchema = z.object({
 const outputSchema = z.object({
   summary: z.string(),
   recommended: z.string(),
-  signals: z.array(z.object({ signal: z.string(), direction: z.enum(["up", "flat", "down"]), evidence: z.string() })),
+  // origin/impact/horizon place each signal on the Trend Radar (impact
+  // 1–5 × how soon it matters), labelled by where it came from.
+  signals: z.array(
+    z.object({
+      signal: z.string(),
+      direction: z.enum(["up", "flat", "down"]),
+      evidence: z.string(),
+      origin: z.enum(["search", "user", "hypothesis"]),
+      impact: z.number(),
+      horizon: z.enum(["now", "soon", "later"]),
+    }),
+  ),
   ideas: z.array(
     z.object({
       name: z.string(),

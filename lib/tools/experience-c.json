@@ -1393,5 +1393,386 @@
         }
       ]
     }
+  },
+  "market-desk": {
+    "layout": "split",
+    "visual": "score",
+    "hero": {
+      "title": {
+        "ko": "결정에 필요한 만큼, 근거와 함께",
+        "en": "As much research as the decision needs, with evidence"
+      },
+      "story": {
+        "ko": "알고 싶은 것과 내릴 결정을 알려 주세요. 질문마다 근거를 찾고, 확인한 것과 가설을 나눠 보여 드려요.",
+        "en": "Tell us the question and the decision. We find evidence per question and keep facts apart from hypotheses."
+      }
+    },
+    "sections": [
+      {
+        "title": {
+          "ko": "무엇을 알고 싶나요",
+          "en": "What you want to know"
+        },
+        "hint": {
+          "ko": "내릴 결정까지 적으면 질문이 날카로워져요",
+          "en": "The decision sharpens the questions"
+        },
+        "fields": [
+          "question",
+          "decision"
+        ]
+      },
+      {
+        "title": {
+          "ko": "범위와 아는 것",
+          "en": "Scope and what you know"
+        },
+        "hint": {
+          "ko": "시장·지역·이미 아는 숫자",
+          "en": "Market, region, known numbers"
+        },
+        "fields": [
+          "market",
+          "region",
+          "known_facts",
+          "depth"
+        ]
+      }
+    ],
+    "ui": {
+      "question": {
+        "placeholder": {
+          "ko": "예: 서울에서 노령견 방문 돌봄 수요가 충분한지",
+          "en": "e.g. is there demand for senior dog home care in Seoul?"
+        }
+      },
+      "decision": {
+        "placeholder": {
+          "ko": "예: 2개 구에서 시범 운영할지",
+          "en": "e.g. whether to pilot in two districts"
+        }
+      },
+      "depth": {
+        "display": "segmented"
+      }
+    },
+    "stage": {
+      "headline": {
+        "ko": "질문 · 가정 · 근거",
+        "en": "Questions · assumptions · evidence"
+      },
+      "story": {
+        "ko": "질문마다 근거 블록, 가정마다 확인 상태, 시장 규모는 계산 방법까지.",
+        "en": "Evidence per question, status per assumption, sizing with its method."
+      },
+      "promises": [
+        {
+          "icon": "search",
+          "text": {
+            "ko": "검색 근거",
+            "en": "Search evidence"
+          }
+        },
+        {
+          "icon": "badge-alert",
+          "text": {
+            "ko": "가설 표시",
+            "en": "Hypotheses labelled"
+          }
+        },
+        {
+          "icon": "list-checks",
+          "text": {
+            "ko": "다음 확인",
+            "en": "Next checks"
+          }
+        }
+      ]
+    }
+  },
+  "competitor-lens": {
+    "layout": "split",
+    "visual": "map",
+    "hero": {
+      "title": {
+        "ko": "경쟁사 옆에 우리를 놓아 보세요",
+        "en": "Put yourself next to the competition"
+      },
+      "story": {
+        "ko": "고객이 실제로 비교하는 곳을 찾아, 고르는 기준별로 나란히 놓고 비어 있는 자리를 찾아 드려요.",
+        "en": "We find who customers really compare you with, line you up on their criteria and find the open space."
+      }
+    },
+    "sections": [
+      {
+        "title": {
+          "ko": "우리 사업",
+          "en": "Your business"
+        },
+        "hint": {
+          "ko": "무엇을 얼마에 누구에게",
+          "en": "What, for how much, for whom"
+        },
+        "fields": [
+          "business",
+          "region"
+        ]
+      },
+      {
+        "title": {
+          "ko": "비교 대상과 기준",
+          "en": "Who and on what"
+        },
+        "hint": {
+          "ko": "비워 두면 찾아 드려요",
+          "en": "Leave blank and we'll find them"
+        },
+        "fields": [
+          "competitors",
+          "criteria"
+        ]
+      }
+    ],
+    "ui": {
+      "business": {
+        "placeholder": {
+          "ko": "예: 성수역 근처 1:4 소그룹 필라테스, 월 8회 18만 원",
+          "en": "e.g. small-group Pilates near Seongsu, ₩180k for 8 classes"
+        }
+      },
+      "competitors": {
+        "placeholder": {
+          "ko": "Enter로 추가",
+          "en": "Press Enter"
+        }
+      },
+      "criteria": {
+        "placeholder": {
+          "ko": "Enter로 추가 — 예: 회당 가격",
+          "en": "Press Enter — e.g. price per class"
+        }
+      }
+    },
+    "stage": {
+      "headline": {
+        "ko": "점수표, 맵, 빈자리",
+        "en": "Matrix, map, openings"
+      },
+      "story": {
+        "ko": "기준별 점수, 두 축 위의 위치, 경쟁사가 비워 둔 자리와 할 일.",
+        "en": "Scores by criterion, positions on two axes, and the openings to take."
+      },
+      "promises": [
+        {
+          "icon": "layout-list",
+          "text": {
+            "ko": "비교 매트릭스",
+            "en": "Matrix"
+          }
+        },
+        {
+          "icon": "map-pin",
+          "text": {
+            "ko": "포지셔닝 맵",
+            "en": "Map"
+          }
+        },
+        {
+          "icon": "target",
+          "text": {
+            "ko": "기회 카드",
+            "en": "Openings"
+          }
+        }
+      ]
+    }
+  },
+  "persona-mapper": {
+    "layout": "split",
+    "visual": "compass",
+    "hero": {
+      "title": {
+        "ko": "우리 고객은 어떤 사람인가요",
+        "en": "Who is your customer, really?"
+      },
+      "story": {
+        "ko": "고객 자료가 있으면 그 목소리로, 없으면 사업 설명으로 만들되 무엇이 추론인지 밝혀 드려요.",
+        "en": "Built from customer data if you have it, otherwise from your description — with assumptions marked."
+      }
+    },
+    "sections": [
+      {
+        "title": {
+          "ko": "무엇을 누구에게",
+          "en": "What and for whom"
+        },
+        "hint": {
+          "ko": "사업과 생각하는 고객",
+          "en": "Business and the customer you have in mind"
+        },
+        "fields": [
+          "business",
+          "customer_hint",
+          "count"
+        ]
+      },
+      {
+        "title": {
+          "ko": "고객 자료",
+          "en": "Customer data"
+        },
+        "hint": {
+          "ko": "선택 — 있으면 근거가 됩니다",
+          "en": "Optional — becomes the evidence"
+        },
+        "fields": [
+          "customer_data"
+        ]
+      }
+    ],
+    "ui": {
+      "business": {
+        "placeholder": {
+          "ko": "예: 저녁 진료를 하는 동네 소아과",
+          "en": "e.g. a pediatric clinic open in the evening"
+        }
+      },
+      "customer_data": {
+        "placeholder": {
+          "ko": "리뷰·인터뷰·문의를 붙여 넣으세요",
+          "en": "Paste reviews, interviews or enquiries"
+        }
+      },
+      "count": {
+        "display": "segmented"
+      }
+    },
+    "stage": {
+      "headline": {
+        "ko": "페르소나와 여정",
+        "en": "Persona and journey"
+      },
+      "story": {
+        "ko": "목표·불편·계기·망설임, 그리고 단계마다의 기분 곡선.",
+        "en": "Goals, frustrations, triggers, doubts — and the mood at each stage."
+      },
+      "promises": [
+        {
+          "icon": "user-round",
+          "text": {
+            "ko": "페르소나 카드",
+            "en": "Persona card"
+          }
+        },
+        {
+          "icon": "route",
+          "text": {
+            "ko": "여정 지도",
+            "en": "Journey map"
+          }
+        },
+        {
+          "icon": "message-square",
+          "text": {
+            "ko": "단계별 메시지",
+            "en": "Message per stage"
+          }
+        }
+      ]
+    }
+  },
+  "insight-miner": {
+    "layout": "split",
+    "visual": "score",
+    "hero": {
+      "title": {
+        "ko": "고객이 반복해서 하는 말 찾기",
+        "en": "Find what customers keep saying"
+      },
+      "story": {
+        "ko": "리뷰·설문·인터뷰를 붙여 넣으면 주제를 묶고 건수와 원문 인용을 보여 드려요. 인용은 원문과 대조해 확인합니다.",
+        "en": "Paste reviews, surveys or interviews; get themes with counts and real quotes, checked against your text."
+      }
+    },
+    "sections": [
+      {
+        "title": {
+          "ko": "원자료",
+          "en": "Raw data"
+        },
+        "hint": {
+          "ko": "한 줄에 하나씩이면 가장 정확해요",
+          "en": "One per line is most accurate"
+        },
+        "fields": [
+          "data",
+          "source_type"
+        ]
+      },
+      {
+        "title": {
+          "ko": "무엇을 찾을까요",
+          "en": "What to look for"
+        },
+        "hint": {
+          "ko": "선택",
+          "en": "Optional"
+        },
+        "fields": [
+          "product",
+          "question"
+        ]
+      }
+    ],
+    "ui": {
+      "data": {
+        "placeholder": {
+          "ko": "여기에 리뷰·설문 답변을 붙여 넣으세요",
+          "en": "Paste reviews or answers here"
+        }
+      },
+      "source_type": {
+        "display": "segmented"
+      },
+      "question": {
+        "placeholder": {
+          "ko": "예: 재구매를 막는 가장 큰 이유",
+          "en": "e.g. the main thing stopping repeat purchases"
+        }
+      }
+    },
+    "stage": {
+      "headline": {
+        "ko": "주제, 감성, 원문 인용",
+        "en": "Themes, sentiment, real quotes"
+      },
+      "story": {
+        "ko": "주제별 건수와 긍정·부정, 원문 대조된 인용, 그리고 고칠 일.",
+        "en": "Counts and sentiment by theme, verified quotes, and what to fix."
+      },
+      "promises": [
+        {
+          "icon": "layers",
+          "text": {
+            "ko": "주제 묶음",
+            "en": "Themes"
+          }
+        },
+        {
+          "icon": "badge-check",
+          "text": {
+            "ko": "원문 대조",
+            "en": "Quotes checked"
+          }
+        },
+        {
+          "icon": "zap",
+          "text": {
+            "ko": "바로 할 일",
+            "en": "Actions"
+          }
+        }
+      ]
+    }
   }
 }
