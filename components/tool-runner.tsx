@@ -25,6 +25,7 @@ import { emptyReference, ReferencePanel, uploadReferenceFiles, type ReferenceVal
 import { getTool } from "@/lib/tools/registry";
 import { CATEGORY_LABELS } from "@/lib/tools/registry/categories";
 import { seedFromChain } from "@/lib/tools/chain";
+import { ProjectPicker } from "@/components/projects/project-picker";
 import { seedFromBrief } from "@/lib/tools/brief";
 import { getToolContent } from "@/lib/tools/content";
 import { RunGuide } from "@/components/tools/run-guide";
@@ -119,6 +120,9 @@ function ToolRunner({
   hasOwnKey,
   isStudent,
   balance,
+  projects = [],
+  initialProject,
+  initialValues,
 }: {
   toolId: string;
   profile: BusinessProfile | null;
@@ -136,6 +140,12 @@ function ToolRunner({
   hasOwnKey: Partial<Record<ProviderId, boolean>>;
   isStudent: boolean;
   balance: number | null;
+  /** The member's projects, for the picker above the form. */
+  projects?: { id: string; name: string }[];
+  /** ?project= — run inside this project. */
+  initialProject?: string;
+  /** ?fromInput= — the inputs of an earlier run, to run again. */
+  initialValues?: ToolFormValues;
 }) {
   const manifest = getTool(toolId);
   const exp = getExperience(toolId);
@@ -149,7 +159,9 @@ function ToolRunner({
       : defaultProvider;
   const cost = manifest ? resolveCost(provider, !!hasOwnKey[provider], isStudent, manifest.estimatedCredits) : 0;
 
+  const [projectId, setProjectId] = useState(initialProject && projects.some((p) => p.id === initialProject) ? initialProject : "");
   const [values, setValues] = useState<ToolFormValues>(() => {
+    if (initialValues) return { ...initialValues };
     if (chainedFrom) return seedFromChain(toolId, chainedFrom.toolId, chainedFrom.output, chainedFrom.pick);
     const preset = initialPreset !== undefined ? getToolContent(toolId)?.presets[initialPreset] : undefined;
     if (preset) return { ...presetValues(toolId, initialPreset!, preset.values, locale) };
@@ -296,6 +308,7 @@ function ToolRunner({
     const base = {
       values: serialized,
       provider,
+      ...(projectId ? { projectId } : {}),
       ...(excludedProfileKeys.size ? { excludeProfile: [...excludedProfileKeys] } : {}),
       ...(referencePayload ? { reference: referencePayload } : {}),
     };
@@ -553,6 +566,16 @@ function ToolRunner({
             : getTool(chainedFrom.toolId)?.name_ko) ?? chainedFrom.toolId}{" "}
           {t("chained_from_suffix")}
         </div>
+      ) : null}
+
+      {manifest ? (
+        <ProjectPicker
+          projects={projects}
+          value={projectId}
+          onChange={setProjectId}
+          inputs={manifest.inputs}
+          onFill={(v) => setValues((prev) => ({ ...prev, ...v }))}
+        />
       ) : null}
 
       {profileChips.length > 0 && (

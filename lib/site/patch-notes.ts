@@ -4,6 +4,17 @@ export type NoteKind = "new" | "improved" | "fixed";
 
 export const PATCH_NOTES: { version: string; date: string; title: Bilingual; items: { kind: NoteKind; text: Bilingual }[] }[] = [
   {
+    version: "2.6.0",
+    date: "2026-10-01",
+    title: { ko: "프로젝트와 버전 — 한 번 입력한 내용을 계속 이어서", en: "Projects and versions — keep building on what you've entered" },
+    items: [
+      { kind: "new", text: { ko: "프로젝트: 사업·브랜드별로 결과를 묶고, 회사명·타깃·포지셔닝·팔레트 같은 핵심 정보를 프로젝트 메모리에 저장", en: "Projects: group results by business or brand, with key facts — name, target, positioning, palette — kept in project memory" } },
+      { kind: "new", text: { ko: "프로젝트를 고르고 도구를 열면 저장된 정보로 입력칸이 채워지고, 결과가 나오면 메모리가 자동으로 업데이트돼요", en: "Pick a project and a tool's form fills from its memory; finished results update the memory automatically" } },
+      { kind: "new", text: { ko: "이 부분만 다시 만들기: 결과 중 한 부분을 골라 원하는 방향으로 다시 — 새 버전으로 저장되고 이전 결과는 그대로", en: "Redo one part: rewrite a single section of a result your way — saved as a new version, the original kept" } },
+      { kind: "improved", text: { ko: "보관함: 결과 이름 바꾸기, 프로젝트로 옮기기, 같은 입력으로 다시 실행, 삭제, 버전 사이 이동, 프로젝트별 필터", en: "Library: rename, move to a project, run again with the same inputs, delete, step between versions, filter by project" } },
+    ],
+  },
+  {
     version: "2.5.0",
     date: "2026-10-01",
     title: { ko: "리서치·인텔리전스 공개 — 25개 도구 모두 사용 가능", en: "Research & Intelligence is live — all 25 tools available" },
