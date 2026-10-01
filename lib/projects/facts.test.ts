@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { factsFromRun, prefillFromFacts } from "./facts.ts";
+import { factsFromRun, mergeProjectFill, prefillFromFacts } from "./facts.ts";
 import type { ToolField } from "../tools/types.ts";
 
 test("a brand board fills the project's brand facts", () => {
@@ -42,4 +42,17 @@ test("prefill fills only the fields a tool has, splitting chips", () => {
 test("one font for heading and body is stored once", () => {
   const f = factsFromRun("brand-dna", {}, { typography: { heading: { family: "IBM Plex Sans KR" }, body: { family: "IBM Plex Sans KR" } } });
   assert.equal(f.fonts, "IBM Plex Sans KR");
+});
+
+test("a project's prefill never overwrites what the member brought", () => {
+  const prev = { product: "봄 한정 벚꽃 막걸리 출시", target_customer: "", channel: "smartstore" };
+  const fill = { product: "전통주 시음 키트", target_customer: "20~30대" };
+  const { values, owned } = mergeProjectFill(prev, fill, new Set());
+  assert.equal(values.product, "봄 한정 벚꽃 막걸리 출시");
+  assert.equal(values.target_customer, "20~30대");
+  assert.deepEqual([...owned], ["target_customer"]);
+  // Switching projects replaces only what the first project filled.
+  const next = mergeProjectFill(values, { product: "다른 제품", target_customer: "40대" }, owned);
+  assert.equal(next.values.product, "봄 한정 벚꽃 막걸리 출시");
+  assert.equal(next.values.target_customer, "40대");
 });

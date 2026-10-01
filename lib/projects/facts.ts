@@ -142,3 +142,23 @@ export function prefillFromFacts(inputs: ToolField[], facts: Facts): { values: R
   }
   return { values, filled: Object.keys(values) };
 }
+
+const isEmpty = (v: unknown) => v === undefined || v === null || (typeof v === "string" && !v.trim()) || (Array.isArray(v) && v.length === 0);
+
+/**
+ * Applies a project's prefill to a form without clobbering what the member
+ * brought: a field is filled when it's empty or was filled by a project
+ * before (so switching projects swaps those). Returns the new values and
+ * the fields the project now owns.
+ */
+export function mergeProjectFill<T extends Record<string, unknown>>(prev: T, fill: Record<string, unknown>, projectOwned: ReadonlySet<string>): { values: T; owned: Set<string> } {
+  const values: Record<string, unknown> = { ...prev };
+  const owned = new Set<string>();
+  for (const [k, v] of Object.entries(fill)) {
+    if (isEmpty(prev[k]) || projectOwned.has(k)) {
+      values[k] = v;
+      owned.add(k);
+    }
+  }
+  return { values: values as T, owned };
+}
