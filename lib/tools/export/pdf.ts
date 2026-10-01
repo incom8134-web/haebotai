@@ -112,17 +112,98 @@ export async function buildPdf(doc: ExportDoc): Promise<Buffer> {
   };
 
   const bulletLine = (text: string) => {
+    // The dot and its text stay on one page.
+    pdf.font("ko").fontSize(10.5);
+    ensure(pdf.heightOfString(text, { width: width - 16, lineGap: 3 }) + 4);
     const y = pdf.y;
     pdf.font("ko").fontSize(10.5).fillColor(ACCENT).text("•", 58, y, { width: 10 });
     pdf.fillColor(INK).text(text, 72, y, { width: width - 16, lineGap: 3 });
     pdf.moveDown(0.25);
   };
 
-  pdf.font("ko-bold").fontSize(22).fillColor(INK).text(doc.title, { width });
-  pdf.moveDown(0.3);
-  para(doc.subtitle, { color: MUTED, size: 10, gap: 1.2 });
+  // Cover: the document's name on its color, the headline numbers, and
+  // the contents — then the body starts on its own page.
+  const sectionTitles = doc.blocks.filter((b): b is Extract<typeof b, { type: "heading" }> => b.type === "heading" && b.level === 1).map((b) => b.text);
+  const cover = doc.report !== undefined || sectionTitles.length >= 3;
+  let skipKpis = false;
+  if (cover) {
+    const W = pdf.page.width;
+    const H = pdf.page.height;
+    const band = H * 0.44;
+    pdf.rect(0, 0, W, band).fill(accent);
+    pdf.circle(W - 40, 70, 150).fillOpacity(0.1).fill("#FFFFFF").fillOpacity(1);
+    pdf.circle(W - 150, band - 10, 70).fillOpacity(0.08).fill("#FFFFFF").fillOpacity(1);
+    pdf.rect(56, 96, 36, 4).fill("#FFFFFF");
+    pdf.font("ko").fontSize(11).fillColor("#FFFFFF").text(doc.eyebrow ?? "", 56, 112, { width });
+    const titleSize = doc.title.length > 40 ? 22 : doc.title.length > 22 ? 26 : 32;
+    pdf.font("ko-bold").fontSize(titleSize).fillColor("#FFFFFF").text(doc.title, 56, 136, { width: width - 40, lineGap: 4 });
+    pdf.moveDown(0.6);
+    pdf.font("ko").fontSize(11).fillColor("#FFFFFF").fillOpacity(0.85).text(doc.subtitle, 56, undefined, { width: width - 40, lineGap: 3 }).fillOpacity(1);
+    pdf.y = band + 36;
+    const kpis = doc.blocks.find((b) => b.type === "kpis");
+    if (kpis && kpis.type === "kpis") {
+      kpiRow(kpis.items);
+      skipKpis = true;
+    }
+    if (sectionTitles.length >= 3) {
+      pdf.moveDown(0.6);
+      pdf.font("ko-bold").fontSize(11).fillColor(accent).text("목차", 56, undefined, { width });
+      pdf.moveDown(0.3);
+      sectionTitles.slice(0, 14).forEach((t, i) => {
+        const y = pdf.y;
+        pdf.font("ko-bold").fontSize(10).fillColor(accent).text(String(i + 1).padStart(2, "0"), 56, y, { width: 26, lineBreak: false });
+        pdf.font("ko").fontSize(10).fillColor(INK).text(t, 86, y, { width: width - 30, height: 14, lineBreak: false, ellipsis: true });
+        pdf.x = 56;
+        pdf.y = y + 18;
+      });
+    }
+    pdf.addPage();
+  } else {
+    pdf.font("ko-bold").fontSize(22).fillColor(INK).text(doc.title, { width });
+    pdf.moveDown(0.3);
+    para(doc.subtitle, { color: MUTED, size: 10, gap: 1.2 });
+  }
 
+  // Consecutive label/value fields (a card's facts) are drawn as one compact fact box.
+  type Facts = { type: "facts"; items: { label: string; value: string }[] };
+  const grouped: (ExportDoc["blocks"][number] | Facts)[] = [];
   for (const b of doc.blocks) {
+    const last = grouped[grouped.length - 1];
+    if (b.type === "field" && last && last.type === "facts") last.items.push({ label: b.label, value: b.value });
+    else if (b.type === "field") grouped.push({ type: "facts", items: [{ label: b.label, value: b.value }] });
+    else grouped.push(b);
+  }
+  const factBox = (items: Facts["items"]) => {
+    const labelW = 78;
+    pdf.font("ko").fontSize(9.5);
+    const rows = items.map((f) => ({ ...f, h: Math.max(14, pdf.heightOfString(f.value || " ", { width: width - labelW - 24, lineGap: 1.5 }) + 5) }));
+    const total = rows.reduce((n, r) => n + r.h, 0) + 12;
+    ensure(Math.min(total, 300));
+    let y = pdf.y;
+    pdf.roundedRect(56, y, width, total, 6).fillOpacity(0.06).fill(accent).fillOpacity(1);
+    y += 6;
+    for (const r of rows) {
+      if (y + r.h > bottom()) {
+        pdf.addPage();
+        y = pdf.y;
+      }
+      pdf.font("ko").fontSize(8.5).fillColor(MUTED).text(r.label, 66, y + 1, { width: labelW - 6, lineBreak: false, ellipsis: true });
+      pdf.font("ko").fontSize(9.5).fillColor(INK).text(r.value, 56 + labelW + 10, y, { width: width - labelW - 24, lineGap: 1.5 });
+      y += r.h;
+    }
+    pdf.x = 56;
+    pdf.y = y + 10;
+  };
+
+  for (const b of grouped) {
+    if (b.type === "facts") {
+      factBox(b.items);
+      continue;
+    }
+    if (b.type === "kpis" && skipKpis) {
+      skipKpis = false;
+      continue;
+    }
     if (b.type === "heading") {
       // A section heading needs room for what follows it, or it's left alone at the page foot.
       if (pdf.y > pdf.page.height - (b.level === 1 ? 240 : 140)) pdf.addPage();
@@ -203,7 +284,10 @@ export async function buildPdf(doc: ExportDoc): Promise<Buffer> {
     pdf.switchToPage(range.start + i);
     // Writing inside the bottom margin would otherwise start a new page.
     pdf.page.margins.bottom = 0;
-    pdf.font("ko").fontSize(8).fillColor(MUTED).text(`${doc.title} · ${i + 1}/${range.count}`, 56, pdf.page.height - 36, { width, align: "center", lineBreak: false });
+    if (cover && i === 0) continue;
+    // A thin color rule on every content page ties the pages to the cover.
+    pdf.rect(0, 0, pdf.page.width, 6).fill(accent);
+    pdf.font("ko").fontSize(8).fillColor(MUTED).text(`${doc.title} · ${cover ? i : i + 1}/${cover ? range.count - 1 : range.count}`, 56, pdf.page.height - 36, { width, align: "center", lineBreak: false });
   }
   pdf.end();
   return done;

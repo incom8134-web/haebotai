@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { catalogTool, publicTools } from "@/lib/tools/catalog";
 import { routeBrief } from "@/lib/tools/route-brief";
+import { CategoryRail, CountUp, HeroBackdrop, PromoStrip, Reveal, ResultGallery, useRotatingExample, WorkflowShowcase } from "@/components/studio/studio-extras";
 import { chainTargets, getTool } from "@/lib/tools/registry";
 import { briefField } from "@/lib/tools/brief";
 import { formatDateTime } from "@/lib/format-date";
@@ -137,56 +138,34 @@ function QuickCreate({
     const qs = q.toString();
     start(() => router.push(`/tools/${chosen}/run${qs ? `?${qs}` : ""}`));
   };
+  const example = useRotatingExample(EXAMPLES.map((e) => L(e)));
   return (
-    <Card title={L({ ko: "바로 시작하기", en: "Quick start" })}>
-      <form
-        className="flex flex-col gap-2.5"
-        onSubmit={(e) => {
-          e.preventDefault();
-          go();
-        }}
-      >
+    <form
+      className="flex flex-col gap-3"
+      onSubmit={(e) => {
+        e.preventDefault();
+        go();
+      }}
+    >
+      <div className="rounded-[22px] border border-hairline-str bg-surface/90 p-2 shadow-[0_20px_60px_-35px_rgba(0,0,0,0.5)] backdrop-blur focus-within:border-accent">
         <textarea
           value={brief}
           onChange={(e) => setBrief(e.target.value)}
+          onKeyDown={(e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+              e.preventDefault();
+              go();
+            }
+          }}
           rows={3}
           maxLength={600}
           aria-label={L({ ko: "하고 싶은 일", en: "What you want to make" })}
-          placeholder={L({
-            ko: "하고 싶은 일을 한두 줄로 — 예: 4월 한정 딸기 타르트를 동네 20~30대에게 알리고 싶어요",
-            en: "A line or two — e.g. Launch an April-only strawberry tart to locals in their 20s–30s",
-          })}
-          className="rounded-xl border border-hairline bg-bg px-3 py-2.5 text-sm text-fg outline-none placeholder:text-fg-subtle focus:border-accent"
+          placeholder={example}
+          className="w-full resize-none rounded-2xl bg-transparent px-3 py-2.5 text-base text-fg outline-none placeholder:text-fg-subtle"
         />
-        {suggested.length ? (
-          <div className="flex flex-wrap items-center gap-1.5" aria-label={L({ ko: "추천 도구", en: "Suggested tools" })}>
-            <span className="text-2xs text-fg-subtle">{L({ ko: "이런 도구가 맞아요", en: "Good fits" })}</span>
-            {suggested.map((s) => {
-              const t = tools.find((x) => x.slug === s);
-              if (!t) return null;
-              return (
-                <button
-                  key={s}
-                  type="button"
-                  aria-pressed={chosen === s}
-                  onClick={() => {
-                    setSlug(s);
-                    setPicked(true);
-                  }}
-                  className={cn(
-                    "rounded-full border px-2.5 py-1 text-xs transition-colors",
-                    chosen === s ? "border-accent bg-accent-dim text-accent" : "border-hairline text-fg-muted hover:text-fg",
-                  )}
-                >
-                  {L(t.name)}
-                </button>
-              );
-            })}
-          </div>
-        ) : null}
-        <div className="flex flex-wrap items-center gap-2">
-          <label className="flex min-w-0 flex-1 items-center gap-1.5 text-xs text-fg-muted">
-            <span className="shrink-0">{L({ ko: "도구", en: "Tool" })}</span>
+        <div className="flex flex-wrap items-center gap-2 border-t border-hairline px-2 pt-2">
+          <label className="flex min-w-0 basis-full items-center gap-1.5 text-xs text-fg-muted sm:basis-0 sm:flex-1">
+            <span className="w-12 shrink-0 sm:w-auto">{L({ ko: "도구", en: "Tool" })}</span>
             <select
               value={chosen}
               onChange={(e) => {
@@ -203,15 +182,9 @@ function QuickCreate({
             </select>
           </label>
           {projects.length ? (
-            <label className="flex min-w-0 flex-1 items-center gap-1.5 text-xs text-fg-muted">
-              <span className="shrink-0">
-                {L({ ko: "프로젝트", en: "Project" })}
-              </span>
-              <select
-                value={project}
-                onChange={(e) => setProject(e.target.value)}
-                className="min-w-0 flex-1 rounded-lg border border-hairline bg-bg px-2 py-1.5 text-sm text-fg"
-              >
+            <label className="flex min-w-0 basis-full items-center gap-1.5 text-xs text-fg-muted sm:basis-0 sm:flex-1">
+              <span className="w-12 shrink-0 sm:w-auto">{L({ ko: "프로젝트", en: "Project" })}</span>
+              <select value={project} onChange={(e) => setProject(e.target.value)} className="min-w-0 flex-1 rounded-lg border border-hairline bg-bg px-2 py-1.5 text-sm text-fg">
                 <option value="">{L({ ko: "없음", en: "None" })}</option>
                 {projects.map((p) => (
                   <option key={p.id} value={p.id}>
@@ -221,29 +194,83 @@ function QuickCreate({
               </select>
             </label>
           ) : null}
-          <button
-            type="submit"
-            disabled={pending || !chosen}
-            className={cn(primaryButton, "h-9 px-4 disabled:opacity-60")}
-          >
-            {pending ? (
-              <Loader2 size={14} className="animate-spin" aria-hidden />
-            ) : (
-              <Sparkles size={14} aria-hidden />
-            )}{" "}
-            {L({ ko: "열기", en: "Open" })}
+          <button type="submit" disabled={pending || !chosen} className={cn(primaryButton, "h-10 w-full justify-center px-5 disabled:opacity-60 sm:w-auto")}>
+            {pending ? <Loader2 size={15} className="animate-spin" aria-hidden /> : <Sparkles size={15} aria-hidden />} {L({ ko: "만들기 시작", en: "Start" })}
           </button>
         </div>
-        <p className="text-2xs text-fg-subtle">
-          {L({
-            ko: "도구 화면에서 내용을 확인하고 실행해요. 열기만 해서는 크레딧이 들지 않아요.",
-            en: "You review it on the tool page before running — opening costs nothing.",
+      </div>
+      {suggested.length ? (
+        <div className="flex flex-wrap items-center gap-1.5" aria-label={L({ ko: "추천 도구", en: "Suggested tools" })}>
+          <span className="text-2xs text-fg-subtle">{L({ ko: "이런 도구가 맞아요", en: "Good fits" })}</span>
+          {suggested.map((sl) => {
+            const t = tools.find((x) => x.slug === sl);
+            if (!t) return null;
+            return (
+              <button
+                key={sl}
+                type="button"
+                aria-pressed={chosen === sl}
+                onClick={() => {
+                  setSlug(sl);
+                  setPicked(true);
+                }}
+                className={cn("rounded-full border px-2.5 py-1 text-xs transition-colors", chosen === sl ? "border-accent bg-accent-dim text-accent" : "border-hairline bg-surface text-fg-muted hover:text-fg")}
+              >
+                {L(t.name)}
+              </button>
+            );
           })}
-        </p>
-      </form>
-    </Card>
+        </div>
+      ) : (
+        <div className="flex flex-wrap gap-1.5" aria-label={L({ ko: "바로 시작할 예시", en: "Starters" })}>
+          {STARTERS.map((st) => {
+            const t = catalogTool(st.slug);
+            if (!t) return null;
+            return (
+              <button
+                key={st.slug}
+                type="button"
+                onClick={() => {
+                  setBrief(L(st.brief));
+                  setSlug(st.slug);
+                  setPicked(true);
+                }}
+                className="inline-flex items-center gap-1.5 rounded-full border border-hairline bg-surface/80 px-3 py-1.5 text-xs text-fg backdrop-blur transition-[transform,border-color] hover:-translate-y-0.5 hover:border-accent/50"
+              >
+                <t.icon size={13} className="text-accent" aria-hidden /> {L(st.label)}
+              </button>
+            );
+          })}
+        </div>
+      )}
+      <p className="text-2xs text-fg-subtle">
+        {L({
+          ko: "도구 화면에서 내용을 확인하고 실행해요. 열기만 해서는 크레딧이 들지 않아요. 자료(PDF·Word·PPT)는 도구 화면에서 올릴 수 있어요.",
+          en: "You review it on the tool page before running — opening costs nothing. Upload PDFs, Word or PowerPoint files there.",
+        })}
+      </p>
+    </form>
   );
 }
+
+const EXAMPLES = [
+  { ko: "4월 한정 딸기 타르트를 동네 20~30대에게 알리고 싶어요", en: "Launch an April-only strawberry tart to locals in their 20s–30s" },
+  { ko: "스마트스토어에 올릴 수제 잼 상세페이지를 만들어 줘", en: "A product page for handmade jam on my online store" },
+  { ko: "정부 지원사업에 낼 30쪽 사업계획서 초안", en: "A 30-page business plan draft for a government grant" },
+  { ko: "카페 이름에 어울리는 로고 방향 4가지", en: "Four logo directions for my café" },
+  { ko: "경쟁 카페 3곳과 비교해서 우리 강점을 정리해 줘", en: "Compare us with three rival cafés and find our edge" },
+];
+
+const STARTERS: { slug: string; label: { ko: string; en: string }; brief: { ko: string; en: string } }[] = [
+  { slug: "sales-page", label: { ko: "상세페이지", en: "Product page" }, brief: { ko: "온라인 스토어에 올릴 상세페이지 — 제품: ", en: "A product page for my online store — product: " } },
+  { slug: "hook-lab", label: { ko: "광고 카피", en: "Ad copy" }, brief: { ko: "인스타그램 광고에 쓸 후킹 문구 — 상품: ", en: "Instagram ad hooks — product: " } },
+  { slug: "logo-lab", label: { ko: "로고", en: "Logo" }, brief: { ko: "브랜드 로고 방향 — 이름: ", en: "Logo directions — brand name: " } },
+  { slug: "campaign-planner", label: { ko: "캠페인", en: "Campaign" }, brief: { ko: "다음 달 캠페인 계획 — 목표: ", en: "Next month's campaign — goal: " } },
+  { slug: "doc-studio", label: { ko: "사업계획서", en: "Business plan" }, brief: { ko: "사업계획서 — 독자(은행·투자자·지원사업): ", en: "Business plan — reader (bank, investor, grant): " } },
+  { slug: "proposal-forge", label: { ko: "제안서", en: "Proposal" }, brief: { ko: "제안서 — 제안 대상과 내용: ", en: "Proposal — to whom and what: " } },
+  { slug: "market-desk", label: { ko: "시장 조사", en: "Market research" }, brief: { ko: "시장 조사 — 알고 싶은 것: ", en: "Market research — what I need to know: " } },
+  { slug: "web-builder", label: { ko: "홈페이지", en: "Website" }, brief: { ko: "홈페이지 — 업종과 방문자가 할 일: ", en: "Website — business and what visitors should do: " } },
+];
 
 export function Dashboard({
   name,
@@ -286,39 +313,66 @@ export function Dashboard({
   const low = usage.balance !== null && usage.balance < 100;
 
   return (
-    <div className="mx-auto max-w-[1180px] px-4 pt-6 pb-12 md:px-8 md:pt-10">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="font-display text-[clamp(1.9rem,3.6vw,2.6rem)] leading-tight font-bold tracking-[-0.02em] break-keep text-fg">
-            {name
-              ? L({ ko: `${name}님, 안녕하세요`, en: `Hello, ${name}` })
-              : L({ ko: "안녕하세요", en: "Hello" })}
-          </h1>
-          <p className="mt-1.5 text-base break-keep text-fg-muted">
-            {runs.length
-              ? L({
-                  ko: "하던 일을 이어서 하거나, 다음 도구로 넘어가 보세요.",
-                  en: "Pick up where you left off, or move on to the next tool.",
-                })
-              : L({
-                  ko: "첫 결과를 만들어 볼까요? 아래에서 바로 시작할 수 있어요.",
-                  en: "Ready for a first result? Start right below.",
-                })}
-          </p>
+    <div className="mx-auto max-w-[1180px] px-4 pt-6 pb-12 md:px-8 md:pt-8">
+      <section className="relative overflow-hidden rounded-[32px] border border-hairline bg-surface px-5 py-7 md:px-10 md:py-10">
+        <HeroBackdrop />
+        <div className="relative grid gap-8 lg:grid-cols-[1.45fr_1fr] lg:items-center">
+          <div>
+            <Reveal>
+              <p className="inline-flex items-center gap-1.5 rounded-full border border-hairline bg-surface/80 px-3 py-1 text-xs text-fg-muted backdrop-blur">
+                <Sparkles size={12} className="text-accent" aria-hidden />
+                {name ? L({ ko: `${name}님, 안녕하세요`, en: `Hello, ${name}` }) : L({ ko: "안녕하세요", en: "Hello" })}
+              </p>
+            </Reveal>
+            <Reveal delay={0.05}>
+              <h1 className="mt-3 font-display text-[clamp(2rem,4.4vw,3.2rem)] leading-[1.08] font-bold tracking-[-0.02em] break-keep text-fg">
+                {L({ ko: "무엇을 만들어 볼까요?", en: "What shall we make?" })}
+              </h1>
+              <p className="mt-2 max-w-xl text-base break-keep text-fg-muted">
+                {runs.length
+                  ? L({ ko: "한 줄로 적으면 맞는 도구를 골라 드려요. 하던 일은 아래에서 이어서 할 수 있어요.", en: "Write it in a line and we'll pick the tool. Your recent work is just below." })
+                  : L({ ko: "한 줄로 적으면 맞는 도구를 골라 드려요. 첫 결과까지 몇 분이면 돼요.", en: "Write it in a line and we'll pick the tool. A first result takes minutes." })}
+              </p>
+            </Reveal>
+            <Reveal delay={0.1} className="mt-5">
+              <QuickCreate projects={projects.map((p) => ({ id: p.id, name: p.name }))} />
+            </Reveal>
+          </div>
+          <Reveal delay={0.15}>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="col-span-2 rounded-[22px] border border-hairline bg-surface/85 p-4 backdrop-blur">
+                <p className="flex items-center gap-1.5 text-xs text-fg-muted">
+                  <Coins size={13} className="text-accent" aria-hidden /> {L({ ko: "남은 크레딧", en: "Credits left" })}
+                </p>
+                <p className="mt-1 font-display text-4xl font-bold text-fg">{usage.balance === null ? "—" : <CountUp value={usage.balance} />}</p>
+                <Link href="/account/membership" className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-accent hover:underline">
+                  {L({ ko: "충전·플랜", en: "Plans" })} <ArrowRight size={12} aria-hidden />
+                </Link>
+              </div>
+              <div className="rounded-[22px] border border-hairline bg-surface/85 p-4 backdrop-blur">
+                <p className="text-xs text-fg-muted">{L({ ko: "30일 완료", en: "Done, 30 days" })}</p>
+                <p className="mt-1 font-display text-2xl font-bold text-fg"><CountUp value={usage.runs30} /></p>
+              </div>
+              <div className="rounded-[22px] border border-hairline bg-surface/85 p-4 backdrop-blur">
+                <p className="text-xs text-fg-muted">{L({ ko: "프로젝트", en: "Projects" })}</p>
+                <p className="mt-1 font-display text-2xl font-bold text-fg"><CountUp value={projectCount} /></p>
+              </div>
+              <Link href="/projects" className={cn(secondaryButton, "h-10 justify-center bg-surface/85 px-3 backdrop-blur")}>
+                <FolderPlus size={15} aria-hidden /> {L({ ko: "새 프로젝트", en: "New project" })}
+              </Link>
+              <Link href="/tools" className={cn(secondaryButton, "h-10 justify-center bg-surface/85 px-3 backdrop-blur")}>
+                <Search size={15} aria-hidden /> {L({ ko: "도구 찾기", en: "Find a tool" })}
+              </Link>
+            </div>
+          </Reveal>
         </div>
-        <div className="flex gap-2">
-          <Link href="/projects" className={cn(secondaryButton, "h-10 px-4")}>
-            <FolderPlus size={15} aria-hidden />{" "}
-            {L({ ko: "새 프로젝트", en: "New project" })}
-          </Link>
-          <Link href="/tools" className={cn(secondaryButton, "h-10 px-4")}>
-            <Search size={15} aria-hidden />{" "}
-            {L({ ko: "도구 찾기", en: "Find a tool" })}
-          </Link>
-        </div>
-      </header>
+      </section>
 
-      <div className="mt-8 grid gap-4 lg:grid-cols-[1.25fr_1fr]">
+      <div className="mt-4">
+        <PromoStrip />
+      </div>
+
+      <div className="mt-4 grid gap-4 lg:grid-cols-[1.25fr_1fr]">
         {/* Continue working */}
         <Card title={L({ ko: "이어서 하기", en: "Continue working" })}>
           {latest ? (
@@ -404,18 +458,9 @@ export function Dashboard({
           )}
         </Card>
 
-        <QuickCreate
-          projects={projects.map((p) => ({ id: p.id, name: p.name }))}
-        />
-      </div>
-
-      <div className="mt-4 grid gap-4 lg:grid-cols-3">
         {/* Recommended */}
-        <Card
-          title={L({ ko: "다음에 해 볼 것", en: "Try next" })}
-          className="lg:col-span-2"
-        >
-          <ul className="grid gap-2 sm:grid-cols-3">
+        <Card title={L({ ko: "다음에 해 볼 것", en: "Try next" })}>
+          <ul className="grid gap-2 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
             {recommended.map((slug) => {
               const t = catalogTool(slug)!;
               const m = t.engine ? getTool(t.engine) : undefined;
@@ -447,66 +492,26 @@ export function Dashboard({
           </ul>
         </Card>
 
-        {/* Usage */}
-        <Card
-          title={L({ ko: "크레딧", en: "Credits" })}
-          action={
-            <Link
-              href="/account/membership"
-              className="text-xs text-accent hover:underline"
-            >
-              {L({ ko: "충전·플랜", en: "Plans" })}
-            </Link>
-          }
-        >
-          <p className="flex items-baseline gap-2">
-            <Coins size={16} className="self-center text-accent" aria-hidden />
-            <span className="font-display text-3xl font-bold text-fg">
-              {usage.balance === null
-                ? "—"
-                : usage.balance.toLocaleString("en-US")}
-            </span>
-            <span className="text-sm text-fg-muted">
-              {L({ ko: "남음", en: "left" })}
-            </span>
-          </p>
-          <dl className="mt-4 grid grid-cols-2 gap-2 text-xs">
-            <div className="rounded-xl bg-surface-2 px-3 py-2">
-              <dt className="text-fg-subtle">
-                {L({ ko: "최근 30일 사용", en: "Used, 30 days" })}
-              </dt>
-              <dd className="mt-0.5 font-mono text-sm text-fg">
-                {usage.used30.toLocaleString("en-US")}
-              </dd>
-            </div>
-            <div className="rounded-xl bg-surface-2 px-3 py-2">
-              <dt className="text-fg-subtle">
-                {L({ ko: "완료한 실행", en: "Finished runs" })}
-              </dt>
-              <dd className="mt-0.5 font-mono text-sm text-fg">
-                {usage.runs30}
-              </dd>
-            </div>
-          </dl>
-          {low ? (
-            <p className="mt-3 text-xs break-keep text-danger">
-              {L({
-                ko: "크레딧이 얼마 남지 않았어요. 내 API 키를 등록하면 크레딧 없이 쓸 수 있어요.",
-                en: "Running low. With your own API key, runs cost no credits.",
-              })}
-            </p>
-          ) : (
-            <p className="mt-3 text-2xs break-keep text-fg-subtle">
-              {L({
-                ko: "실패하거나 취소한 실행은 자동으로 환불돼요.",
-                en: "Failed and cancelled runs are refunded automatically.",
-              })}
-            </p>
-          )}
-        </Card>
       </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+      {low ? (
+        <p className="mt-3 rounded-2xl border border-danger/30 bg-danger/5 px-4 py-2.5 text-xs break-keep text-danger">
+          {L({ ko: "크레딧이 얼마 남지 않았어요. 내 API 키를 등록하면 크레딧 없이 쓸 수 있어요.", en: "Running low. With your own API key, runs cost no credits." })}{" "}
+          <Link href="/account/api-key" className="font-semibold underline">{L({ ko: "API 키 연결", en: "Connect a key" })}</Link>
+        </p>
+      ) : null}
+
+      <div className="mt-10">
+        <CategoryRail />
+      </div>
+      <div className="mt-10">
+        <WorkflowShowcase projectId={latestProject?.id} />
+      </div>
+      <div className="mt-10">
+        <ResultGallery />
+      </div>
+
+      <div className="mt-10 grid gap-4 lg:grid-cols-2">
         {/* Projects */}
         <Card
           title={L({

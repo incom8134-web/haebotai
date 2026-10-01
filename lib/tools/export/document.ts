@@ -34,6 +34,8 @@ export interface ExportSlide {
 export interface ExportDoc {
   title: string;
   subtitle: string;
+  /** The kind of document (tool name), for covers. */
+  eyebrow?: string;
   blocks: Block[];
   sources: Source[];
   /** Presentation tool only: its own slide list, used as-is for .pptx. */
@@ -84,6 +86,9 @@ export function deckBlocks(o: Record<string, unknown>): Block[] {
   return out;
 }
 
+/** Tools whose report hero title is the document's own title (not a conclusion). */
+const DOCUMENT_TITLED = new Set(["proposal", "business-plan", "presentation", "grant", "sop-builder", "meeting-action"]);
+
 /** A report as export blocks: sections become level-1 headings, cards become sub-headings with facts. */
 export function reportBlocks(report: Report): { blocks: Block[]; sources: Source[] } {
   const out: Block[] = [];
@@ -93,7 +98,8 @@ export function reportBlocks(report: Report): { blocks: Block[]; sources: Source
   for (const section of report.sections) {
     const onlySources = section.blocks.every((b) => b.type === "sources");
     if (!onlySources) out.push({ type: "heading", level: 1, text: section.title });
-    if (section.lead) out.push({ type: "paragraph", text: section.lead });
+    // A lead that only repeats the summary above isn't printed twice.
+    if (section.lead && section.lead !== report.hero.subtitle) out.push({ type: "paragraph", text: section.lead });
     for (const b of section.blocks) {
       switch (b.type) {
         case "kpis":
@@ -120,7 +126,7 @@ export function reportBlocks(report: Report): { blocks: Block[]; sources: Source
           if (b.title) out.push({ type: "heading", level: 2, text: b.title });
           for (const c of b.items) {
             out.push({ type: "heading", level: 3, text: [c.kicker, c.title].filter(Boolean).join(" · ") + (c.badge ? ` [${c.badge}]` : "") });
-            if (c.meter) out.push({ type: "field", label: "점수", value: c.meter.label });
+            if (c.meter) out.push({ type: "field", label: "지표", value: c.meter.label });
             for (const f of c.facts ?? []) out.push({ type: "field", label: f.label, value: f.value });
             if (c.lines?.length) out.push({ type: "bullets", items: c.lines });
           }
@@ -321,9 +327,22 @@ export function buildExportDoc(params: {
   }
 
   if (report) {
-    return { title: report.hero.title, subtitle: `${report.hero.eyebrow} · ${subtitle}`, blocks, sources: allSources, output, report };
+    // A document's own title for documents; for analyses the hero title is
+    // the conclusion ("먼저: 매장 판매 + 구독"), so the file is named for
+    // what it is and the conclusion leads the subtitle.
+    const named = DOCUMENT_TITLED.has(toolId) || !report.hero.title;
+    const name = params.brandName ? `${params.brandName} ${toolName}` : toolName;
+    return {
+      title: named ? report.hero.title || name : name,
+      subtitle: named ? `${report.hero.eyebrow} · ${subtitle}` : `${report.hero.title} · ${subtitle}`,
+      eyebrow: report.hero.eyebrow || toolName,
+      blocks,
+      sources: allSources,
+      output,
+      report,
+    };
   }
-  return { title: toolName, subtitle, blocks, sources: allSources, slides, output };
+  return { title: toolName, subtitle, eyebrow: toolName, blocks, sources: allSources, slides, output };
 }
 
 /** Section = a level-1 heading and everything under it (for slides). */
