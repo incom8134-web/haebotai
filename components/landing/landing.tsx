@@ -1,392 +1,440 @@
 "use client";
 
-import { catalogTool, toolSlug } from "@/lib/tools/catalog";
-import { CATEGORY_ORDER as CATEGORY_ORDER_ALL } from "@/lib/tools/catalog";
+import { createContext, useContext } from "react";
+import Link from "next/link";
+import { motion } from "motion/react";
+import { ArrowRight, Check, GraduationCap, Plus } from "lucide-react";
 import { BusinessInfo } from "@/components/site/business-info";
 import { BrandMark } from "@/components/brand-mark";
-import { createContext, useContext, useEffect, useState } from "react";
-import Link from "next/link";
-import dynamic from "next/dynamic";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { ArrowRight, Check, FileText, GraduationCap, Image as ImageIcon, Link2, MessageSquareText, Plus, ShieldCheck, Sparkles, UserRound } from "lucide-react";
-import { listTools, getTool } from "@/lib/tools/registry";
-import { CATEGORY_LABELS } from "@/lib/tools/registry/categories";
-import { WORKFLOWS } from "@/lib/site/guides";
+import { ThemeLangControls } from "@/components/shell/app-shell";
+import { primaryButton, secondaryButton } from "@/components/site/page";
+import { publicTools } from "@/lib/tools/catalog";
 import { PLANS } from "@/lib/site/plans";
 import { FAQ } from "@/lib/site/faq";
-import { useBi, useLocale } from "@/lib/i18n/context";
-import type { CategoryId } from "@/lib/tools/types";
-import { ThemeLangControls } from "@/components/shell/app-shell";
-import { Segmented, primaryButton, secondaryButton } from "@/components/site/page";
+import { useBi } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
+import { HeroMock } from "./hero-mock";
+import {
+  BeforeAfterSection,
+  CategorySection,
+  FlowSection,
+  PersonasSection,
+  SectionHead,
+  StepsSection,
+  reveal,
+} from "./sections";
 
-// Public landing. The story in order: the problem (no marketing team),
-// the promise (one brief → a whole campaign), proof (a live studio mock,
-// three structural differences), the tools, the flows, honest pricing,
-// answers, and one last invitation.
-
-const ORDER: CategoryId[] = CATEGORY_ORDER_ALL;
-
-// WebGL — dynamically imported with no SSR (Canvas can't render server-
-// side) and it's purely decorative, so a late mount never blocks anything
-// above the fold from being usable.
-const Hero3DScene = dynamic(() => import("./hero-3d").then((m) => m.Hero3D), { ssr: false });
-
-// three.js is ~1MB of JS and a constant GPU load — on phones it made the
-// landing page slow for a purely decorative effect. Only mount (and so
-// only download) it on large screens without reduced motion.
-function Hero3D() {
-  const [show, setShow] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width: 1024px) and (prefers-reduced-motion: no-preference)");
-    const update = () => setShow(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
-  return show ? <Hero3DScene /> : null;
-}
-
-// Muted, looping, silent (audio stripped at encode time). No autoplay for
-// people who asked for reduced motion; controls let anyone pause it.
-function DemoVideo({ label }: { label: string }) {
-  const reduce = useReducedMotion();
-  return (
-    <video
-      src="/videos/demo.mp4"
-      poster="/videos/demo-poster.jpg"
-      aria-label={label}
-      className="aspect-video w-full rounded-[22px] bg-black object-cover"
-      autoPlay={!reduce}
-      muted
-      loop
-      playsInline
-      controls
-      preload="metadata"
-      width={1280}
-      height={720}
-    />
-  );
-}
-
-const reveal = {
-  initial: { opacity: 0, y: 18 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: "-60px" },
-  transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const },
-};
+// Public homepage (docs/redesign-plan.md §5). In order: the promise with a
+// live product mock → the idea-to-growth flow → five categories → how it
+// works → a real before/after → who it's for → pricing → answers → one
+// last invitation.
 
 // Signed-in visitors get "Go to Studio" instead of sign-in/sign-up CTAs,
 // so nobody is sent through Google sign-in again.
 const SignedIn = createContext(false);
 
+const FAQ_ON_HOME = [
+  "Can tools use each other's results?",
+  "What if I don't like a result?",
+  "How are credits charged?",
+  'What\'s the "estimate" badge?',
+  "Can I use outputs commercially?",
+  "Is my data used for training?",
+];
+
 function Nav() {
   const signedIn = useContext(SignedIn);
   const L = useBi();
   return (
-    <header className="sticky top-0 z-40 px-3 pt-[max(12px,env(safe-area-inset-top))] md:px-6">
-      <div className="mx-auto flex max-w-[1200px] items-center gap-2">
-        <Link href="/" className="glass flex h-11 items-center gap-2.5 rounded-2xl pr-4 pl-1.5">
-          <BrandMark size={32} priority />
-          <span className="text-sm font-bold tracking-[-0.02em]">{L({ ko: "해봇 AI", en: "Haebot AI" })}</span>
-        </Link>
-        <nav className="glass mx-auto hidden h-11 items-center gap-1 rounded-2xl px-1.5 md:flex" aria-label={L({ ko: "페이지 안내", en: "Page" })}>
-          {[
-            ["#tools", { ko: "도구", en: "Tools" }],
-            ["#flows", { ko: "흐름", en: "Flows" }],
-            ["#pricing", { ko: "요금", en: "Pricing" }],
-            ["#faq", { ko: "질문", en: "FAQ" }],
-          ].map(([href, label]) => (
-            <a key={href as string} href={href as string} className="rounded-xl px-3.5 py-1.5 text-sm text-fg-muted transition-colors hover:bg-surface-2/60 hover:text-fg">
-              {L(label as { ko: string; en: string })}
-            </a>
-          ))}
-        </nav>
-        <div className="ml-auto flex items-center gap-2 md:ml-0">
-          <div className="glass flex rounded-2xl p-0.5"><ThemeLangControls /></div>
-          {signedIn ? (
-            <Link href="/studio" className={cn(primaryButton, "h-11")}>{L({ ko: "스튜디오로", en: "Go to Studio" })}</Link>
-          ) : (
-            <>
-              <Link href="/auth" className="glass hidden h-11 items-center rounded-2xl px-4 text-sm font-medium sm:flex">{L({ ko: "로그인", en: "Sign in" })}</Link>
-              <Link href="/auth" className={cn(primaryButton, "h-11")}>{L({ ko: "무료로 시작", en: "Start free" })}</Link>
-            </>
-          )}
+    <>
+      <a
+        href="#main"
+        className="sr-only fixed top-3 left-3 z-[100] rounded-full bg-fg px-4 py-2 text-sm font-semibold text-bg focus:not-sr-only"
+      >
+        {L({ ko: "본문으로 건너뛰기", en: "Skip to content" })}
+      </a>
+      <header className="sticky top-0 z-40 border-b border-hairline bg-bg/85 px-3 pt-[env(safe-area-inset-top)] backdrop-blur md:px-6">
+        <div className="mx-auto flex h-16 max-w-[1200px] items-center gap-2">
+          <Link href="/" className="flex items-center gap-2 pr-2">
+            <BrandMark size={30} priority />
+            <span className="text-sm font-bold tracking-[-0.02em] text-fg">
+              {L({ ko: "해봇 AI", en: "Haebot AI" })}
+            </span>
+          </Link>
+          <nav
+            className="mx-auto hidden items-center gap-1 md:flex"
+            aria-label={L({ ko: "페이지 안내", en: "Page" })}
+          >
+            {[
+              ["#flow", { ko: "흐름", en: "Flow" }],
+              ["#tools", { ko: "도구", en: "Tools" }],
+              ["#example", { ko: "실제 결과", en: "Example" }],
+              ["#pricing", { ko: "요금", en: "Pricing" }],
+              ["#faq", { ko: "질문", en: "FAQ" }],
+            ].map(([href, label]) => (
+              <a
+                key={href as string}
+                href={href as string}
+                className="rounded-lg px-3 py-1.5 text-sm text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg"
+              >
+                {L(label as { ko: string; en: string })}
+              </a>
+            ))}
+          </nav>
+          <div className="ml-auto flex items-center gap-2 md:ml-0">
+            <div className="flex rounded-xl border border-hairline bg-surface p-0.5">
+              <ThemeLangControls />
+            </div>
+            {signedIn ? (
+              <Link href="/studio" className={cn(primaryButton, "h-10")}>
+                {L({ ko: "스튜디오로", en: "Go to Studio" })}
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/auth"
+                  className="hidden h-10 items-center rounded-xl px-3 text-sm font-medium text-fg sm:flex"
+                >
+                  {L({ ko: "로그인", en: "Sign in" })}
+                </Link>
+                <Link href="/auth" className={cn(primaryButton, "h-10")}>
+                  {L({ ko: "무료로 시작", en: "Start free" })}
+                </Link>
+              </>
+            )}
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+    </>
   );
 }
 
-/** A small live studio: a brief types itself, then three deliverables arrive. */
-function StudioMock() {
+function Hero() {
+  const signedIn = useContext(SignedIn);
   const L = useBi();
-  const brief = L({ ko: "봄 딸기 타르트 출시, 4월 한정. 동네 20~30대 대상.", en: "Spring strawberry tart, April only. For locals in their 20s–30s." });
-  const [typed, setTyped] = useState(0);
-  const [cycle, setCycle] = useState(0);
-  useEffect(() => {
-    if (typed < brief.length) {
-      const t = setTimeout(() => setTyped((n) => n + 1), 45);
-      return () => clearTimeout(t);
-    }
-    const t = setTimeout(() => { setTyped(0); setCycle((c) => c + 1); }, 5200);
-    return () => clearTimeout(t);
-  }, [typed, brief.length]);
-  const done = typed >= brief.length;
-  const outputs = [
-    { icon: MessageSquareText, tool: getTool("copy")!, line: L({ ko: "\"4월이 지나면 내년까지 기다려야 해요\"", en: "\"After April, it's a year's wait\"" }) },
-    { icon: ImageIcon, tool: getTool("image")!, line: L({ ko: "원목 테이블 · 자연광 · 4:5 네 컷", en: "Wooden table · daylight · four 4:5 shots" }) },
-    { icon: FileText, tool: getTool("blog")!, line: L({ ko: "제목 5개 · 이미지 자리 3곳 · 해시태그", en: "5 titles · 3 image slots · hashtags" }) },
-  ];
+  const count = publicTools().length;
   return (
-    <div className="glass-strong relative rounded-[32px] p-5 sm:p-6">
-      <div className="flex items-center justify-between">
-        <span className="flex items-center gap-2 text-sm font-semibold"><span className="size-2 rounded-full bg-studio-success" aria-hidden /> {L({ ko: "스튜디오", en: "Studio" })}</span>
-        <span className="font-mono text-2xs text-fg-subtle">{L({ ko: "달빛 베이커리", en: "Moonlight Bakery" })}</span>
+    <section className="mx-auto grid max-w-[1200px] gap-10 px-4 pt-12 pb-16 md:px-6 md:pt-20 lg:grid-cols-[1fr_1.05fr] lg:items-center lg:gap-14">
+      <motion.div
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <p className="inline-flex items-center gap-2 rounded-full border border-hairline bg-surface px-3 py-1 text-xs font-medium text-fg-muted">
+          <span className="size-1.5 rounded-full bg-accent" aria-hidden />{" "}
+          {L({
+            ko: `작은 사업을 위한 ${count}개 AI 도구`,
+            en: `${count} AI tools for small businesses`,
+          })}
+        </p>
+        <h1 className="mt-6 font-display text-[clamp(2.4rem,5vw,3.8rem)] leading-[1.06] font-bold tracking-[-0.03em] break-keep text-fg">
+          {L({ ko: "아이디어에서 매출까지,", en: "From idea to revenue," })}
+          <br />
+          <span className="text-accent">
+            {L({ ko: "이어지는 사업 작업실", en: "one connected workshop" })}
+          </span>
+        </h1>
+        <p className="mt-6 max-w-xl text-lg leading-relaxed break-keep text-fg-muted">
+          {L({
+            ko: "사업 아이디어, 오퍼, 브랜드, 상세페이지, 캠페인, 업무 문서까지. 하나의 프로젝트가 정한 내용을 기억하고, 한 도구의 결과가 다음 도구의 입력이 돼요.",
+            en: "Business ideas, offers, brand, sales pages, campaigns and operating documents. One project remembers what you've settled, and each tool's result becomes the next one's input.",
+          })}
+        </p>
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Link
+            href={signedIn ? "/studio" : "/auth"}
+            className={cn(primaryButton, "h-12 px-6 text-[15px]")}
+          >
+            {signedIn
+              ? L({ ko: "스튜디오로 가기", en: "Go to Studio" })
+              : L({ ko: "무료로 시작하기", en: "Start free" })}{" "}
+            <ArrowRight size={16} aria-hidden />
+          </Link>
+          <Link
+            href="/tools"
+            className={cn(secondaryButton, "h-12 px-6 text-[15px]")}
+          >
+            {L({ ko: "도구 둘러보기", en: "Browse tools" })}
+          </Link>
+        </div>
+        <ul className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-sm text-fg-muted">
+          {[
+            { ko: "가입하면 500 크레딧", en: "500 credits on sign-up" },
+            { ko: "카드 등록 없음", en: "No card needed" },
+            { ko: "실패한 실행은 자동 환불", en: "Failed runs refunded" },
+          ].map((t) => (
+            <li key={t.en} className="flex items-center gap-1.5 break-keep">
+              <Check size={15} className="text-grounded" aria-hidden /> {L(t)}
+            </li>
+          ))}
+        </ul>
+      </motion.div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <HeroMock />
+      </motion.div>
+    </section>
+  );
+}
+
+function Pricing() {
+  const signedIn = useContext(SignedIn);
+  const L = useBi();
+  return (
+    <section
+      id="pricing"
+      className="mx-auto max-w-[1200px] scroll-mt-24 px-4 py-16 md:px-6 md:py-20"
+    >
+      <SectionHead
+        kicker={L({ ko: "요금", en: "Pricing" })}
+        title={L({
+          ko: "모든 플랜에 모든 도구. 다른 건 크레딧뿐",
+          en: "Every tool on every plan. Only credits differ",
+        })}
+        body={L({
+          ko: "실행 전에 크레딧이 얼마나 드는지 보여 드려요. 실패하거나 취소한 실행은 자동 환불되고, 내 API 키를 넣으면 크레딧이 들지 않아요.",
+          en: "You see the credit cost before every run. Failed or cancelled runs are refunded automatically, and with your own API key runs cost no credits.",
+        })}
+      />
+      <div className="mt-10 grid gap-4 md:grid-cols-3">
+        {PLANS.map((p, i) => (
+          <motion.article
+            key={p.id}
+            {...reveal}
+            transition={{ ...reveal.transition, delay: i * 0.06 }}
+            className={cn(
+              "relative flex flex-col rounded-[24px] border bg-surface p-6",
+              p.highlight ? "border-accent/50" : "border-hairline",
+            )}
+          >
+            {p.id === "student" ? (
+              <span className="absolute -top-3 left-6 flex items-center gap-1.5 rounded-full bg-ai px-3 py-1 text-2xs font-semibold text-white">
+                <GraduationCap size={12} aria-hidden />{" "}
+                {L({ ko: "학생 무제한", en: "Unlimited for students" })}
+              </span>
+            ) : null}
+            <p className="font-semibold text-fg">{L(p.name)}</p>
+            <p className="mt-3 font-display text-4xl font-bold tracking-[-0.02em] text-fg">
+              {L(p.price)}
+            </p>
+            <p className="mt-1 text-2xs text-fg-subtle">{L(p.note)}</p>
+            <p className="mt-5 rounded-xl bg-surface-2 px-3 py-2 text-sm font-medium text-fg">
+              {L(p.credits)}
+            </p>
+            <ul className="mt-5 flex-1 space-y-2.5 text-sm text-fg-muted">
+              {p.features.map((f) => (
+                <li key={f.en} className="flex gap-2 break-keep">
+                  <Check
+                    size={15}
+                    className="mt-0.5 shrink-0 text-grounded"
+                    aria-hidden
+                  />{" "}
+                  {L(f)}
+                </li>
+              ))}
+            </ul>
+            <Link
+              href={
+                !signedIn
+                  ? "/auth"
+                  : p.id === "pro"
+                    ? "/account/membership/checkout"
+                    : p.id === "student"
+                      ? "/account/membership"
+                      : "/studio"
+              }
+              className={cn(
+                p.id === "free" ? secondaryButton : primaryButton,
+                "mt-7",
+              )}
+            >
+              {p.id === "student"
+                ? signedIn
+                  ? L({ ko: "학생 인증하기", en: "Verify as a student" })
+                  : L({ ko: "가입 후 인증하기", en: "Sign up, then verify" })
+                : p.id === "pro" && signedIn
+                  ? L({ ko: "프로 시작하기", en: "Get Pro" })
+                  : L({ ko: "시작하기", en: "Get started" })}
+            </Link>
+          </motion.article>
+        ))}
       </div>
-      <div className="mt-4 min-h-[76px] rounded-2xl border border-hairline bg-bg/40 p-4 text-sm leading-relaxed break-keep">
-        {brief.slice(0, typed)}
-        <span className="ml-0.5 inline-block h-4 w-0.5 translate-y-0.5 animate-pulse bg-studio-cyan" aria-hidden />
+    </section>
+  );
+}
+
+function Faq() {
+  const L = useBi();
+  const items = FAQ_ON_HOME.map((en) => FAQ.find((f) => f.q.en === en)).filter(
+    (f) => !!f,
+  );
+  return (
+    <section
+      id="faq"
+      className="mx-auto max-w-[900px] scroll-mt-24 px-4 py-16 md:px-6 md:py-20"
+    >
+      <SectionHead
+        kicker={L({ ko: "질문", en: "FAQ" })}
+        title={L({ ko: "시작하기 전에 궁금한 것", en: "Before you start" })}
+      />
+      <div className="mt-8 divide-y divide-hairline rounded-[24px] border border-hairline bg-surface">
+        {items.map((f) => (
+          <details key={f.q.en} className="smooth px-6 py-5">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium break-keep text-fg">
+              {L(f.q)}
+              <Plus
+                size={16}
+                className="smooth-plus shrink-0 text-fg-subtle"
+                aria-hidden
+              />
+            </summary>
+            <div className="smooth-body">
+              <div>
+                <p className="pt-3 text-sm leading-relaxed break-keep text-fg-muted">
+                  {L(f.a)}
+                </p>
+              </div>
+            </div>
+          </details>
+        ))}
       </div>
-      <div className="mt-4 space-y-2">
-        <AnimatePresence mode="popLayout">
-          {done
-            ? outputs.map((o, i) => (
-                <motion.div
-                  key={`${cycle}-${o.tool.id}`}
-                  initial={{ opacity: 0, y: 10, scale: 0.98 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ delay: i * 0.25, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                  className="flex items-center gap-3 rounded-2xl border border-hairline bg-bg/30 p-3"
-                >
-                  <span className="studio-gradient-bg grid size-9 shrink-0 place-items-center rounded-xl text-white"><o.icon size={16} aria-hidden /></span>
-                  <span className="min-w-0">
-                    <span className="block text-2xs text-fg-subtle">{L({ ko: o.tool.name_ko, en: o.tool.name_en })}</span>
-                    <span className="block truncate text-sm">{o.line}</span>
-                  </span>
-                </motion.div>
-              ))
-            : [0, 1, 2].map((i) => <div key={`sk-${i}`} className="h-[62px] animate-pulse rounded-2xl bg-fg/5" />)}
-        </AnimatePresence>
+      <p className="mt-4 text-sm text-fg-muted">
+        <Link
+          href="/help/faq"
+          className="text-accent underline underline-offset-2"
+        >
+          {L({ ko: "질문 전체 보기", en: "All questions" })}
+        </Link>
+      </p>
+    </section>
+  );
+}
+
+function FinalCta() {
+  const signedIn = useContext(SignedIn);
+  const L = useBi();
+  return (
+    <section className="mx-auto max-w-[1200px] px-4 pt-6 pb-20 md:px-6">
+      <motion.div
+        {...reveal}
+        className="rounded-[32px] bg-fg px-6 py-14 text-center md:px-12"
+      >
+        <h2 className="mx-auto max-w-2xl font-display text-[clamp(1.8rem,3.8vw,2.8rem)] leading-tight font-bold tracking-[-0.02em] break-keep text-bg">
+          {L({
+            ko: "오늘 만든 프로젝트가 내일 도구의 출발점이 됩니다",
+            en: "Today's project is where tomorrow's tool starts",
+          })}
+        </h2>
+        <p className="mx-auto mt-4 max-w-lg text-base leading-relaxed break-keep text-bg/70">
+          {L({
+            ko: "구글 계정으로 바로 시작하세요. 결과는 도구에 따라 1~4분이면 나와요.",
+            en: "Start with your Google account. Results take 1–4 minutes depending on the tool.",
+          })}
+        </p>
+        <Link
+          href={signedIn ? "/studio" : "/auth"}
+          className={cn(primaryButton, "mt-8 h-12 px-7 text-[15px]")}
+        >
+          {signedIn
+            ? L({ ko: "스튜디오로 가기", en: "Go to Studio" })
+            : L({ ko: "무료로 시작하기", en: "Start free" })}{" "}
+          <ArrowRight size={16} aria-hidden />
+        </Link>
+      </motion.div>
+    </section>
+  );
+}
+
+function Footer() {
+  const signedIn = useContext(SignedIn);
+  const L = useBi();
+  return (
+    <footer className="border-t border-hairline px-4 py-10 md:px-6">
+      <div className="mx-auto flex max-w-[1200px] flex-col gap-6 md:flex-row md:items-center md:justify-between">
+        <p className="flex items-center gap-2 text-sm font-semibold text-fg">
+          <BrandMark size={28} /> {L({ ko: "해봇 AI", en: "Haebot AI" })}
+        </p>
+        <nav
+          className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-fg-muted"
+          aria-label={L({ ko: "바닥글", en: "Footer" })}
+        >
+          {[
+            ["/tools", { ko: "도구", en: "Tools" }],
+            ["/use-cases", { ko: "활용 사례", en: "Use cases" }],
+            ["/help", { ko: "도움말", en: "Help" }],
+            ["/help/faq", { ko: "자주 묻는 질문", en: "FAQ" }],
+            ["/help/api-guide", { ko: "API 키 설명서", en: "API key manual" }],
+            ["/help/whats-new", { ko: "새로운 점", en: "What's new" }],
+            ["/status", { ko: "서비스 상태", en: "Status" }],
+            signedIn
+              ? ["/account", { ko: "내 계정", en: "My account" }]
+              : ["/auth", { ko: "로그인", en: "Sign in" }],
+          ].map(([href, label]) => (
+            <Link
+              key={href as string}
+              href={href as string}
+              className="hover:text-fg"
+            >
+              {L(label as { ko: string; en: string })}
+            </Link>
+          ))}
+        </nav>
       </div>
-      <p className="mt-4 flex items-center gap-1.5 text-2xs text-fg-subtle"><Link2 size={12} aria-hidden /> {L({ ko: "세 결과 모두 같은 브랜드 프로필을 읽었어요", en: "All three read the same Business Profile" })}</p>
-    </div>
+      <div className="mx-auto mt-8 flex max-w-[1200px] flex-col gap-3 border-t border-hairline pt-6">
+        <nav
+          className="flex flex-wrap gap-x-4 gap-y-1 text-xs"
+          aria-label={L({ ko: "약관·정책", en: "Legal" })}
+        >
+          <Link href="/legal/terms" className="text-fg-muted hover:text-fg">
+            {L({ ko: "이용약관", en: "Terms" })}
+          </Link>
+          <Link
+            href="/legal/privacy"
+            className="font-semibold text-fg hover:text-fg"
+          >
+            {L({ ko: "개인정보 처리방침", en: "Privacy Policy" })}
+          </Link>
+          <Link href="/legal/refund" className="text-fg-muted hover:text-fg">
+            {L({ ko: "환불정책", en: "Refund Policy" })}
+          </Link>
+          <Link href="/legal/cookies" className="text-fg-muted hover:text-fg">
+            {L({ ko: "쿠키 정책", en: "Cookies" })}
+          </Link>
+          <Link href="/legal/licenses" className="text-fg-muted hover:text-fg">
+            {L({ ko: "라이선스", en: "Licenses" })}
+          </Link>
+        </nav>
+        <BusinessInfo />
+        <p className="text-xs text-fg-subtle">
+          © {new Date().getFullYear()} {L({ ko: "해봇 AI", en: "Haebot AI" })}
+        </p>
+      </div>
+    </footer>
   );
 }
 
 function Landing({ signedIn = false }: { signedIn?: boolean }) {
   return (
     <SignedIn.Provider value={signedIn}>
-      <LandingBody />
+      <div className="relative min-h-dvh overflow-x-clip bg-bg">
+        <Nav />
+        <main id="main">
+          <Hero />
+          <FlowSection />
+          <CategorySection />
+          <StepsSection />
+          <BeforeAfterSection />
+          <PersonasSection />
+          <Pricing />
+          <Faq />
+          <FinalCta />
+        </main>
+        <Footer />
+      </div>
     </SignedIn.Provider>
-  );
-}
-
-function LandingBody() {
-  const signedIn = useContext(SignedIn);
-  const L = useBi();
-  const { locale } = useLocale();
-  const tools = listTools();
-  const [cat, setCat] = useState<CategoryId>("campaign");
-  const name = (id: string) => { const t = getTool(id)!; return locale === "en" ? t.name_en : t.name_ko; };
-
-  return (
-    <div className="relative min-h-dvh overflow-x-clip">
-      <div className="app-backdrop" aria-hidden><span className="orb orb-a" /><span className="orb orb-b" /><span className="orb orb-c" /></div>
-      <Hero3D />
-      <Nav />
-
-      <main>
-        {/* Hero */}
-        <section className="mx-auto grid max-w-[1200px] gap-12 px-4 pt-16 pb-20 md:px-6 md:pt-24 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}>
-            <div className="mb-6 flex items-center gap-4">
-              <BrandMark size={72} priority className="drop-shadow-[0_18px_40px_rgba(77,124,254,0.35)]" />
-              <span className="font-display text-4xl font-bold tracking-[-0.03em]">{L({ ko: "해봇 AI", en: "Haebot AI" })}</span>
-            </div>
-            <p className="glass inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-medium text-studio-cyan"><Sparkles size={13} aria-hidden /> {L({ ko: "소상공인·1인 사업자를 위한 AI 마케팅 스튜디오", en: "An AI marketing studio for small businesses" })}</p>
-            <h1 className="mt-6 font-display text-[clamp(2.5rem,5.2vw,4rem)] leading-[1.05] font-bold tracking-[-0.03em] break-keep">
-              {L({ ko: "마케팅 팀이 없어도,", en: "No marketing team?" })}
-              <br />
-              <span className="studio-gradient-type">{L({ ko: "마케팅은 됩니다.", en: "Still marketing." })}</span>
-            </h1>
-            <p className="mt-6 max-w-xl text-lg leading-relaxed break-keep text-fg-muted">
-              {L({ ko: "무엇을 팔지 정하는 일부터 카피, 사진, 상세페이지, 사업계획서까지. 브리프 하나를 쓰면 도구들이 서로 결과를 이어받아 캠페인 전체를 만듭니다.", en: "From deciding what to sell to copy, photos, detail pages and business plans. Write one brief and the tools pass results to each other to build the whole campaign." })}
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href={signedIn ? "/studio" : "/auth"} className={cn(primaryButton, "h-12 px-6 text-[15px]")}>{signedIn ? L({ ko: "스튜디오로 가기", en: "Go to Studio" }) : L({ ko: "무료로 시작하기", en: "Start free" })} <ArrowRight size={16} aria-hidden /></Link>
-              <Link href="/tools" className={cn(secondaryButton, "h-12 px-6 text-[15px]")}>{L({ ko: "도구 둘러보기", en: "Browse tools" })}</Link>
-            </div>
-            <ul className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-sm text-fg-muted">
-              {[
-                { ko: "가입하면 500 크레딧", en: "500 credits on sign-up" },
-                { ko: "카드 등록 없음", en: "No card needed" },
-                { ko: "학생은 무제한", en: "Unlimited for students" },
-              ].map((t) => <li key={t.en} className="flex items-center gap-1.5 break-keep"><Check size={15} className="text-studio-success" aria-hidden /> {L(t)}</li>)}
-            </ul>
-          </motion.div>
-          <motion.div initial={{ opacity: 0, y: 24, filter: "blur(8px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}>
-            <StudioMock />
-          </motion.div>
-        </section>
-
-        {/* Demo video */}
-        <section className="mx-auto max-w-[1200px] px-4 py-16 md:px-6">
-          <motion.div {...reveal} className="max-w-2xl">
-            <p className="text-sm font-medium text-studio-cyan">{L({ ko: "직접 보세요", en: "See it in action" })}</p>
-            <h2 className="mt-3 font-display text-[clamp(1.9rem,3.6vw,2.8rem)] leading-tight font-bold tracking-[-0.02em] break-keep">{L({ ko: "브리프 한 줄에서 결과물까지", en: "From one brief to finished assets" })}</h2>
-          </motion.div>
-          <motion.div {...reveal} className="glass mt-10 overflow-hidden rounded-[28px] p-2">
-            <DemoVideo label={L({ ko: "해봇 AI 사용 흐름 데모 영상", en: "Haebot AI demo video" })} />
-          </motion.div>
-        </section>
-
-        {/* Differences */}
-        <section className="mx-auto max-w-[1200px] px-4 py-16 md:px-6">
-          <motion.div {...reveal} className="max-w-2xl">
-            <p className="text-sm font-medium text-studio-cyan">{L({ ko: "무엇이 다른가요", en: "What's different" })}</p>
-            <h2 className="mt-3 font-display text-[clamp(1.9rem,3.6vw,2.8rem)] leading-tight font-bold tracking-[-0.02em] break-keep">{L({ ko: "도구 모음이 아니라, 하나로 이어진 작업실", en: "Not a folder of tools — one connected workshop" })}</h2>
-          </motion.div>
-          <div className="mt-10 grid gap-4 md:grid-cols-3">
-            {[
-              { icon: Link2, title: { ko: "결과가 다음 도구로 이어져요", en: "Results flow to the next tool" }, body: { ko: "수익화 발굴에서 고른 방향이 트렌드 분석과 13주 캘린더로 그대로 넘어갑니다. 파일을 내보냈다 다시 올릴 일이 없어요.", en: "The direction you pick in Monetization Finder goes straight into Trend Analysis and the 13-week calendar. No exporting and re-uploading." } },
-              { icon: UserRound, title: { ko: "한 번 쓰면 모든 도구가 기억해요", en: "Write it once; every tool remembers" }, body: { ko: "업종, 고객, 말투를 비즈니스 프로필에 한 번만 적으면 모든 도구가 읽습니다. 매번 같은 설명을 반복하지 마세요.", en: "Industry, customers and voice go into one Business Profile that every tool reads. Stop repeating yourself." } },
-              { icon: ShieldCheck, title: { ko: "모르는 숫자는 모른다고 말해요", en: "Unknown numbers are labeled" }, body: { ko: "시장 규모와 통계에는 출처 링크가 붙고, 확인하지 못한 숫자에는 '추정' 배지가 붙습니다. 그럴듯한 가짜 숫자는 없어요.", en: "Market sizes and stats come with source links; anything unverified gets an estimate badge. No plausible-looking fakes." } },
-            ].map((d, i) => (
-              <motion.article key={d.title.en} {...reveal} transition={{ ...reveal.transition, delay: i * 0.08 }} className="glass glass-hover rounded-[28px] p-7">
-                <span className="studio-gradient-bg grid size-12 place-items-center rounded-2xl text-white"><d.icon size={21} aria-hidden /></span>
-                <h3 className="mt-6 text-xl leading-snug font-semibold break-keep">{L(d.title)}</h3>
-                <p className="mt-3 text-sm leading-relaxed break-keep text-fg-muted">{L(d.body)}</p>
-              </motion.article>
-            ))}
-          </div>
-        </section>
-
-        {/* Tools */}
-        <section id="tools" className="mx-auto max-w-[1200px] scroll-mt-24 px-4 py-16 md:px-6">
-          <motion.div {...reveal} className="flex flex-wrap items-end justify-between gap-6">
-            <div className="max-w-2xl">
-              <p className="text-sm font-medium text-studio-cyan">{L({ ko: `${tools.length}개 도구`, en: `${tools.length} tools` })}</p>
-              <h2 className="mt-3 font-display text-[clamp(1.9rem,3.6vw,2.8rem)] leading-tight font-bold tracking-[-0.02em] break-keep">{L({ ko: "도구마다 작업 화면이 달라요", en: "Each tool has its own workspace" })}</h2>
-              <p className="mt-3 text-base leading-relaxed break-keep text-fg-muted">{L({ ko: "발표자료는 슬라이드 수를 움직이면 미리보기가 바뀌고, 사업계획서는 숫자를 넣는 순간 손익분기가 계산돼요.", en: "Move the slide count and the deck preview changes; enter numbers and the business plan computes break-even." })}</p>
-            </div>
-            <Segmented label={L({ ko: "분야", en: "Area" })} value={cat} onChange={setCat} options={ORDER.map((c) => ({ value: c, label: L(CATEGORY_LABELS[c]), count: tools.filter((t) => t.category === c).length }))} />
-          </motion.div>
-          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <AnimatePresence mode="popLayout">
-              {tools.filter((t) => t.category === cat).map((t, i) => (
-                <motion.div key={t.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97 }} transition={{ duration: 0.35, delay: i * 0.04 }}>
-                  <Link href={`/tools/${toolSlug(t.id)}`} className="glass glass-hover flex h-full flex-col rounded-[24px] p-5">
-                    <span className="studio-gradient-bg grid size-11 place-items-center rounded-2xl text-white"><t.icon size={19} aria-hidden /></span>
-                    <span className="mt-5 font-semibold break-keep">{locale === "en" ? t.name_en : t.name_ko}</span>
-                    <span className="mt-1 text-sm leading-relaxed break-keep text-fg-muted">{L(catalogTool(t.slug ?? t.id)?.promise ?? { ko: t.summary, en: t.name_en })}</span>
-                  </Link>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
-        </section>
-
-        {/* Flows */}
-        <section id="flows" className="mx-auto max-w-[1200px] scroll-mt-24 px-4 py-16 md:px-6">
-          <motion.h2 {...reveal} className="max-w-2xl font-display text-[clamp(1.9rem,3.6vw,2.8rem)] leading-tight font-bold tracking-[-0.02em] break-keep">{L({ ko: "목표에서 시작하면, 순서는 저희가", en: "Start from the goal; we'll set the order" })}</motion.h2>
-          <div className="mt-10 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-            {WORKFLOWS.map((w, i) => (
-              <motion.div key={w.id} {...reveal} transition={{ ...reveal.transition, delay: (i % 3) * 0.06 }} className="glass rounded-[24px] p-6">
-                <p className="text-lg leading-snug font-semibold break-keep">{L(w.title)}</p>
-                <p className="mt-2 text-sm leading-relaxed break-keep text-fg-muted">{L(w.body)}</p>
-                <ol className="mt-5 space-y-2">
-                  {w.tools.map((id, k) => (
-                    <li key={id} className="flex items-center gap-2.5 text-sm">
-                      <span className="grid size-6 shrink-0 place-items-center rounded-full border border-hairline font-mono text-[10px] text-fg-muted">{k + 1}</span>
-                      <span className="break-keep">{name(id)}</span>
-                    </li>
-                  ))}
-                </ol>
-              </motion.div>
-            ))}
-          </div>
-        </section>
-
-        {/* Pricing */}
-        <section id="pricing" className="mx-auto max-w-[1200px] scroll-mt-24 px-4 py-16 md:px-6">
-          <motion.div {...reveal} className="max-w-2xl">
-            <p className="text-sm font-medium text-studio-cyan">{L({ ko: "요금", en: "Pricing" })}</p>
-            <h2 className="mt-3 font-display text-[clamp(1.9rem,3.6vw,2.8rem)] leading-tight font-bold tracking-[-0.02em] break-keep">{L({ ko: "모든 플랜에 모든 도구. 다른 건 크레딧뿐", en: "Every tool on every plan. Only credits differ" })}</h2>
-            <p className="mt-3 text-base leading-relaxed break-keep text-fg-muted">{L({ ko: "실패하거나 취소한 실행은 자동 환불되고, 내 API 키를 넣으면 크레딧이 들지 않아요.", en: "Failed or cancelled runs are refunded automatically, and with your own API key runs cost no credits." })}</p>
-          </motion.div>
-          <div className="mt-10 grid gap-4 md:grid-cols-3">
-            {PLANS.map((p, i) => (
-              <motion.article key={p.id} {...reveal} transition={{ ...reveal.transition, delay: i * 0.08 }} className={cn("glass relative flex flex-col rounded-[28px] p-7", p.id === "student" && "ring-1 ring-studio-cyan/50")}>
-                {p.id === "student" ? <span className="studio-gradient-bg absolute -top-3 left-7 flex items-center gap-1.5 rounded-full px-3 py-1 text-2xs font-semibold text-white"><GraduationCap size={12} aria-hidden /> {L({ ko: "학생 추천", en: "For students" })}</span> : null}
-                <p className="font-semibold">{L(p.name)}</p>
-                <p className="mt-3 font-display text-4xl font-bold tracking-[-0.02em]">{L(p.price)}</p>
-                <p className="mt-1 text-2xs text-fg-subtle">{L(p.note)}</p>
-                <p className="mt-5 rounded-xl bg-surface-2/60 px-3 py-2 text-sm font-medium">{L(p.credits)}</p>
-                <ul className="mt-5 flex-1 space-y-2.5 text-sm text-fg-muted">
-                  {p.features.map((f) => <li key={f.en} className="flex gap-2 break-keep"><Check size={15} className="mt-0.5 shrink-0 text-studio-success" aria-hidden /> {L(f)}</li>)}
-                </ul>
-                <Link href={!signedIn ? "/auth" : p.id === "pro" ? "/account/membership/checkout" : p.id === "student" ? "/account/membership" : "/studio"} className={cn(p.id === "free" ? secondaryButton : primaryButton, "mt-7")}>{p.id === "student" ? (signedIn ? L({ ko: "학생 인증하기", en: "Verify as a student" }) : L({ ko: "가입 후 인증하기", en: "Sign up, then verify" })) : p.id === "pro" && signedIn ? L({ ko: "프로 시작하기", en: "Get Pro" }) : L({ ko: "시작하기", en: "Get started" })}</Link>
-              </motion.article>
-            ))}
-          </div>
-        </section>
-
-        {/* FAQ */}
-        <section id="faq" className="mx-auto max-w-[900px] scroll-mt-24 px-4 py-16 md:px-6">
-          <motion.h2 {...reveal} className="font-display text-[clamp(1.9rem,3.6vw,2.8rem)] leading-tight font-bold tracking-[-0.02em] break-keep">{L({ ko: "시작하기 전에 궁금한 것", en: "Before you start" })}</motion.h2>
-          <div className="glass mt-8 divide-y divide-hairline rounded-[28px]">
-            {FAQ.filter((f) => ["start", "credits", "sources", "account"].includes(f.category)).slice(0, 6).map((f) => (
-              <details key={f.q.en} className="smooth px-6 py-5">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium break-keep">{L(f.q)}<Plus size={16} className="smooth-plus shrink-0 text-fg-subtle" aria-hidden /></summary>
-                <div className="smooth-body"><div><p className="pt-3 text-sm leading-relaxed break-keep text-fg-muted">{L(f.a)}</p></div></div>
-              </details>
-            ))}
-          </div>
-          <p className="mt-4 text-sm text-fg-muted">{L({ ko: "더 있어요 →", en: "More →" })} <Link href="/help/faq" className="text-studio-cyan underline underline-offset-2">{L({ ko: "전체 질문 보기", en: "All questions" })}</Link></p>
-        </section>
-
-        {/* Final CTA */}
-        <section className="mx-auto max-w-[1200px] px-4 pt-8 pb-20 md:px-6">
-          <motion.div {...reveal} className="glass-strong relative overflow-hidden rounded-[36px] px-6 py-14 text-center md:px-12">
-            <div className="studio-gradient-bg absolute -top-24 left-1/2 size-72 -translate-x-1/2 rounded-full opacity-25 blur-3xl" aria-hidden />
-            <h2 className="relative mx-auto max-w-2xl font-display text-[clamp(1.9rem,4vw,3rem)] leading-tight font-bold tracking-[-0.02em] break-keep">{L({ ko: "오늘 쓰는 브리프 하나가 이번 달 캠페인이 됩니다", en: "Today's brief becomes this month's campaign" })}</h2>
-            <p className="relative mx-auto mt-4 max-w-lg text-base leading-relaxed break-keep text-fg-muted">{L({ ko: "구글 계정으로 바로 가입하고, 결과는 도구에 따라 30초~3분이면 나와요.", en: "Sign up with Google, and get results in 30 seconds to 3 minutes depending on the tool." })}</p>
-            <Link href={signedIn ? "/studio" : "/auth"} className={cn(primaryButton, "relative mt-8 h-12 px-7 text-[15px]")}>{signedIn ? L({ ko: "스튜디오로 가기", en: "Go to Studio" }) : L({ ko: "무료로 시작하기", en: "Start free" })} <ArrowRight size={16} aria-hidden /></Link>
-          </motion.div>
-        </section>
-      </main>
-
-      <footer className="border-t border-hairline px-4 py-10 md:px-6">
-        <div className="mx-auto flex max-w-[1200px] flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <p className="flex items-center gap-2 text-sm font-semibold"><BrandMark size={28} /> {L({ ko: "해봇 AI", en: "Haebot AI" })}</p>
-          <nav className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-fg-muted" aria-label={L({ ko: "바닥글", en: "Footer" })}>
-            {[
-              ["/tools", { ko: "도구", en: "Tools" }],
-              ["/use-cases", { ko: "활용 사례", en: "Use cases" }],
-              ["/help", { ko: "도움말", en: "Help" }],
-              ["/help/faq", { ko: "자주 묻는 질문", en: "FAQ" }],
-              ["/help/api-guide", { ko: "API 키 설명서", en: "API key manual" }],
-              ["/help/whats-new", { ko: "새로운 점", en: "What's new" }],
-              ["/status", { ko: "서비스 상태", en: "Status" }],
-              signedIn ? ["/account", { ko: "내 계정", en: "My account" }] : ["/auth", { ko: "로그인", en: "Sign in" }],
-            ].map(([href, label]) => <Link key={href as string} href={href as string} className="hover:text-fg">{L(label as { ko: string; en: string })}</Link>)}
-          </nav>
-        </div>
-        <div className="mx-auto mt-8 flex max-w-[1200px] flex-col gap-3 border-t border-hairline pt-6">
-          <nav className="flex flex-wrap gap-x-4 gap-y-1 text-xs" aria-label={L({ ko: "약관·정책", en: "Legal" })}>
-            <Link href="/legal/terms" className="text-fg-muted hover:text-fg">{L({ ko: "이용약관", en: "Terms" })}</Link>
-            <Link href="/legal/privacy" className="font-semibold text-fg hover:text-fg">{L({ ko: "개인정보 처리방침", en: "Privacy Policy" })}</Link>
-            <Link href="/legal/refund" className="text-fg-muted hover:text-fg">{L({ ko: "환불정책", en: "Refund Policy" })}</Link>
-            <Link href="/legal/cookies" className="text-fg-muted hover:text-fg">{L({ ko: "쿠키 정책", en: "Cookies" })}</Link>
-            <Link href="/legal/licenses" className="text-fg-muted hover:text-fg">{L({ ko: "라이선스", en: "Licenses" })}</Link>
-          </nav>
-          <BusinessInfo />
-          <p className="text-xs text-fg-subtle">© {new Date().getFullYear()} {L({ ko: "해봇 AI", en: "Haebot AI" })}</p>
-        </div>
-      </footer>
-    </div>
   );
 }
 
