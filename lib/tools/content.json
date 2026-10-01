@@ -3831,5 +3831,468 @@
       "ko": "결정: 목요일 매장 촬영 · 딸기 세트 18,000원 유지\n준호 — 사진작가 섭외 (마감: 미정)\n소라 — 배달앱 수수료 조사 (2026-10-13)\n열린 질문: 봄 메뉴 배달앱 입점 여부",
       "en": "Decided: shoot Thursday · strawberry set stays ₩18,000\nJunho — book photographer (due: unassigned)\nSora — delivery app fees (2026-10-13)\nOpen: list the spring menu on delivery apps?"
     }
+  },
+  "market-desk": {
+    "tagline": {
+      "ko": "확인된 사실과 가설을 나눠 보는 시장 조사",
+      "en": "Market research with facts and hypotheses kept apart"
+    },
+    "description": {
+      "ko": "알고 싶은 것과 내릴 결정을 적으면, 그 결정에 필요한 조사 질문을 세우고 질문마다 근거를 검색해 정리합니다. 근거마다 검색으로 확인한 것인지, 입력한 것인지, 가설인지 표시하고, 시장 규모는 계산 방법까지 보여 드려요.",
+      "en": "Tell us what you want to know and the decision it informs. We set the research questions and search for evidence for each, labelled as searched, provided or hypothesis — with market sizing that shows its method."
+    },
+    "features": [
+      {
+        "icon": "search",
+        "title": {
+          "ko": "질문별 근거",
+          "en": "Evidence per question"
+        },
+        "body": {
+          "ko": "결정에 필요한 질문마다 근거 블록이 붙습니다.",
+          "en": "Each question gets its own evidence blocks."
+        }
+      },
+      {
+        "icon": "shield-check",
+        "title": {
+          "ko": "사실과 가설 구분",
+          "en": "Facts vs hypotheses"
+        },
+        "body": {
+          "ko": "확인한 것과 추론한 것이 라벨로 나뉩니다.",
+          "en": "Verified and inferred findings are labelled apart."
+        }
+      },
+      {
+        "icon": "calendar-days",
+        "title": {
+          "ko": "다음에 확인할 것",
+          "en": "What to check next"
+        },
+        "body": {
+          "ko": "직접 확인할 일과 드는 비용·시간까지.",
+          "en": "Next checks with their cost and time."
+        }
+      }
+    ],
+    "presets": [
+      {
+        "title": {
+          "ko": "노견 방문 돌봄 수요",
+          "en": "Senior dog home care demand"
+        },
+        "tag": {
+          "ko": "반려동물",
+          "en": "Pets"
+        },
+        "values": {
+          "question": "서울에서 노령견 방문 돌봄 수요가 충분한지, 보호자들은 지금 얼마를 쓰는지",
+          "decision": "2개 구에서 시범 운영할지",
+          "market": "반려동물 돌봄 서비스",
+          "region": "서울",
+          "depth": "standard"
+        }
+      },
+      {
+        "title": {
+          "ko": "성인 취미 클래스 시장",
+          "en": "Adult hobby class market"
+        },
+        "tag": {
+          "ko": "교육",
+          "en": "Education"
+        },
+        "values": {
+          "question": "평일 저녁 성인 취미 클래스(도예, 베이킹) 시장이 얼마나 큰지",
+          "decision": "두 번째 공방을 열지",
+          "market": "성인 취미 클래스",
+          "region": "부산",
+          "depth": "quick"
+        }
+      }
+    ],
+    "steps": [
+      {
+        "ko": "알고 싶은 것과 내릴 결정을 적습니다.",
+        "en": "Enter the question and the decision."
+      },
+      {
+        "ko": "이미 아는 사실이 있으면 넣습니다.",
+        "en": "Add facts you already have."
+      },
+      {
+        "ko": "근거를 확인하고 다음에 확인할 일을 실행합니다.",
+        "en": "Review the evidence and run the next checks."
+      }
+    ],
+    "tips": [
+      {
+        "ko": "내릴 결정을 적으면 조사 질문이 훨씬 날카로워집니다.",
+        "en": "Stating the decision makes the questions sharper."
+      },
+      {
+        "ko": "이미 아는 숫자를 넣으면 '입력 내용'으로 구분해 표시해요.",
+        "en": "Numbers you add are labelled as your input."
+      }
+    ],
+    "faq": [
+      {
+        "q": {
+          "ko": "검색 결과를 믿어도 되나요?",
+          "en": "Can I trust the search results?"
+        },
+        "a": {
+          "ko": "출처와 신뢰도를 함께 표시합니다. 중요한 숫자는 출처를 직접 열어 확인하세요.",
+          "en": "Sources and confidence are shown with each finding. Open the source for key numbers."
+        }
+      }
+    ],
+    "sample": {
+      "ko": "q1 노령견 보호자가 지금 쓰는 돌봄 비용은? — 펫시터 1회 3~5만 원 (검색 근거, 보통)\n가정: 투약 가능한 돌봄 수요가 있다 — 일부 확인",
+      "en": "q1 What do owners spend on care now? — ₩30–50k per sitter visit (searched, medium)\nAssumption: demand exists for care with medication — partly verified"
+    }
+  },
+  "competitor-lens": {
+    "tagline": {
+      "ko": "경쟁사를 나란히, 우리가 설 자리까지",
+      "en": "Competitors side by side, and where you can stand apart"
+    },
+    "description": {
+      "ko": "우리 사업을 적으면 고객이 실제로 비교하는 경쟁사를 찾아 고르는 기준별 점수표, 포지셔닝 맵, 비어 있는 자리와 할 일을 정리합니다. 경쟁사 정보마다 검색으로 확인한 것인지 표시해요.",
+      "en": "Describe your business to get the competitors customers really compare you with, a scored matrix by buying criteria, a positioning map and the openings to take — each competitor fact labelled by source."
+    },
+    "features": [
+      {
+        "icon": "layers",
+        "title": {
+          "ko": "기준별 점수표",
+          "en": "Scored matrix"
+        },
+        "body": {
+          "ko": "고객이 고르는 기준으로 우리와 경쟁사를 1~5점으로.",
+          "en": "Us and competitors scored 1–5 on buying criteria."
+        }
+      },
+      {
+        "icon": "map-pin",
+        "title": {
+          "ko": "포지셔닝 맵",
+          "en": "Positioning map"
+        },
+        "body": {
+          "ko": "두 축 위에서 비어 있는 자리를 봅니다.",
+          "en": "See the open space on two axes."
+        }
+      },
+      {
+        "icon": "search",
+        "title": {
+          "ko": "검색으로 확인",
+          "en": "Checked by search"
+        },
+        "body": {
+          "ko": "가격·서비스는 확인된 것만 사실로 씁니다.",
+          "en": "Prices and services are stated only when found."
+        }
+      }
+    ],
+    "presets": [
+      {
+        "title": {
+          "ko": "성수동 필라테스",
+          "en": "Seongsu Pilates studio"
+        },
+        "tag": {
+          "ko": "오프라인",
+          "en": "Offline"
+        },
+        "values": {
+          "business": "성수역 근처 1:4 소그룹 필라테스 스튜디오, 월 8회 18만 원",
+          "criteria": [
+            "회당 가격",
+            "정원",
+            "예약 유연성",
+            "강사 경력"
+          ],
+          "region": "서울 성수동"
+        }
+      },
+      {
+        "title": {
+          "ko": "착즙 주스 구독",
+          "en": "Juice subscription"
+        },
+        "tag": {
+          "ko": "D2C",
+          "en": "D2C"
+        },
+        "values": {
+          "business": "새벽 배송 착즙 주스 정기구독",
+          "competitors": [
+            "마트 주스",
+            "대기업 주스 브랜드",
+            "카페 스무디"
+          ],
+          "region": "수도권"
+        }
+      }
+    ],
+    "steps": [
+      {
+        "ko": "우리 사업을 적습니다.",
+        "en": "Describe your business."
+      },
+      {
+        "ko": "비교할 경쟁사와 기준이 있으면 넣습니다.",
+        "en": "Add competitors and criteria if you have them."
+      },
+      {
+        "ko": "빈자리를 브랜드 DNA나 오퍼 설계소로 이어갑니다.",
+        "en": "Take the opening to Brand DNA or Offer Architect."
+      }
+    ],
+    "tips": [
+      {
+        "ko": "경쟁사를 비워 두면 검색으로 찾아 드려요.",
+        "en": "Leave competitors empty and we'll find them."
+      },
+      {
+        "ko": "고객이 실제로 묻는 기준(예: 주차, 예약)을 넣으면 비교가 현실적이에요.",
+        "en": "Criteria customers actually ask about make it realistic."
+      }
+    ],
+    "faq": [
+      {
+        "q": {
+          "ko": "경쟁사 가격이 틀리면요?",
+          "en": "What if a price is wrong?"
+        },
+        "a": {
+          "ko": "검색으로 확인한 것만 사실로 쓰고 출처를 붙입니다. 확인하지 못한 것은 '확인 필요'로 표시해요.",
+          "en": "Only searched facts are stated, with sources; the rest is marked to verify."
+        }
+      }
+    ],
+    "sample": {
+      "ko": "맵: 가격(낮음→높음) × 맞춤도(낮음→높음) — 우리: 중간 가격·높은 맞춤도\n빈자리: 퇴근 후 21시 수업을 하는 소그룹이 없음 (검색 근거)",
+      "en": "Map: price × personalisation — us: mid price, high personalisation\nOpening: no small-group classes at 9pm after work (searched)"
+    }
+  },
+  "persona-mapper": {
+    "tagline": {
+      "ko": "고객 한 사람을 팀 모두가 같은 모습으로",
+      "en": "One customer everyone on the team pictures the same way"
+    },
+    "description": {
+      "ko": "무엇을 파는지와 고객 자료(리뷰·인터뷰)가 있으면 넣어 주세요. 고객의 목표, 불편, 구매 계기, 망설임을 담은 페르소나와, 처음 알게 된 순간부터 추천하기까지의 여정과 기분을 한 장에 보여 드려요. 무엇이 자료 근거이고 무엇이 추론인지 따로 적습니다.",
+      "en": "Tell us what you sell and paste customer data if you have it. You'll get a persona — goals, frustrations, triggers, doubts — and their journey and mood from first hearing of you to recommending you, with evidence and assumptions noted apart."
+    },
+    "features": [
+      {
+        "icon": "user-round",
+        "title": {
+          "ko": "페르소나 카드",
+          "en": "Persona card"
+        },
+        "body": {
+          "ko": "목표·불편·계기·망설임을 한눈에.",
+          "en": "Goals, frustrations, triggers and doubts at a glance."
+        }
+      },
+      {
+        "icon": "layers",
+        "title": {
+          "ko": "여정과 기분 곡선",
+          "en": "Journey and mood curve"
+        },
+        "body": {
+          "ko": "어느 단계에서 기분이 가장 나쁜지 보입니다.",
+          "en": "See where the experience dips."
+        }
+      },
+      {
+        "icon": "shield-check",
+        "title": {
+          "ko": "근거와 추론 구분",
+          "en": "Evidence vs assumption"
+        },
+        "body": {
+          "ko": "고객 자료에서 온 것과 추론을 나눠 적습니다.",
+          "en": "What came from your data and what's assumed."
+        }
+      }
+    ],
+    "presets": [
+      {
+        "title": {
+          "ko": "동네 소아과",
+          "en": "Pediatric clinic"
+        },
+        "tag": {
+          "ko": "의료",
+          "en": "Healthcare"
+        },
+        "values": {
+          "business": "저녁 진료를 하는 동네 소아청소년과",
+          "customer_hint": "10세 이하 아이를 키우는 맞벌이 부모",
+          "count": "1"
+        }
+      },
+      {
+        "title": {
+          "ko": "외국인 한식 클래스",
+          "en": "Korean cooking for expats"
+        },
+        "tag": {
+          "ko": "교육",
+          "en": "Education"
+        },
+        "values": {
+          "business": "한국에 사는 외국인을 위한 온라인 한식 쿠킹 클래스",
+          "customer_hint": "20~30대 외국인 직장인",
+          "count": "2"
+        }
+      }
+    ],
+    "steps": [
+      {
+        "ko": "무엇을 파는지 적습니다.",
+        "en": "Describe what you sell."
+      },
+      {
+        "ko": "리뷰·인터뷰가 있으면 붙여 넣습니다.",
+        "en": "Paste reviews or interviews if you have them."
+      },
+      {
+        "ko": "기분이 떨어지는 단계를 개선하고 캠페인 플래너로 이어갑니다.",
+        "en": "Fix the low points and continue to Campaign Planner."
+      }
+    ],
+    "tips": [
+      {
+        "ko": "인사이트 마이너 결과에서 이어 오면 실제 고객 목소리로 만들어져요.",
+        "en": "Continue from Insight Miner to build it from real customer voices."
+      }
+    ],
+    "faq": [
+      {
+        "q": {
+          "ko": "가짜 고객 아닌가요?",
+          "en": "Isn't this a made-up customer?"
+        },
+        "a": {
+          "ko": "페르소나는 대표 고객을 묘사한 것이고, 어떤 부분이 자료 근거이고 어떤 부분이 추론인지 결과에 따로 적어 드려요.",
+          "en": "It's a representative portrait; the result notes which parts come from data and which are assumed."
+        }
+      }
+    ],
+    "sample": {
+      "ko": "서윤 엄마 (30대 후반, 맞벌이) — \"퇴근하고 가면 접수가 끝나 있어요\"\n여정: 고려 단계 기분 -1 (대기 시간 불안) → 결정 +1 (저녁 진료 확인)",
+      "en": "Seoyun's mum (late 30s, working) — \"By the time I finish work, registration has closed\"\nJourney: consider −1 (worried about waiting) → decide +1 (finds evening hours)"
+    }
+  },
+  "insight-miner": {
+    "tagline": {
+      "ko": "리뷰 속 반복되는 말, 건수와 원문으로",
+      "en": "What customers keep saying, with counts and real quotes"
+    },
+    "description": {
+      "ko": "리뷰·설문·인터뷰 텍스트를 붙여 넣으면 반복되는 주제를 묶어 건수와 긍정·부정 비율, 원문 그대로의 인용을 보여 드려요. 인용은 화면에서 붙여 넣은 원문과 대조해 실제로 있는 문장인지 표시합니다.",
+      "en": "Paste reviews, survey answers or interviews to get recurring themes with counts, sentiment and verbatim quotes. Each quote is checked against your pasted text and marked if it can't be found."
+    },
+    "features": [
+      {
+        "icon": "layers",
+        "title": {
+          "ko": "주제와 감성",
+          "en": "Themes and sentiment"
+        },
+        "body": {
+          "ko": "주제마다 언급 건수와 긍정·부정 비율.",
+          "en": "Mentions and sentiment split per theme."
+        }
+      },
+      {
+        "icon": "shield-check",
+        "title": {
+          "ko": "원문 대조",
+          "en": "Quotes checked"
+        },
+        "body": {
+          "ko": "인용이 실제로 원문에 있는지 화면에서 확인합니다.",
+          "en": "Each quote is matched against your text."
+        }
+      },
+      {
+        "icon": "zap",
+        "title": {
+          "ko": "바로 할 일",
+          "en": "What to do"
+        },
+        "body": {
+          "ko": "어떤 주제를 근거로 무엇을 고칠지와 노력 크기.",
+          "en": "What to change, based on which theme, and the effort."
+        }
+      }
+    ],
+    "presets": [
+      {
+        "title": {
+          "ko": "딸기 타르트 선물 리뷰",
+          "en": "Strawberry tart gift reviews"
+        },
+        "tag": {
+          "ko": "커머스",
+          "en": "E-commerce"
+        },
+        "values": {
+          "data": "★★★★★ 딸기가 진짜 싱싱해요. 선물했는데 다들 좋아했어요\n★★☆☆☆ 주문하고 5일 걸렸어요. 선물이라 날짜 맞추려고 했는데ㅠ\n★★★★☆ 맛은 최고인데 박스가 찌그러져서 왔어요\n★★★★★ 크림이 안 달아서 좋아요. 재구매합니다\n★★☆☆☆ 배송이 너무 늦어요. 아이스팩도 다 녹았고요\n★★★★★ 포장이 고급스러워서 선물용으로 딱이에요\n★★★☆☆ 맛있는데 가격이 좀 있어요. 작은 사이즈도 있었으면\n★★★★★ 생일 케이크로 주문했는데 문구 서비스 감동이에요\n★☆☆☆☆ 배송 날짜를 지정할 수 없어서 불편해요\n★★★★☆ 딸기 양이 많아요. 다음엔 1인용도 나오면 좋겠어요",
+          "source_type": "reviews",
+          "product": "딸기 타르트 선물 세트",
+          "question": "재구매를 막는 가장 큰 이유"
+        }
+      }
+    ],
+    "steps": [
+      {
+        "ko": "리뷰·설문·인터뷰 텍스트를 붙여 넣습니다.",
+        "en": "Paste reviews, survey answers or interviews."
+      },
+      {
+        "ko": "자료 종류와 알고 싶은 것을 고릅니다.",
+        "en": "Pick the data type and what to look for."
+      },
+      {
+        "ko": "주제와 인용을 확인하고 고칠 일을 정합니다.",
+        "en": "Review themes and quotes, then decide what to fix."
+      }
+    ],
+    "tips": [
+      {
+        "ko": "한 줄에 리뷰 하나씩 붙여 넣으면 건수가 정확해져요.",
+        "en": "One review per line gives accurate counts."
+      },
+      {
+        "ko": "스마트스토어 리뷰를 엑셀로 받아 리뷰 열만 복사해도 됩니다.",
+        "en": "You can copy just the review column from a Smart Store export."
+      }
+    ],
+    "faq": [
+      {
+        "q": {
+          "ko": "인용이 지어낸 말이면요?",
+          "en": "What if a quote is made up?"
+        },
+        "a": {
+          "ko": "화면에서 원문과 대조해 찾지 못한 인용에는 경고가 붙습니다.",
+          "en": "Quotes not found in your text are flagged on screen."
+        }
+      }
+    ],
+    "sample": {
+      "ko": "배송 지연 (불만 · 3건 · 부정 3) — \"주문하고 5일 걸렸어요\" ✓원문 확인\n포장 (칭찬 · 2건) — \"포장이 고급스러워서 선물용으로 딱이에요\" ✓원문 확인",
+      "en": "Slow delivery (complaint · 3 · negative 3) — \"It took 5 days\" ✓ found in text\nPackaging (praise · 2) — \"Premium packaging, perfect as a gift\" ✓ found"
+    }
   }
 }

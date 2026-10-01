@@ -53,7 +53,7 @@ export const hookLab: ToolManifest = {
     { kind: "text", id: "avoid", label: "피할 표현", max: 200 },
   ],
   usesProfile: ["brand_name", "industry", "target_customer", "tone"],
-  acceptsChainFrom: ["strategy", "brand-dna", "offer-architect"],
+  acceptsChainFrom: ["persona-mapper", "strategy", "brand-dna", "offer-architect"],
   outputRenderer: "cards",
   grounding: { requireSources: false, webSearch: false, estimateBadge: false },
   model: "gemini-3.1-pro-preview",

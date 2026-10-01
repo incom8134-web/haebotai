@@ -40,6 +40,10 @@ export const TOOL_CAPABILITIES: Record<string, ToolCapability> = {
   "content-transformer": { providers: ["google"], default: "google" },
   "sop-builder": { providers: ["google"], default: "google" },
   "meeting-action": { providers: ["google"], default: "google" },
+  "market-desk": { providers: ["google"], default: "google" },
+  "competitor-lens": { providers: ["google"], default: "google" },
+  "persona-mapper": { providers: ["google"], default: "google" },
+  "insight-miner": { providers: ["google"], default: "google" },
   money: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 2
   trend: { providers: ["google", "anthropic"], default: "google" }, // Stage 2 batch 4
   strategy: { providers: ["google", "anthropic"], default: "google" },

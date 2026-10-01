@@ -27,6 +27,10 @@ import hookLabSchema from "./hook-lab";
 import contentTransformerSchema from "./content-transformer";
 import sopBuilderSchema from "./sop-builder";
 import meetingActionSchema from "./meeting-action";
+import marketDeskSchema from "./market-desk";
+import competitorLensSchema from "./competitor-lens";
+import personaMapperSchema from "./persona-mapper";
+import insightMinerSchema from "./insight-miner";
 
 // Each tool's output schema (zod), kept out of lib/tools/registry so the
 // registry — imported by the app shell, Studio, tool pages and the ⌘K
@@ -43,6 +47,10 @@ const OUTPUT_SCHEMAS: Record<string, z.ZodType> = {
   "content-transformer": contentTransformerSchema,
   "sop-builder": sopBuilderSchema,
   "meeting-action": meetingActionSchema,
+  "market-desk": marketDeskSchema,
+  "competitor-lens": competitorLensSchema,
+  "persona-mapper": personaMapperSchema,
+  "insight-miner": insightMinerSchema,
   "blog": blogSchema,
   "brand-model": brandModelSchema,
   "business-plan": businessPlanSchema,

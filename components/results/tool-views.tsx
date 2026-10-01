@@ -12,6 +12,11 @@ import { HookBoard } from "./campaign/hook-board";
 import { SeoEditor } from "./campaign/seo-editor";
 import { GapMap } from "./discover/gap-map";
 import { ActionBoard } from "./operate/action-board";
+import { CompetitorMatrix } from "./research/competitor-matrix";
+import { InsightBoard } from "./research/insight-board";
+import { PersonaMap } from "./research/persona-map";
+import { ResearchDesk } from "./research/research-desk";
+import { TrendRadar } from "./research/trend-radar";
 import { DocCanvas } from "./operate/doc-canvas";
 import { OpsBoard } from "./operate/ops-board";
 import { ProposalBuilder } from "./operate/proposal-builder";
@@ -54,5 +59,11 @@ export const TOOL_VIEWS: Record<string, { match: (o: Record<string, unknown>) =>
   "business-plan": { match: (o) => Boolean(o.sections), View: DocCanvas },
   proposal: { match: (o) => typeof o.executive_summary === "string", View: ProposalBuilder },
   calendar: { match: (o) => has(o, "weeks"), View: OpsBoard },
+  "market-desk": { match: (o) => has(o, "questions"), View: ResearchDesk },
+  "competitor-lens": { match: (o) => has(o, "competitors"), View: CompetitorMatrix },
+  "persona-mapper": { match: (o) => has(o, "personas"), View: PersonaMap },
+  "insight-miner": { match: (o) => has(o, "themes"), View: InsightBoard },
+  // Trend runs from before signals carried an origin keep the plain report.
+  trend: { match: (o) => Array.isArray(o.signals) && (o.signals as { origin?: unknown }[]).some((s) => typeof s?.origin === "string"), View: TrendRadar },
   presentation: { match: (o) => has(o, "slides") && (o.slides as { headline?: unknown }[]).some((s) => typeof s?.headline === "string"), View: Storyboard },
 };

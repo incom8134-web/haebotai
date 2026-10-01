@@ -32,7 +32,7 @@ export const offerArchitect: ToolManifest = {
     },
   ],
   usesProfile: ["brand_name", "industry", "tone"],
-  acceptsChainFrom: ["idea-radar", "revenue-mapper"],
+  acceptsChainFrom: ["competitor-lens", "idea-radar", "revenue-mapper"],
   outputRenderer: "cards",
   grounding: { requireSources: false, webSearch: false, estimateBadge: false },
   model: "gemini-3.1-pro-preview",
