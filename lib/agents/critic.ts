@@ -44,7 +44,18 @@ export const CRITIC_SYSTEM = [
   "점수는 냉정하게 매기세요. 문제가 없으면 억지로 만들지 마세요.",
 ].join("\n");
 
-export function criticPrompt(opts: { toolName: string; intentText: string; requestText?: string; strategy: Strategy | null; draft: string; sameness?: string }): string {
+export function criticPrompt(opts: {
+  toolName: string;
+  intentText: string;
+  requestText?: string;
+  strategy: Strategy | null;
+  draft: string;
+  sameness?: string;
+  /** What the planner asked the critic to check hardest for this request. */
+  focus?: string[];
+  /** The obvious default the strategist named and rejected: the template detector's reference. */
+  avoidDefault?: { name: string; summary: string } | null;
+}): string {
   return [
     `도구: ${opts.toolName}`,
     "",
@@ -58,6 +69,13 @@ export function criticPrompt(opts: { toolName: string; intentText: string; reque
           ...opts.strategy.blueprint.map((b, i) => `${i + 1}. ${b.part} — ${b.purpose}`),
           "[완성 기준]",
           ...opts.strategy.rubric.map((r) => `- ${r}`),
+          "",
+        ]
+      : []),
+    ...(opts.focus?.length ? ["[이번 요청에서 특히 볼 것]", ...opts.focus.map((f) => `- ${f}`), ""] : []),
+    ...(opts.avoidDefault
+      ? [
+          `[템플릿 점검] 이 요청에 AI가 흔히 내놓는 뻔한 기본안은 '${opts.avoidDefault.name}'(${opts.avoidDefault.summary})이고, 전략은 이를 피하기로 했습니다. 초안의 구성·흐름·형식이 그 기본안이나 도구의 기본 목차를 닮았다면 type structure, severity high로 지적하고, 무엇을 어떻게 바꿀지 구체적으로 쓰세요.`,
           "",
         ]
       : []),
