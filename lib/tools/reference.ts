@@ -209,6 +209,17 @@ export const REFERENCE_MODES: Record<string, ReferenceMode[]> = {
   ],
   "content-transformer": [REFERENCE],
   "sop-builder": [REFERENCE, IMPROVE("매뉴얼")],
+  "market-desk": [REFERENCE],
+  "competitor-lens": [REFERENCE],
+  "persona-mapper": [REFERENCE],
+  "insight-miner": [
+    {
+      id: "data-file",
+      label: { ko: "리뷰·설문 파일", en: "Reviews or survey file" },
+      hint: { ko: "CSV·엑셀에서 복사한 텍스트나 문서 파일", en: "Text from a CSV/Excel export or a document" },
+      instruction: "참고 자료는 분석할 고객 리뷰·설문·인터뷰 원자료입니다. 입력 칸의 텍스트와 함께 모두 읽고, 인용은 이 자료에서 글자 그대로 가져오세요.",
+    },
+  ],
   "meeting-action": [
     {
       id: "transcript",

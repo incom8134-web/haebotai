@@ -12,6 +12,32 @@ const COMMON: Record<string, FieldEn> = {
 };
 
 const FIELDS_EN: Record<string, Record<string, FieldEn>> = {
+  "market-desk": {
+    question: { label: "What you want to know" },
+    decision: { label: "The decision this research informs" },
+    market: { label: "Market / industry" },
+    region: { label: "Region" },
+    known_facts: { label: "Facts and numbers you already have (optional)" },
+    depth: { label: "Depth", options: { quick: "Quick check", standard: "Standard", deep: "Deep" } },
+  },
+  "competitor-lens": {
+    business: { label: "Your business" },
+    competitors: { label: "Competitors to compare (optional — we'll find them)" },
+    criteria: { label: "Criteria (optional, e.g. price, delivery, reviews)" },
+    region: { label: "Region / market" },
+  },
+  "persona-mapper": {
+    business: { label: "What you sell" },
+    customer_hint: { label: "Your main customer, as you see them" },
+    customer_data: { label: "Reviews, interviews or enquiries (optional — used as evidence)" },
+    count: { label: "Personas", options: { "1": "1 (in depth)", "2": "2 (compare)" } },
+  },
+  "insight-miner": {
+    data: { label: "Reviews, survey answers or interview text" },
+    source_type: { label: "Type of data", options: { reviews: "Purchase reviews", survey: "Survey answers", interviews: "Interviews", cs: "Customer enquiries" } },
+    product: { label: "Product or service" },
+    question: { label: "What you especially want to find (optional)" },
+  },
   "sop-builder": {
     process: { label: "What the work is and how you do it now" },
     standard: { label: "What 'done well' looks like" },

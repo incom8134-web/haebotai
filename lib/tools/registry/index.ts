@@ -28,6 +28,10 @@ import { hookLab } from "./hook-lab";
 import { contentTransformer } from "./content-transformer";
 import { sopBuilder } from "./sop-builder";
 import { meetingAction } from "./meeting-action";
+import { marketDesk } from "./market-desk";
+import { competitorLens } from "./competitor-lens";
+import { personaMapper } from "./persona-mapper";
+import { insightMiner } from "./insight-miner";
 
 // HAEBOT_A_TOOLS_SPEC.md §3.1 / §4 — the tool registry. Every tool is a
 // manifest here, not a deployment; adding a tool means adding a file in
@@ -47,7 +51,7 @@ const withFreeRequest = (m: ToolManifest): ToolManifest =>
 // category, promise) comes from lib/tools/catalog.ts and is laid over
 // each engine here; the catalog's tools without an engine get a
 // "coming soon" manifest so every page can list and explain them.
-const ENGINES = [ideaRadar, revenueMapper, offerArchitect, marketGap, mvpBlueprint, brandDna, hookLab, contentTransformer, sopBuilder, meetingAction, money, trend, strategy, calendar, prompt, blog, copy, keyword, place, image, logo, brandModel, sangsepage, homepage, proposal, presentation, businessPlan, grant];
+const ENGINES = [ideaRadar, revenueMapper, offerArchitect, marketGap, mvpBlueprint, brandDna, hookLab, contentTransformer, sopBuilder, meetingAction, marketDesk, competitorLens, personaMapper, insightMiner, money, trend, strategy, calendar, prompt, blog, copy, keyword, place, image, logo, brandModel, sangsepage, homepage, proposal, presentation, businessPlan, grant];
 
 function withCatalog(m: ToolManifest): ToolManifest {
   const c = catalogTool(m.id);

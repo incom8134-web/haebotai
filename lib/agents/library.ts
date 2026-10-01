@@ -136,6 +136,43 @@ export const AGENT_GUIDES: Record<string, AgentGuide> = {
       { id: "client-recap", name: "고객 미팅 요약", when: "외부 고객·거래처와의 미팅", structure: "합의 사항 → 우리가 할 일 → 고객이 할 일 → 확인 필요 사항 → 보낼 요약 메시지" },
     ],
   },
+  "market-desk": {
+    objective: "결정에 필요한 질문에 답하되, 확인된 사실과 가설을 분명히 구분한 조사",
+    decide: ["결정에 정말 필요한 질문", "어디서 근거를 찾을지", "어떤 가정이 가장 위험한지"],
+    approaches: [
+      { id: "decision-back", name: "결정에서 거꾸로", when: "내릴 결정이 분명할 때", structure: "결정 → 필요한 질문 → 질문별 근거 → 결론과 남은 불확실성" },
+      { id: "size-first", name: "시장 크기 먼저", when: "들어갈 만한 시장인지가 핵심일 때", structure: "시장 정의 → 크기 추정(방법 공개) → 성장 → 경쟁 → 다음 확인" },
+      { id: "customer-first", name: "고객 먼저", when: "누가 왜 사는지가 불확실할 때", structure: "고객 정의 → 구매 이유 근거 → 지불 의향 근거 → 시장 크기 → 다음 확인" },
+      { id: "risk-first", name: "위험 가정 먼저", when: "이미 하려는 사업의 약점을 확인할 때", structure: "핵심 가정 → 가장 위험한 가정의 근거 → 반대 근거 → 결론" },
+    ],
+  },
+  "competitor-lens": {
+    objective: "고객이 실제로 비교하는 기준으로 경쟁사를 나란히 놓고, 우리가 설 빈자리를 찾는 비교",
+    decide: ["비교할 경쟁사", "고객이 고르는 기준", "포지셔닝 맵의 두 축"],
+    approaches: [
+      { id: "customer-criteria", name: "고객 기준 비교", when: "고객이 비교하는 기준이 분명할 때", structure: "기준 정의 → 점수 매트릭스 → 맵 → 빈자리" },
+      { id: "price-value", name: "가격 대비 가치", when: "가격이 주된 비교 요소일 때", structure: "가격대별 배치 → 가치 요소 비교 → 가격·가치 맵 → 빈자리" },
+      { id: "experience", name: "경험 비교", when: "제품보다 경험(예약, 배송, 응대)이 차이일 때", structure: "고객 여정 단계별 비교 → 매트릭스 → 맵 → 빈자리" },
+    ],
+  },
+  "persona-mapper": {
+    objective: "팀이 같은 고객 한 사람을 떠올리게 하는, 근거와 추론이 구분된 페르소나와 여정",
+    decide: ["누구를 페르소나로 삼을지", "가장 중요한 구매 계기와 망설임", "여정에서 가장 나쁜 순간"],
+    approaches: [
+      { id: "data-led", name: "자료에서", when: "고객 리뷰·인터뷰가 있을 때", structure: "자료의 반복 패턴 → 페르소나 → 여정의 감정 → 기회" },
+      { id: "job-led", name: "고객의 일에서", when: "자료가 적고 고객이 해결하려는 일이 분명할 때", structure: "해결하려는 일 → 상황 → 페르소나 → 여정 → 기회" },
+      { id: "contrast", name: "두 고객 비교", when: "고객층이 둘로 갈릴 때", structure: "두 페르소나의 차이 → 각자의 여정 → 공통 기회와 다른 메시지" },
+    ],
+  },
+  "insight-miner": {
+    objective: "고객이 실제로 반복해 말하는 것을 건수와 원문 인용으로 보여 주고, 무엇을 할지로 바꾼 분석",
+    decide: ["주제를 묶는 기준", "가장 큰 불만과 칭찬", "가장 먼저 할 개선"],
+    approaches: [
+      { id: "pain-ranking", name: "불만 순위", when: "개선할 점을 찾을 때", structure: "불만 주제 순위 → 원문 인용 → 원인 추정 → 개선 과제" },
+      { id: "praise-to-message", name: "칭찬을 메시지로", when: "마케팅 메시지를 찾을 때", structure: "칭찬 주제 → 고객이 쓴 표현 → 광고·상세페이지 문구 제안" },
+      { id: "request-roadmap", name: "요청을 로드맵으로", when: "새 기능·메뉴를 정할 때", structure: "요청 주제와 건수 → 영향과 노력 → 우선순위" },
+    ],
+  },
   homepage: {
     objective: "방문자가 이 사업을 신뢰하고 한 가지 행동(예약·문의·구매·방문)으로 이어지는, 이 사업에만 맞는 사이트",
     decide: [

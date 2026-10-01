@@ -64,3 +64,14 @@ test("meeting board hands its actions to the ops plan and SOP", () => {
   assert.deepEqual(cal.milestones, ["목요일 촬영"]);
   assert.match(String(seedFromChain("sop-builder", "meeting-action", m).process), /작가 섭외 \(준호\)/);
 });
+
+test("research hand-offs carry real evidence forward", () => {
+  const insights = { themes: [{ quotes: ["주문하고 5일 걸렸어요"] }, { quotes: ["포장이 고급스러워요"] }] };
+  assert.equal(seedFromChain("persona-mapper", "insight-miner", insights).customer_data, "- 주문하고 5일 걸렸어요\n- 포장이 고급스러워요");
+  const gap = { market_summary: "노견 돌봄", gaps: [{ title: "투약 돌봄", opportunity: "방문 투약" }], solutions: [{ name: "펫호텔" }] };
+  assert.match(String(seedFromChain("market-desk", "market-gap", gap).question), /투약 돌봄/);
+  assert.deepEqual(seedFromChain("competitor-lens", "market-gap", gap).competitors, ["펫호텔"]);
+  const persona = { personas: [{ name: "서윤 엄마", age_range: "30대", situation: "맞벌이", quote: "퇴근하면 접수 끝", frustrations: ["대기"] }] };
+  assert.equal(seedFromChain("hook-lab", "persona-mapper", persona).topic, "대기");
+  assert.equal(seedFromChain("strategy", "persona-mapper", persona).customer_voice, "퇴근하면 접수 끝");
+});

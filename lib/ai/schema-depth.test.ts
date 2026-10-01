@@ -11,6 +11,10 @@ import hookLab from "../tools/schemas/hook-lab.ts";
 import contentTransformer from "../tools/schemas/content-transformer.ts";
 import sopBuilder from "../tools/schemas/sop-builder.ts";
 import meetingAction from "../tools/schemas/meeting-action.ts";
+import marketDesk from "../tools/schemas/market-desk.ts";
+import competitorLens from "../tools/schemas/competitor-lens.ts";
+import personaMapper from "../tools/schemas/persona-mapper.ts";
+import insightMiner from "../tools/schemas/insight-miner.ts";
 
 // Gemini's structured output answers 400 "invalid argument" to schemas it
 // finds too complex. The limit is on overall complexity and isn't
@@ -41,7 +45,7 @@ function arrayDepth(node: unknown): number {
   return here + deepest;
 }
 
-const NEW_TOOLS = { "idea-radar": ideaRadar, "revenue-mapper": revenueMapper, "offer-architect": offerArchitect, "market-gap": marketGap, "mvp-blueprint": mvpBlueprint, "brand-dna": brandDna, "hook-lab": hookLab, "content-transformer": contentTransformer, "sop-builder": sopBuilder, "meeting-action": meetingAction };
+const NEW_TOOLS = { "idea-radar": ideaRadar, "revenue-mapper": revenueMapper, "offer-architect": offerArchitect, "market-gap": marketGap, "mvp-blueprint": mvpBlueprint, "brand-dna": brandDna, "hook-lab": hookLab, "content-transformer": contentTransformer, "sop-builder": sopBuilder, "meeting-action": meetingAction, "market-desk": marketDesk, "competitor-lens": competitorLens, "persona-mapper": personaMapper, "insight-miner": insightMiner };
 
 test("new tool schemas stay inside what Gemini accepts", () => {
   for (const [id, schema] of Object.entries(NEW_TOOLS)) {

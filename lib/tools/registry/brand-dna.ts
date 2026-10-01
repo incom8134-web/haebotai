@@ -49,7 +49,7 @@ export const brandDna: ToolManifest = {
     { kind: "text", id: "avoid", label: "절대 되고 싶지 않은 모습", max: 200 },
   ],
   usesProfile: ["brand_name", "industry", "target_customer", "tone", "brand_colors"],
-  acceptsChainFrom: ["idea-radar", "offer-architect"],
+  acceptsChainFrom: ["competitor-lens", "idea-radar", "offer-architect"],
   outputRenderer: "cards",
   grounding: { requireSources: false, webSearch: false, estimateBadge: false },
   model: "gemini-3.1-pro-preview",

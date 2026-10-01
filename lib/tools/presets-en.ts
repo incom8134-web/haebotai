@@ -4,6 +4,21 @@
 // languages. Used when the UI is in English.
 
 export const PRESET_VALUES_EN: Record<string, Record<number, Record<string, string | string[]>>> = {
+  "market-desk": {
+    0: { question: "Is there enough demand for home-visit care for senior dogs in Seoul, and what do owners pay now?", decision: "Whether to launch a pilot in two districts", market: "Pet care services", region: "Seoul" },
+    1: { question: "How big is the market for adult hobby classes (pottery, baking) on weekday evenings?", decision: "Whether to open a second studio", market: "Adult hobby classes", region: "Busan" },
+  },
+  "competitor-lens": {
+    0: { business: "A 1:4 small-group Pilates studio near Seongsu station, ₩180,000/month for 8 classes", criteria: ["Price per class", "Class size", "Booking flexibility", "Instructor experience"], region: "Seongsu-dong, Seoul" },
+    1: { business: "A cold-pressed juice subscription delivered at dawn", competitors: ["Supermarket juice", "Big juice brands", "Café smoothies"], region: "Seoul metro area" },
+  },
+  "persona-mapper": {
+    0: { business: "A neighbourhood pediatric clinic with evening hours", customer_hint: "Working parents with children under 10" },
+    1: { business: "Online Korean cooking classes for foreigners living in Korea", customer_hint: "Expats in their 20s–30s" },
+  },
+  "insight-miner": {
+    0: { data: "★★★★★ The strawberries are so fresh. Everyone loved the gift\n★★☆☆☆ It took 5 days after ordering. I needed it for a date ㅠ\n★★★★☆ Tastes great but the box arrived dented\n★★★★★ The cream isn't too sweet. Buying again\n★★☆☆☆ Delivery is too slow. The ice packs had melted\n★★★★★ Premium packaging, perfect as a gift\n★★★☆☆ Tasty but a bit pricey. Wish there was a small size\n★★★★★ Ordered as a birthday cake — the lettering service was lovely\n★☆☆☆☆ You can't choose a delivery date\n★★★★☆ Lots of strawberries. A single-serve size next time please", product: "Strawberry tart gift box" },
+  },
   "sop-builder": {
     0: { process: "Smart Store order to shipping: check new orders at 9am, pack items, print labels on the courier site, enter tracking numbers in Smart Store, ship at 4pm pickup. Part-timer packs, owner handles CS.", standard: "Same-day shipping for orders before 2pm, zero wrong items", roles: ["Owner", "Part-timer"], tools: ["Smart Store", "Courier site", "KakaoTalk"], problems: "Wrong colour options sent, tracking numbers not entered so customers ask" },
     1: { process: "Café opening: unlock at 7:30, machine warm-up, calibrate espresso, check pastries delivery, stock the counter, open POS at 8.", roles: ["Morning barista"], tools: ["POS", "Espresso machine"], problems: "Espresso tastes sour on busy mornings because calibration is skipped" },
