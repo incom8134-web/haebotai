@@ -13,6 +13,7 @@
 import type { BusinessProfile } from "@/lib/tools/types";
 import type { Source } from "@/lib/tools/registry/shared";
 import type { ProviderId, TokenUsage } from "@/lib/ai/types";
+import type { Plan } from "./plan.ts";
 
 export type Bi = { ko: string; en: string };
 
@@ -105,7 +106,9 @@ export interface AgentRunState {
   /** A strategy the member asked for ("다른 전략으로 다시 만들기"). */
   strategyOverride: string | null;
   strategy: Strategy | null;
-  /** Stage bookkeeping. */
+  /** The workflow made for this run (lib/agents/plan.ts); absent → the tool's default plan. */
+  plan?: Plan | null;
+  /** Stage bookkeeping: `stage` is the current plan step's id. */
   stage: string;
   stagesDone: string[];
   /** Times a stage was restarted in a fresh invocation after running out of time. */

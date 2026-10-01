@@ -16,8 +16,8 @@ import { runMeta } from "./meta";
 import type { AgentRunState, StageContext } from "./types";
 
 // The orchestrator (docs/ai-architecture-proposal.md §3.1). One call works
-// on a run for the rest of this function invocation: it runs the agent's
-// stages in order, saving the state after each, and when the next stage
+// on a run for the rest of this function invocation: it runs the run's
+// plan (lib/agents/plan.ts) step by step, saving the state after each, and when the next stage
 // won't fit in the time left it saves and hands off to a fresh
 // invocation (lib/agents/handoff.ts). A run therefore isn't bound by one
 // function's time limit — each stage is.
@@ -92,7 +92,8 @@ export async function runAgent(runId: string, startedAt: number): Promise<void> 
       if (ref.ok && ref.bundle) input = { ...values, _reference: ref.bundle };
     }
 
-    const spec = agentFor(manifest, state.provider);
+    // Re-read every step: a planning step may replace the run's plan.
+    const spec = () => agentFor(manifest, state.provider, state);
     const ctx: StageContext = {
       state,
       manifest,
@@ -114,10 +115,10 @@ export async function runAgent(runId: string, startedAt: number): Promise<void> 
     let ranHere = 0;
     for (;;) {
       if (state.stage === "finalize") {
-        await finish(state, spec.finalize(state), values);
+        await finish(state, spec().finalize(state), values);
         return;
       }
-      const stage = spec.stages[state.stage];
+      const stage = spec().stages[state.stage];
       if (!stage) {
         await failRun(db, runId, "error", "실행 단계를 찾지 못했습니다. 크레딧은 돌려드렸어요.");
         await cleanup(db, state);
