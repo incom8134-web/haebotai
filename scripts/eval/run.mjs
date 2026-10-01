@@ -8,18 +8,27 @@
 // into results, invented-looking facts left unmarked).
 //
 //   EVAL_BASE=http://localhost:3000 EVAL_COOKIE='sb-…-auth-token=…' node scripts/eval/run.mjs [case…]
+//   node scripts/eval/run.mjs --offline [dir]   # re-score saved results, no runs
+//
+// "shape" is the result's own skeleton similarity (lib/agents/skeleton.ts,
+// docs/ai-architecture-v2.md §7 phase 0): 1.00 means two contrasting
+// requests came back as the same template. "plan" compares the
+// strategy's blueprint words, as before.
 //
 // Use a throwaway test account, never a real member's session. Runs spend
 // real model calls and the account's credits.
 
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { readFileSync, readdirSync, writeFileSync, mkdirSync } from "node:fs";
+import { skeletonOf, skeletonSimilarity, skeletonSignature } from "../../lib/agents/skeleton.ts";
 
+const args = process.argv.slice(2);
+const OFFLINE = args[0] === "--offline";
 const BASE = process.env.EVAL_BASE ?? "http://localhost:3000";
 const COOKIE = process.env.EVAL_COOKIE;
-if (!COOKIE) throw new Error("EVAL_COOKIE is required (a throwaway test account's auth cookie)");
+if (!COOKIE && !OFFLINE) throw new Error("EVAL_COOKIE is required (a throwaway test account's auth cookie)");
 const golden = JSON.parse(readFileSync(new URL("./golden.json", import.meta.url), "utf8"));
-const keys = process.argv.slice(2).length ? process.argv.slice(2) : Object.keys(golden);
-const OUT = new URL("./results/", import.meta.url);
+const keys = !OFFLINE && args.length ? args : Object.keys(golden);
+const OUT = OFFLINE && args[1] ? new URL(`file://${args[1].replace(/\/?$/, "/")}`) : new URL("./results/", import.meta.url);
 mkdirSync(OUT, { recursive: true });
 
 const headers = { Cookie: COOKIE, "Content-Type": "application/json" };
@@ -70,6 +79,7 @@ async function runCase(key) {
     strategy: agent.strategy?.chosen,
     considered: agent.strategy?.considered?.map((x) => `${x.name} (${x.fit})`),
     blueprint: agent.strategy?.blueprint ?? [],
+    shape: skeletonSignature(skeletonOf(output)),
     scores: agent.review?.scores ?? [],
     handoffs: steps.filter((s) => s.kind === "handoff").length,
     guards: {
@@ -89,18 +99,43 @@ const jaccard = (a, b) => {
   return A.size + B.size - i ? i / (A.size + B.size - i) : 0;
 };
 
+/** A saved result file, re-read for offline scoring. */
+function loadSaved(file) {
+  const r = JSON.parse(readFileSync(new URL(file, OUT), "utf8"));
+  const output = r.output ?? r.final?.output ?? {};
+  return { ...r, key: r.key ?? file.replace(/\.json$/, ""), tool: r.tool ?? golden[r.key]?.tool, output, blueprint: r.blueprint ?? output.agent?.strategy?.blueprint ?? [], shape: skeletonSignature(skeletonOf(output)) };
+}
+
 const results = [];
-for (let i = 0; i < keys.length; i += 3) results.push(...(await Promise.all(keys.slice(i, i + 3).map(runCase))));
+if (OFFLINE) {
+  for (const f of readdirSync(OUT).filter((f) => f.endsWith(".json") && f !== "summary.json" && f !== "sameness.json")) results.push(loadSaved(f));
+} else {
+  for (let i = 0; i < keys.length; i += 3) results.push(...(await Promise.all(keys.slice(i, i + 3).map(runCase))));
+}
+const outputs = Object.fromEntries(
+  results.map((r) => [r.key, r.output ?? null]),
+);
 console.table(results.map((r) => ({ case: r.key, status: r.status ?? r.error, s: r.seconds, credits: r.credits, strategy: r.strategy, scores: r.scores?.join("→"), asked: r.questions?.length, handoffs: r.handoffs, "해봇": r.guards?.serviceName })));
 
-// Structural diversity: same-tool pairs should not share a blueprint.
+// Structural diversity: contrasting same-tool requests should not come
+// back as the same template. "shape" is the result itself; "plan" the
+// strategy's blueprint.
 const byTool = {};
-for (const r of results) if (r.blueprint?.length) (byTool[r.tool] ??= []).push(r);
+for (const r of results) if (outputs[r.key]) (byTool[r.tool] ??= []).push(r);
+const pairs = [];
 for (const [tool, rs] of Object.entries(byTool)) {
   for (let i = 0; i < rs.length; i++) for (let j = i + 1; j < rs.length; j++) {
-    console.log(`${tool}: ${rs[i].key} vs ${rs[j].key} — structure similarity ${jaccard(rs[i].blueprint, rs[j].blueprint).toFixed(2)}, strategies "${rs[i].strategy}" / "${rs[j].strategy}"`);
+    const shape = skeletonSimilarity(skeletonOf(outputs[rs[i].key]), skeletonOf(outputs[rs[j].key]));
+    const plan = rs[i].blueprint?.length && rs[j].blueprint?.length ? Number(jaccard(rs[i].blueprint, rs[j].blueprint).toFixed(2)) : null;
+    pairs.push({ tool, a: rs[i].key, b: rs[j].key, shape, plan });
+    console.log(`${tool}: ${rs[i].key} vs ${rs[j].key} — shape ${shape.toFixed(2)}, plan ${plan ?? "–"}, strategies "${rs[i].strategy ?? "–"}" / "${rs[j].strategy ?? "–"}"`);
   }
+}
+if (pairs.length) {
+  const mean = pairs.reduce((s, p) => s + p.shape, 0) / pairs.length;
+  console.log(`SAMENESS (mean shape similarity of same-tool pairs, lower is better): ${mean.toFixed(2)} over ${pairs.length} pairs`);
+  writeFileSync(new URL("sameness.json", OUT), JSON.stringify({ mean: Number(mean.toFixed(3)), pairs }, null, 1));
 }
 const leaks = results.filter((r) => r.guards?.serviceName);
 if (leaks.length) console.log("GUARD: service name in results:", leaks.map((r) => r.key).join(", "));
-writeFileSync(new URL("summary.json", OUT), JSON.stringify(results, null, 1));
+if (!OFFLINE) writeFileSync(new URL("summary.json", OUT), JSON.stringify(results, null, 1));

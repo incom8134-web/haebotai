@@ -1,0 +1,61 @@
+{
+ "mean": 0.545,
+ "pairs": [
+  {
+   "tool": "business-plan",
+   "a": "bp_loan",
+   "b": "bp_vc",
+   "shape": 0.34,
+   "plan": 0.02
+  },
+  {
+   "tool": "copy",
+   "a": "copy_funeral",
+   "b": "copy_truck",
+   "shape": 0.57,
+   "plan": 0.24
+  },
+  {
+   "tool": "copy",
+   "a": "copy_funeral",
+   "b": "truck_other",
+   "shape": 0.52,
+   "plan": 0
+  },
+  {
+   "tool": "copy",
+   "a": "copy_truck",
+   "b": "truck_other",
+   "shape": 0.67,
+   "plan": 0
+  },
+  {
+   "tool": "presentation",
+   "a": "deck_client",
+   "b": "deck_teach",
+   "shape": 0.7,
+   "plan": 0.03
+  },
+  {
+   "tool": "homepage",
+   "a": "hp_club",
+   "b": "hp_law",
+   "shape": 0.5,
+   "plan": 0.04
+  },
+  {
+   "tool": "homepage",
+   "a": "hp_club",
+   "b": "vague_hp",
+   "shape": 0.5,
+   "plan": 0
+  },
+  {
+   "tool": "homepage",
+   "a": "hp_law",
+   "b": "vague_hp",
+   "shape": 0.56,
+   "plan": 0.03
+  }
+ ]
+}
