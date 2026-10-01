@@ -75,3 +75,33 @@ test("research hand-offs carry real evidence forward", () => {
   assert.equal(seedFromChain("hook-lab", "persona-mapper", persona).topic, "대기");
   assert.equal(seedFromChain("strategy", "persona-mapper", persona).customer_voice, "퇴근하면 접수 끝");
 });
+
+test("brand board → hook lab fills the required topic", () => {
+  const seed = seedFromChain("hook-lab", "brand-dna", {
+    essence: { promise: "1주일 안에 아이가 스스로 질문해요", one_line: "AI 학습 코칭" },
+    messaging: { key_messages: ["실전 프롬프트 템플릿을 드려요", "둘째"] },
+    positioning: { for_whom: "초등 학부모" },
+  });
+  assert.equal(seed.topic, "1주일 안에 아이가 스스로 질문해요\n실전 프롬프트 템플릿을 드려요");
+  assert.equal(seed.audience, "초등 학부모");
+});
+
+test("a business plan carries into a pitch deck and a proposal", () => {
+  const plan = { title: "AI 학습 코칭", one_liner: "학부모 코칭", plan_type: "정부지원사업 심사용 사업계획서", sections: { problem: "불안", solution: "코칭" }, revenue_streams: [{ name: "워크숍" }] };
+  const deck = seedFromChain("presentation", "business-plan", plan);
+  assert.match(String(deck.brief), /AI 학습 코칭[\s\S]*문제: 불안[\s\S]*수익: 워크숍/);
+  assert.equal(deck.audience, "정부지원사업 심사위원");
+  const prop = seedFromChain("proposal", "business-plan", plan);
+  assert.ok(prop.target && prop.content);
+});
+
+test("market research carries into competitor and persona tools", () => {
+  const desk = { decision: "B2B로 시작할지", summary: "결합형 패키지가 타당" };
+  assert.equal(seedFromChain("competitor-lens", "market-desk", desk).business, "B2B로 시작할지\n결합형 패키지가 타당");
+  assert.equal(seedFromChain("persona-mapper", "market-desk", desk).business, "B2B로 시작할지\n결합형 패키지가 타당");
+});
+
+test("a trend radar idea carries into a business plan", () => {
+  const seed = seedFromChain("business-plan", "trend", { ideas: [{ name: "AI 코칭", one_liner: "학부모용", target_customer: "초등 학부모" }] });
+  assert.equal(seed.item, "AI 코칭\n학부모용\n대상: 초등 학부모");
+});
