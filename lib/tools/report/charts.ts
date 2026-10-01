@@ -619,13 +619,41 @@ const RENDER: { [K in ChartSpec["kind"]]: (c: Ctx, s: Extract<ChartSpec, { kind:
   funnel,
 };
 
+const list = (xs: string[]) => (xs.length > 6 ? `${xs.slice(0, 6).join(", ")} 외 ${xs.length - 6}개` : xs.join(", "));
+
+/** A short text alternative for a chart: its kind and what it compares. */
+export function describeChart(spec: ChartSpec): string {
+  switch (spec.kind) {
+    case "bar":
+      return `막대 그래프: ${list(spec.categories)}${spec.series.length > 1 ? ` (${spec.series.map((x) => x.name).join(", ")})` : ""}`;
+    case "line":
+      return `선 그래프: ${list(spec.series.map((x) => x.name))} · ${spec.categories[0] ?? ""}–${spec.categories.at(-1) ?? ""}`;
+    case "donut":
+      return `비율 그래프: ${list(spec.slices.map((x) => `${x.label} ${x.value}${spec.unit ?? ""}`))}`;
+    case "radar":
+      return `레이더 차트: ${list(spec.axes)}`;
+    case "scatter":
+      return `포지셔닝 맵 (${spec.xLabel} × ${spec.yLabel}): ${list(spec.points.map((x) => x.label))}`;
+    case "gantt":
+      return `일정표: ${list(spec.rows.map((x) => x.label))}`;
+    case "heatmap":
+      return `히트맵: ${list(spec.rows)} × ${list(spec.cols)}`;
+    case "gauge":
+      return `게이지: ${spec.label} ${spec.value}/${spec.max}`;
+    case "circles":
+      return `지표: ${list(spec.items.map((x) => `${x.label} ${x.value}`))}`;
+    case "funnel":
+      return `퍼널: ${list(spec.stages.map((x) => `${x.label} ${x.display ?? x.value}`))}`;
+  }
+}
+
 /** The chart as a standalone SVG string, laid out for `width` px. Empty string when there's nothing to draw. */
-export function renderChart(spec: ChartSpec, opts: { width: number; palette: string[]; theme: ChartTheme; fontSize?: number; background?: string }): string {
+export function renderChart(spec: ChartSpec, opts: { width: number; palette: string[]; theme: ChartTheme; fontSize?: number; background?: string; title?: string }): string {
   const c: Ctx = { w: opts.width, t: opts.theme, p: opts.palette.length ? opts.palette : ["#4D7CFE"], fs: opts.fontSize ?? (opts.width < 440 ? 12 : 13) };
   const draw = RENDER[spec.kind] as (c: Ctx, s: ChartSpec) => { svg: string; h: number };
   const { svg, h } = draw(c, spec);
   if (!svg) return "";
   const height = Math.ceil(h + 6);
   const bg = opts.background ? `<rect x="-4" y="-4" width="${opts.width + 8}" height="${height + 4}" style="fill:${opts.background}"/>` : "";
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-4 -4 ${opts.width + 8} ${height + 4}" width="${opts.width + 8}" height="${height + 4}" role="img">${bg}${svg}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-4 -4 ${opts.width + 8} ${height + 4}" width="${opts.width + 8}" height="${height + 4}" role="img"><title>${esc(opts.title || describeChart(spec))}</title>${bg}${svg}</svg>`;
 }

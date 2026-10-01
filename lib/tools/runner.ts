@@ -23,7 +23,22 @@ export function buildInputSchema(fields: ToolField[]) {
       s = z.string();
     }
     const required = "required" in f && f.required;
+    // A required text field must say something — "" or spaces don't count.
+    if (required && s instanceof z.ZodString) s = s.refine((v) => v.trim().length > 0, { message: "empty" });
     shape[f.id] = required ? s : s.optional();
   }
   return z.object(shape);
+}
+
+/** A member-facing message for failed input validation, naming the fields by their labels. */
+export function inputErrorMessage(fields: ToolField[], issues: readonly { path: readonly PropertyKey[]; code: string; message: string }[]): string {
+  const parts = issues.slice(0, 3).map((i) => {
+    const field = fields.find((f) => f.id === i.path[0]);
+    const label = field?.label ?? String(i.path[0] ?? "입력");
+    if (i.code === "invalid_type" || i.message === "empty") return `'${label}' 칸을 채워 주세요`;
+    if (i.code === "too_big") return `'${label}' 값이 너무 커요`;
+    if (i.code === "too_small") return `'${label}' 값이 너무 작아요`;
+    return `'${label}' 값을 확인해 주세요`;
+  });
+  return parts.join(" · ");
 }

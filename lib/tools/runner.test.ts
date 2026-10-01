@@ -1,6 +1,6 @@
 import assert from "node:assert";
 import { test } from "node:test";
-import { buildInputSchema } from "./runner.ts";
+import { buildInputSchema, inputErrorMessage } from "./runner.ts";
 import type { ToolField } from "./types.ts";
 
 // Regression test: "image" fields used to fall through to the bare
@@ -53,4 +53,17 @@ test("image fields accept an array of base64 data URLs, not a bare string", () =
     "a bare string must be rejected — this was the actual bug: image fell through to z.string()",
   );
   assert.equal(schema.safeParse({}).success, true, "image fields have no `required` flag in the type — always optional");
+});
+
+test("a required text field must not be blank, and errors name the field", () => {
+  const fields = [
+    { kind: "textarea", id: "product", label: "제품·서비스", required: true },
+    { kind: "number", id: "price", label: "가격", min: 0 },
+  ] as never;
+  const blank = buildInputSchema(fields).safeParse({ product: "   " });
+  assert.equal(blank.success, false);
+  assert.equal(inputErrorMessage(fields, blank.error!.issues), "'제품·서비스' 칸을 채워 주세요");
+  const missing = buildInputSchema(fields).safeParse({ price: -1 });
+  assert.equal(inputErrorMessage(fields, missing.error!.issues), "'제품·서비스' 칸을 채워 주세요 · '가격' 값이 너무 작아요");
+  assert.equal(buildInputSchema(fields).safeParse({ product: "그래놀라" }).success, true);
 });

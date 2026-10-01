@@ -97,6 +97,11 @@ export function getTool(id: string): ToolManifest | undefined {
 }
 
 /** The 25 public tools in catalog order (hidden modes and retired tools excluded). */
+/** Public tools a result of `engine` can continue into (the same list a result page offers). */
+export function chainTargets(engine: string): ToolManifest[] {
+  return listTools().filter((t) => t.acceptsChainFrom?.includes(engine));
+}
+
 export function listTools(): ToolManifest[] {
   return publicTools().map((c) => getTool(c.slug)!);
 }

@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { hasCurrentConsent } from "@/lib/consent";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getTool } from "@/lib/tools/registry";
-import { buildInputSchema } from "@/lib/tools/runner";
+import { buildInputSchema, inputErrorMessage } from "@/lib/tools/runner";
 import { buildReference, referenceForStorage } from "@/lib/tools/reference-server";
 import { checkToolPolicy } from "@/lib/tools/policy";
 import { ownKeyRequiredError, resolveCost, resolveRequestedProvider } from "@/lib/ai/resolve-provider";
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const parsedInput = buildInputSchema(manifest.inputs).safeParse(values ?? {});
   if (!parsedInput.success) {
     return Response.json(
-      { error: parsedInput.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join(", ") },
+      { error: inputErrorMessage(manifest.inputs, parsedInput.error.issues) },
       { status: 400 },
     );
   }

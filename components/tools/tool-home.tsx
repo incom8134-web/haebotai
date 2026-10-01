@@ -30,9 +30,16 @@ function ToolHome({ toolId }: { toolId: string }) {
   const c = getToolContent(toolId)!;
   const name = (t: ToolManifest) => (locale === "en" ? t.name_en : t.name_ko);
   const fav = favorites.has(tool.id);
-  const chainsFrom = (tool.acceptsChainFrom ?? []).map((id) => getTool(id)).filter((t): t is ToolManifest => !!t);
-  const chainsTo = listTools().filter((t) => t.acceptsChainFrom?.includes(tool.id));
-  const related = listTools().filter((t) => t.category === tool.category && t.id !== tool.id);
+  // Link only to tools that are in the public catalog: an engine that's
+  // been retired (e.g. "money") only redirects, and a <Link> to a
+  // redirect made the router prefetch it in a loop.
+  const listed = (t: ToolManifest) => {
+    const c = catalogTool(t.id);
+    return !!c && !c.hidden;
+  };
+  const chainsFrom = (tool.acceptsChainFrom ?? []).map((id) => getTool(id)).filter((t): t is ToolManifest => !!t && listed(t));
+  const chainsTo = listTools().filter((t) => t.acceptsChainFrom?.includes(tool.id) && listed(t));
+  const related = listTools().filter((t) => t.category === tool.category && t.id !== tool.id && listed(t));
   const engines = getToolCapability(tool.id)?.providers ?? ["google"];
   // Modes of this tool that still run on their own engine (catalog `hidden`),
   // and the parent when this page is itself a mode.
@@ -150,7 +157,7 @@ function ToolHome({ toolId }: { toolId: string }) {
           <section>
             <h2 className="mb-1 font-display text-2xl font-bold tracking-[-0.01em]">{L({ ko: "예시에서 시작", en: "Start from an example" })}</h2>
             <p className="mb-4 text-sm text-fg-muted">{L({ ko: "고르면 입력이 채워진 채로 열려요. 내 상황에 맞게 고쳐서 실행하세요.", en: "Opens with the form filled in. Adjust it to your situation and run." })}</p>
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               {c.presets.map((p, i) => (
                 <motion.article
                   key={p.title.en}
@@ -158,7 +165,7 @@ function ToolHome({ toolId }: { toolId: string }) {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-40px" }}
                   transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: i * 0.05 }}
-                  className="glass glass-hover group flex flex-col rounded-[22px] p-5"
+                  className="glass glass-hover group flex min-w-0 flex-col rounded-[22px] p-5"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <span className="rounded-full bg-studio-cyan/12 px-2.5 py-1 text-2xs font-medium text-studio-cyan">{L(p.tag)}</span>

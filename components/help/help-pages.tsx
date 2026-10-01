@@ -93,8 +93,8 @@ export function ApiGuide() {
   return (
     <>
       <PageHeader title={L({ ko: "API 키 설명서", en: "API key manual" })} lead={L({ ko: "내 Google AI Studio 키로 해봇을 쓰면 크레딧이 차감되지 않아요. 5분이면 끝나요.", en: "Run Haebot on your own Google AI Studio key and no credits are charged. Takes five minutes." })} />
-      <div className="grid gap-6 lg:grid-cols-[1.3fr_1fr]">
-        <section className="glass rounded-[24px] p-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.3fr_1fr]">
+        <section className="glass min-w-0 rounded-[24px] p-6">
           <h2 className="text-lg font-semibold">{L({ ko: "순서대로 따라 하기", en: "Step by step" })}</h2>
           <ol className="relative mt-5 space-y-6 border-l border-hairline pl-7">
             {STEPS.map((s, i) => (
@@ -110,7 +110,7 @@ export function ApiGuide() {
             <Link href="/account/api-key" className={secondaryButton}><KeyRound size={14} aria-hidden /> {L({ ko: "내 API 키 등록", en: "Add my key" })}</Link>
           </div>
         </section>
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           <section className="glass rounded-[24px] p-6">
             <h2 className="text-lg font-semibold">{L({ ko: "키는 이렇게 생겼어요", en: "What a key looks like" })}</h2>
             <div className="mt-3 flex items-center gap-2 rounded-xl border border-hairline bg-bg/40 p-3 font-mono text-sm">
@@ -130,7 +130,7 @@ export function ApiGuide() {
             </ul>
           </section>
           <section className="rounded-[24px] bg-studio-warning/10 p-6">
-            <p className="flex items-center gap-2 font-semibold text-studio-warning"><TriangleAlert size={16} aria-hidden /> {L({ ko: "학생 멤버십이라면", en: "On Student membership?" })}</p>
+            <p className="flex items-center gap-2 font-semibold text-fg"><TriangleAlert size={16} className="text-studio-warning" aria-hidden /> {L({ ko: "학생 멤버십이라면", en: "On Student membership?" })}</p>
             <p className="mt-2 text-sm leading-relaxed text-fg-muted">{L({ ko: "이미 크레딧 제한이 없어요. 키를 등록하면 더 높은 모델 한도를 내 계정으로 쓰게 돼요.", en: "You already have no credit limit. A key lets you use higher model quotas on your own account." })}</p>
           </section>
         </div>
