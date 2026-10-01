@@ -365,6 +365,61 @@ const SAMPLES: Record<string, { output: Record<string, unknown>; input?: Record<
       follow_up_message: "정리",
     },
   },
+  "market-desk": {
+    output: {
+      summary: "요약",
+      decision: "시범 운영할지",
+      questions: [{ id: "q1", question: "수요?", why: "결정 근거" }],
+      assumptions: [{ assumption: "투약 수요", status: "partly", risk_if_wrong: "수요 없음" }, { assumption: "가격", status: "verified", risk_if_wrong: "" }],
+      evidence: [
+        { question_id: "q1", finding: "펫시터 1회 3~5만 원", figure: "3~5만 원", origin: "search", confidence: "medium", source_title: "기사" },
+        { question_id: "q1", finding: "투약 거절 사례", figure: "", origin: "hypothesis", confidence: "low", source_title: "" },
+      ],
+      market_size: { estimate: "연 300억 원", method: "가구 × 비율 × 지출", origin: "hypothesis" },
+      implications: ["2개 구 시범"],
+      next_checks: [{ check: "병원 문의", how: "전화", cost: "1일" }],
+      sources: [{ url: "https://example.com/n", title: "기사" }],
+    },
+  },
+  "competitor-lens": {
+    output: {
+      summary: "요약",
+      axes: { x: "가격", y: "맞춤도" },
+      us: { x: 5, y: 8, position: "중간 가격, 높은 맞춤도" },
+      competitors: [
+        { name: "A짐", positioning: "저가", price: "월 9만", strengths: ["싸다"], weaknesses: ["대형"], x: 2, y: 3, origin: "search" },
+        { name: "B스튜디오", positioning: "고가", price: "월 30만", strengths: ["1:1"], weaknesses: ["비쌈"], x: 9, y: 9, origin: "user" },
+      ],
+      matrix: [{ criterion: "회당 가격", scores: [{ name: "우리", score: 4, note: "" }, { name: "A짐", score: 5, note: "" }, { name: "B스튜디오", score: 2, note: "" }] }],
+      opportunities: [{ title: "21시 수업", gap: "없음", move: "개설", risk: "강사" }],
+      sources: [],
+    },
+  },
+  "persona-mapper": {
+    output: {
+      summary: "요약",
+      personas: [{ name: "서윤 엄마", age_range: "30대 후반", situation: "맞벌이", quote: "퇴근하면 접수 끝", goals: ["빨리"], frustrations: ["대기"], triggers: ["열"], objections: ["멀다"], channels: ["맘카페"], decision_factors: [{ factor: "진료 시간", weight: 5 }] }],
+      journey: [
+        { stage: "aware", doing: "검색", thinking: "어디", feeling: 0, touchpoints: ["네이버"], opportunity: "지도" },
+        { stage: "consider", doing: "비교", thinking: "대기?", feeling: -1, touchpoints: ["맘카페"], opportunity: "대기 안내" },
+        { stage: "decide", doing: "예약", thinking: "다행", feeling: 1, touchpoints: ["전화"], opportunity: "앱 예약" },
+      ],
+      messaging: [{ stage: "consider", message: "저녁 9시까지" }],
+      data_basis: "추론",
+    },
+  },
+  "insight-miner": {
+    output: {
+      summary: "배송이 가장 큰 불만",
+      items_read: 10,
+      themes: [
+        { name: "배송 지연", kind: "complaint", description: "늦음", mentions: 3, positive: 0, negative: 3, neutral: 0, quotes: ["주문하고 5일 걸렸어요"] },
+        { name: "포장", kind: "praise", description: "고급", mentions: 2, positive: 2, negative: 0, neutral: 0, quotes: ["포장이 고급스러워서 선물용으로 딱이에요"] },
+      ],
+      opportunities: [{ title: "날짜 지정", based_on: "배송 지연", action: "옵션 추가", effort: "M" }],
+      caveats: ["10건"],
+    },
+  },
 };
 
 function charts(report: Report) {

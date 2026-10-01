@@ -2,6 +2,10 @@ import { brandDnaReport } from "./brand-dna.ts";
 import { contentTransformerReport } from "./content-transformer.ts";
 import { hookLabReport } from "./hook-lab.ts";
 import { meetingActionReport } from "./meeting-action.ts";
+import { marketDeskReport } from "./market-desk.ts";
+import { competitorLensReport } from "./competitor-lens.ts";
+import { personaMapperReport } from "./persona-mapper.ts";
+import { insightMinerReport } from "./insight-miner.ts";
 import { sopBuilderReport } from "./sop-builder.ts";
 import { businessPlanReport } from "./business-plan.ts";
 import { calendarReport } from "./calendar.ts";
@@ -40,6 +44,10 @@ const BUILDERS: Record<string, (o: Record<string, unknown>, input: Record<string
   "content-transformer": contentTransformerReport,
   "sop-builder": sopBuilderReport,
   "meeting-action": meetingActionReport,
+  "market-desk": marketDeskReport,
+  "competitor-lens": competitorLensReport,
+  "persona-mapper": personaMapperReport,
+  "insight-miner": insightMinerReport,
 };
 
 export const hasReport = (toolId: string) => toolId in BUILDERS;

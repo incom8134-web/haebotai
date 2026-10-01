@@ -16,6 +16,40 @@ const lines = (...xs: (string | false | undefined)[]) => xs.filter(Boolean).join
 // (an index into ideas[]); without it the recommended idea is used.
 function seedFromDiscover(targetId: string, sourceId: string, source: unknown, pick?: number): Loose | null {
   const out = o(source);
+  // Research targets first: their sources (market-gap, idea-radar…) also
+  // have their own branches below that end in a catch-all return.
+  if (targetId === "market-desk") {
+    if (sourceId === "market-gap") {
+      const g = arr(out.gaps)[pick ?? 0] ?? arr(out.gaps)[0];
+      return { question: g ? `${s(g.title)} — ${s(g.opportunity)}의 수요가 실제로 있는지` : "", market: s(out.market_summary).slice(0, 120) };
+    }
+    if (sourceId === "idea-radar") {
+      const ideas = arr(out.ideas);
+      const idea = ideas[pick !== undefined && ideas[pick] ? pick : 0];
+      return idea ? { question: `${s(idea.name)}을(를) 살 고객이 충분한지, 지금 무엇에 얼마를 쓰는지`, decision: `${s(idea.name)}을(를) 시작할지` } : {};
+    }
+  }
+  if (targetId === "competitor-lens") {
+    if (sourceId === "market-gap") return { business: s(arr(out.gaps)[0]?.opportunity), competitors: arr(out.solutions).map((x) => s(x.name)).filter(Boolean).slice(0, 6) };
+    if (sourceId === "brand-dna") return { business: lines(s(o(out.essence).one_line), s(o(out.positioning).statement)) };
+  }
+  if (sourceId === "insight-miner" && targetId === "persona-mapper") {
+    // Real customer words, so the persona rests on evidence rather than guesses.
+    const quotes = arr(out.themes).flatMap((t) => (Array.isArray(t.quotes) ? (t.quotes as unknown[]).map(s) : [])).filter(Boolean);
+    return { customer_data: quotes.map((q) => `- ${q}`).join("\n") };
+  }
+  if (sourceId === "competitor-lens") {
+    const opp = arr(out.opportunities)[0];
+    if (targetId === "brand-dna") return { offering: s(o(out.us).position), competitors: arr(out.competitors).map((c) => s(c.name)).filter(Boolean).slice(0, 5) };
+    if (targetId === "offer-architect") return { differentiation: opp ? `${s(opp.title)}: ${s(opp.move)}` : "" };
+  }
+  if (sourceId === "persona-mapper") {
+    const p = arr(out.personas)[0];
+    if (!p) return {};
+    const frustrations = Array.isArray(p.frustrations) ? (p.frustrations as unknown[]).map(s) : [];
+    if (targetId === "hook-lab") return { audience: `${s(p.name)} (${s(p.age_range)}, ${s(p.situation)})`, topic: frustrations[0] ?? "" };
+    if (targetId === "strategy") return { customer_voice: s(p.quote) };
+  }
   if (sourceId === "idea-radar") {
     const ideas = arr(out.ideas);
     const recommended = ideas.findIndex((i) => s(i.name) === s(o(out.recommendation).pick));

@@ -4,6 +4,18 @@ export type NoteKind = "new" | "improved" | "fixed";
 
 export const PATCH_NOTES: { version: string; date: string; title: Bilingual; items: { kind: NoteKind; text: Bilingual }[] }[] = [
   {
+    version: "2.5.0",
+    date: "2026-10-01",
+    title: { ko: "리서치·인텔리전스 공개 — 25개 도구 모두 사용 가능", en: "Research & Intelligence is live — all 25 tools available" },
+    items: [
+      { kind: "new", text: { ko: "시장 리서치 데스크: 결정에 필요한 질문, 질문별 근거(검색·입력·가설 구분), 가정의 확인 상태, 계산 방법이 보이는 시장 규모", en: "Market Research Desk: the questions a decision needs, evidence per question (searched, provided or hypothesis), assumption status and sizing with its method" } },
+      { kind: "new", text: { ko: "경쟁사 렌즈: 고객 기준별 점수표, 포지셔닝 맵, 경쟁사가 비워 둔 자리", en: "Competitor Lens: a matrix on buying criteria, a positioning map and the openings competitors leave" } },
+      { kind: "new", text: { ko: "고객 페르소나 지도: 페르소나 카드와 단계별 기분 곡선이 있는 고객 여정", en: "Customer Persona Mapper: persona cards and a journey with the mood at each stage" } },
+      { kind: "new", text: { ko: "인사이트 마이너: 리뷰·설문에서 주제별 건수와 감성, 원문과 대조해 확인한 인용", en: "Insight Miner: themes, counts and sentiment from reviews and surveys, with quotes checked against your text" } },
+      { kind: "improved", text: { ko: "트렌드 레이더: 신호를 시기·영향·출처별로 보여 주는 레이더", en: "Trend Radar: a radar of signals by timing, impact and source" } },
+    ],
+  },
+  {
     version: "2.4.0",
     date: "2026-09-30",
     title: { ko: "문서·운영: 업무 매뉴얼 빌더, 회의→실행 보드와 새 결과 화면", en: "Documents & Operations: SOP Builder, Meeting-to-Action and new result screens" },

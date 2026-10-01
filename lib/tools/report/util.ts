@@ -87,6 +87,10 @@ export const PALETTES: Record<string, string[]> = {
   "content-transformer": ["#0E7C66", "#E11D48", "#2563EB", "#D97706", "#9333EA", "#64748B"],
   "sop-builder": ["#0369A1", "#EA580C", "#16A34A", "#9333EA", "#DB2777", "#64748B"],
   "meeting-action": ["#4D7C0F", "#0284C7", "#C026D3", "#EA580C", "#0F766E", "#64748B"],
+  "market-desk": ["#1D4ED8", "#16A34A", "#94A3B8", "#EA580C", "#9333EA", "#64748B"],
+  "competitor-lens": ["#B91C1C", "#0891B2", "#65A30D", "#7C3AED", "#D97706", "#64748B"],
+  "persona-mapper": ["#C2185B", "#0D9488", "#F59E0B", "#4F46E5", "#16A34A", "#64748B"],
+  "insight-miner": ["#047857", "#94A3B8", "#DC2626", "#2563EB", "#CA8A04", "#64748B"],
   "brand-dna": ["#BE185D", "#0F766E", "#CA8A04", "#4338CA", "#EA580C", "#64748B"],
   "mvp-blueprint": ["#9333EA", "#EA580C", "#0284C7", "#16A34A", "#E11D48", "#64748B"],
 };

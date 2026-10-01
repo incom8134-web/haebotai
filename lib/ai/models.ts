@@ -31,6 +31,10 @@ const MAX_TOKENS_BY_TOOL: Record<string, number> = {
   "content-transformer": 16000, // up to 8 full platform versions
   "sop-builder": 12000,
   "meeting-action": 10000,
+  "market-desk": 12000,
+  "competitor-lens": 12000,
+  "persona-mapper": 10000,
+  "insight-miner": 12000,
 };
 const MAX_TOKENS_DEFAULT = 8000;
 
