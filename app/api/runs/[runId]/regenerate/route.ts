@@ -16,6 +16,9 @@ import { runLimiter, checkRateLimit } from "@/lib/rate-limit";
 import { checkSpend } from "@/lib/spend-guard";
 import { regenerateCost, regeneratableSections, versionTitle } from "@/lib/projects/regenerate";
 import { writeRunFacts } from "@/lib/projects/server";
+import { parseDocument } from "@/lib/agents/core/document";
+import { routeRevision } from "@/lib/agents/core/revise-request";
+import { reviseDocument } from "@/lib/agents/specs/doc-revise";
 
 // Rewrite one part of a finished result (POST { section, instruction }).
 // The model gets the original input, the whole current result (so the
@@ -49,6 +52,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     .maybeSingle();
   if (!run || run.status !== "done" || !run.tool_id) return Response.json({ error: "결과를 찾을 수 없습니다" }, { status: 404 });
   const manifest = getTool(run.tool_id);
+  // A document-agent result: the change is routed to the smallest edit (lib/agents/specs/doc-revise.ts).
+  const document = parseDocument((run.output as Record<string, unknown> | null)?.document);
+  if (manifest && document && (section === "document" || section.startsWith("doc:"))) {
+    return reviseDocumentRun({ user: { id: user.id }, run, manifest, document, section, instruction });
+  }
   const schema = getOutputSchema(run.tool_id);
   const shape = (schema as unknown as { shape?: Record<string, z.ZodType> } | undefined)?.shape;
   if (!manifest || manifest.retired || !shape || !shape[section] || !regeneratableSections(run.tool_id, run.output).includes(section)) {
@@ -140,4 +148,76 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   if (cost > 0) await settleGenerationCredits(created.id, cost);
   await writeRunFacts(admin, { runId: created.id, userId: user.id, toolId: run.tool_id, input, output: nextOutput });
   return Response.json({ runId: created.id });
+}
+
+
+/** Follow-up on a document: design-only and image-removal edits are free (no model call); the rest is charged like any partial redo. */
+async function reviseDocumentRun(opts: {
+  user: { id: string };
+  run: { id: string; tool_id: string; input: unknown; output: unknown; sources: unknown; project_id: string | null; title: string | null };
+  manifest: NonNullable<ReturnType<typeof getTool>>;
+  document: NonNullable<ReturnType<typeof parseDocument>>;
+  section: string;
+  instruction: string;
+}): Promise<Response> {
+  const { user, run, manifest, document, section, instruction } = opts;
+  const route = section.startsWith("doc:") ? null : routeRevision(instruction, document);
+  const free = route?.kind === "design" || (route?.kind === "visuals" && !route.moreDiagrams);
+  if (route?.kind === "unknown") return Response.json({ error: "어느 섹션을 바꿀지 골라 주세요. (디자인만 바꾸기, 이미지·도표 조정은 그대로 적으면 돼요)" }, { status: 400 });
+
+  const [keys, membership] = await Promise.all([getUserApiKeys("google", { excludeBroken: true }), getMembership()]);
+  const cost = free ? 0 : resolveCost("google", keys.length > 0, membership.plan === "student", regenerateCost(manifest.estimatedCredits));
+  if (!free) {
+    const usesPlatformKey = keys.length === 0;
+    const spend = await checkSpend(user.id, usesPlatformKey ? regenerateCost(manifest.estimatedCredits) : 0, usesPlatformKey);
+    if (!spend.ok) return Response.json({ error: spend.message }, { status: 429 });
+  }
+  const reservation = cost > 0 ? await reserveCredits(user.id, cost) : ({ ok: true } as const);
+  if (!reservation.ok) {
+    const insufficient = reservation.error.includes("insufficient_credits");
+    return Response.json({ error: insufficient ? "크레딧이 부족합니다" : "크레딧 확인 실패" }, { status: insufficient ? 402 : 500 });
+  }
+  const output = run.output as Record<string, unknown>;
+  const report = output.work_report as { contractText?: string } | undefined;
+  const input = Object.fromEntries(Object.entries((run.input ?? {}) as Record<string, unknown>).filter(([k]) => !k.startsWith("_")));
+  const go = () => reviseDocument({ doc: document, instruction, target: section, contractText: report?.contractText ?? "", requestText: buildContext(manifest, input, null), signal: AbortSignal.timeout(280_000) });
+  let result: Awaited<ReturnType<typeof go>>;
+  try {
+    result = keys.length ? await runWithApiKey(keys, go) : await go();
+  } catch (err) {
+    console.warn("document revise failed", (err as Error).message);
+    result = { ok: false, status: 502, error: "다시 만들지 못했어요. 크레딧은 돌려드렸어요." };
+  }
+  if (!result.ok) {
+    if (cost > 0) await releaseUnattachedReservation(user.id, cost);
+    return Response.json({ error: result.error }, { status: result.status });
+  }
+  const nextOutput = { ...output, document: result.doc, agent: { ...((output.agent as object) ?? {}), regenerated: { section, instruction, note: result.note, changed: result.changed } } };
+  const admin = createAdminClient();
+  const { data: created, error } = await admin
+    .from("generations")
+    .insert({
+      user_id: user.id,
+      kind: "generate",
+      tool_id: run.tool_id,
+      input: run.input,
+      output: nextOutput,
+      sources: run.sources ?? [],
+      status: "done",
+      credits_reserved: cost,
+      provider: "google",
+      parent_run_id: run.id,
+      project_id: run.project_id,
+      title: versionTitle(run.title),
+      input_tokens: result.usage.inputTokens ?? null,
+      output_tokens: result.usage.outputTokens ?? null,
+    })
+    .select("id")
+    .single();
+  if (error || !created) {
+    if (cost > 0) await releaseUnattachedReservation(user.id, cost);
+    return Response.json({ error: "새 버전을 저장하지 못했습니다" }, { status: 500 });
+  }
+  if (cost > 0) await settleGenerationCredits(created.id, cost);
+  return Response.json({ runId: created.id, note: result.note });
 }

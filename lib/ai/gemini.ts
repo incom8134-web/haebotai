@@ -151,6 +151,24 @@ export async function searchGrounding(
   return { findings: res.text ?? "", sources, usage: addUsage({ inputTokens: 0, outputTokens: 0 }, res.usageMetadata) };
 }
 
+/** One web-grounded answer to a research question (lib/agents/core/research.ts writes the prompt). */
+export async function groundedSearch(prompt: string, abortSignal: AbortSignal | undefined): Promise<{ findings: string; sources: Source[]; usage: TokenUsage }> {
+  const res = await getClient().models.generateContent({
+    model: TEXT_MODEL,
+    contents: prompt,
+    config: { tools: [{ googleSearch: {} }], abortSignal: abortSignal ? AbortSignal.any([abortSignal, AbortSignal.timeout(70_000)]) : AbortSignal.timeout(70_000) },
+  });
+  const seen = new Set<string>();
+  const sources: Source[] = [];
+  for (const chunk of res.candidates?.[0]?.groundingMetadata?.groundingChunks ?? []) {
+    const web = chunk.web;
+    if (!web?.uri || seen.has(web.uri)) continue;
+    seen.add(web.uri);
+    sources.push({ url: web.uri, title: web.title ?? web.uri, domain: web.domain });
+  }
+  return { findings: res.text ?? "", sources, usage: addUsage({ inputTokens: 0, outputTokens: 0 }, res.usageMetadata) };
+}
+
 const REAL_PERSON_CHECK_SCHEMA = {
   type: "object",
   properties: {

@@ -12,6 +12,9 @@ export const regenerateCost = (estimatedCredits: number) => Math.max(5, Math.rou
 
 /** Top-level keys of this result that can be rewritten on their own. */
 export function regeneratableSections(toolId: string, output: unknown): string[] {
+  // A document-agent result: the whole document (routed by the instruction) or one of its sections.
+  const doc = (output as { document?: { sections?: { id?: unknown }[] } } | null)?.document;
+  if (doc && Array.isArray(doc.sections)) return ["document", ...doc.sections.map((s) => `doc:${String(s.id)}`)];
   if (NO_REGENERATE_TOOLS.has(toolId) || !output || typeof output !== "object" || Array.isArray(output)) return [];
   return Object.entries(output as Record<string, unknown>)
     .filter(([key, value]) => !META_KEYS.has(key) && !key.startsWith("_") && value !== null && value !== "")

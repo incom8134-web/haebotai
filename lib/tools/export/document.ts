@@ -135,6 +135,9 @@ export function reportBlocks(report: Report): { blocks: Block[]; sources: Source
           });
           break;
         }
+        case "image":
+          out.push({ type: "image", url: b.url, caption: b.caption });
+          break;
         case "sources":
           sources.push(...b.items);
           break;

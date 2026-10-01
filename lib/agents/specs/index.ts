@@ -3,6 +3,7 @@ import type { ProviderId } from "@/lib/ai/types";
 import type { ToolManifest } from "@/lib/tools/types";
 import type { AgentSpec } from "../types";
 import { genericSpec } from "./generic";
+import { documentSpec } from "./document";
 import { homepageSpec } from "./homepage";
 import { legacySpec } from "./legacy";
 import { logoSpec, photoSpec } from "./visual";
@@ -16,6 +17,8 @@ const NO_AGENT = new Set(["grant"]);
 export function agentFor(manifest: ToolManifest, provider: ProviderId): AgentSpec {
   if (provider !== "google" || NO_AGENT.has(manifest.id)) return legacySpec(manifest.id);
   if (manifest.id === "homepage") return homepageSpec();
+  // Long-form documents: contract → sources → plan → section-by-section writing → verification (lib/agents/core).
+  if (manifest.id === "proposal" || manifest.id === "business-plan") return documentSpec(manifest.id);
   if (manifest.id === "logo") return logoSpec();
   if (manifest.id === "image" || manifest.id === "brand-model") return photoSpec(manifest.id);
   return genericSpec(manifest.id);

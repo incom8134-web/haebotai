@@ -2,6 +2,8 @@
 
 import { toolSlug } from "@/lib/tools/catalog";
 import { StrategyCard, type AgentMeta } from "@/components/agent/strategy-card";
+import { WorkReportCard } from "@/components/agent/work-report";
+import type { WorkReport } from "@/lib/agents/core/doc-agent";
 import Link from "next/link";
 import { useState } from "react";
 import {
@@ -458,7 +460,7 @@ function RunResult({
   // The run's creative direction (lib/tools/directions.ts) is shown as a
   // chip, not as a result field.
   // How it was made (lib/agents/meta.ts) goes in the strategy card.
-  const { creative_direction: direction, request_brief: brief, agent, ...shown } = (output ?? {}) as Record<string, unknown> & { creative_direction?: { name?: string; reason?: string }; request_brief?: { tone?: string }; agent?: AgentMeta };
+  const { creative_direction: direction, request_brief: brief, agent, work_report: workReport, ...shown } = (output ?? {}) as Record<string, unknown> & { creative_direction?: { name?: string; reason?: string }; request_brief?: { tone?: string }; agent?: AgentMeta; work_report?: WorkReport };
   const extras = extraDownloads(shown, input, locale === "en");
   const chainTargets = listTools().filter((tool) => tool.acceptsChainFrom?.includes(manifest.id));
 
@@ -491,6 +493,7 @@ function RunResult({
       </div>
 
       {agent ? <StrategyCard meta={agent} onRerun={onRerunWithStrategy} /> : null}
+      {workReport?.checks ? <WorkReportCard report={workReport} /> : null}
 
       <AiOutputNotice design={manifest.category === "brand"} />
 

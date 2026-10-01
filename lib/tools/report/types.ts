@@ -19,6 +19,7 @@ export type ReportBlock =
   | { type: "bullets"; title?: string; items: string[]; style?: "dot" | "check" | "num"; half?: boolean }
   | { type: "cards"; title?: string; columns?: 1 | 2 | 3; items: ReportCard[] }
   | { type: "quad"; title?: string; cells: { title: string; items: string[] }[] }
+  | { type: "image"; url: string; caption?: string }
   | { type: "sources"; items: Source[] };
 
 export interface ReportCard {

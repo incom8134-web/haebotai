@@ -1,12 +1,16 @@
 import { fmt } from "./charts.ts";
 import type { Report, ReportSection } from "./types.ts";
 import { keep, num, obj, objs, PALETTES, pct, str, strs, sum, won } from "./util.ts";
+import { documentReport, parseDocument } from "../../agents/core/document.ts";
 
 // 제안서: what a decision-maker needs on one pass — the ask in numbers
 // (total, weeks, phases), before/after outcomes, scope in and out, the
 // schedule as a Gantt, the quote with its split, and why us.
 
 export function proposalReport(o: Record<string, unknown>): Report {
+  // Written by the document agent: its own structure, not the fixed one below.
+  const doc = parseDocument(o.document);
+  if (doc) return documentReport(doc, "제안서");
   const timeline = objs(o.timeline).map((t) => ({ phase: str(t.phase), weeks: Math.max(1, Math.round(num(t.weeks))), deliverable: str(t.deliverable) })).filter((t) => t.phase);
   const totalWeeks = sum(timeline.map((t) => t.weeks));
   const pricing = objs(o.pricing_table).map((p) => ({ item: str(p.item), amount: num(p.amount_krw) })).filter((p) => p.item);
