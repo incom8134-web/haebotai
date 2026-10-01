@@ -663,10 +663,10 @@ contrasting same-tool requests (1.00 = the same template):
 | Tool | Pair | Shape similarity |
 | --- | --- | --- |
 | presentation | client deck vs teaching deck | 0.70 |
-| copy | 3 pairs | 0.52–0.67 |
+| copy | 3 pairs | 0.69–0.89 |
 | homepage | 3 pairs | 0.50–0.56 |
 | business plan | loan vs VC | 0.34 |
-| **Mean** | | **0.54** |
+| **Mean** | | **0.62** |
 
 Over the same pairs, the strategies' blueprints overlapped about 0.03.
 The plans differed while the results kept the same shape, which is the

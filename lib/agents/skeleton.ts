@@ -26,7 +26,8 @@ const bucket = (n: number) => (n <= 3 ? String(n) : n <= 6 ? "4-6" : n <= 10 ? "
 function kindOf(item: Record<string, unknown>): string | null {
   for (const k of KIND_KEYS) {
     const v = item[k];
-    if (typeof v === "string" && v.length > 0 && v.length <= 40) return `${k}=${v.toLowerCase()}`;
+    // Only enum-like values (layout ids, block types) are structure; free text is content.
+    if (typeof v === "string" && /^[a-z][a-z0-9_-]{0,23}$/i.test(v)) return `${k}=${v.toLowerCase()}`;
   }
   return null;
 }
