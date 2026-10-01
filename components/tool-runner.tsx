@@ -35,6 +35,7 @@ import { ExField } from "@/components/tools/experience/controls";
 import { FreeRequest } from "@/components/tools/free-request";
 import { localizeField } from "@/lib/tools/fields-en";
 import { presetValues } from "@/lib/tools/presets-en";
+import { mergeProjectFill } from "@/lib/projects/facts";
 import { Stage } from "@/components/tools/experience/stage";
 import { useLocale, useT, useBi } from "@/lib/i18n/context";
 import { useLocalValue } from "@/lib/hooks/use-local-list";
@@ -181,6 +182,8 @@ function ToolRunner({
   // seeded with a preset in Korean switches to the English sample values
   // once English is known — only while the user hasn't edited it.
   const seeded = useRef<{ index: number; values: ToolFormValues } | null>(null);
+  // Fields the project picker filled, so switching projects can swap them.
+  const projectFilled = useRef<Set<string>>(new Set());
   if (seeded.current === null && !chainedFrom && !initialBrief && !startsInProject) {
     const index = initialPreset ?? 0;
     const preset = getToolContent(toolId)?.presets[index];
@@ -584,7 +587,15 @@ function ToolRunner({
               // example's answers ride along with the project's facts.
               const seed = seeded.current;
               const untouched = !!seed && Object.keys(seed.values).every((k) => JSON.stringify(prev[k]) === JSON.stringify(presetValues(toolId, seed.index, seed.values, locale)[k]));
-              return untouched ? { ...v } : { ...prev, ...v };
+              if (untouched) {
+                projectFilled.current = new Set(Object.keys(v));
+                return { ...v };
+              }
+              // Otherwise fill only empty fields (and ones a project filled
+              // before), never a brief or answers the member brought.
+              const merged = mergeProjectFill(prev, v, projectFilled.current);
+              projectFilled.current = merged.owned;
+              return merged.values;
             })
           }
         />

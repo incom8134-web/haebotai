@@ -6,7 +6,7 @@ import { apiIpLimiter, checkRateLimit } from "@/lib/rate-limit";
 
 // Public inside the shell: /tools and /tools/<id> (overviews) and /help.
 // Running a tool, the Studio, library, profile and account need a session.
-const PROTECTED_PREFIXES = ["/studio", "/library", "/brand", "/account", "/auth/consent"];
+const PROTECTED_PREFIXES = ["/studio", "/onboarding", "/projects", "/library", "/brand", "/account", "/auth/consent"];
 const PROTECTED_PATTERNS = [/^\/tools\/[^/]+\/run(\/|$)/];
 
 // A redirect must carry any session cookies getClaims() just refreshed:
