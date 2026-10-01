@@ -69,8 +69,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }
 
   const body = await request.json().catch(() => null);
-  const { chainedFromRunId, provider: requestedProvider, values, reference: rawReference, excludeProfile } = (body ?? {}) as {
+  const { chainedFromRunId, provider: requestedProvider, values, reference: rawReference, excludeProfile, projectId } = (body ?? {}) as {
     excludeProfile?: unknown;
+    projectId?: unknown;
     chainedFromRunId?: string;
     provider?: unknown;
     values?: unknown;
@@ -128,6 +129,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       .eq("user_id", user.id)
       .maybeSingle();
     chainedFrom = data?.id ?? null;
+  }
+
+  // The project this run belongs to (its facts are written when it ends).
+  let project: string | null = null;
+  if (typeof projectId === "string" && projectId) {
+    const { data } = await supabase.from("projects").select("id").eq("id", projectId).eq("user_id", user.id).maybeSingle();
+    if (!data) return Response.json({ error: "프로젝트를 찾을 수 없습니다" }, { status: 404 });
+    project = data.id;
   }
 
   // Own API key(s) → the user pays the provider directly; student plan
@@ -217,6 +226,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       status: "pending",
       credits_reserved: cost,
       chained_from: chainedFrom,
+      // Only when set, so runs keep working before migration 0016 is applied.
+      ...(project ? { project_id: project } : {}),
       provider,
       output: { _agent: state },
     })

@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { FileQuestion, Inbox } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getTool } from "@/lib/tools/registry";
 import { useLocale, useT } from "@/lib/i18n/context";
 import type { DictKey } from "@/lib/i18n/dictionaries";
+import { formatDateTime } from "@/lib/format-date";
 
 export interface LibraryRun {
   id: string;
@@ -16,6 +18,8 @@ export interface LibraryRun {
   status: string;
   credits: number | null;
   createdAt: string;
+  title?: string | null;
+  projectId?: string | null;
 }
 
 const STATUS_KEY: Record<string, DictKey> = {
@@ -26,9 +30,12 @@ const STATUS_KEY: Record<string, DictKey> = {
   error: "status_error",
 };
 
-function LibraryList({ runs }: { runs: LibraryRun[] }) {
+function LibraryList({ runs: all, projects = [] }: { runs: LibraryRun[]; projects?: { id: string; name: string }[] }) {
   const { locale } = useLocale();
   const t = useT();
+  const [project, setProject] = useState("");
+  const projectName = new Map(projects.map((p) => [p.id, p.name]));
+  const runs = all.filter((r) => !project || (project === "none" ? !r.projectId : r.projectId === project));
 
   return (
     <div className="mx-auto max-w-3xl px-4 pt-6 pb-10 md:px-8 md:pt-10">
@@ -36,6 +43,19 @@ function LibraryList({ runs }: { runs: LibraryRun[] }) {
         {t("library")}
       </h1>
       <p className="mt-3 text-base leading-relaxed break-keep text-fg-muted">{t("library_desc")}</p>
+
+      {projects.length ? (
+        <label className="mt-5 flex items-center gap-2 text-xs text-fg-muted">
+          {locale === "en" ? "Project" : "프로젝트"}
+          <select value={project} onChange={(e) => setProject(e.target.value)} className="rounded-md border border-hairline bg-surface px-2 py-1 text-xs text-fg">
+            <option value="">{locale === "en" ? "All" : "전체"}</option>
+            <option value="none">{locale === "en" ? "No project" : "프로젝트 없음"}</option>
+            {projects.map((p) => (
+              <option key={p.id} value={p.id}>{p.name}</option>
+            ))}
+          </select>
+        </label>
+      ) : null}
 
       {runs.length === 0 ? (
         <EmptyState
@@ -61,12 +81,14 @@ function LibraryList({ runs }: { runs: LibraryRun[] }) {
                 </div>
                 <div className="min-w-0">
                   <p className="truncate text-sm text-fg">
-                    {locale === "en" ? run.toolNameEn : run.toolNameKo}
+                    {run.title || (locale === "en" ? run.toolNameEn : run.toolNameKo)}
+                    {run.title ? <span className="ml-1.5 text-2xs text-fg-subtle">{locale === "en" ? run.toolNameEn : run.toolNameKo}</span> : null}
+                    {run.projectId && projectName.get(run.projectId) ? (
+                      <span className="ml-1.5 rounded bg-accent-dim px-1.5 py-0.5 text-[10px] text-accent">{projectName.get(run.projectId)}</span>
+                    ) : null}
                   </p>
                   <p className="font-mono text-2xs text-fg-subtle">
-                    {new Date(run.createdAt).toLocaleString(
-                      locale === "en" ? "en-US" : "ko-KR",
-                    )}
+                    {formatDateTime(run.createdAt, locale)}
                   </p>
                 </div>
               </div>

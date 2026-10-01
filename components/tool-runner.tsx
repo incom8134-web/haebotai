@@ -25,6 +25,7 @@ import { emptyReference, ReferencePanel, uploadReferenceFiles, type ReferenceVal
 import { getTool } from "@/lib/tools/registry";
 import { CATEGORY_LABELS } from "@/lib/tools/registry/categories";
 import { seedFromChain } from "@/lib/tools/chain";
+import { ProjectPicker } from "@/components/projects/project-picker";
 import { seedFromBrief } from "@/lib/tools/brief";
 import { getToolContent } from "@/lib/tools/content";
 import { RunGuide } from "@/components/tools/run-guide";
@@ -119,6 +120,9 @@ function ToolRunner({
   hasOwnKey,
   isStudent,
   balance,
+  projects = [],
+  initialProject,
+  initialValues,
 }: {
   toolId: string;
   profile: BusinessProfile | null;
@@ -136,6 +140,12 @@ function ToolRunner({
   hasOwnKey: Partial<Record<ProviderId, boolean>>;
   isStudent: boolean;
   balance: number | null;
+  /** The member's projects, for the picker above the form. */
+  projects?: { id: string; name: string }[];
+  /** ?project= — run inside this project. */
+  initialProject?: string;
+  /** ?fromInput= — the inputs of an earlier run, to run again. */
+  initialValues?: ToolFormValues;
 }) {
   const manifest = getTool(toolId);
   const exp = getExperience(toolId);
@@ -149,12 +159,18 @@ function ToolRunner({
       : defaultProvider;
   const cost = manifest ? resolveCost(provider, !!hasOwnKey[provider], isStudent, manifest.estimatedCredits) : 0;
 
+  const [projectId, setProjectId] = useState(initialProject && projects.some((p) => p.id === initialProject) ? initialProject : "");
+  // Opened inside a project: the form fills from the project's memory, so
+  // it starts empty rather than with another business's example.
+  const startsInProject = !!projectId && !initialValues && !chainedFrom && initialPreset === undefined && !initialBrief;
   const [values, setValues] = useState<ToolFormValues>(() => {
+    if (initialValues) return { ...initialValues };
     if (chainedFrom) return seedFromChain(toolId, chainedFrom.toolId, chainedFrom.output, chainedFrom.pick);
     const preset = initialPreset !== undefined ? getToolContent(toolId)?.presets[initialPreset] : undefined;
     if (preset) return { ...presetValues(toolId, initialPreset!, preset.values, locale) };
     const brief = manifest ? seedFromBrief(manifest, initialBrief) : {};
     if (Object.keys(brief).length) return brief;
+    if (startsInProject) return {};
     // A cold visit (no chain, no ?preset=, no brief) opens with the
     // tool's first example pre-filled rather than blank fields — same
     // promise ToolHome's example gallery already makes ("opens with the
@@ -165,7 +181,7 @@ function ToolRunner({
   // seeded with a preset in Korean switches to the English sample values
   // once English is known — only while the user hasn't edited it.
   const seeded = useRef<{ index: number; values: ToolFormValues } | null>(null);
-  if (seeded.current === null && !chainedFrom && !initialBrief) {
+  if (seeded.current === null && !chainedFrom && !initialBrief && !startsInProject) {
     const index = initialPreset ?? 0;
     const preset = getToolContent(toolId)?.presets[index];
     if (preset) seeded.current = { index, values: { ...preset.values } };
@@ -296,6 +312,7 @@ function ToolRunner({
     const base = {
       values: serialized,
       provider,
+      ...(projectId ? { projectId } : {}),
       ...(excludedProfileKeys.size ? { excludeProfile: [...excludedProfileKeys] } : {}),
       ...(referencePayload ? { reference: referencePayload } : {}),
     };
@@ -553,6 +570,24 @@ function ToolRunner({
             : getTool(chainedFrom.toolId)?.name_ko) ?? chainedFrom.toolId}{" "}
           {t("chained_from_suffix")}
         </div>
+      ) : null}
+
+      {manifest ? (
+        <ProjectPicker
+          projects={projects}
+          value={projectId}
+          onChange={setProjectId}
+          inputs={manifest.inputs}
+          onFill={(v) =>
+            setValues((prev) => {
+              // Still the untouched example → replace it, so none of the
+              // example's answers ride along with the project's facts.
+              const seed = seeded.current;
+              const untouched = !!seed && Object.keys(seed.values).every((k) => JSON.stringify(prev[k]) === JSON.stringify(presetValues(toolId, seed.index, seed.values, locale)[k]));
+              return untouched ? { ...v } : { ...prev, ...v };
+            })
+          }
+        />
       ) : null}
 
       {profileChips.length > 0 && (

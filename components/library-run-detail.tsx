@@ -11,11 +11,14 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { RunResult } from "@/components/run-result";
+import { RunActions } from "@/components/projects/run-actions";
+import { RegeneratePanel } from "@/components/projects/regenerate-panel";
 import { getTool } from "@/lib/tools/registry";
 import { useLocale, useT } from "@/lib/i18n/context";
 import type { DictKey } from "@/lib/i18n/dictionaries";
 import type { Source } from "@/lib/tools/registry/shared";
 import type { ProviderId } from "@/lib/ai/types";
+import { formatDateTime } from "@/lib/format-date";
 
 const STATUS_KEY: Record<string, DictKey> = {
   pending: "status_pending",
@@ -36,6 +39,12 @@ function LibraryRunDetail({
   provider,
   error,
   createdAt,
+  title = null,
+  projectId = null,
+  parentRunId = null,
+  childRunIds = [],
+  projects = [],
+  versioned = false,
 }: {
   toolId: string;
   runId: string;
@@ -47,6 +56,12 @@ function LibraryRunDetail({
   provider?: ProviderId | null;
   error: string | null;
   createdAt: string;
+  title?: string | null;
+  projectId?: string | null;
+  parentRunId?: string | null;
+  childRunIds?: string[];
+  projects?: { id: string; name: string }[];
+  versioned?: boolean;
 }) {
   const { locale } = useLocale();
   const t = useT();
@@ -73,13 +88,25 @@ function LibraryRunDetail({
 
       <div className="mt-3 flex items-center justify-between gap-3">
         <h1 className="font-display text-[clamp(2rem,4vw,3rem)] leading-[1.05] font-bold tracking-[-0.02em] break-keep text-fg">
-          {locale === "en" ? manifest.name_en : manifest.name_ko}
+          {title || (locale === "en" ? manifest.name_en : manifest.name_ko)}
         </h1>
         {/* Fixed to Korea time so the server (UTC) and the browser render the same text. */}
         <span className="shrink-0 font-mono text-2xs text-fg-subtle" suppressHydrationWarning>
-          {new Date(createdAt).toLocaleString(locale === "en" ? "en-US" : "ko-KR", { timeZone: "Asia/Seoul" })}
+          {formatDateTime(createdAt, locale)}
         </span>
       </div>
+
+      <RunActions
+        runId={runId}
+        toolId={toolId}
+        status={status}
+        title={title}
+        projectId={projectId}
+        projects={projects}
+        parentRunId={parentRunId}
+        childRunIds={childRunIds}
+        versioned={versioned}
+      />
 
       <div className="mt-6">
         {status === "done" ? (
@@ -92,7 +119,11 @@ function LibraryRunDetail({
             provider={provider}
             runId={runId}
           />
-        ) : status === "error" ? (
+        ) : null}
+        {status === "done" && versioned ? (
+          <RegeneratePanel runId={runId} toolId={toolId} output={output} estimatedCredits={manifest.estimatedCredits} />
+        ) : null}
+        {status === "done" ? null : status === "error" ? (
           <div className="glass rounded-[20px] p-4 ">
             <p className="text-sm text-danger">{error ?? t("status_error")}</p>
           </div>

@@ -7,6 +7,7 @@ import { runWithApiKey } from "@/lib/tools/generate";
 import { providerErrorMessage } from "@/lib/ai/provider-errors";
 import { getUserApiKeysFor } from "@/lib/api-keys";
 import { settleGenerationCredits } from "@/lib/credits";
+import { writeRunFacts } from "@/lib/projects/server";
 import type { TokenUsage } from "@/lib/ai/types";
 import { agentDb, failRun, loadRun, pushEvent, runStatus, saveState } from "./store";
 import { MAX_INVOCATIONS, requestContinuation } from "./handoff";
@@ -226,7 +227,10 @@ export async function runAgent(runId: string, startedAt: number): Promise<void> 
       .eq("status", "streaming")
       .select("id");
     // Not streaming any more: cancelled (already refunded) or failed elsewhere.
-    if (finished?.length) await settleGenerationCredits(s.runId, s.creditsReserved);
+    if (finished?.length) {
+      await settleGenerationCredits(s.runId, s.creditsReserved);
+      await writeRunFacts(db, { runId: s.runId, userId: s.userId, toolId: manifest!.id, input: values, output: clean });
+    }
     await cleanup(db, s);
   }
 }
