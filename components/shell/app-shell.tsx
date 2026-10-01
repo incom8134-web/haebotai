@@ -7,7 +7,7 @@ import { useMemo, useState, useSyncExternalStore, useTransition } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "motion/react";
-import { AlertTriangle, CircleGauge, CircleHelp, CircleUserRound, Coins, LayoutGrid, Library, LogOut, Moon, Search, Sparkles, Sun, UserRound, X, Zap, type LucideIcon } from "lucide-react";
+import { FolderKanban, AlertTriangle, CircleGauge, CircleHelp, CircleUserRound, Coins, LayoutGrid, Library, LogOut, Moon, Search, Sparkles, Sun, UserRound, X, Zap, type LucideIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { CommandPalette, type CommandPaletteGroup } from "@/components/command-palette";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -41,6 +41,7 @@ const ITEMS: Item[] = [
   { href: "/studio", label: { ko: "스튜디오", en: "Studio" }, icon: Sparkles, match: (p) => p === "/studio" },
   { href: "/tools", label: { ko: "도구", en: "Tools" }, icon: LayoutGrid, match: (p) => p.startsWith("/tools") },
   { href: "/links", label: { ko: "바로가기", en: "Quick links" }, icon: Zap, match: (p) => p.startsWith("/links") },
+  { href: "/projects", label: { ko: "프로젝트", en: "Projects" }, icon: FolderKanban, match: (p) => p.startsWith("/projects") },
   { href: "/library", label: { ko: "보관함", en: "Library" }, icon: Library, match: (p) => p.startsWith("/library") },
   { href: "/brand", label: { ko: "브랜드", en: "Brand" }, icon: UserRound, match: (p) => p.startsWith("/brand") },
   { href: "/help", label: { ko: "도움말", en: "Help" }, icon: CircleHelp, match: (p) => p.startsWith("/help") },
