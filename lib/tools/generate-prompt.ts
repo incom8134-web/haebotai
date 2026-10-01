@@ -14,6 +14,7 @@ import { intentBlock } from "../agents/intent.ts";
 import { strategyBlock } from "../agents/strategy.ts";
 import { revisionBlock } from "../agents/critic.ts";
 import type { Critique, Intent, Strategy } from "../agents/types.ts";
+import { contractBlock, type TaskContract } from "../agents/core/contract.ts";
 
 // Prompt-level enforcement for the hard guards documented in policy.ts —
 // that file's checks are the pre-flight/output-safety backstop; this is
@@ -147,8 +148,13 @@ export function buildContext(
   if (intent?.intent) lines.push("", intentBlock(intent.intent, intent.answers ?? []));
   const strategy = input._strategy as Strategy | undefined;
   if (strategy?.blueprint?.length) lines.push("", strategyBlock(strategy));
+  const contract = input._contract as TaskContract | undefined;
+  if (contract?.mode) lines.push("", contractBlock(contract));
   const reference = referenceOf(input);
-  if (reference) lines.push("", referencePrompt(reference));
+  // A long source reaches the writer as its map plus the passages this
+  // result needs (lib/agents/core/retrieve.ts), not its first 80,000 characters.
+  const sourceView = typeof input._sourceView === "string" ? input._sourceView : "";
+  if (reference) lines.push("", referencePrompt(sourceView ? { ...reference, text: sourceView } : reference));
   const free = typeof input.free_request === "string" ? input.free_request.trim() : "";
   if (free) lines.push("", freeRequestPrompt(free));
   const revision = input._revision as { draft: string; critique: Critique } | undefined;

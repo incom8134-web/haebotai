@@ -251,6 +251,14 @@ function Block({ block, palette, half }: { block: ReportBlock; palette: string[]
           </div>
         </div>
       );
+    case "image":
+      return (
+        <figure>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={block.url} alt={block.caption ?? ""} className="w-full rounded-2xl border border-hairline object-cover" loading="lazy" />
+          {block.caption ? <figcaption className="mt-2 text-2xs leading-relaxed text-fg-subtle">{block.caption}</figcaption> : null}
+        </figure>
+      );
     case "sources":
       return (
         <div className="flex flex-wrap gap-1.5">
