@@ -2,10 +2,11 @@
 
 import { BrandMark } from "@/components/brand-mark";
 import { Suspense, useEffect, useState, useSyncExternalStore } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { motion } from "motion/react";
-import { ArrowLeft, Check, GraduationCap, KeyRound, LoaderCircle, LockKeyhole, RotateCcw } from "lucide-react";
+import { ArrowLeft, Check, GraduationCap, Sparkles, KeyRound, LoaderCircle, LockKeyhole, RotateCcw } from "lucide-react";
 import { CATEGORIES, CATEGORY_ORDER, toolsIn } from "@/lib/tools/catalog";
 import { createClient } from "@/lib/supabase/client";
 import { useBi } from "@/lib/i18n/context";
@@ -180,6 +181,53 @@ function BuildList({ compact }: { compact?: boolean }) {
   );
 }
 
+/**
+ * One owner, one request, finished work back: a photo of a bakery owner
+ * planning a new menu, with an example request and what comes back.
+ * Labelled as an example — it's not a real member's run.
+ */
+function AuthPhoto() {
+  const L = useBi();
+  return (
+    <motion.figure
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+      className="relative max-w-xl overflow-hidden rounded-[28px] bg-[#2a1d14] shadow-[0_40px_90px_-50px_rgba(43,30,18,0.7)]"
+    >
+      <div className="relative aspect-[16/10] lg:aspect-[2/1]">
+        <Image
+          src="/images/auth-hero.webp"
+          alt={L({ ko: "햇살 드는 빵집에서 사장이 딸기 타르트 옆에 노트를 펴고 신메뉴를 구상하는 모습", en: "A bakery owner in a sunlit shop, planning a new menu beside a tray of strawberry tarts" })}
+          fill
+          sizes="(min-width: 1024px) 576px, 100vw"
+          className="object-cover object-[50%_30%]"
+        />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+      </div>
+      <figcaption className="absolute right-3 bottom-3 left-3 flex flex-col gap-2 sm:right-4 sm:bottom-4 sm:left-4">
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.5 }}
+          className="max-w-[85%] self-start rounded-2xl rounded-bl-md bg-white/92 px-3.5 py-2 text-xs leading-relaxed break-keep text-[#1f1b16] shadow-lg backdrop-blur sm:text-sm"
+        >
+          <span className="mr-1.5 text-[10px] font-semibold text-[#c2410c]">{L({ ko: "예시 요청", en: "Example" })}</span>
+          {L({ ko: "딸기 타르트 신메뉴, 인스타 홍보 문구랑 2주 게시 일정 짜 줘", en: "New strawberry tart — write the Instagram copy and a two-week posting plan" })}
+        </motion.p>
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.1, duration: 0.5 }}
+          className="flex items-center gap-1.5 self-end rounded-2xl rounded-br-md bg-[#c2410c] px-3.5 py-2 text-xs font-semibold text-white shadow-lg sm:text-sm"
+        >
+          <Sparkles size={13} aria-hidden /> {L({ ko: "카피 3안 · 게시 일정 14일 · 이미지 4장", en: "3 copy options · 14-day plan · 4 images" })}
+        </motion.p>
+      </figcaption>
+    </motion.figure>
+  );
+}
+
 export default function AuthPage() {
   const L = useBi();
 
@@ -193,8 +241,9 @@ export default function AuthPage() {
       </div>
 
       {/* What you can build — beside the card on large screens, under it on phones. */}
-      <section className="relative order-2 px-4 pb-12 sm:px-8 lg:order-1 lg:flex lg:flex-col lg:justify-center lg:border-r lg:border-hairline lg:bg-surface-2/40 lg:px-12 lg:py-24 xl:px-20">
-        <p className="text-sm font-semibold text-accent">{L({ ko: "아이디어에서 매출까지", en: "From idea to revenue" })}</p>
+      <section className="relative order-2 px-4 pb-12 sm:px-8 lg:order-1 lg:flex lg:flex-col lg:justify-center lg:border-r lg:border-hairline lg:bg-surface-2/40 lg:px-12 lg:py-20 xl:px-20">
+        <AuthPhoto />
+        <p className="mt-8 text-sm font-semibold text-accent">{L({ ko: "아이디어에서 매출까지", en: "From idea to revenue" })}</p>
         <h2 className="mt-3 max-w-xl font-display text-[clamp(1.6rem,3vw,2.6rem)] leading-[1.1] font-bold tracking-[-0.02em] break-keep text-fg">
           {L({ ko: "로그인하면 이런 걸 만들 수 있어요", en: "Sign in and build things like these" })}
         </h2>
