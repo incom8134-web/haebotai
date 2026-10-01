@@ -671,3 +671,34 @@ contrasting same-tool requests (1.00 = the same template):
 Over the same pairs, the strategies' blueprints overlapped about 0.03.
 The plans differed while the results kept the same shape, which is the
 diagnosis in §3.
+
+**After phase 2** (live, 2026-10-01, throwaway account, same golden
+requests):
+
+| Pair | v1 | v2 |
+| --- | --- | --- |
+| business plan, loan vs VC | 0.34 | 0.37 |
+| copy, funeral vs food truck | 0.79 | 0.67 |
+| deck, client vs lesson | 0.70 | 0.58 |
+| **Mean** | **0.61** | **0.54** |
+
+**Runs.** All 6 runs finished; none asked a question.
+
+**Planner choices.**
+- Loan plan: topic research.
+- VC plan: topic research plus competitor analysis.
+- Both copy requests: customer-language research.
+- Decks: no research.
+- Revision budgets were 1–2 as the requests warranted.
+
+**Strategist.** Each request was placed in its own region of the space,
+for example loan = evidence-led / lender / heavy numbers versus
+VC = problem-solution / investor. Once (the food-truck promo) it chose
+the named default, and the card says why.
+
+**Cost and time.** Credits were unchanged. Time was similar, except
+where the planner added research and two rewrites (funeral copy:
+234 s vs 123 s).
+
+**Remaining sameness.** What's left is the fixed output shapes, which is
+phase 3's job.
