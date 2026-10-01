@@ -47,8 +47,9 @@ export function ProjectPicker({
       const { values, filled } = prefillFromFacts(inputs, facts);
       if (filled.length) {
         onFill(values);
-        const labels = filled.map((f) => inputs.find((i) => i.id === f)?.label ?? f);
-        setNote(L({ ko: `프로젝트에서 ${labels.join(", ")} 칸을 채웠어요. 고쳐도 돼요.`, en: `Filled ${labels.length} field(s) from the project. Edit freely.` }));
+        // The form decides which fields actually take the value (it never
+        // overwrites a brief or the member's answers), so stay general.
+        setNote(L({ ko: "프로젝트가 아는 내용으로 비어 있는 칸을 채웠어요. 고쳐도 돼요.", en: "Empty fields were filled from the project. Edit freely." }));
       } else {
         setNote(L({ ko: "이 도구에 채울 프로젝트 정보가 아직 없어요. 실행이 끝나면 결과가 프로젝트에 쌓여요.", en: "Nothing to pre-fill yet. This run's results will be added to the project." }));
       }

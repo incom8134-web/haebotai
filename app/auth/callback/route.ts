@@ -24,7 +24,7 @@ export async function GET(request: Request) {
       // Data minimisation: Google sends a profile photo URL with every
       // sign-in; the service never shows or needs it, so drop it from the
       // stored profile (it comes back on the next sign-in and is dropped
-      // again). Runs alongside the brand lookup so sign-in isn't slower.
+      // again).
       const meta = user.user_metadata ?? {};
       const scrub =
         meta.avatar_url || meta.picture
@@ -32,9 +32,11 @@ export async function GET(request: Request) {
               .auth.admin.updateUserById(user.id, { user_metadata: { ...meta, avatar_url: null, picture: null } })
               .catch((err: unknown) => console.warn("avatar scrub failed", err))
           : Promise.resolve();
-      const [{ data: brand }] = await Promise.all([supabase.from("brands").select("id").eq("user_id", user.id).limit(1).maybeSingle(), scrub]);
+      await scrub;
 
-      const target = brand ? next : "/brand";
+      // New members land on /studio, which sends anyone with no projects
+      // and no runs through onboarding (a project, then a first tool).
+      const target = next;
       if (!hasCurrentConsent(user.app_metadata)) {
         return NextResponse.redirect(`${origin}/auth/consent?next=${encodeURIComponent(target)}`);
       }
