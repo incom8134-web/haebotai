@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { motion } from "motion/react";
 import { ArrowRight, ShieldCheck } from "lucide-react";
@@ -78,7 +79,56 @@ function ToolLink({ slug, compact }: { slug: string; compact?: boolean }) {
   );
 }
 
-/* ── The flow: six stages, every tool once ─────────────────────────── */
+/* ── The flow: five stages, every tool once ────────────────────────── */
+
+/**
+ * Every stage's photo is stacked in one frame and crossfaded, so switching
+ * tabs never waits on a download. A stage without a photo gets a drawn
+ * backdrop in the accent colour instead.
+ */
+function StagePhoto({ active }: { active: number }) {
+  const L = useBi();
+  const stage = FLOW[active];
+  return (
+    <div className="relative aspect-[16/10] overflow-hidden bg-[#1a1410] lg:aspect-auto lg:min-h-[460px]">
+      {FLOW.map((s, i) => (
+        <div
+          key={s.id}
+          aria-hidden={i !== active}
+          className={cn(
+            "absolute inset-0 transition-[opacity,transform] duration-700 ease-out motion-reduce:transition-none",
+            i === active ? "scale-100 opacity-100" : "scale-[1.04] opacity-0",
+          )}
+        >
+          {s.image ? (
+            <Image
+              src={s.image.src}
+              alt={i === active ? L(s.image.alt) : ""}
+              fill
+              sizes="(min-width: 1024px) 640px, 100vw"
+              className="object-cover"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_20%_10%,var(--color-accent)_0%,transparent_55%),radial-gradient(90%_80%_at_90%_90%,#f2b27a_0%,transparent_60%),linear-gradient(160deg,#2a1d14,#120d0a)]">
+              <span className="absolute -right-6 -bottom-10 font-display text-[clamp(7rem,16vw,12rem)] leading-none font-black tracking-[-0.05em] text-white/10">
+                {s.label}
+              </span>
+            </div>
+          )}
+        </div>
+      ))}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
+      <div className="absolute right-4 bottom-4 left-4 text-white md:right-6 md:bottom-6 md:left-6">
+        <p className="font-mono text-[11px] tracking-wider text-white/75">
+          {String(active + 1).padStart(2, "0")} · {stage.label}
+        </p>
+        <p className="mt-1 font-display text-[clamp(1.4rem,2.6vw,2rem)] leading-tight font-bold tracking-[-0.02em] break-keep">
+          {L(stage.title)}
+        </p>
+      </div>
+    </div>
+  );
+}
 
 export function FlowSection() {
   const L = useBi();
@@ -103,7 +153,7 @@ export function FlowSection() {
       <div
         role="tablist"
         aria-label={L({ ko: "단계", en: "Stages" })}
-        className="mt-10 grid grid-cols-3 gap-1.5 sm:grid-cols-6"
+        className="mt-10 grid grid-cols-2 gap-1.5 sm:grid-cols-5"
       >
         {FLOW.map((s, i) => (
           <button
@@ -150,22 +200,25 @@ export function FlowSection() {
         id="flow-panel"
         role="tabpanel"
         aria-labelledby={`flow-tab-${stage.id}`}
-        className="mt-4 rounded-[24px] border border-hairline bg-surface-2/50 p-4 md:p-6"
+        className="mt-4 grid overflow-hidden rounded-[24px] border border-hairline bg-surface-2/50 lg:grid-cols-[1.15fr_1fr]"
       >
-        <p className="max-w-2xl text-sm leading-relaxed break-keep text-fg-muted">
-          {L(stage.body)}
-        </p>
-        <motion.div
-          key={stage.id}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3"
-        >
-          {stage.tools.map((slug) => (
-            <ToolLink key={slug} slug={slug} />
-          ))}
-        </motion.div>
+        <StagePhoto active={active} />
+        <div className="p-4 md:p-6">
+          <p className="max-w-2xl text-sm leading-relaxed break-keep text-fg-muted">
+            {L(stage.body)}
+          </p>
+          <motion.div
+            key={stage.id}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-1"
+          >
+            {stage.tools.map((slug) => (
+              <ToolLink key={slug} slug={slug} />
+            ))}
+          </motion.div>
+        </div>
       </div>
     </section>
   );

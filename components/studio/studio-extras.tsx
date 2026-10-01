@@ -231,10 +231,10 @@ export function CategoryRail() {
 
 // ── Ready-made workflows ───────────────────────────────────────────────
 
-const FLOWS: { name: { ko: string; en: string }; pitch: { ko: string; en: string }; steps: string[] }[] = [
-  { name: { ko: "가게 오픈 패키지", en: "Opening a shop" }, pitch: { ko: "브랜드부터 첫 광고까지 한 번에 이어서", en: "Brand to first ad, one hand-off at a time" }, steps: ["brand-dna", "logo-lab", "sales-page", "ad-factory"] },
-  { name: { ko: "투자·지원사업 준비", en: "Funding-ready" }, pitch: { ko: "시장 근거로 계획서와 발표자료까지", en: "Market evidence into a plan and a deck" }, steps: ["market-desk", "doc-studio", "pitch-director"] },
-  { name: { ko: "캠페인 런칭", en: "Campaign launch" }, pitch: { ko: "트렌드를 캠페인과 콘텐츠로", en: "Trends into a campaign and its content" }, steps: ["trend-radar", "campaign-planner", "hook-lab", "content-transformer"] },
+const FLOWS: { name: { ko: string; en: string }; pitch: { ko: string; en: string }; steps: string[]; image: string }[] = [
+  { name: { ko: "가게 오픈 패키지", en: "Opening a shop" }, pitch: { ko: "브랜드부터 첫 광고까지 한 번에 이어서", en: "Brand to first ad, one hand-off at a time" }, steps: ["brand-dna", "logo-lab", "sales-page", "ad-factory"], image: "/images/stage-brand.webp" },
+  { name: { ko: "투자·지원사업 준비", en: "Funding-ready" }, pitch: { ko: "시장 근거로 계획서와 발표자료까지", en: "Market evidence into a plan and a deck" }, steps: ["market-desk", "doc-studio", "pitch-director"], image: "/images/stage-build.webp" },
+  { name: { ko: "캠페인 런칭", en: "Campaign launch" }, pitch: { ko: "트렌드를 캠페인과 콘텐츠로", en: "Trends into a campaign and its content" }, steps: ["trend-radar", "campaign-planner", "hook-lab", "content-transformer"], image: "/images/stage-idea.webp" },
 ];
 
 export function WorkflowShowcase({ projectId }: { projectId?: string }) {
@@ -249,13 +249,19 @@ export function WorkflowShowcase({ projectId }: { projectId?: string }) {
       <div className="mt-4 grid gap-3 lg:grid-cols-3">
         {FLOWS.map((f, i) => (
           <Reveal key={f.name.en} delay={i * 0.08}>
-            <div className="flex h-full flex-col rounded-[22px] border border-hairline bg-surface p-4">
-              <p className="text-sm font-bold text-fg">{L(f.name)}</p>
-              <p className="mt-0.5 text-xs text-fg-muted">{L(f.pitch)}</p>
-              <ol className="relative mt-4 flex flex-col gap-2">
+            <div className="group/flow flex h-full flex-col overflow-hidden rounded-[22px] border border-hairline bg-surface">
+              <div className="relative h-32 overflow-hidden">
+                <Image src={f.image} alt="" fill sizes="(min-width: 1024px) 380px, 100vw" className="object-cover transition-transform duration-700 ease-out group-hover/flow:scale-105 motion-reduce:transition-none" />
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                <div className="absolute right-4 bottom-3 left-4 text-white">
+                  <p className="text-sm font-bold">{L(f.name)}</p>
+                  <p className="mt-0.5 text-xs text-white/80">{L(f.pitch)}</p>
+                </div>
+              </div>
+              <ol className="relative flex flex-col gap-2 p-4">
                 <motion.span
                   aria-hidden
-                  className="absolute top-3 bottom-3 left-[15px] w-px origin-top bg-gradient-to-b from-accent to-accent/10"
+                  className="absolute top-7 bottom-7 left-[35px] w-px origin-top bg-gradient-to-b from-accent to-accent/10"
                   initial={reduce ? false : { scaleY: 0 }}
                   whileInView={{ scaleY: 1 }}
                   viewport={{ once: true }}
