@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, BookOpenText, CircleGauge, CircleHelp, Copy, Check, Crown, ExternalLink, Headset, KeyRound, MonitorSmartphone, Search, ShieldCheck, Sparkle, TriangleAlert } from "lucide-react";
+import { ArrowRight, BookOpenText, CircleGauge, CircleHelp, Copy, Check, Crown, ExternalLink, Headset, KeyRound, MonitorSmartphone, Search, ShieldCheck, Sparkle, TriangleAlert, Rocket } from "lucide-react";
 import { FAQ } from "@/lib/site/faq";
 import { PATCH_NOTES } from "@/lib/site/patch-notes";
 import { useBi } from "@/lib/i18n/context";
@@ -24,7 +24,8 @@ export function HelpHome() {
     { href: "/help/faq", icon: CircleHelp, title: { ko: "자주 묻는 질문", en: "FAQ" }, body: { ko: `${FAQ.length}개 질문을 주제별로`, en: `${FAQ.length} answers by topic` } },
     { href: "/help/contact", icon: Headset, title: { ko: "고객센터", en: "Customer service" }, body: { ko: "1:1 문의와 원격 지원", en: "Tickets and remote help" } },
     { href: "/help/api-guide", icon: BookOpenText, title: { ko: "API 키 설명서", en: "API key manual" }, body: { ko: "발급부터 문제 해결까지", en: "From getting a key to fixing errors" } },
-    { href: "/account/credits", icon: CircleGauge, title: { ko: "크레딧·한도", en: "Credits & limits" }, body: { ko: "도구별 비용과 사용 한도", en: "Cost per tool and usage limits" } },
+    { href: "/onboarding", icon: Rocket, title: { ko: "처음 시작하기", en: "Getting started" }, body: { ko: "목표 → 프로젝트 → 첫 도구, 세 화면", en: "Goal → project → first tool, three screens" } },
+    { href: "/pricing", icon: CircleGauge, title: { ko: "요금·크레딧", en: "Pricing & credits" }, body: { ko: "플랜과 도구별 예상 크레딧", en: "Plans and credits per tool" } },
     { href: "/account/membership", icon: Crown, title: { ko: "학생 멤버십", en: "Student membership" }, body: { ko: "재학 인증으로 무제한", en: "Unlimited with enrollment" } },
     { href: "/legal/terms", icon: ShieldCheck, title: { ko: "약관·정책", en: "Terms & policies" }, body: { ko: "이용약관·개인정보·환불", en: "Terms, privacy, refunds" } },
     { href: "/help/whats-new", icon: Sparkle, title: { ko: "새로운 점", en: "What's new" }, body: { ko: `v${PATCH_NOTES[0].version} · ${PATCH_NOTES[0].date}`, en: `v${PATCH_NOTES[0].version} · ${PATCH_NOTES[0].date}` } },
