@@ -1,15 +1,14 @@
 "use client";
 
-import { toolSlug } from "@/lib/tools/catalog";
 import Link from "next/link";
 import { motion } from "motion/react";
 import { Download, Gauge, KeyRound, RotateCcw, Timer } from "lucide-react";
-import { getTool, listTools } from "@/lib/tools/registry";
-import { CATEGORY_LABELS } from "@/lib/tools/registry/categories";
+import { getTool } from "@/lib/tools/registry";
 import { useBi, useLocale } from "@/lib/i18n/context";
 import type { PlanId } from "@/lib/site/plans";
 import type { OwnKeyUsage, ToolUsage } from "@/lib/usage";
 import { PageHeader } from "@/components/site/page";
+import { PriceTable } from "@/components/site/plan-cards";
 
 // /account/credits — what I have, what each tool costs, what I've used
 // this month, and the limits that apply regardless of credits.
@@ -59,8 +58,6 @@ function CreditsView({ balance, plan, apiKeyConnected, usage }: { balance: numbe
   const pct = allowance ? Math.max(0, Math.min(100, Math.round((balance / allowance) * 100))) : 100;
   const unlimited = plan === "student";
   const maxUsed = Math.max(1, ...usage.byTool.map((u) => u.credits));
-  // Only tools that can run have a price; upcoming ones are listed on the tools page.
-  const tools = listTools().filter((t) => !t.comingSoon).sort((a, b) => a.estimatedCredits - b.estimatedCredits);
 
   return (
     <>
@@ -129,28 +126,7 @@ function CreditsView({ balance, plan, apiKeyConnected, usage }: { balance: numbe
 
       <section className="mt-8">
         <h2 className="mb-3 text-lg font-semibold">{L({ ko: "도구별 예상 크레딧", en: "Estimated credits per tool" })}</h2>
-        <div className="glass overflow-x-auto rounded-[24px]">
-          <table className="w-full min-w-[520px] text-sm">
-            <thead>
-              <tr className="border-b border-hairline text-left text-xs text-fg-subtle">
-                <th className="px-5 py-3 font-medium">{L({ ko: "도구", en: "Tool" })}</th>
-                <th className="px-5 py-3 font-medium">{L({ ko: "분야", en: "Area" })}</th>
-                <th className="px-5 py-3 text-right font-medium">{L({ ko: "예상 크레딧", en: "Est. credits" })}</th>
-                <th className="px-5 py-3 text-right font-medium">{L({ ko: "소요 시간", en: "Time" })}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tools.map((t) => (
-                <tr key={t.id} className="border-b border-hairline/60 last:border-0 transition-colors hover:bg-surface-2/30">
-                  <td className="px-5 py-3"><Link href={`/tools/${toolSlug(t.id)}`} className="flex items-center gap-2 hover:text-studio-cyan"><t.icon size={14} className="text-studio-cyan" aria-hidden />{locale === "en" ? t.name_en : t.name_ko}</Link></td>
-                  <td className="px-5 py-3 text-fg-muted">{L(CATEGORY_LABELS[t.category])}</td>
-                  <td className="px-5 py-3 text-right font-mono">{t.estimatedCredits}</td>
-                  <td className="px-5 py-3 text-right font-mono text-fg-muted">~{t.estimatedSeconds}s</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <PriceTable />
       </section>
     </>
   );

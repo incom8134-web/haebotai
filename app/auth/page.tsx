@@ -1,20 +1,29 @@
 "use client";
 
 import { BrandMark } from "@/components/brand-mark";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { motion } from "motion/react";
-import { ArrowLeft, Check, GraduationCap, KeyRound, Link2, LoaderCircle, ShieldCheck } from "lucide-react";
-import { listTools } from "@/lib/tools/registry";
+import { ArrowLeft, Check, GraduationCap, KeyRound, LoaderCircle, LockKeyhole, RotateCcw } from "lucide-react";
+import { CATEGORIES, CATEGORY_ORDER, toolsIn } from "@/lib/tools/catalog";
 import { createClient } from "@/lib/supabase/client";
 import { useBi } from "@/lib/i18n/context";
 import { ThemeLangControls } from "@/components/shell/app-shell";
 
-// Sign-in. One screen, two halves: on the left, why it's worth it (told
-// with the real tool set drifting past); on the right, one glass card with
-// one action. Honest terms — 500 credits on sign-up, no card, students
+// Sign-in (docs/redesign-plan.md §5). Google only — email sign-up was
+// closed on purpose. Next to the one button: what you can build (from the
+// catalog), a word for returning members, and what happens to your
+// account data. Honest terms — 500 credits on sign-up, no card, students
 // unlimited after verification (lib/site/plans.ts).
+
+// Set by onboarding; read only after hydration so the server render and
+// the first client render match. No project names on this signed-out
+// screen — it may be a shared computer.
+const noop = () => () => {};
+function useReturning() {
+  return useSyncExternalStore(noop, () => /(?:^|;\s*)haebot-onboarded=1/.test(document.cookie), () => false);
+}
 
 function safeNext(raw: string | null) {
   return raw && raw.startsWith("/") && !raw.startsWith("//") ? raw : "/studio";
@@ -27,6 +36,7 @@ function AuthCard() {
   const next = safeNext(params.get("next"));
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState(false);
+  const returning = useReturning();
 
   // Coming back from Google with the Back button restores this page from
   // the back/forward cache with the button still stuck on "Opening Google…".
@@ -58,14 +68,16 @@ function AuthCard() {
       initial={{ opacity: 0, y: 16, filter: "blur(6px)" }}
       animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      className="glass-strong w-full max-w-[420px] rounded-[32px] p-7 sm:p-9"
+      className="w-full max-w-[420px] rounded-[28px] border border-hairline bg-surface p-7 shadow-[0_30px_80px_-50px_rgba(43,30,18,0.5)] sm:p-9"
     >
       <BrandMark size={48} priority />
       <h1 className="mt-6 font-display text-[28px] leading-tight font-bold tracking-[-0.02em] break-keep">{L({ ko: "해봇 AI 시작하기", en: "Start with Haebot AI" })}</h1>
       <p className="mt-2 text-sm leading-relaxed break-keep text-fg-muted">
         {next !== "/studio"
           ? L({ ko: "로그인하면 보던 화면으로 바로 돌아가요.", en: "Sign in and you'll land right back where you were." })
-          : L({ ko: "Google 계정 하나로 모든 도구를 씁니다.", en: "One Google account, every tool." })}
+          : returning
+            ? L({ ko: "다시 오셨네요. 로그인하면 하던 작업과 프로젝트로 바로 돌아가요.", en: "Welcome back. Sign in to pick up your work and projects." })
+            : L({ ko: "Google 계정 하나로 25개 도구를 모두 써요. 처음이면 목표와 프로젝트를 정하는 짧은 안내부터 시작해요.", en: "One Google account, all 25 tools. First time? A short setup picks your goal and project." })}
       </p>
 
       {error || failed ? (
@@ -98,76 +110,85 @@ function AuthCard() {
           { icon: Check, text: { ko: "가입하면 500 크레딧, 카드 등록 없음", en: "500 credits on sign-up, no card needed" } },
           { icon: GraduationCap, text: { ko: "학생은 재학 인증 후 무제한", en: "Students: unlimited after verification" } },
           { icon: KeyRound, text: { ko: "내 API 키를 넣으면 크레딧 없이 실행", en: "Bring your own API key and runs are free" } },
+          { icon: RotateCcw, text: { ko: "실패하거나 취소한 실행은 자동 환불", en: "Failed or cancelled runs are refunded" } },
         ].map((item) => (
           <li key={item.text.en} className="flex items-start gap-2.5 break-keep text-fg-muted">
-            <item.icon size={16} className="mt-0.5 shrink-0 text-studio-cyan" aria-hidden /> {L(item.text)}
+            <item.icon size={16} className="mt-0.5 shrink-0 text-accent" aria-hidden /> {L(item.text)}
           </li>
         ))}
       </ul>
+
+      <div className="mt-6 rounded-2xl bg-surface-2 px-4 py-3">
+        <p className="flex items-center gap-1.5 text-xs font-semibold text-fg"><LockKeyhole size={13} className="text-grounded" aria-hidden /> {L({ ko: "계정과 데이터", en: "Your account and data" })}</p>
+        <ul className="mt-1.5 space-y-1 text-2xs leading-relaxed break-keep text-fg-muted">
+          <li>{L({ ko: "Google로만 로그인해요. 비밀번호를 만들거나 저장하지 않아요.", en: "Google sign-in only — no password is created or stored." })}</li>
+          <li>{L({ ko: "이름과 이메일만 쓰고, 프로필 사진은 저장하지 않아요.", en: "We use your name and email; your profile photo isn't kept." })}</li>
+          <li>{L({ ko: "입력과 결과는 AI 학습에 쓰지 않아요. 계정에서 언제든 지울 수 있어요.", en: "Inputs and results are never used for training, and you can delete them any time." })}</li>
+        </ul>
+      </div>
 
       <p className="mt-6 text-2xs leading-relaxed break-keep text-fg-subtle">
         {L({ ko: "처음 로그인하면 만 14세 이상 여부와 ", en: "On first sign-in we'll ask you to confirm you're 14 or older and accept the " })}
         <Link href="/legal/terms" className="underline underline-offset-2 hover:text-fg">{L({ ko: "이용약관", en: "Terms" })}</Link>
         {L({ ko: "·", en: " and " })}
         <Link href="/legal/privacy" className="underline underline-offset-2 hover:text-fg">{L({ ko: "개인정보 처리방침", en: "Privacy Policy" })}</Link>
-        {L({ ko: " 동의를 확인해요. 만 14세 미만은 가입할 수 없어요. 입력한 내용은 AI 학습에 쓰지 않아요.", en: ". Under-14s can't sign up. Your inputs are never used for AI training." })}
+        {L({ ko: " 동의를 확인해요. 만 14세 미만은 가입할 수 없어요.", en: ". Under-14s can't sign up." })}
       </p>
     </motion.div>
   );
 }
 
+/** What you can build: one line per area, from the catalog. */
+function BuildList({ compact }: { compact?: boolean }) {
+  const L = useBi();
+  return (
+    <ul className={compact ? "grid gap-2" : "grid gap-3"}>
+      {CATEGORY_ORDER.map((c) => {
+        const tools = toolsIn(c).filter((t) => t.engine && !t.hidden);
+        const lead = tools[0];
+        if (!lead) return null;
+        return (
+          <li key={c} className="flex items-start gap-3 rounded-2xl border border-hairline bg-surface p-3.5">
+            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-accent-dim text-accent"><lead.icon size={16} aria-hidden /></span>
+            <span className="min-w-0">
+              <span className="block text-sm font-semibold break-keep text-fg">{L(CATEGORIES[c].name)}</span>
+              <span className="mt-0.5 block text-xs leading-relaxed break-keep text-fg-muted">{tools.slice(0, 3).map((t) => L(t.outputs[0])).join(" · ")}</span>
+            </span>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 export default function AuthPage() {
   const L = useBi();
-  const tools = listTools();
-  const rows = [tools.slice(0, 9), tools.slice(9)];
 
   return (
-    <main className="relative grid min-h-dvh overflow-hidden lg:grid-cols-[1.1fr_1fr]">
-      <div className="app-backdrop" aria-hidden>
-        <span className="orb orb-a" />
-        <span className="orb orb-b" />
-        <span className="orb orb-c" />
-      </div>
-
+    <main className="relative grid min-h-dvh bg-bg lg:grid-cols-[1.05fr_1fr]">
       <div className="absolute top-[max(16px,env(safe-area-inset-top))] right-4 left-4 z-10 flex items-center justify-between">
-        <Link href="/" className="glass flex h-11 items-center gap-2 rounded-2xl px-4 text-sm text-fg-muted transition-colors hover:text-fg">
+        <Link href="/" className="flex h-10 items-center gap-2 rounded-xl border border-hairline bg-surface px-3.5 text-sm text-fg-muted transition-colors hover:text-fg">
           <ArrowLeft size={15} aria-hidden /> {L({ ko: "처음으로", en: "Home" })}
         </Link>
-        <div className="glass flex rounded-2xl p-0.5"><ThemeLangControls /></div>
+        <div className="flex rounded-xl border border-hairline bg-surface p-0.5"><ThemeLangControls /></div>
       </div>
 
-      {/* Story half — hidden on phones so the action stays above the fold. */}
-      <section className="relative hidden flex-col justify-center overflow-hidden px-12 py-24 lg:flex xl:px-20">
-        <p className="text-sm font-medium text-studio-cyan">{L({ ko: "브리프 하나로, 캠페인 전체를", en: "One brief. A whole campaign." })}</p>
-        <h2 className="mt-4 max-w-xl font-display text-[clamp(2.4rem,3.6vw,3.6rem)] leading-[1.05] font-bold tracking-[-0.02em] break-keep">
-          {L({ ko: "마케팅 팀이 없어도,", en: "No marketing team?" })}
-          <br />
-          <span className="studio-gradient-type">{L({ ko: "마케팅은 됩니다.", en: "No problem." })}</span>
+      {/* What you can build — beside the card on large screens, under it on phones. */}
+      <section className="relative order-2 px-4 pb-12 sm:px-8 lg:order-1 lg:flex lg:flex-col lg:justify-center lg:border-r lg:border-hairline lg:bg-surface-2/40 lg:px-12 lg:py-24 xl:px-20">
+        <p className="text-sm font-semibold text-accent">{L({ ko: "아이디어에서 매출까지", en: "From idea to revenue" })}</p>
+        <h2 className="mt-3 max-w-xl font-display text-[clamp(1.6rem,3vw,2.6rem)] leading-[1.1] font-bold tracking-[-0.02em] break-keep text-fg">
+          {L({ ko: "로그인하면 이런 걸 만들 수 있어요", en: "Sign in and build things like these" })}
         </h2>
-        <p className="mt-5 max-w-lg text-base leading-relaxed break-keep text-fg-muted">
-          {L({ ko: "전략부터 카피, 이미지, 상세페이지, 사업계획서까지. 도구끼리 결과를 이어받고, 확인하지 못한 숫자에는 추정이라고 표시합니다.", en: "Strategy, copy, images, detail pages, business plans. Tools pass results to each other, and unverified numbers are labeled as estimates." })}
+        <p className="mt-3 max-w-lg text-sm leading-relaxed break-keep text-fg-muted lg:text-base">
+          {L({ ko: "프로젝트가 정한 내용을 기억하고, 한 도구의 결과가 다음 도구로 이어져요. 확인하지 못한 숫자에는 추정이라고 표시해요.", en: "Projects remember what you've settled, results carry from tool to tool, and unverified numbers are labelled as estimates." })}
         </p>
-        <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3 text-sm text-fg-muted">
-          <span className="flex items-center gap-2"><Link2 size={15} className="text-studio-cyan" aria-hidden /> {L({ ko: "도구끼리 이어서", en: "Tools that chain" })}</span>
-          <span className="flex items-center gap-2"><ShieldCheck size={15} className="text-studio-cyan" aria-hidden /> {L({ ko: "출처 또는 추정 표시", en: "Sourced or labeled" })}</span>
-        </div>
-
-        {/* Two slow, opposite marquees of the real tools. */}
-        <div className="mt-14 -mr-20 space-y-3 [mask-image:linear-gradient(90deg,transparent,black_12%,black_88%,transparent)]" aria-hidden>
-          {rows.map((row, r) => (
-            <div key={r} className="flex w-max gap-3" style={{ animation: `auth-marquee ${r ? 46 : 38}s linear infinite ${r ? "reverse" : ""}` }}>
-              {[...row, ...row].map((t, i) => (
-                <span key={`${t.id}-${i}`} className="glass flex items-center gap-2 rounded-full px-4 py-2 text-sm whitespace-nowrap">
-                  <t.icon size={14} className="text-studio-cyan" /> {L({ ko: t.name_ko, en: t.name_en })}
-                </span>
-              ))}
-            </div>
-          ))}
+        <div className="mt-6 max-w-xl lg:mt-8">
+          <BuildList />
         </div>
       </section>
 
-      <section className="relative flex items-center justify-center px-4 pt-24 pb-10 sm:px-8">
-        <Suspense fallback={<div className="glass-strong h-[520px] w-full max-w-[420px] rounded-[32px]" />}>
+      <section className="relative order-1 flex items-center justify-center px-4 pt-24 pb-8 sm:px-8 lg:order-2 lg:pb-10">
+        <Suspense fallback={<div className="h-[560px] w-full max-w-[420px] rounded-[28px] border border-hairline bg-surface" />}>
           <AuthCard />
         </Suspense>
       </section>

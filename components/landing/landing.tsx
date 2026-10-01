@@ -3,13 +3,13 @@
 import { createContext, useContext } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
-import { ArrowRight, Check, GraduationCap, Plus } from "lucide-react";
+import { ArrowRight, Check, Plus } from "lucide-react";
 import { BusinessInfo } from "@/components/site/business-info";
 import { BrandMark } from "@/components/brand-mark";
 import { ThemeLangControls } from "@/components/shell/app-shell";
 import { primaryButton, secondaryButton } from "@/components/site/page";
+import { PlanCards } from "@/components/site/plan-cards";
 import { publicTools } from "@/lib/tools/catalog";
-import { PLANS } from "@/lib/site/plans";
 import { FAQ } from "@/lib/site/faq";
 import { useBi } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
@@ -199,69 +199,14 @@ function Pricing() {
           en: "You see the credit cost before every run. Failed or cancelled runs are refunded automatically, and with your own API key runs cost no credits.",
         })}
       />
-      <div className="mt-10 grid gap-4 md:grid-cols-3">
-        {PLANS.map((p, i) => (
-          <motion.article
-            key={p.id}
-            {...reveal}
-            transition={{ ...reveal.transition, delay: i * 0.06 }}
-            className={cn(
-              "relative flex flex-col rounded-[24px] border bg-surface p-6",
-              p.highlight ? "border-accent/50" : "border-hairline",
-            )}
-          >
-            {p.id === "student" ? (
-              <span className="absolute -top-3 left-6 flex items-center gap-1.5 rounded-full bg-ai px-3 py-1 text-2xs font-semibold text-white">
-                <GraduationCap size={12} aria-hidden />{" "}
-                {L({ ko: "학생 무제한", en: "Unlimited for students" })}
-              </span>
-            ) : null}
-            <p className="font-semibold text-fg">{L(p.name)}</p>
-            <p className="mt-3 font-display text-4xl font-bold tracking-[-0.02em] text-fg">
-              {L(p.price)}
-            </p>
-            <p className="mt-1 text-2xs text-fg-subtle">{L(p.note)}</p>
-            <p className="mt-5 rounded-xl bg-surface-2 px-3 py-2 text-sm font-medium text-fg">
-              {L(p.credits)}
-            </p>
-            <ul className="mt-5 flex-1 space-y-2.5 text-sm text-fg-muted">
-              {p.features.map((f) => (
-                <li key={f.en} className="flex gap-2 break-keep">
-                  <Check
-                    size={15}
-                    className="mt-0.5 shrink-0 text-grounded"
-                    aria-hidden
-                  />{" "}
-                  {L(f)}
-                </li>
-              ))}
-            </ul>
-            <Link
-              href={
-                !signedIn
-                  ? "/auth"
-                  : p.id === "pro"
-                    ? "/account/membership/checkout"
-                    : p.id === "student"
-                      ? "/account/membership"
-                      : "/studio"
-              }
-              className={cn(
-                p.id === "free" ? secondaryButton : primaryButton,
-                "mt-7",
-              )}
-            >
-              {p.id === "student"
-                ? signedIn
-                  ? L({ ko: "학생 인증하기", en: "Verify as a student" })
-                  : L({ ko: "가입 후 인증하기", en: "Sign up, then verify" })
-                : p.id === "pro" && signedIn
-                  ? L({ ko: "프로 시작하기", en: "Get Pro" })
-                  : L({ ko: "시작하기", en: "Get started" })}
-            </Link>
-          </motion.article>
-        ))}
+      <div className="mt-10">
+        <PlanCards signedIn={signedIn} />
       </div>
+      <p className="mt-4 text-sm text-fg-muted">
+        <Link href="/pricing" className="text-accent underline underline-offset-2">
+          {L({ ko: "도구별 크레딧 전체 보기", en: "Credits for every tool" })}
+        </Link>
+      </p>
     </section>
   );
 }
@@ -363,6 +308,7 @@ function Footer() {
         >
           {[
             ["/tools", { ko: "도구", en: "Tools" }],
+            ["/pricing", { ko: "요금", en: "Pricing" }],
             ["/use-cases", { ko: "활용 사례", en: "Use cases" }],
             ["/help", { ko: "도움말", en: "Help" }],
             ["/help/faq", { ko: "자주 묻는 질문", en: "FAQ" }],

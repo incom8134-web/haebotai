@@ -4,7 +4,7 @@ import { listTools } from "@/lib/tools/registry";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
-const PAGES = ["", "/tools", "/use-cases", "/status", "/help/shortcuts", "/help", "/help/faq", "/help/contact", "/help/api-guide", "/help/whats-new", "/legal/terms", "/legal/privacy", "/legal/refund"];
+const PAGES = ["", "/tools", "/pricing", "/use-cases", "/status", "/help/shortcuts", "/help", "/help/faq", "/help/contact", "/help/api-guide", "/help/whats-new", "/legal/terms", "/legal/privacy", "/legal/refund"];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const tools = listTools()
