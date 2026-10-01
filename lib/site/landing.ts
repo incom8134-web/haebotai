@@ -13,6 +13,8 @@ export const FLOW: {
   title: Bilingual;
   body: Bilingual;
   tools: string[];
+  /** A photo of the stage (public/images); stages without one get a drawn backdrop. */
+  image?: { src: string; alt: Bilingual };
 }[] = [
   {
     id: "idea",
@@ -23,6 +25,7 @@ export const FLOW: {
       "Find a business worth trying in your experience, the market's gaps and its customers.",
     ),
     tools: ["idea-radar", "market-gap", "trend-radar", "market-desk", "persona-mapper"],
+    image: { src: "/images/stage-idea.webp", alt: b("밤늦은 책상 위, 동네 지도와 포스트잇에 가게 아이디어를 그려 둔 모습", "A desk late at night: a neighbourhood map and sticky notes sketching shop ideas") },
   },
   {
     id: "build",
@@ -33,6 +36,7 @@ export const FLOW: {
       "Settle the competition, revenue model and first product, then an offer and a plan.",
     ),
     tools: ["competitor-lens", "revenue-mapper", "offer-architect", "mvp-blueprint", "doc-studio"],
+    image: { src: "/images/stage-build.webp", alt: b("두 공동 창업자가 한옥 카페에서 계산기와 메모로 수익 구조를 맞춰 보는 모습", "Two co-founders in a hanok café working out the numbers with a calculator and notes") },
   },
   {
     id: "brand",
@@ -43,6 +47,7 @@ export const FLOW: {
       "Set the brand, then carry it into a logo, site, product page and ads.",
     ),
     tools: ["brand-dna", "logo-lab", "web-builder", "sales-page", "ad-factory"],
+    image: { src: "/images/stage-brand.webp", alt: b("작업실에서 유자청 병을 스마트폰으로 제품 촬영하는 모습", "A maker photographing jars of yuzu preserve with a phone in a small studio") },
   },
   {
     id: "operate",
@@ -53,6 +58,7 @@ export const FLOW: {
       "Proposals, decks, SOPs, meeting decisions and operating plans you can use today.",
     ),
     tools: ["proposal-forge", "pitch-director", "sop-builder", "meeting-action", "ops-planner"],
+    image: { src: "/images/stage-operate.webp", alt: b("저녁 꽃집에서 사장이 클립보드로 주간 일정을 정리하는 모습", "A florist going over the week's schedule on a clipboard at dusk") },
   },
   {
     id: "grow",
