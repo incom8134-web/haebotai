@@ -37,13 +37,15 @@ export interface KeyAvailability {
 }
 
 /**
- * Claude/ChatGPT are own-key only — no usable key for that provider
- * means no run, not a Gemini fallback. Distinguishes "never registered a
- * key" from "registered one, but every slot is broken or exhausted" so
- * the message points at the actual problem.
+ * Every provider is own-key only for members (product decision,
+ * 2026-10): no usable key means no run. Only the team may fall back to
+ * the platform's Gemini key (`platformAllowed`, lib/platform-access.ts).
+ * Distinguishes "never registered a key" from "registered one, but every
+ * slot is broken or exhausted" so the message points at the problem.
  */
-export function ownKeyRequiredError(provider: ProviderId, keys: KeyAvailability): string | null {
-  if (provider === "google" || keys.hasUsableKey) return null;
+export function ownKeyRequiredError(provider: ProviderId, keys: KeyAvailability, platformAllowed = false): string | null {
+  if (keys.hasUsableKey) return null;
+  if (provider === "google" && platformAllowed) return null;
   if (keys.hasAnyKey) {
     return `등록된 ${PROVIDER_LABEL[provider]} 키를 모두 사용할 수 없습니다 (한도 초과 또는 인증 실패) — /account/api-key 에서 확인해주세요`;
   }

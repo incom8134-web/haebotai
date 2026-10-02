@@ -12,6 +12,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useBi } from "@/lib/i18n/context";
 import { ThemeLangControls } from "@/components/shell/app-shell";
 import { AUTH_PROVIDERS, type AuthProvider } from "@/lib/auth-providers";
+import { OWN_KEY_ONLY } from "@/lib/site/access";
 
 // Sign-in (docs/redesign-plan.md §5). Google, plus Kakao when it's switched
 // on (lib/auth-providers.ts) — email sign-up was closed on purpose. Next to the one button: what you can build (from the
@@ -126,12 +127,19 @@ function AuthCard() {
       ) : null}
 
       <ul className="mt-7 space-y-3 border-t border-hairline pt-6 text-sm">
-        {[
-          { icon: Check, text: { ko: "가입하면 500 크레딧, 카드 등록 없음", en: "500 credits on sign-up, no card needed" } },
-          { icon: GraduationCap, text: { ko: "학생은 재학 인증 후 무제한", en: "Students: unlimited after verification" } },
-          { icon: KeyRound, text: { ko: "내 API 키를 넣으면 크레딧 없이 실행", en: "Bring your own API key and runs are free" } },
-          { icon: RotateCcw, text: { ko: "실패하거나 취소한 실행은 자동 환불", en: "Failed or cancelled runs are refunded" } },
-        ].map((item) => (
+        {(OWN_KEY_ONLY
+          ? [
+              { icon: Check, text: { ko: "가입은 무료, 카드 등록 없음", en: "Free to join, no card needed" } },
+              { icon: KeyRound, text: { ko: "도구는 내 Gemini API 키로 실행 — Google AI Studio에서 무료 발급", en: "Tools run on your own Gemini API key — free from Google AI Studio" } },
+              { icon: RotateCcw, text: { ko: "요금은 내 Google 계정에서 직접 확인하고 관리", en: "Any usage is billed to, and managed in, your own Google account" } },
+            ]
+          : [
+              { icon: Check, text: { ko: "가입하면 500 크레딧, 카드 등록 없음", en: "500 credits on sign-up, no card needed" } },
+              { icon: GraduationCap, text: { ko: "학생은 재학 인증 후 무제한", en: "Students: unlimited after verification" } },
+              { icon: KeyRound, text: { ko: "내 API 키를 넣으면 크레딧 없이 실행", en: "Bring your own API key and runs are free" } },
+              { icon: RotateCcw, text: { ko: "실패하거나 취소한 실행은 자동 환불", en: "Failed or cancelled runs are refunded" } },
+            ]
+        ).map((item) => (
           <li key={item.text.en} className="flex items-start gap-2.5 break-keep text-fg-muted">
             <item.icon size={16} className="mt-0.5 shrink-0 text-accent" aria-hidden /> {L(item.text)}
           </li>

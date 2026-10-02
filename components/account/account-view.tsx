@@ -16,6 +16,7 @@ import { listTools } from "@/lib/tools/registry";
 import { PageHeader, inputClass, primaryButton, secondaryButton, textareaClass } from "@/components/site/page";
 import { cn } from "@/lib/utils";
 import type { ConsentState } from "@/lib/consent";
+import { OWN_KEY_ONLY } from "@/lib/site/access";
 
 // Which tools currently run on a given provider, read live from the
 // capability map so this list can never drift out of sync with reality.
@@ -30,6 +31,7 @@ function toolNamesForProvider(provider: ApiKeyProvider): { ko: string; en: strin
 
 const STUDENT_MSG: Record<string, { ko: string; en: string }> = {
   submitted: { ko: "신청했어요. 영업일 1~2일 안에 알려 드려요.", en: "Submitted — we'll reply within 1–2 business days." },
+  closed: { ko: "학생 멤버십 신청을 받지 않아요. 내 API 키를 등록하면 모든 도구를 쓸 수 있어요.", en: "Student membership is closed. Add your own API key to use every tool." },
   school_required: { ko: "학교 이름을 입력해 주세요.", en: "Enter your school name." },
   school_email_invalid: { ko: "학교 이메일은 ac.kr 또는 edu 주소여야 해요. 없으면 비워 두고 비고에 적어 주세요.", en: "School emails end in ac.kr or edu. No school email? Leave it blank and add a note." },
   already_pending: { ko: "이미 검토 중인 신청이 있어요.", en: "You already have a request under review." },
@@ -78,11 +80,13 @@ function providerDescription(provider: ApiKeyProvider): { ko: string; en: string
 function AccountOverview({ email, balance, membership, apiKey, brandName, signOut, consent }: { email: string; balance: number | null; membership: Membership; apiKey: ApiKeyStatus; brandName: string | null; signOut: () => void; consent: ConsentState | null }) {
   const L = useBi();
   const plan = PLANS.find((p) => p.id === membership.plan)!;
-  const doors = [
+  const allDoors = [
     { href: "/account/credits", icon: CircleGauge, title: { ko: "크레딧·한도", en: "Credits & limits" }, value: membership.plan === "student" ? L({ ko: "제한 없음", en: "Unlimited" }) : L({ ko: `${(balance ?? 0).toLocaleString()} 남음`, en: `${(balance ?? 0).toLocaleString()} left` }) },
     { href: "/account/membership", icon: Crown, title: { ko: "학생 멤버십", en: "Student membership" }, value: membership.plan === "student" ? L({ ko: "사용 중", en: "Active" }) : membership.studentRequest === "pending" ? L({ ko: "검토 중", en: "Under review" }) : L({ ko: "신청 가능", en: "Available" }) },
-    { href: "/account/api-key", icon: KeyRound, title: { ko: "내 API 키", en: "My API key" }, value: apiKey.connected ? L({ ko: "연결됨 · 크레딧 미차감", en: "Connected · no credits" }) : L({ ko: "없음", en: "None" }) },
+    { href: "/account/api-key", icon: KeyRound, title: { ko: "내 API 키", en: "My API key" }, value: apiKey.connected ? L(OWN_KEY_ONLY ? { ko: "연결됨", en: "Connected" } : { ko: "연결됨 · 크레딧 미차감", en: "Connected · no credits" }) : L(OWN_KEY_ONLY ? { ko: "등록 필요", en: "Needed" } : { ko: "없음", en: "None" }) },
   ];
+  // No credits or plans while members bring their own key (lib/site/access.ts): the key is the one door that matters.
+  const doors = OWN_KEY_ONLY ? allDoors.filter((d) => d.href === "/account/api-key") : allDoors;
   return (
     <>
       <h1 className="sr-only">{L({ ko: "내 계정", en: "My account" })}</h1>
@@ -92,14 +96,16 @@ function AccountOverview({ email, balance, membership, apiKey, brandName, signOu
         <div className="min-w-0 flex-1">
           <p className="truncate text-lg font-semibold">{email}</p>
           <p className="text-sm text-fg-muted">
-            {L(plan.name)}
-            {membership.daysLeft !== null ? ` · D-${membership.daysLeft}` : ""} · {brandName ? <Link href="/brand" className="hover:text-fg">{brandName}</Link> : <Link href="/brand" className="text-studio-cyan">{L({ ko: "프로필 설정하기", en: "Set up profile" })}</Link>}
+            {OWN_KEY_ONLY ? L({ ko: "내 API 키로 사용", en: "On your own API key" }) : L(plan.name)}
+            {!OWN_KEY_ONLY && membership.daysLeft !== null ? ` · D-${membership.daysLeft}` : ""} · {brandName ? <Link href="/brand" className="hover:text-fg">{brandName}</Link> : <Link href="/brand" className="text-studio-cyan">{L({ ko: "프로필 설정하기", en: "Set up profile" })}</Link>}
           </p>
         </div>
-        <div className="text-right">
-          <p className="font-mono text-2xl">{membership.plan === "student" ? "∞" : (balance ?? 0).toLocaleString()}</p>
-          <p className="text-2xs text-fg-subtle">{L({ ko: "크레딧", en: "credits" })}</p>
-        </div>
+        {OWN_KEY_ONLY ? null : (
+          <div className="text-right">
+            <p className="font-mono text-2xl">{membership.plan === "student" ? "∞" : (balance ?? 0).toLocaleString()}</p>
+            <p className="text-2xs text-fg-subtle">{L({ ko: "크레딧", en: "credits" })}</p>
+          </div>
+        )}
         <form action={signOut}>
           <button type="submit" className={cn(secondaryButton, "h-10")}><LogOut size={14} aria-hidden /> {L({ ko: "로그아웃", en: "Sign out" })}</button>
         </form>
@@ -114,9 +120,9 @@ function AccountOverview({ email, balance, membership, apiKey, brandName, signOu
           </Link>
         ))}
       </div>
-      <p className="mt-6 text-sm text-fg-muted">{L(plan.name)} · {brandName ?? L({ ko: "프로필 없음", en: "No profile" })}</p>
+      {OWN_KEY_ONLY ? null : <p className="mt-6 text-sm text-fg-muted">{L(plan.name)} · {brandName ?? L({ ko: "프로필 없음", en: "No profile" })}</p>}
 
-      {membership.plan === "pro" && membership.daysLeft !== null && membership.daysLeft <= 7 ? (
+      {!OWN_KEY_ONLY && membership.plan === "pro" && membership.daysLeft !== null && membership.daysLeft <= 7 ? (
         <section className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-[24px] border border-hairline bg-surface-2 p-5" aria-labelledby="pro-ending">
           <div className="min-w-0">
             <h2 id="pro-ending" className="font-semibold">{L({ ko: `프로가 ${membership.daysLeft}일 뒤 끝나요`, en: `Pro ends in ${membership.daysLeft} days` })}</h2>

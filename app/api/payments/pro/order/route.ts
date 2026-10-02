@@ -4,12 +4,15 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getMembership } from "@/lib/membership";
 import { newOrderId, PRO_ORDER } from "@/lib/payments/pro";
 import { tossConfigured } from "@/lib/payments/toss";
+import { OWN_KEY_ONLY } from "@/lib/site/access";
 import { checkRateLimit, paymentLimiter } from "@/lib/rate-limit";
 
 // Step 1 of checkout: record a pending order (amount fixed server-side)
 // before the payment widget opens. The confirm route only ever approves
 // an order that exists here, for this user, at this amount.
 export async function POST() {
+  // Credits aren't sold while members bring their own key (lib/site/access.ts).
+  if (OWN_KEY_ONLY) return Response.json({ error: "크레딧 판매를 중단했어요 — 내 API 키를 등록하면 무료로 쓸 수 있어요" }, { status: 410 });
   if (!tossConfigured()) return Response.json({ error: "결제가 아직 준비되지 않았습니다" }, { status: 503 });
 
   const supabase = await createClient();

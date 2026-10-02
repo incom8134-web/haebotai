@@ -10,6 +10,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useBi } from "@/lib/i18n/context";
 import { BUSINESS } from "@/lib/site/business";
 import { REFERRAL, normalizeReferralCode } from "@/lib/referral";
+import { OWN_KEY_ONLY } from "@/lib/site/access";
 
 // The consent step right after Google/Kakao sign-in (lib/consent.ts). Each item
 // is its own checkbox — nothing is pre-checked, required and optional are
@@ -218,6 +219,7 @@ function ConsentForm() {
           </ul>
         </fieldset>
 
+        {OWN_KEY_ONLY ? null : (
         <details className="mt-4 rounded-2xl border border-hairline px-4 py-3 text-sm" open={!!code}>
           <summary className="cursor-pointer text-fg-muted">{L({ ko: "초대 코드가 있어요 (선택)", en: "I have an invite code (optional)" })}</summary>
           <input
@@ -237,6 +239,7 @@ function ConsentForm() {
             {L({ ko: `첫 결과물을 만들면 나는 ${REFERRAL.refereeBonus}, 초대한 친구는 ${REFERRAL.referrerBonus} 크레딧을 받아요.`, en: `After your first result you get ${REFERRAL.refereeBonus} credits and your friend gets ${REFERRAL.referrerBonus}.` })}
           </p>
         </details>
+        )}
 
         {codeNote ? (
           <p role="status" className="mt-4 rounded-xl bg-warn/15 px-3 py-2 text-sm text-fg">

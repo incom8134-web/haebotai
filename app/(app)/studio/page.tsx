@@ -2,6 +2,8 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { Dashboard, type DashboardRun } from "@/components/studio/dashboard";
 import { getBalance } from "@/lib/credits";
+import { getApiKeyStatus } from "@/lib/api-keys";
+import { canUsePlatformKey } from "@/lib/platform-access";
 import { listProjects } from "@/lib/projects/server";
 import { displayName } from "@/lib/site/display-name";
 import { isGoal, recommendTools } from "@/lib/site/onboarding";
@@ -28,7 +30,8 @@ export default async function StudioPage() {
   const goal = isGoal(goalCookie) ? goalCookie : null;
 
   const since = daysAgo(30);
-  const [projects, balance, recent, month, used, inProjects] = await Promise.all([
+  const [keyStatus, projects, balance, recent, month, used, inProjects] = await Promise.all([
+    getApiKeyStatus(),
     listProjects(),
     getBalance(),
     user
@@ -145,6 +148,8 @@ export default async function StudioPage() {
         balance,
         used30: monthRuns.reduce((s, r) => s + (r.credits_used ?? 0), 0),
         runs30: monthRuns.length,
+        keyConnected: keyStatus.providers.google.some((s) => s.connected && !s.broken),
+        team: canUsePlatformKey(user?.email),
       }}
     />
   );

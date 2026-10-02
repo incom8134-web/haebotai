@@ -7,12 +7,13 @@ import { useEffect, useMemo, useState, useSyncExternalStore, useTransition } fro
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "motion/react";
-import { FolderKanban, AlertTriangle, CircleGauge, CircleHelp, CircleUserRound, Coins, LayoutGrid, Library, LogOut, Moon, Search, Sparkles, Sun, UserRound, X, Zap, type LucideIcon } from "lucide-react";
+import { FolderKanban, AlertTriangle, CircleGauge, CircleHelp, CircleUserRound, Coins, KeyRound, LayoutGrid, Library, LogOut, Moon, Search, Sparkles, Sun, UserRound, X, Zap, type LucideIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { CommandPalette, type CommandPaletteGroup } from "@/components/command-palette";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { signOut } from "@/lib/actions/auth";
 import { PLANS } from "@/lib/site/plans";
+import { OWN_KEY_ONLY } from "@/lib/site/access";
 import { getTool, listTools } from "@/lib/tools/registry";
 import { CATEGORY_LABELS } from "@/lib/tools/registry/categories";
 import { PATCH_NOTES } from "@/lib/site/patch-notes";
@@ -153,7 +154,9 @@ function UserMenu({ email, plan, credits }: { email: string; plan: PlanId; credi
   const planName = PLANS.find((p) => p.id === plan)?.name;
   const links = [
     { href: "/account", icon: CircleUserRound, label: { ko: "내 계정", en: "My account" } },
-    { href: "/account/credits", icon: CircleGauge, label: { ko: "크레딧·한도", en: "Credits & limits" } },
+    OWN_KEY_ONLY
+      ? { href: "/account/api-key", icon: KeyRound, label: { ko: "내 API 키", en: "My API key" } }
+      : { href: "/account/credits", icon: CircleGauge, label: { ko: "크레딧·한도", en: "Credits & limits" } },
     { href: "/help", icon: CircleHelp, label: { ko: "도움말", en: "Help" } },
   ];
   return (
@@ -168,7 +171,7 @@ function UserMenu({ email, plan, credits }: { email: string; plan: PlanId; credi
         <div className="px-2.5 py-2">
           <p className="truncate text-sm font-medium text-fg">{email}</p>
           <p className="mt-0.5 text-2xs text-fg-muted">
-            {planName ? L(planName) : null} · {credits} {L({ ko: "크레딧", en: "credits" })}
+            {OWN_KEY_ONLY ? L({ ko: "내 API 키로 사용", en: "Runs on your own API key" }) : <>{planName ? L(planName) : null} · {credits} {L({ ko: "크레딧", en: "credits" })}</>}
           </p>
         </div>
         <DropdownMenuSeparator />
@@ -279,9 +282,15 @@ function AppShell({ user, balance, plan, answeredTickets, children }: ShellProps
             <span className="hidden truncate sm:inline">{L({ ko: "도구 찾기", en: "Find a tool" })}</span>
             <kbd className="ml-auto hidden rounded-md border border-hairline px-1.5 font-mono text-[10px] sm:inline">⌘K</kbd>
           </button>
-          <Link href="/account/credits" className="glass pointer-events-auto flex h-11 items-center gap-2 rounded-2xl px-3.5 font-mono text-xs lg:hidden" aria-label={L({ ko: "크레딧", en: "Credits" })}>
-            <Coins size={14} className="text-studio-cyan" aria-hidden /> {credits}
-          </Link>
+          {OWN_KEY_ONLY ? (
+            <Link href="/account/api-key" className="glass pointer-events-auto flex h-11 items-center gap-2 rounded-2xl px-3.5 text-xs lg:hidden" aria-label={L({ ko: "내 API 키", en: "My API key" })}>
+              <KeyRound size={14} className="text-studio-cyan" aria-hidden /> {L({ ko: "API 키", en: "API key" })}
+            </Link>
+          ) : (
+            <Link href="/account/credits" className="glass pointer-events-auto flex h-11 items-center gap-2 rounded-2xl px-3.5 font-mono text-xs lg:hidden" aria-label={L({ ko: "크레딧", en: "Credits" })}>
+              <Coins size={14} className="text-studio-cyan" aria-hidden /> {credits}
+            </Link>
+          )}
           {/* Phones have no side dock, so theme/language live up here. */}
           <div className="glass pointer-events-auto flex h-11 items-center rounded-2xl px-0.5 lg:hidden">
             <ThemeLangControls />
@@ -294,7 +303,7 @@ function AppShell({ user, balance, plan, answeredTickets, children }: ShellProps
             </Link>
           )}
         </div>
-        {user && plan !== "student" && balance !== null && balance < LOW_CREDIT_THRESHOLD ? <LowCreditBanner balance={balance} /> : null}
+        {!OWN_KEY_ONLY && user && plan !== "student" && balance !== null && balance < LOW_CREDIT_THRESHOLD ? <LowCreditBanner balance={balance} /> : null}
       </header>
 
       <main id="main" tabIndex={-1} className="pb-28 outline-none lg:pr-24 lg:pb-10">{children}</main>
@@ -311,10 +320,17 @@ function AppShell({ user, balance, plan, answeredTickets, children }: ShellProps
           />
         ))}
         <span className="my-1 h-px w-8 bg-hairline" aria-hidden />
-        <Link href="/account/credits" className="grid w-12 place-items-center gap-0.5 rounded-2xl py-2 text-studio-cyan" aria-label={`${L({ ko: "크레딧", en: "Credits" })} ${credits}`}>
-          <Coins size={16} aria-hidden />
-          <span className="font-mono text-[10px] text-fg-muted">{credits}</span>
-        </Link>
+        {OWN_KEY_ONLY ? (
+          <Link href="/account/api-key" className="grid w-12 place-items-center gap-0.5 rounded-2xl py-2 text-studio-cyan" aria-label={L({ ko: "내 API 키", en: "My API key" })}>
+            <KeyRound size={16} aria-hidden />
+            <span className="text-[10px] text-fg-muted">{L({ ko: "API 키", en: "Key" })}</span>
+          </Link>
+        ) : (
+          <Link href="/account/credits" className="grid w-12 place-items-center gap-0.5 rounded-2xl py-2 text-studio-cyan" aria-label={`${L({ ko: "크레딧", en: "Credits" })} ${credits}`}>
+            <Coins size={16} aria-hidden />
+            <span className="font-mono text-[10px] text-fg-muted">{credits}</span>
+          </Link>
+        )}
         <ThemeLangControls vertical />
         {!user ? (
           <Link href="/auth" className="studio-gradient-bg mt-1 grid size-12 place-items-center rounded-2xl text-[11px] font-semibold text-white">

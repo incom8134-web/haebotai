@@ -1,3 +1,4 @@
+import { OWN_KEY_ONLY } from "./access.ts";
 import type { SubNavItem } from "@/components/site/sub-nav";
 
 // Separate pages, grouped: Help = look up / ask / learn; Account = me /
@@ -16,13 +17,18 @@ export const HELP_NAV: SubNavItem[] = [
   { href: "/status", label: { ko: "서비스 상태", en: "Status" }, icon: "activity" },
 ];
 
-export const ACCOUNT_NAV: SubNavItem[] = [
+const ALL_ACCOUNT_NAV: SubNavItem[] = [
   { href: "/account", label: { ko: "내 계정", en: "My account" }, icon: "user-round", exact: true },
   { href: "/account/credits", label: { ko: "크레딧·한도", en: "Credits & limits" }, icon: "circle-gauge" },
   { href: "/account/membership", label: { ko: "학생 멤버십", en: "Student membership" }, icon: "crown" },
   { href: "/account/api-key", label: { ko: "내 API 키", en: "My API key" }, icon: "key-round" },
   { href: "/account/referral", label: { ko: "친구 초대", en: "Invite friends" }, icon: "gift" },
 ];
+
+/** Credits, plans and invites are gone while members bring their own key (lib/site/access.ts). */
+export const ACCOUNT_NAV: SubNavItem[] = OWN_KEY_ONLY
+  ? ALL_ACCOUNT_NAV.filter((i) => i.href === "/account" || i.href === "/account/api-key")
+  : ALL_ACCOUNT_NAV;
 
 export const LEGAL_NAV: SubNavItem[] = [
   { href: "/legal/terms", label: { ko: "이용약관", en: "Terms" }, icon: "scroll-text" },
