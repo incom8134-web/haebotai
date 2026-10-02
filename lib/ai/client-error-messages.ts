@@ -63,31 +63,40 @@ const PATTERNS: { test: (msg: string) => boolean; map: (msg: string) => MappedEr
     }),
   },
   {
+    test: (m) => m.includes("무료 Gemini 키로는"),
+    map: () => ({
+      ko: "무료 Gemini 키로는 이미지를 만들 수 없습니다 — Google AI Studio에서 결제를 켠 키를 등록해주세요. 글 위주의 도구는 무료 키로도 쓸 수 있어요.",
+      en: "A free Gemini key can't make images — register a key with billing turned on in Google AI Studio. Text tools work on a free key.",
+      link: "/account/api-key",
+      linkLabel: { ko: "내 API 키 확인", en: "Check my API key" },
+    }),
+  },
+  {
     test: (m) => m.includes("AI 엔진 사용 한도를 초과했습니다"),
     map: () => ({
-      ko: "AI 엔진 사용 한도를 초과했습니다 — 잠시 후 다시 시도해주세요. 크레딧은 차감되지 않았습니다.",
-      en: "The AI engine's usage limit was reached — please try again shortly. No credits were charged.",
+      ko: "AI 엔진 사용 한도를 초과했습니다 — 잠시 후 다시 시도해주세요.",
+      en: "The AI engine's usage limit was reached — please try again shortly.",
     }),
   },
   {
     test: (m) => m.includes("AI 엔진 요청이 많아"),
     map: () => ({
-      ko: "AI 엔진 요청이 많아 지금은 응답할 수 없습니다 — 잠시 후 다시 시도해주세요. 크레딧은 차감되지 않았습니다.",
-      en: "The AI engine is busy right now — please try again shortly. No credits were charged.",
+      ko: "AI 엔진 요청이 많아 지금은 응답할 수 없습니다 — 잠시 후 다시 시도해주세요.",
+      en: "The AI engine is busy right now — please try again shortly.",
     }),
   },
   {
     test: (m) => m.includes("AI 엔진을 지금 사용할 수 없습니다"),
     map: () => ({
-      ko: "AI 엔진을 지금 사용할 수 없습니다 — 운영팀에 알렸어요. 잠시 후 다시 시도해주세요. 크레딧은 차감되지 않았습니다.",
-      en: "The AI engine is unavailable right now — we've alerted the team. Please try again later. No credits were charged.",
+      ko: "AI 엔진을 지금 사용할 수 없습니다 — 운영팀에 알렸어요. 잠시 후 다시 시도해주세요.",
+      en: "The AI engine is unavailable right now — we've alerted the team. Please try again later.",
     }),
   },
   {
     test: (m) => m.includes("등록한 API 키가 거부되었습니다"),
     map: () => ({
-      ko: "등록한 API 키가 거부되었습니다 — 키와 Google 결제 상태를 확인해주세요. 크레딧은 차감되지 않았습니다.",
-      en: "Your API key was refused — check the key and its Google billing. No credits were charged.",
+      ko: "등록한 API 키가 거부되었습니다 — 키와 Google 결제 상태를 확인해주세요.",
+      en: "Your API key was refused — check the key and its Google billing.",
       link: "/account/api-key",
       linkLabel: { ko: "내 API 키 확인", en: "Check my API key" },
     }),
@@ -95,8 +104,8 @@ const PATTERNS: { test: (msg: string) => boolean; map: (msg: string) => MappedEr
   {
     test: (m) => m.includes("AI 엔진에서 오류가 발생했습니다"),
     map: () => ({
-      ko: "AI 엔진에서 오류가 발생했습니다 — 잠시 후 다시 시도해주세요. 크레딧은 차감되지 않았습니다.",
-      en: "The AI engine returned an error — please try again shortly. No credits were charged.",
+      ko: "AI 엔진에서 오류가 발생했습니다 — 잠시 후 다시 시도해주세요.",
+      en: "The AI engine returned an error — please try again shortly.",
     }),
   },
   {
