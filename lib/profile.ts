@@ -76,3 +76,17 @@ export async function upsertBusinessProfile(patch: Partial<BusinessProfile>) {
   if (error) return { ok: false as const, error: error.message };
   return { ok: true as const };
 }
+
+/**
+ * Fills only the empty fields of the brand profile (onboarding: the first
+ * project's name and customer become the profile's starting point, so
+ * every tool opens personalised). Never overwrites what's there.
+ */
+export async function seedBusinessProfile(seed: { brand_name?: string; target_customer?: string }) {
+  const current = await getBusinessProfile();
+  const patch: Partial<BusinessProfile> = {};
+  if (seed.brand_name?.trim() && !current?.brand_name?.trim()) patch.brand_name = seed.brand_name.trim().slice(0, 80);
+  if (seed.target_customer?.trim() && !current?.target_customer?.trim()) patch.target_customer = seed.target_customer.trim().slice(0, 200);
+  if (!Object.keys(patch).length) return { ok: true as const };
+  return upsertBusinessProfile(patch);
+}

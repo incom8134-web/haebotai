@@ -94,7 +94,7 @@ test("the planner reshapes research and the critic's budget, and keeps the rest"
   assert.deepEqual(choice.research, ["analyze_competitors", "research_audience"]);
   assert.equal(choice.revisions, 2);
   const plan = buildPlan(base, choice);
-  assert.deepEqual(plan.steps.map((s) => s.id), ["understand", "strategize", "planning", "competitors", "audience", "draft", "critique", "revise", "polish"]);
+  assert.deepEqual(plan.steps.map((s) => s.id), ["understand", "analyze", "contract", "strategize", "planning", "competitors", "audience", "draft", "critique", "revise", "polish"]);
   assert.equal(plan.source, "planner");
   assert.deepEqual(plan.steps.find((s) => s.id === "critique")!.args, { maxRevisions: 2, focus: ["대학생이 3초 안에 혜택을 이해하는가"] });
   assert.equal(flowFor(plan, "planning")!.next, "competitors");

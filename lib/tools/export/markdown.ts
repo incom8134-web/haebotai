@@ -77,7 +77,7 @@ export function buildMarkdown(doc: ExportDoc): string {
     }
   }
   if (doc.sources.length) {
-    lines.push("## 출처", "", ...doc.sources.map((s) => `- [${s.title}](${s.url})`), "");
+    lines.push("## 출처", "", ...doc.sources.map((s, i) => `${i + 1}. [${s.title}](${s.url})`), "");
   }
   return lines.join("\n").replace(/\n{3,}/g, "\n\n").trimEnd() + "\n";
 }

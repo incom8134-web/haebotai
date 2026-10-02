@@ -2,6 +2,8 @@ import JSZip from "jszip";
 import { z } from "zod";
 import { REFERENCE_LIMITS, referenceModesFor, type ReferenceBundle } from "./reference.ts";
 import type { ImagePart } from "./generate-prompt.ts";
+import { parseText, parseUpload } from "../agents/core/parse.ts";
+import { renumber, type SourceDoc } from "../agents/core/source.ts";
 
 // Server side of "참고 자료": validates what the run page sent, turns
 // documents into text the model can read (DOCX paragraphs, PPTX slide by
@@ -145,6 +147,8 @@ async function readReference(
   const images: ImagePart[] = [];
   const documents: ImagePart[] = [];
   const texts: string[] = pasted ? [pasted] : [];
+  // The structured sources (whole documents, nothing cut off) the agents read.
+  const sources: SourceDoc[] = pasted.length >= 200 ? [parseText("붙여 넣은 글", pasted, "pasted")] : [];
   let total = 0;
 
   for (const file of files) {
@@ -166,6 +170,10 @@ async function readReference(
     total += bytes.length;
     if (total > REFERENCE_LIMITS.maxTotalBytes) return { ok: false, error: "참고 파일은 합쳐서 30MB까지 올릴 수 있습니다" };
 
+    if (!mime.startsWith("image/")) {
+      const doc = await parseUpload(file.name, new Uint8Array(bytes)).catch(() => null);
+      if (doc && doc.stats.chars > 0) sources.push(doc);
+    }
     try {
       if (mime === "image/png" || mime === "image/jpeg" || mime === "image/webp") {
         const img = await shrinkImage(bytes, mime);
@@ -184,10 +192,11 @@ async function readReference(
   let text = texts.join("\n\n").trim();
   if (text.length > MAX_TEXT) text = `${text.slice(0, MAX_TEXT)}\n…(이후 생략)`;
   const slideCount = (text.match(/^\[슬라이드 \d+\]$/gm) ?? []).length || undefined;
-  return { ok: true, bundle: { mode, text, fileNames: files.map((f) => f.name), images, documents, slideCount } };
+  return { ok: true, bundle: { mode, text, fileNames: files.map((f) => f.name), images, documents, slideCount, sources: renumber(sources) } };
 }
 
 /** What the run row keeps: no file bytes. */
 export function referenceForStorage(bundle: ReferenceBundle) {
+  // Sources are rebuilt from the files each invocation; the row keeps text only.
   return { mode: bundle.mode.id, text: bundle.text.slice(0, 20_000), files: bundle.fileNames };
 }

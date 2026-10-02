@@ -9,8 +9,9 @@ import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 import { useBi } from "@/lib/i18n/context";
 import { BUSINESS } from "@/lib/site/business";
+import { REFERRAL, normalizeReferralCode } from "@/lib/referral";
 
-// The consent step right after Google sign-in (lib/consent.ts). Each item
+// The consent step right after Google/Kakao sign-in (lib/consent.ts). Each item
 // is its own checkbox — nothing is pre-checked, required and optional are
 // labelled, and the collection and overseas-transfer notices the law
 // requires are shown here, not only behind a link. "Agree to all" is a
@@ -38,7 +39,7 @@ const ITEMS: Item[] = [
     detail: {
       head: [{ ko: "항목", en: "Items" }, { ko: "목적", en: "Purpose" }, { ko: "보유 기간", en: "Kept" }],
       rows: [
-        [{ ko: "구글 계정 이메일·이름·계정 식별자", en: "Google email, name, account ID" }, { ko: "회원 식별, 로그인, 고객 응대", en: "Identify you, sign-in, support" }, { ko: "탈퇴 시까지", en: "Until you leave" }],
+        [{ ko: "구글·카카오 계정 이메일·이름·계정 식별자", en: "Google/Kakao email, name, account ID" }, { ko: "회원 식별, 로그인, 고객 응대", en: "Identify you, sign-in, support" }, { ko: "탈퇴 시까지", en: "Until you leave" }],
         [{ ko: "도구 입력 내용·업로드 파일·결과물, 실행 기록", en: "Tool inputs, uploads, results, run history" }, { ko: "결과물 생성과 보관함 제공", en: "Generate and keep your results" }, { ko: "삭제 또는 탈퇴 시까지", en: "Until deleted or you leave" }],
         [{ ko: "결제 기록(주문번호·금액·일시)", en: "Payment records (order, amount, date)" }, { ko: "결제·환불 처리", en: "Payments and refunds" }, { ko: "5년 (전자상거래법)", en: "5 years (e-commerce law)" }],
         [{ ko: "접속 IP·기기 정보·접속 일시", en: "IP, device, access time" }, { ko: "부정 이용 방지, 보안", en: "Abuse prevention, security" }, { ko: "3개월", en: "3 months" }],
@@ -112,18 +113,44 @@ function ConsentForm() {
   const [checked, setChecked] = useState<Record<Key, boolean>>({ age14: false, terms: false, privacy: false, overseas: false, marketing: false });
   const [busy, setBusy] = useState<"" | "save" | "leave" | "delete">("");
   const [error, setError] = useState("");
+  // Optional invite code typed by hand (an invite link sets it on its own).
+  const [code, setCode] = useState("");
+  const [codeNote, setCodeNote] = useState("");
+  const [done, setDone] = useState(false);
   const allRequired = ITEMS.filter((i) => i.required).every((i) => checked[i.key]);
   const all = ITEMS.every((i) => checked[i.key]);
 
   const setAll = (v: boolean) => setChecked({ age14: v, terms: v, privacy: v, overseas: v, marketing: v });
 
   async function submit() {
+    if (done) {
+      window.location.assign(next);
+      return;
+    }
+    const typed = code.trim() ? normalizeReferralCode(code) : null;
+    if (code.trim() && !typed) {
+      setError(L({ ko: "초대 코드는 영문·숫자 8자리예요. 없으면 비워 두세요.", en: "Invite codes are 8 letters and numbers. Leave it empty if you don't have one." }));
+      return;
+    }
     setBusy("save");
     setError("");
-    const res = await fetch("/api/account/consent", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(checked) });
+    const res = await fetch("/api/account/consent", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...checked, ...(typed ? { referralCode: typed } : {}) }) });
+    const body = (await res.json().catch(() => ({}))) as { error?: string; referral?: string };
     if (!res.ok) {
-      const body = (await res.json().catch(() => ({}))) as { error?: string };
       setError(body.error ?? L({ ko: "저장하지 못했어요.", en: "Couldn't save." }));
+      setBusy("");
+      return;
+    }
+    // A typed code that didn't take: say so before moving on (consent is saved).
+    if (typed && body.referral && body.referral !== "ok" && body.referral !== "already") {
+      setCodeNote(
+        body.referral === "self"
+          ? L({ ko: "내 초대 코드는 쓸 수 없어요.", en: "You can't use your own code." })
+          : body.referral === "not_new"
+            ? L({ ko: "가입한 지 7일이 지난 계정은 초대 코드를 쓸 수 없어요.", en: "Invite codes only work for accounts under 7 days old." })
+            : L({ ko: "초대 코드를 찾지 못했어요. 동의는 저장됐으니 계속하면 돼요.", en: "That invite code wasn't found. Your consent is saved — you can continue." }),
+      );
+      setDone(true);
       setBusy("");
       return;
     }
@@ -191,6 +218,32 @@ function ConsentForm() {
           </ul>
         </fieldset>
 
+        <details className="mt-4 rounded-2xl border border-hairline px-4 py-3 text-sm" open={!!code}>
+          <summary className="cursor-pointer text-fg-muted">{L({ ko: "초대 코드가 있어요 (선택)", en: "I have an invite code (optional)" })}</summary>
+          <input
+            value={code}
+            onChange={(e) => {
+              setCode(e.target.value.toUpperCase());
+              setCodeNote("");
+            }}
+            maxLength={8}
+            autoComplete="off"
+            spellCheck={false}
+            aria-label={L({ ko: "초대 코드", en: "Invite code" })}
+            placeholder="ABCD2345"
+            className="mt-2 w-full rounded-xl border border-hairline bg-bg px-3 py-2 font-mono text-sm tracking-widest uppercase outline-none focus:border-accent"
+          />
+          <p className="mt-1.5 text-2xs text-fg-subtle break-keep">
+            {L({ ko: `첫 결과물을 만들면 나는 ${REFERRAL.refereeBonus}, 초대한 친구는 ${REFERRAL.referrerBonus} 크레딧을 받아요.`, en: `After your first result you get ${REFERRAL.refereeBonus} credits and your friend gets ${REFERRAL.referrerBonus}.` })}
+          </p>
+        </details>
+
+        {codeNote ? (
+          <p role="status" className="mt-4 rounded-xl bg-warn/15 px-3 py-2 text-sm text-fg">
+            {codeNote}
+          </p>
+        ) : null}
+
         {error ? (
           <p role="alert" className="mt-4 rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger">
             {error}
@@ -199,7 +252,7 @@ function ConsentForm() {
 
         <Button className="mt-6 w-full" size="lg" disabled={!allRequired || !!busy} onClick={submit}>
           {busy === "save" ? <LoaderCircle className="size-4 animate-spin" aria-hidden /> : null}
-          {L({ ko: "동의하고 시작하기", en: "Agree and continue" })}
+          {done ? L({ ko: "계속하기", en: "Continue" }) : L({ ko: "동의하고 시작하기", en: "Agree and continue" })}
         </Button>
         {!allRequired ? <p className="mt-2 text-center text-xs text-fg-muted">{L({ ko: "필수 항목 4개에 모두 동의하면 시작할 수 있어요.", en: "Agree to the 4 required items to continue." })}</p> : null}
 

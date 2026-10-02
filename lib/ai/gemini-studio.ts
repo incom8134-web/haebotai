@@ -884,6 +884,23 @@ async function shootSet(
 
 type Obj = Record<string, unknown>;
 
+/** Illustrations a long document asked for (lib/agents/core/doc-agent.ts), planned as one set. */
+export async function documentIllustrations(
+  items: { key: string; prompt: string }[],
+  context: string,
+  storage: ImageStorageContext,
+  abortSignal: AbortSignal | undefined,
+): Promise<{ shots: Map<string, { url: string; caption: string }>; usage: TokenUsage }> {
+  return shootSet(
+    "당신은 기업 문서·제안서에 들어갈 사진과 일러스트를 기획하는 아트 디렉터입니다. 각 이미지는 그 섹션이 말하는 내용을 실제로 보여 줘야 하고, 문서 전체가 같은 톤과 색감이어야 합니다. 글자·로고·워터마크는 넣지 않습니다. 스톡 사진처럼 보이면 안 됩니다.",
+    `[문서]\n${context}\n\n[이미지 자리]\n${items.map((i) => `${i.key}: ${i.prompt}`).join("\n")}`,
+    items.map((i) => ({ key: i.key, ratio: "16:9" as AspectRatio })),
+    "document",
+    storage,
+    abortSignal,
+  );
+}
+
 /**
  * Pictures for the text tools whose work is visual in use: a blog post's
  * cover and in-body photos, a campaign's ad visual per angle, a

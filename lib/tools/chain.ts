@@ -267,6 +267,36 @@ export function seedFromChain(targetId: string, sourceId: string, sourceOutput: 
     return { topic: output.combinations?.[0] ?? "" };
   }
 
+  if (targetId === "copy" && sourceId === "keyword") {
+    const kw = o(sourceOutput);
+    const combos = (output.combinations ?? []).filter(Boolean).slice(0, 5);
+    return { offer: lines(s(kw.summary), combos.length > 0 && `반영할 검색어: ${combos.join(", ")}`) };
+  }
+
+  if (sourceId === "strategy" && (targetId === "presentation" || targetId === "strategy")) {
+    const st = o(sourceOutput);
+    const territory = arr(st.territories).find((t) => s(t.name) === s(st.recommended_territory)) ?? arr(st.territories)[0];
+    if (targetId === "presentation")
+      return {
+        brief: lines(s(st.positioning_statement), s(st.promise) && `약속: ${s(st.promise)}`, territory && `방향: ${s(territory.name)} — ${s(territory.idea)}`),
+        audience: s(arr(st.segments)[0]?.name),
+        purpose: "launch",
+      };
+  }
+
+  if (sourceId === "trend" && (targetId === "presentation" || targetId === "strategy")) {
+    const tr = o(sourceOutput);
+    const ideas = arr(tr.ideas);
+    const top = ideas.find((i) => s(i.name) === s(tr.recommended)) ?? ideas[0];
+    const angles = Array.isArray(top?.differentiation_angles) ? (top.differentiation_angles as unknown[]).map(s).filter(Boolean) : [];
+    if (targetId === "strategy")
+      return top ? { context: lines(`${s(top.name)} — ${s(top.one_liner)}`, s(top.target_customer) && `대상: ${s(top.target_customer)}`, angles.length > 0 && `차별화: ${angles.join(" / ")}`) } : {};
+    return {
+      brief: lines(s(tr.summary), ...ideas.slice(0, 3).map((i) => `- ${s(i.name)}: ${s(i.one_liner)}${s(i.verdict) ? ` (${s(i.verdict)})` : ""}`)),
+      purpose: "report",
+    };
+  }
+
   if (targetId === "place" && sourceId === "keyword") {
     return { current_info: `현재 상위 키워드: ${(output.combinations ?? []).join(", ")}` };
   }

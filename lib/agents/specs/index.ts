@@ -2,6 +2,7 @@ import "server-only";
 import type { ProviderId } from "@/lib/ai/types";
 import type { ToolManifest } from "@/lib/tools/types";
 import { CAPABILITIES } from "../capabilities";
+import { documentSpec } from "./document";
 import { agenticFor, defaultPlan, flowFor, type Plan } from "../plan";
 import { guideFor } from "../library";
 import type { AgentRunState, AgentSpec, Stage } from "../types";
@@ -40,7 +41,11 @@ export function specFromPlan(toolId: string, plan: Plan): AgentSpec {
   };
 }
 
+/** Long-form documents run their own agent: contract → sources → plan → section-by-section writing → verification (lib/agents/core). */
+const DOCUMENT_TOOLS = new Set(["proposal", "business-plan"]);
+
 export function agentFor(manifest: ToolManifest, provider: ProviderId, state?: Pick<AgentRunState, "plan"> | null): AgentSpec {
+  if (provider === "google" && DOCUMENT_TOOLS.has(manifest.id) && !state?.plan) return documentSpec(manifest.id);
   return specFromPlan(manifest.id, planFor(manifest, provider, state));
 }
 

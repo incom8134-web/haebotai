@@ -1,5 +1,5 @@
 import "server-only";
-import { chooseStrategy, planWorkflowCapability, understandRequest } from "./agent";
+import { analyzeSource, chooseStrategy, planWorkflowCapability, taskContract, understandRequest } from "./agent";
 import { assembleSite, buildSite, critiqueSite, reviseSite, siteArtDirection } from "./site";
 import { critiqueLogoPlans, drawLogo, oneShot, planLogo, renderPhotos } from "./visual";
 import { analyzeCompetitors, critiqueOutput, finishOutput, researchAudience, researchTopic, reviseOutput, writeDraft } from "./writing";
@@ -10,6 +10,8 @@ import type { Capability } from "./types";
 export const CAPABILITIES: Record<string, Capability> = Object.fromEntries(
   [
     understandRequest,
+    analyzeSource,
+    taskContract,
     chooseStrategy,
     planWorkflowCapability(() => new Set(Object.keys(CAPABILITIES))),
     researchTopic,

@@ -75,8 +75,10 @@ export function agenticFor(toolId: string, provider: string): boolean {
 }
 
 /**
- * The tool's standard workflow — the v1 agent specs, step ids included,
- * plus the planning step for the writing tools. Members' own Claude keys and the grant lookup keep the
+ * The tool's standard workflow — the agent specs' stages, step ids
+ * included, plus the planning step for the writing tools. (On Gemini the
+ * long-form documents — proposal, business plan — run their own document
+ * agent instead: lib/agents/specs/index.ts.) Members' own Claude keys and the grant lookup keep the
  * one-shot pipeline as one step.
  */
 export function defaultPlan(toolId: string, provider: string): Plan {
@@ -106,7 +108,19 @@ export function defaultPlan(toolId: string, provider: string): Plan {
     source: "default",
     finalize: "brief",
     // "planning" (v2 phase 2) may reshape the steps after it for this request.
-    steps: [...head, step("planning", "plan_workflow"), step("research", "research_topic"), step("draft", "write_draft"), step("critique", "critique_output"), step("revise", "revise_output"), step("polish", "finish_output")],
+    steps: [
+      step("understand", "understand_request"),
+      // The agent core's shared layers (lib/agents/core): the whole uploaded source, then the task contract.
+      step("analyze", "analyze_source"),
+      step("contract", "task_contract"),
+      step("strategize", "choose_strategy"),
+      step("planning", "plan_workflow"),
+      step("research", "research_topic"),
+      step("draft", "write_draft"),
+      step("critique", "critique_output"),
+      step("revise", "revise_output"),
+      step("polish", "finish_output"),
+    ],
   };
 }
 

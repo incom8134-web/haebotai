@@ -1,5 +1,6 @@
 "use client";
 
+import { Cited } from "@/components/results/cited";
 import { useState } from "react";
 import { useBi } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
@@ -34,7 +35,7 @@ export function ResearchDesk({ output }: { output: Record<string, unknown> }) {
       <section className="rounded-2xl border border-accent/30 bg-accent-dim p-4">
         <Kicker>{L({ ko: "이 조사가 돕는 결정", en: "The decision" })}</Kicker>
         <p className="mt-1 text-base font-bold text-fg break-keep">{str(output.decision)}</p>
-        {str(output.summary) ? <p className="mt-1.5 text-sm leading-relaxed text-fg-muted break-keep">{str(output.summary)}</p> : null}
+        {str(output.summary) ? <p className="mt-1.5 text-sm leading-relaxed text-fg-muted break-keep"><Cited text={str(output.summary)} /></p> : null}
         <p className="mt-2 flex flex-wrap gap-2 text-2xs text-fg-muted">
           <span>{L({ ko: `근거 ${evidence.length}개`, en: `${evidence.length} findings` })}</span>
           <span>· <Origin origin="search" /> {counts.search}</span>
@@ -66,7 +67,7 @@ export function ResearchDesk({ output }: { output: Record<string, unknown> }) {
                         {CONFIDENCE[str(e.confidence)] ? <span className="text-[10px] text-fg-subtle">{L(CONFIDENCE[str(e.confidence)])}</span> : null}
                       </div>
                       {str(e.figure) ? <p className="mt-1.5 text-lg font-bold text-fg break-keep">{str(e.figure)}</p> : null}
-                      <p className="mt-1 text-sm leading-relaxed text-fg break-keep">{str(e.finding)}</p>
+                      <p className="mt-1 text-sm leading-relaxed text-fg break-keep"><Cited text={str(e.finding)} /></p>
                       {str(e.source_title) ? <p className="mt-1.5 text-2xs text-fg-subtle break-keep">— {str(e.source_title)}</p> : null}
                     </article>
                   ))}
@@ -85,7 +86,7 @@ export function ResearchDesk({ output }: { output: Record<string, unknown> }) {
               <Origin origin={str(size.origin)} />
             </div>
             <p className="mt-1 text-xl font-bold text-fg break-keep">{str(size.estimate)}</p>
-            <p className="mt-1 text-xs leading-relaxed text-fg-muted break-keep">{L({ ko: "계산 방법", en: "Method" })}: {str(size.method)}</p>
+            <p className="mt-1 text-xs leading-relaxed text-fg-muted break-keep">{L({ ko: "계산 방법", en: "Method" })}: <Cited text={str(size.method)} /></p>
           </div>
         ) : null}
         {strs(output.implications).length ? (

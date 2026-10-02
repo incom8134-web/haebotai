@@ -5,8 +5,8 @@ import { agenticFor, defaultPlan, FINALIZE, flowFor, planCapabilities } from "./
 const ids = (toolId: string, provider = "google") => defaultPlan(toolId, provider).steps.map((s) => s.id);
 
 test("default plans keep the v1 stage ids, so runs in flight across a deploy carry on", () => {
-  assert.deepEqual(ids("presentation"), ["understand", "strategize", "planning", "research", "draft", "critique", "revise", "polish"]);
-  assert.deepEqual(ids("business-plan"), ["understand", "strategize", "planning", "research", "draft", "critique", "revise", "polish"]);
+  assert.deepEqual(ids("presentation"), ["understand", "analyze", "contract", "strategize", "planning", "research", "draft", "critique", "revise", "polish"]);
+  assert.deepEqual(ids("copy"), ["understand", "analyze", "contract", "strategize", "planning", "research", "draft", "critique", "revise", "polish"]);
   assert.deepEqual(ids("homepage"), ["understand", "strategize", "plan", "build", "critique", "revise", "assemble"]);
   assert.deepEqual(ids("logo"), ["understand", "strategize", "concepts", "critique", "draw"]);
   assert.deepEqual(ids("image"), ["understand", "strategize", "render"]);

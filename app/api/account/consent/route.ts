@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { REFERRAL } from "@/lib/referral";
-import { redeemReferral } from "@/lib/referral-server";
+import { claimReferral } from "@/lib/referral-server";
 import { consentOf, nextConsentState, parseConsentInput } from "@/lib/consent";
 import { appendConsentLog, requestMeta, saveConsentState } from "@/lib/consent-server";
 import { limitSensitive } from "@/lib/rate-limit";
@@ -18,7 +18,8 @@ export async function POST(request: Request) {
 
   const limited = await limitSensitive("consent", user.id);
   if (limited) return limited;
-  const parsed = parseConsentInput(await request.json().catch(() => null));
+  const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
+  const parsed = parseConsentInput(body);
   if (!parsed.ok) return Response.json({ error: "필수 항목에 모두 동의해야 서비스를 이용할 수 있어요", missing: parsed.missing }, { status: 400 });
 
   const now = new Date().toISOString();
@@ -34,13 +35,20 @@ export async function POST(request: Request) {
   // this response), so the next page load passes the gate at once.
   await supabase.auth.refreshSession().catch(() => null);
 
-  // Everyone passes through here once, so this is where an invite link
-  // pays out (the SQL only accepts accounts younger than 7 days).
+  // Everyone passes through here once, so this is where an invite is
+  // claimed — from the link's cookie or a code typed on the consent page.
+  // It pays out after their first successful run (lib/agents/runner.ts);
+  // the SQL only accepts accounts younger than 7 days.
   const jar = await cookies();
-  const ref = jar.get(REFERRAL.cookie)?.value;
+  const typed = typeof body?.referralCode === "string" ? body.referralCode : undefined;
+  const ref = typed || jar.get(REFERRAL.cookie)?.value;
+  let referral: string | undefined;
   if (ref) {
-    await redeemReferral(user.id, ref).catch((err: unknown) => console.warn("referral redeem failed", err));
+    referral = await claimReferral(user.id, ref).catch((err: unknown) => {
+      console.warn("referral claim failed", err);
+      return "unavailable" as const;
+    });
     jar.delete(REFERRAL.cookie);
   }
-  return Response.json({ ok: true });
+  return Response.json({ ok: true, referral });
 }

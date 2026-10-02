@@ -448,7 +448,7 @@ class Deck {
     const bodyAvail = (n: number, band: number) => BOTTOM - TOP - band - 0.35;
     const need = (c: (typeof cards)[number], w: number, pt: number) =>
       c.lines.reduce((h, l) => h + (l.label ? (pt * 1.3) / 72 : 0) + (l.text ? textHeight(l.text, pt, l.bullet ? w - 0.25 : w, 1.28) : 0) + 0.06, 0);
-    const bandOf = (c: (typeof cards)[number], w: number) => Math.max(0.75, textHeight(c.title, bandPt, w - (c.badge ? 0.9 : 0), 1.2) + 0.35);
+    const bandOf = (c: (typeof cards)[number], w: number) => Math.max(0.75, textHeight(c.title, bandPt, w - (c.badge && c.badge.length <= 3 ? 0.9 : 0), 1.2) + 0.35);
 
     let per = 1;
     for (const n of cards.length % 4 === 0 ? [4, 3, 2] : [3, 2]) {
@@ -480,9 +480,12 @@ class Deck {
         this.rect(s, x, TOP, w, h, col.soft, 0.12);
         this.rect(s, x, TOP, w, band, col.c, 0.12);
         this.rect(s, x, TOP + band - 0.14, w, 0.14, col.c);
-        if (c.badge) this.text(s, c.badge, { x: x + 0.2, y: TOP, w: 0.8, h: band, fontSize: 20, bold: true, color: "FFFFFF", valign: "middle", transparency: 20 });
-        this.text(s, c.title, { x: x + (c.badge ? 1.0 : 0.25), y: TOP, w: w - (c.badge ? 1.2 : 0.45), h: band, fontSize: bandPt, bold: true, color: "FFFFFF", valign: "middle" });
+        // A short badge (a number, a grade) sits in the band; a longer one opens the body.
+        const shortBadge = !!c.badge && c.badge.length <= 3;
+        if (shortBadge) this.text(s, c.badge!, { x: x + 0.2, y: TOP, w: 0.8, h: band, fontSize: 20, bold: true, color: "FFFFFF", valign: "middle", transparency: 20 });
+        this.text(s, c.title, { x: x + (shortBadge ? 1.0 : 0.25), y: TOP, w: w - (shortBadge ? 1.2 : 0.45), h: band, fontSize: bandPt, bold: true, color: "FFFFFF", valign: "middle" });
         const runs: Run[] = [];
+        if (c.badge && !shortBadge) runs.push({ text: c.badge, options: { bold: true, color: col.c, fontSize: pt - 1, breakLine: true } });
         for (const l of c.lines) {
           if (l.label) runs.push({ text: l.label, options: { bold: true, color: col.c, fontSize: pt - 2, breakLine: true, paraSpaceBefore: runs.length ? 8 : 0 } });
           if (l.text) runs.push({ text: l.text, options: { color: BODY, fontSize: pt, breakLine: true, bullet: l.bullet ? { indent: 12 } : false } });
@@ -1150,7 +1153,7 @@ function renderReport(ctx: Ctx, report: Report) {
     const c = report.palette[0].replace("#", "").toUpperCase();
     return { c, soft: mix(c, "FFFFFF", 0.9) } as unknown as Color;
   })();
-  if (report.hero.kpis?.length) deck.kpis("핵심 숫자", report.hero.subtitle ? report.hero.subtitle : report.hero.title, report.hero.kpis.map((k) => ({ label: k.note ? `${k.label} · ${k.note}` : k.label, value: k.value })), color);
+  if (report.hero.kpis?.length) deck.kpis("핵심 숫자", report.hero.title || report.hero.subtitle || "", report.hero.kpis.map((k) => ({ label: k.note ? `${k.label} · ${k.note}` : k.label, value: k.value })), color);
   const shown = report.sections.filter((sec) => !sec.blocks.every((b) => b.type === "sources"));
   if (shown.length >= 4) deck.agenda(shown.map((sec) => sec.title));
 
@@ -1164,7 +1167,10 @@ function renderReport(ctx: Ctx, report: Report) {
       prose = [];
       proseTitle = "";
     };
-    if (sec.lead) prose.push({ text: sec.lead });
+    // A section's lead before charts and tables opens the section as a statement slide, not a near-empty text slide.
+    const firstBlock = (sec.blocks as ReportBlock[])[0];
+    if (sec.lead && firstBlock && firstBlock.type !== "text" && firstBlock.type !== "bullets" && sec.lead.length <= 220) deck.statement(kicker, sec.title, sec.lead, color);
+    else if (sec.lead) prose.push({ text: sec.lead });
     for (const b of sec.blocks as ReportBlock[]) {
       if (b.type === "text" || b.type === "bullets") {
         if (!prose.length && b.title) proseTitle = b.title;

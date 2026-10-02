@@ -8,12 +8,13 @@ import { BusinessInfo } from "@/components/site/business-info";
 import { BrandMark } from "@/components/brand-mark";
 import { ThemeLangControls } from "@/components/shell/app-shell";
 import { primaryButton, secondaryButton } from "@/components/site/page";
-import { PlanCards } from "@/components/site/plan-cards";
+import { CreditPreview, PlanCards } from "@/components/site/plan-cards";
 import { publicTools } from "@/lib/tools/catalog";
 import { FAQ } from "@/lib/site/faq";
 import { useBi } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
 import { HeroMock } from "./hero-mock";
+import { ConceptFilm } from "./concept-film";
 import { SceneVideo } from "./scene-video";
 import {
   BeforeAfterSection,
@@ -211,8 +212,11 @@ function Pricing() {
       <div className="mt-10">
         <PlanCards signedIn={signedIn} />
       </div>
+      <div className="mt-4">
+        <CreditPreview />
+      </div>
       <p className="mt-4 text-sm text-fg-muted">
-        <Link href="/pricing" className="text-accent underline underline-offset-2">
+        <Link href="/pricing#per-tool" className="text-accent underline underline-offset-2">
           {L({ ko: "도구별 크레딧 전체 보기", en: "Credits for every tool" })}
         </Link>
       </p>
@@ -378,6 +382,7 @@ function Landing({ signedIn = false }: { signedIn?: boolean }) {
         <Nav />
         <main id="main">
           <Hero />
+          <ConceptFilm />
           <FlowSection />
           <CategorySection />
           <StepsSection />

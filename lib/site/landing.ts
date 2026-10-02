@@ -6,69 +6,59 @@ import type { Bilingual } from "@/lib/tools/content";
 
 const b = (ko: string, en: string): Bilingual => ({ ko, en });
 
-/** IDEA → BUILD → BRAND → SELL → OPERATE → GROW: every public tool, once. */
+/** IDEA → BUILD → BRAND & SELL → OPERATE → GROW: five stages of five tools, every public tool once. */
 export const FLOW: {
   id: string;
   label: string;
   title: Bilingual;
   body: Bilingual;
   tools: string[];
+  /** A photo of the stage (public/images); stages without one get a drawn backdrop. */
+  image?: { src: string; alt: Bilingual };
 }[] = [
   {
     id: "idea",
     label: "IDEA",
     title: b("무엇을 할지", "What to do"),
     body: b(
-      "내 경험과 시장의 빈틈에서 해볼 만한 사업을 찾아요.",
-      "Find a business worth trying in your experience and the market's gaps.",
+      "내 경험과 시장의 빈틈, 고객에서 해볼 만한 사업을 찾아요.",
+      "Find a business worth trying in your experience, the market's gaps and its customers.",
     ),
-    tools: ["idea-radar", "market-gap", "market-desk", "trend-radar"],
+    tools: ["idea-radar", "market-gap", "trend-radar", "market-desk", "persona-mapper"],
+    image: { src: "/images/stage-idea.webp", alt: b("밤늦은 책상 위, 동네 지도와 포스트잇에 가게 아이디어를 그려 둔 모습", "A desk late at night: a neighbourhood map and sticky notes sketching shop ideas") },
   },
   {
     id: "build",
     label: "BUILD",
     title: b("어떻게 벌지", "How it earns"),
     body: b(
-      "고객·경쟁·수익 구조를 정하고 팔 수 있는 제안으로 다듬어요.",
-      "Settle the customer, competition and revenue model, and shape an offer people buy.",
+      "경쟁·수익 구조·첫 제품을 정하고, 팔 수 있는 제안과 계획서로 만들어요.",
+      "Settle the competition, revenue model and first product, then an offer and a plan.",
     ),
-    tools: [
-      "persona-mapper",
-      "competitor-lens",
-      "revenue-mapper",
-      "offer-architect",
-      "mvp-blueprint",
-    ],
+    tools: ["competitor-lens", "revenue-mapper", "offer-architect", "mvp-blueprint", "doc-studio"],
+    image: { src: "/images/stage-build.webp", alt: b("두 공동 창업자가 한옥 카페에서 계산기와 메모로 수익 구조를 맞춰 보는 모습", "Two co-founders in a hanok café working out the numbers with a calculator and notes") },
   },
   {
     id: "brand",
-    label: "BRAND",
-    title: b("어떻게 보일지", "How it looks"),
+    label: "BRAND & SELL",
+    title: b("어떻게 보이고 팔지", "How it looks and sells"),
     body: b(
-      "성격·색·서체·말투를 한 장에 정하고 로고와 사이트로 이어가요.",
-      "Personality, colour, type and voice on one board, carried into a logo and site.",
+      "브랜드 기준을 정하고 로고·사이트·상세페이지·광고까지 같은 얼굴로.",
+      "Set the brand, then carry it into a logo, site, product page and ads.",
     ),
-    tools: ["brand-dna", "logo-lab", "web-builder"],
-  },
-  {
-    id: "sell",
-    label: "SELL",
-    title: b("어떻게 팔지", "How it sells"),
-    body: b(
-      "상세페이지, 광고, 제안서, 발표자료를 같은 메시지로 만들어요.",
-      "Sales page, ads, proposal and pitch deck, all with the same message.",
-    ),
-    tools: ["sales-page", "ad-factory", "proposal-forge", "pitch-director"],
+    tools: ["brand-dna", "logo-lab", "web-builder", "sales-page", "ad-factory"],
+    image: { src: "/images/stage-brand.webp", alt: b("작업실에서 유자청 병을 스마트폰으로 제품 촬영하는 모습", "A maker photographing jars of yuzu preserve with a phone in a small studio") },
   },
   {
     id: "operate",
     label: "OPERATE",
     title: b("어떻게 돌릴지", "How it runs"),
     body: b(
-      "문서, 업무 매뉴얼, 회의 결정, 운영 계획을 바로 쓰는 형태로.",
-      "Documents, SOPs, meeting decisions and operating plans you can use today.",
+      "제안서, 발표자료, 업무 매뉴얼, 회의 결정, 운영 계획을 바로 쓰는 형태로.",
+      "Proposals, decks, SOPs, meeting decisions and operating plans you can use today.",
     ),
-    tools: ["doc-studio", "sop-builder", "meeting-action", "ops-planner"],
+    tools: ["proposal-forge", "pitch-director", "sop-builder", "meeting-action", "ops-planner"],
+    image: { src: "/images/stage-operate.webp", alt: b("저녁 꽃집에서 사장이 클립보드로 주간 일정을 정리하는 모습", "A florist going over the week's schedule on a clipboard at dusk") },
   },
   {
     id: "grow",
@@ -78,13 +68,7 @@ export const FLOW: {
       "캠페인과 콘텐츠를 돌리고 고객의 목소리로 다음 수를 정해요.",
       "Run campaigns and content, and let customer feedback set the next move.",
     ),
-    tools: [
-      "campaign-planner",
-      "hook-lab",
-      "seo-composer",
-      "content-transformer",
-      "insight-miner",
-    ],
+    tools: ["campaign-planner", "hook-lab", "seo-composer", "content-transformer", "insight-miner"],
   },
 ];
 
