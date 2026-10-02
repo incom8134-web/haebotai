@@ -4,7 +4,8 @@ import { checkGrounding } from "@/lib/tools/grounding";
 import { checkOutputSafety } from "@/lib/tools/policy";
 import { buildReference, referencePaths } from "@/lib/tools/reference-server";
 import { runWithApiKey } from "@/lib/tools/generate";
-import { providerErrorMessage } from "@/lib/ai/provider-errors";
+import { isAccessDenied, providerErrorMessage } from "@/lib/ai/provider-errors";
+import { alert as opsAlert } from "@/lib/spend-guard";
 import { getUserApiKeysFor } from "@/lib/api-keys";
 import { settleGenerationCredits } from "@/lib/credits";
 import { writeRunFacts } from "@/lib/projects/server";
@@ -17,8 +18,8 @@ import { runMeta } from "./meta";
 import type { AgentRunState, StageContext } from "./types";
 
 // The orchestrator (docs/ai-architecture-proposal.md §3.1). One call works
-// on a run for the rest of this function invocation: it runs the agent's
-// stages in order, saving the state after each, and when the next stage
+// on a run for the rest of this function invocation: it runs the run's
+// plan (lib/agents/plan.ts) step by step, saving the state after each, and when the next stage
 // won't fit in the time left it saves and hands off to a fresh
 // invocation (lib/agents/handoff.ts). A run therefore isn't bound by one
 // function's time limit — each stage is.
@@ -93,7 +94,8 @@ export async function runAgent(runId: string, startedAt: number): Promise<void> 
       if (ref.ok && ref.bundle) input = { ...values, _reference: ref.bundle };
     }
 
-    const spec = agentFor(manifest, state.provider);
+    // Re-read every step: a planning step may replace the run's plan.
+    const spec = () => agentFor(manifest, state.provider, state);
     const ctx: StageContext = {
       state,
       manifest,
@@ -115,10 +117,10 @@ export async function runAgent(runId: string, startedAt: number): Promise<void> 
     let ranHere = 0;
     for (;;) {
       if (state.stage === "finalize") {
-        await finish(state, spec.finalize(state), values);
+        await finish(state, spec().finalize(state), values);
         return;
       }
-      const stage = spec.stages[state.stage];
+      const stage = spec().stages[state.stage];
       if (!stage) {
         await failRun(db, runId, "error", "실행 단계를 찾지 못했습니다. 크레딧은 돌려드렸어요.");
         await cleanup(db, state);
@@ -162,7 +164,10 @@ export async function runAgent(runId: string, startedAt: number): Promise<void> 
           return;
         }
         console.error(`agent ${manifest.id}: stage ${stage.id} failed`, err);
-        const message = providerErrorMessage(err) ?? (err instanceof Error ? err.message : "생성 중 오류가 발생했습니다");
+        const message = providerErrorMessage(err, { ownKey: state.ownKey }) ?? (err instanceof Error ? err.message : "생성 중 오류가 발생했습니다");
+        // The platform's own key was refused (billing in arrears, revoked
+        // key): every run fails until someone fixes it, so tell the team.
+        if (!state.ownKey && isAccessDenied(err)) alertKeyRefused(state.provider, err);
         await failRun(db, runId, "error", message);
         await cleanup(db, state);
         return;
@@ -242,4 +247,13 @@ export async function runAgent(runId: string, startedAt: number): Promise<void> 
 async function cleanup(db: ReturnType<typeof agentDb>, state: AgentRunState) {
   const paths = referencePaths(state.referenceRaw, `${state.userId}/`);
   if (paths.length) await db.storage.from("inputs").remove(paths).then(() => {}, () => {});
+}
+
+let lastKeyAlert = 0;
+/** At most one alert per 10 minutes per instance: every run fails the same way. */
+function alertKeyRefused(provider: string, err: unknown) {
+  if (Date.now() - lastKeyAlert < 600_000) return;
+  lastKeyAlert = Date.now();
+  const detail = (err instanceof Error ? err.message : String(err)).slice(0, 300);
+  void opsAlert(`The platform ${provider} API key was refused; every run fails until it is fixed (billing or key). ${detail}`);
 }
