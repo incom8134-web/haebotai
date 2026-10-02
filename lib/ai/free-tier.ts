@@ -18,7 +18,7 @@ import { freeTierBlocked, freeTierDailyQuotaHit, isOverloaded, retryAfterSeconds
 // Pure apart from the clock and the wait, both injectable (tested).
 
 /** Free text models, in the order a free key tries them. */
-export const FREE_TEXT_MODELS = ["gemini-3.8-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.7-flash"];
+export const FREE_TEXT_MODELS = ["gemini-3.8-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3-flash-preview", "gemini-3.7-flash"];
 
 const PAID_ONLY_MS = 6 * 60 * 60 * 1000; // Pro refused: the key is free-tier
 const DAILY_QUOTA_MS = 6 * 60 * 60 * 1000; // quotas reset daily (Pacific midnight)
