@@ -13,7 +13,7 @@
 // Bump CONSENT_VERSION when the terms or privacy policy change in a way
 // that needs fresh consent; everyone is asked again on their next visit.
 
-export const CONSENT_VERSION = "2026-09-29";
+export const CONSENT_VERSION = "2026-10-02"; // own-key terms (lib/site/legal.ts)
 
 export interface ConsentState {
   /** Version of the terms/privacy policy agreed to. */
