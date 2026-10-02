@@ -31,9 +31,29 @@ export function isAccessDenied(err: unknown): boolean {
   return status === 401 || status === 403 || /API_KEY_INVALID|API key not valid|PERMISSION_DENIED|dunning|billing/i.test(message);
 }
 
+/**
+ * Google answers a free-tier key (no billing on its project) with a 429
+ * whose quota is 0 for models the free tier doesn't include: the Pro
+ * text model and the image models (ai.google.dev/gemini-api/docs/pricing).
+ * Not a rate limit: waiting never helps; a free model or billing does.
+ */
+export function freeTierBlocked(err: unknown): boolean {
+  const message = err instanceof Error ? err.message : "";
+  return statusOf(err) === 429 && /free_tier/i.test(message) && /limit:\s*0\b/.test(message);
+}
+
+/** Seconds Google asks us to wait before retrying a 429 ("Please retry in 23.4s" / "retryDelay": "23s"), or null. */
+export function retryAfterSeconds(err: unknown): number | null {
+  if (statusOf(err) !== 429) return null;
+  const message = err instanceof Error ? err.message : "";
+  const match = /retry in ([\d.]+)s/i.exec(message) ?? /"retryDelay"\s*:\s*"([\d.]+)s"/.exec(message);
+  return match ? Number(match[1]) : null;
+}
+
 /** A readable message for a provider failure; null when the error is ours and already readable. */
 export function providerErrorMessage(err: unknown, opts: { ownKey?: boolean } = {}): string | null {
   const status = statusOf(err);
+  if (freeTierBlocked(err)) return "무료 Gemini 키로는 이미지를 만들 수 없습니다 — Google AI Studio에서 결제를 켠 키를 등록해주세요";
   if (status === 429) return "AI 엔진 사용 한도를 초과했습니다 — 잠시 후 다시 시도해주세요";
   if (status === 503 || status === 529) return "AI 엔진 요청이 많아 지금은 응답할 수 없습니다 — 잠시 후 다시 시도해주세요";
   if (isAccessDenied(err)) {
