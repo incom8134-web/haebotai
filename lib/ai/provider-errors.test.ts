@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { classifyGeminiError, isAccessDenied, providerErrorMessage } from "./provider-errors.ts";
+import { classifyGeminiError, freeTierBlocked, isAccessDenied, providerErrorMessage, retryAfterSeconds } from "./provider-errors.ts";
 
 const raw = (code: number, status: string) =>
   new Error(JSON.stringify({ error: { code, message: "…", status } }));
@@ -33,4 +33,16 @@ test("a refused key (billing in arrears, revoked, invalid) gets its own message 
   // Any other upstream JSON is replaced, not shown.
   assert.match(providerErrorMessage(raw(400, "INVALID_ARGUMENT"))!, /AI 엔진에서 오류/);
   assert.doesNotMatch(providerErrorMessage(raw(500, "INTERNAL"))!, /\{/);
+});
+
+test("a free-tier key asking for a paid-only model is told apart from a rate limit", () => {
+  const paidOnly = new Error(JSON.stringify({ error: { code: 429, message: "You exceeded your current quota. Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3-pro-image. Please retry in 31.2s.", status: "RESOURCE_EXHAUSTED" } }));
+  const rateLimited = new Error(JSON.stringify({ error: { code: 429, message: "Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 10, model: gemini-3.8-flash. Please retry in 23.4s.", status: "RESOURCE_EXHAUSTED" } }));
+  assert.equal(freeTierBlocked(paidOnly), true);
+  assert.equal(freeTierBlocked(rateLimited), false);
+  assert.equal(freeTierBlocked(raw(429, "RESOURCE_EXHAUSTED")), false);
+  assert.match(providerErrorMessage(paidOnly)!, /무료 Gemini 키/);
+  assert.equal(retryAfterSeconds(rateLimited), 23.4);
+  assert.equal(retryAfterSeconds(new Error('{"error":{"code":429,"details":[{"retryDelay": "17s"}]}}')), 17);
+  assert.equal(retryAfterSeconds(raw(503, "UNAVAILABLE")), null);
 });

@@ -17,6 +17,7 @@ import {
   referenceParts,
 } from "@/lib/tools/generate-prompt";
 import { classifyGeminiError } from "./provider-errors";
+import { freeTierAware } from "./free-tier";
 import { getPlaybook } from "@/lib/tools/playbooks";
 import { zodToJsonSchema } from "./schema";
 import { renderLogoLockup, type LogoTracking, type LogoWeight } from "@/lib/tools/render/logo";
@@ -57,13 +58,25 @@ export async function runWithApiKey<T>(apiKeys: string[], fn: () => Promise<T>):
 
 export function getClient(): GoogleGenAI {
   const state = userKeyStore.getStore();
-  if (state) return new GoogleGenAI({ apiKey: state.keys[state.index] });
+  if (state) return withFreeTierFallback(new GoogleGenAI({ apiKey: state.keys[state.index] }));
   if (!client) {
     const apiKey = process.env.GOOGLE_GENAI_API_KEY;
     if (!apiKey) throw new Error("GOOGLE_GENAI_API_KEY가 설정되지 않았습니다");
-    client = new GoogleGenAI({ apiKey });
+    client = withFreeTierFallback(new GoogleGenAI({ apiKey }));
   }
   return client;
+}
+
+// Free-tier keys: Pro text calls fall back to Flash, short rate-limit
+// waits are honoured (./free-tier). Every call goes through a client from
+// getClient(), so wrapping here covers all of them.
+function withFreeTierFallback(ai: GoogleGenAI): GoogleGenAI {
+  const models = ai.models;
+  const generate = models.generateContent.bind(models);
+  const stream = models.generateContentStream.bind(models);
+  models.generateContent = (params) => freeTierAware(params, generate, { keyTag: currentKeyTag(), flashModel: TEXT_MODEL });
+  models.generateContentStream = (params) => freeTierAware(params, stream, { keyTag: currentKeyTag(), flashModel: TEXT_MODEL });
+  return ai;
 }
 
 // A request to Gemini tops out at 20 MB with everything inline. Reference
