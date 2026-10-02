@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useBi } from "@/lib/i18n/context";
 import { LABELS, humanize } from "@/lib/tools/output-labels";
 import { REGENERATE_PRESETS, regenerateCost, regeneratableSections } from "@/lib/projects/regenerate";
+import { OWN_KEY_ONLY } from "@/lib/site/access";
 
 const DOC_PRESETS = [
   { ko: "내용은 그대로, 디자인만 더 고급스럽게", en: "Keep everything, make the design more premium" },
@@ -51,7 +52,7 @@ export function RegeneratePanel({ runId, toolId, output, estimatedCredits, isFre
     <details className="mt-4 rounded-2xl border border-hairline bg-surface px-4 py-3">
       <summary className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-fg">
         <Wand2 className="size-4 text-accent" aria-hidden /> {L({ ko: "이 부분만 다시 만들기", en: "Redo one part" })}
-        <span className="ml-auto text-2xs font-normal text-fg-subtle">{isFree ? L({ ko: "무료", en: "Free" }) : L({ ko: `${cost} 크레딧`, en: `${cost} credits` })}</span>
+        <span className="ml-auto text-2xs font-normal text-fg-subtle">{OWN_KEY_ONLY ? L({ ko: "내 API 키로 실행", en: "Runs on your API key" }) : isFree ? L({ ko: "무료", en: "Free" }) : L({ ko: `${cost} 크레딧`, en: `${cost} credits` })}</span>
       </summary>
       <div className="mt-3 flex flex-col gap-2">
         <label className="flex flex-col gap-1 text-xs text-fg-muted">

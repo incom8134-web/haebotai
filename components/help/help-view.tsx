@@ -51,7 +51,7 @@ function Faq() {
         <Search size={16} className="text-fg-subtle" aria-hidden />
         <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={L({ ko: "무엇이 궁금하세요? (예: 크레딧, API 키)", en: "What do you want to know? (e.g. credits, API key)" })} className="min-w-0 flex-1 bg-transparent text-sm outline-none" aria-label={L({ ko: "질문 검색", en: "Search questions" })} />
       </label>
-      <Segmented label={L({ ko: "주제", en: "Topic" })} value={category} onChange={setCategory} options={[{ value: "all" as const, label: L({ ko: "전체", en: "All" }) }, ...(Object.keys(FAQ_CATEGORIES) as FaqCategory[]).map((c) => ({ value: c, label: L(FAQ_CATEGORIES[c]) }))]} />
+      <Segmented label={L({ ko: "주제", en: "Topic" })} value={category} onChange={setCategory} options={[{ value: "all" as const, label: L({ ko: "전체", en: "All" }) }, ...(Object.keys(FAQ_CATEGORIES) as FaqCategory[]).map((c) => ({ value: c, label: L(FAQ_CATEGORIES[c]!) }))]} />
       {visible.length ? (
         <div className="glass divide-y divide-hairline rounded-[24px]">
           {visible.map((f) => (

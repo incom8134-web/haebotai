@@ -2,10 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { OWN_KEY_ONLY } from "@/lib/site/access";
 
 export type StudentRequestState = { ok: boolean; message: string } | null;
 
 export async function requestStudentVerification(_prev: StudentRequestState, formData: FormData): Promise<StudentRequestState> {
+  // The student plan granted unlimited platform credits; members now bring their own key (lib/site/access.ts).
+  if (OWN_KEY_ONLY) return { ok: false, message: "closed" };
   const schoolName = String(formData.get("schoolName") ?? "").trim();
   const schoolEmail = String(formData.get("schoolEmail") ?? "").trim();
   const note = String(formData.get("note") ?? "").trim().slice(0, 500);

@@ -7,6 +7,7 @@ import { buildInputSchema, inputErrorMessage } from "@/lib/tools/runner";
 import { buildReference, referenceForStorage } from "@/lib/tools/reference-server";
 import { checkToolPolicy } from "@/lib/tools/policy";
 import { ownKeyRequiredError, resolveCost, resolveRequestedProvider } from "@/lib/ai/resolve-provider";
+import { canUsePlatformKey } from "@/lib/platform-access";
 import { getUserApiKeys } from "@/lib/api-keys";
 import { getMembership } from "@/lib/membership";
 import { getBusinessProfile } from "@/lib/profile";
@@ -151,15 +152,18 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const hasUsableKey = userApiKeys.length > 0;
   // Only spend a second query distinguishing "never registered" from
   // "registered but all broken" when it's actually needed for the message.
+  // Members run on their own key only; the platform's key is the team's,
+  // for testing, and costs them nothing (lib/platform-access.ts).
+  const team = canUsePlatformKey(user.email);
   let hasAnyKey = hasUsableKey;
-  if (!hasUsableKey && provider !== "google") {
+  if (!hasUsableKey) {
     hasAnyKey = (await getUserApiKeys(provider)).length > 0;
   }
-  const keyError = ownKeyRequiredError(provider, { hasAnyKey, hasUsableKey });
+  const keyError = ownKeyRequiredError(provider, { hasAnyKey, hasUsableKey }, team);
   if (keyError) {
-    return Response.json({ error: keyError }, { status: 400 });
+    return Response.json({ error: keyError, code: "own_key_required" }, { status: 400 });
   }
-  const cost = resolveCost(provider, hasUsableKey, membership.plan === "student", manifest.estimatedCredits);
+  const cost = team ? 0 : resolveCost(provider, hasUsableKey, membership.plan === "student", manifest.estimatedCredits);
 
   // Platform-wide ceilings on top of credits (lib/spend-guard-core.ts):
   // kill switch, daily platform AI budget, per-member daily run cap.

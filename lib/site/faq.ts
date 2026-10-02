@@ -1,8 +1,9 @@
 import type { Bilingual } from "@/lib/tools/content";
+import { OWN_KEY_ONLY } from "@/lib/site/access";
 
 export type FaqCategory = "start" | "projects" | "credits" | "tools" | "sources" | "api" | "account";
 
-export const FAQ_CATEGORIES: Record<FaqCategory, Bilingual> = {
+const ALL_CATEGORIES: Record<FaqCategory, Bilingual> = {
   start: { ko: "시작하기", en: "Getting started" },
   projects: { ko: "프로젝트·버전", en: "Projects & versions" },
   credits: { ko: "크레딧·멤버십", en: "Credits & membership" },
@@ -12,7 +13,9 @@ export const FAQ_CATEGORIES: Record<FaqCategory, Bilingual> = {
   account: { ko: "계정·데이터", en: "Account & data" },
 };
 
-export const FAQ: { category: FaqCategory; q: Bilingual; a: Bilingual }[] = [
+type Faq = { category: FaqCategory; q: Bilingual; a: Bilingual };
+
+const ALL_FAQ: Faq[] = [
   { category: "start", q: { ko: "무엇부터 하면 되나요?", en: "Where do I start?" }, a: { ko: "처음 로그인하면 목표를 고르고 프로젝트를 만드는 세 화면짜리 안내가 나와요. 마지막 화면의 '첫 작업'을 누르면 그 프로젝트에서 첫 도구가 열립니다. 건너뛰었다면 스튜디오의 '다음에 해 볼 것'이나 도구 페이지에서 시작하세요.", en: "Your first sign-in shows a three-screen setup: pick a goal and create a project. \"First task\" on the last screen opens your first tool inside that project. If you skipped it, start from \"Try next\" in the Studio or the Tools page." } },
   { category: "start", q: { ko: "도구마다 따로 로그인해야 하나요?", en: "Do I sign in to each tool separately?" }, a: { ko: "아니요. 25개 도구가 모두 하나의 앱이에요. 로그인, 크레딧, 프로젝트, 보관함이 모두 공유돼요.", en: "No. All 25 tools are one app, sharing sign-in, credits, projects and the Library." } },
   { category: "start", q: { ko: "도구끼리 결과를 이어서 쓸 수 있나요?", en: "Can tools use each other's results?" }, a: { ko: "네. 결과 아래 '이어서 만들기'를 누르면 다음 도구가 앞 결과를 이어받아 입력칸이 채워진 채로 열려요. 파일을 내보냈다 다시 올릴 필요가 없어요.", en: "Yes. \"Continue with…\" under a result opens the next tool with that result already filled in — no exporting and re-uploading." } },
@@ -33,3 +36,40 @@ export const FAQ: { category: FaqCategory; q: Bilingual; a: Bilingual }[] = [
   { category: "account", q: { ko: "내 데이터로 AI를 학습하나요?", en: "Is my data used for training?" }, a: { ko: "아니요. 입력과 결과는 결과 제공과 보관함 저장에만 사용됩니다.", en: "No. Inputs and outputs are used only to produce results and keep your Library." } },
   { category: "account", q: { ko: "보관함 결과를 삭제할 수 있나요?", en: "Can I delete Library results?" }, a: { ko: "네, 보관함 목록이나 각 결과에서 삭제할 수 있어요(만드는 중인 결과는 끝난 뒤에). 결과와 함께 만든 이미지 파일도 지워지고, 복구되지 않아요. 계정 → 계정 삭제에서 모든 데이터를 한 번에 지울 수도 있어요.", en: "Yes, from the Library list or each result (once it has finished). The images it made are deleted with it, and nothing can be recovered. Account → Delete account removes all your data at once." } },
 ];
+
+// While members bring their own API key (lib/site/access.ts) there are no
+// credits or plans to explain: those answers give way to the key ones.
+const OWN_KEY_FAQ: Faq[] = [
+  {
+    category: "api",
+    q: { ko: "왜 내 API 키가 필요한가요?", en: "Why do I need my own API key?" },
+    a: {
+      ko: "해봇의 모든 도구는 내 Google AI Studio(Gemini) 키로 실행돼요. 해봇 이용료는 없고, AI 사용 요금은 Google이 내 Google 계정으로 직접 청구해요. 키 발급은 무료이고 5분이면 끝나요.",
+      en: "Every Haebot tool runs on your own Google AI Studio (Gemini) key. Haebot charges nothing; Google bills any AI usage directly to your Google account. Getting a key is free and takes about 5 minutes.",
+    },
+  },
+  {
+    category: "api",
+    q: { ko: "AI 사용 요금은 얼마나 나오나요?", en: "How much will the AI usage cost?" },
+    a: {
+      ko: "Google의 요금과 무료 한도를 따라요. 도구마다 쓰는 양이 다르니, Google AI Studio에서 사용량을 확인하고 Google Cloud에 예산 알림을 걸어 두는 걸 권해요.",
+      en: "It follows Google's prices and free limits. Tools use different amounts, so check your usage in Google AI Studio and set a budget alert in Google Cloud.",
+    },
+  },
+  {
+    category: "api",
+    q: { ko: "Claude나 ChatGPT 키도 쓸 수 있나요?", en: "Can I use a Claude or ChatGPT key?" },
+    a: {
+      ko: "Claude 키는 일부 도구에서 쓸 수 있어요. 대부분의 도구와 전략·검토 단계는 Gemini 키에서 동작하니 Gemini 키를 먼저 등록하세요. ChatGPT 키는 지금은 저장만 돼요.",
+      en: "A Claude key works on some tools. Most tools, and the strategy and review steps, run on a Gemini key, so add a Gemini key first. A ChatGPT key is only stored for now.",
+    },
+  },
+];
+
+export const FAQ: Faq[] = OWN_KEY_ONLY
+  ? [...ALL_FAQ.filter((f) => f.category !== "credits" && f.q.en !== "Why add my own API key?"), ...OWN_KEY_FAQ]
+  : ALL_FAQ;
+
+export const FAQ_CATEGORIES: Partial<Record<FaqCategory, Bilingual>> = OWN_KEY_ONLY
+  ? Object.fromEntries(Object.entries(ALL_CATEGORIES).filter(([k]) => k !== "credits"))
+  : ALL_CATEGORIES;
