@@ -152,6 +152,24 @@ export async function searchGrounding(
   return { findings: res.text ?? "", sources, usage: addUsage({ inputTokens: 0, outputTokens: 0 }, res.usageMetadata) };
 }
 
+/** One web-grounded answer to a research question (lib/agents/core/research.ts writes the prompt). */
+export async function groundedSearch(prompt: string, abortSignal: AbortSignal | undefined): Promise<{ findings: string; sources: Source[]; usage: TokenUsage }> {
+  const res = await getClient().models.generateContent({
+    model: TEXT_MODEL,
+    contents: prompt,
+    config: { tools: [{ googleSearch: {} }], abortSignal: abortSignal ? AbortSignal.any([abortSignal, AbortSignal.timeout(70_000)]) : AbortSignal.timeout(70_000) },
+  });
+  const seen = new Set<string>();
+  const sources: Source[] = [];
+  for (const chunk of res.candidates?.[0]?.groundingMetadata?.groundingChunks ?? []) {
+    const web = chunk.web;
+    if (!web?.uri || seen.has(web.uri)) continue;
+    seen.add(web.uri);
+    sources.push({ url: web.uri, title: web.title ?? web.uri, domain: web.domain });
+  }
+  return { findings: res.text ?? "", sources, usage: addUsage({ inputTokens: 0, outputTokens: 0 }, res.usageMetadata) };
+}
+
 const REAL_PERSON_CHECK_SCHEMA = {
   type: "object",
   properties: {
@@ -651,14 +669,14 @@ async function* generateStructured(
   if (manifest.grounding.webSearch && research) {
     sources = research.sources;
     groundingBlock = `\n\n[검색 근거]\n${research.findings || "(검색 결과 없음)"}\n\n[사용 가능한 출처]\n${
-      sources.map((s) => `- ${s.title} — ${s.url}`).join("\n") || "(없음)"
+      sources.map((s, i) => `[${i + 1}] ${s.title} — ${s.url}`).join("\n") || "(없음)"
     }`;
   } else if (manifest.grounding.webSearch) {
     const grounded = await searchGrounding(manifest, contextText, abortSignal);
     sources = grounded.sources;
     usage = addUsage(usage, { promptTokenCount: grounded.usage.inputTokens ?? 0, candidatesTokenCount: grounded.usage.outputTokens ?? 0 });
     groundingBlock = `\n\n[검색 근거]\n${grounded.findings || "(검색 결과 없음)"}\n\n[사용 가능한 출처]\n${
-      sources.map((s) => `- ${s.title} — ${s.url}`).join("\n") || "(없음)"
+      sources.map((s, i) => `[${i + 1}] ${s.title} — ${s.url}`).join("\n") || "(없음)"
     }`;
   }
 

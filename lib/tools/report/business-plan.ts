@@ -1,3 +1,4 @@
+import { documentReport, parseDocument } from "../../agents/core/document.ts";
 import { fmt } from "./charts.ts";
 import type { Report, ReportSection } from "./types.ts";
 import { clamp, has, keep, list, num, obj, objs, PALETTES, pct, sourcesOf, str, strs, sum, won } from "./util.ts";
@@ -251,7 +252,8 @@ export function businessPlanReport(o: Record<string, unknown>): Report {
     ]),
   });
 
-  const chapters = objs(o.chapters).filter((c) => str(c.title));
+  const document = parseDocument(o.document);
+  const chapters = document ? [] : objs(o.chapters).filter((c) => str(c.title));
   const DATA_ID: Record<string, string> = { market: "market", competition: "competition", revenue: "model", financials: "financials", funding: "funding", roadmap: "roadmap", risks: "risks" };
   const sections: ReportSection[] = [];
   const used = new Set<string>();
@@ -262,7 +264,12 @@ export function businessPlanReport(o: Record<string, unknown>): Report {
     // Between the plan's own numbered chapters, analysis blocks drop the classic numbering.
     sections.push(chapters.length && section.kicker ? { ...section, kicker: section.kicker.replace(/^\d+ · /, "") } : section);
   };
-  if (chapters.length) {
+  if (document) {
+    // Written by the document agent: its sections in its order, then the analysis blocks it computed.
+    sections.push(...documentReport(document, "사업계획서").sections);
+    used.add("summary");
+    for (const id of ["market", "competition", "model", "financials", "funding", "roadmap", "risks"]) place(id);
+  } else if (chapters.length) {
     // The one-liner opens the plan; the classic summary/model texts only
     // appear when the plan still has them.
     if (str(o.one_liner)) sections.push({ id: "one-liner", title: str(o.plan_type) || "한 줄 요약", blocks: [{ type: "callout", label: "한 줄 요약", text: str(o.one_liner) }] });

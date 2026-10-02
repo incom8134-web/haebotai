@@ -146,7 +146,7 @@ async function* generateStructured(
     sources = grounded.sources;
     usage = sumUsage(usage, grounded.usage);
     groundingBlock = `\n\n[검색 근거]\n${grounded.findings || "(검색 결과 없음)"}\n\n[사용 가능한 출처]\n${
-      sources.map((s) => `- ${s.title} — ${s.url}`).join("\n") || "(없음)"
+      sources.map((s, i) => `[${i + 1}] ${s.title} — ${s.url}`).join("\n") || "(없음)"
     }`;
   }
 

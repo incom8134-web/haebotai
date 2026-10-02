@@ -8,6 +8,13 @@ import { useBi } from "@/lib/i18n/context";
 import { LABELS, humanize } from "@/lib/tools/output-labels";
 import { REGENERATE_PRESETS, regenerateCost, regeneratableSections } from "@/lib/projects/regenerate";
 
+const DOC_PRESETS = [
+  { ko: "내용은 그대로, 디자인만 더 고급스럽게", en: "Keep everything, make the design more premium" },
+  { ko: "이미지는 줄이고 도표를 더 넣어 줘", en: "Fewer images, more diagrams" },
+  { ko: "이 섹션을 더 기술적으로", en: "Make this section more technical" },
+  { ko: "더 구체적인 예시와 숫자로", en: "More concrete, with examples" },
+];
+
 // "이 부분만 다시": pick one part of the result and say how to change it.
 // The rewrite is saved as a new version; this one stays as it is.
 
@@ -20,6 +27,11 @@ export function RegeneratePanel({ runId, toolId, output, estimatedCredits, isFre
   const [busy, setBusy] = useState(false);
   if (!sections.length) return null;
   const cost = regenerateCost(estimatedCredits);
+  // A document-agent result: the whole document (the instruction decides what changes) or one section.
+  const docSections = new Map(((output as { document?: { sections?: { id: string; title: string }[] } } | null)?.document?.sections ?? []).map((s) => [`doc:${s.id}`, s.title]));
+  const isDoc = docSections.size > 0;
+  const presets = isDoc ? DOC_PRESETS : REGENERATE_PRESETS;
+  const labelOf = (s: string) => (s === "document" ? L({ ko: "문서 전체 — 요청에 맞게 판단", en: "Whole document — routed by your request" }) : docSections.get(s) ?? LABELS[s] ?? humanize(s));
 
   async function run() {
     setBusy(true);
@@ -46,12 +58,12 @@ export function RegeneratePanel({ runId, toolId, output, estimatedCredits, isFre
           {L({ ko: "다시 만들 부분", en: "Part to redo" })}
           <select value={section} onChange={(e) => setSection(e.target.value)} className="rounded-lg border border-hairline bg-bg px-2 py-1.5 text-sm text-fg">
             {sections.map((s) => (
-              <option key={s} value={s}>{LABELS[s] ?? humanize(s)}</option>
+              <option key={s} value={s}>{labelOf(s)}</option>
             ))}
           </select>
         </label>
         <div className="flex flex-wrap gap-1.5">
-          {REGENERATE_PRESETS.map((p) => (
+          {presets.map((p) => (
             <button key={p.ko} type="button" onClick={() => setInstruction(L(p))} className="rounded-full border border-hairline px-2.5 py-1 text-xs text-fg-muted hover:border-accent hover:text-fg">
               {L(p)}
             </button>
@@ -59,7 +71,11 @@ export function RegeneratePanel({ runId, toolId, output, estimatedCredits, isFre
         </div>
         <textarea value={instruction} onChange={(e) => setInstruction(e.target.value)} maxLength={500} rows={2} aria-label={L({ ko: "어떻게 바꿀까요", en: "How to change it" })} placeholder={L({ ko: "어떻게 바꿀까요? 예: 20대가 쓰는 말투로", en: "How should it change? e.g. in the voice of people in their 20s" })} className="rounded-lg border border-hairline bg-bg px-3 py-2 text-sm text-fg outline-none focus:border-accent" />
         <div className="flex items-center gap-2">
-          <p className="text-2xs text-fg-subtle">{L({ ko: "새 버전으로 저장돼요. 지금 결과는 그대로 남습니다.", en: "Saved as a new version; this result stays as it is." })}</p>
+          <p className="text-2xs text-fg-subtle">
+            {isDoc && section === "document"
+              ? L({ ko: "디자인만 바꾸거나 이미지를 빼는 요청은 문장을 건드리지 않고 무료로 처리돼요. 새 버전으로 저장됩니다.", en: "Design-only and remove-images requests don't touch the wording and are free. Saved as a new version." })
+              : L({ ko: "새 버전으로 저장돼요. 지금 결과는 그대로 남습니다.", en: "Saved as a new version; this result stays as it is." })}
+          </p>
           <button type="button" disabled={busy || !instruction.trim() || !section} onClick={run} className="ml-auto rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50">
             {busy ? L({ ko: "만드는 중…", en: "Working…" }) : L({ ko: "다시 만들기", en: "Redo" })}
           </button>

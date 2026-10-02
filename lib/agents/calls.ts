@@ -25,7 +25,7 @@ import type { Direction } from "@/lib/tools/directions";
 
 const ZERO: TokenUsage = { inputTokens: 0, outputTokens: 0 };
 
-async function jsonCall(opts: {
+export async function jsonCall(opts: {
   model: string;
   system: string;
   prompt: string;
@@ -53,7 +53,7 @@ async function jsonCall(opts: {
 }
 
 /** Pro first; the fast model when Pro is rate-limited, down or slow — never fails the run for a planning call. */
-async function smartCall(opts: Parameters<typeof jsonCall>[0]): Promise<{ data: unknown; usage: TokenUsage }> {
+export async function smartCall(opts: Parameters<typeof jsonCall>[0]): Promise<{ data: unknown; usage: TokenUsage }> {
   try {
     return await jsonCall(opts);
   } catch (err) {

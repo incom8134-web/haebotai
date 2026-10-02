@@ -7,7 +7,7 @@ import type { TokenUsage } from "@/lib/ai/types";
 import { pickBest } from "../critic";
 import { RESEARCH } from "../planner";
 import { skeletonOf, skeletonSignature } from "../skeleton";
-import { directives, runCritic } from "../specs/common";
+import { contractResearch, directives, runCritic } from "../specs/common";
 import type { AgentRunState, Critique, StageContext } from "../types";
 import type { Capability } from "./types";
 
@@ -58,9 +58,11 @@ const versions = (state: AgentRunState) => ((state.work.versions as Version[] | 
 export const researchTopic: Capability = {
   id: "research_topic",
   label: { ko: "자료 조사", en: "Researching" },
-  maxSeconds: () => 60,
+  maxSeconds: () => 110,
   skipTo: (flow) => flow.next,
   async run(ctx, flow) {
+    // The task contract's research questions first; the tool's own search otherwise.
+    if (await contractResearch(ctx)) return flow.next;
     if (!ctx.manifest.grounding.webSearch) return flow.next;
     const context = buildContext(ctx.manifest, directives(ctx.state, ctx.input), ctx.state.profile);
     const r = await searchGrounding(ctx.manifest, context, ctx.signal);

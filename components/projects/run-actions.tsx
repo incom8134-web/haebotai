@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { GitBranch, Pencil, RotateCcw, Trash2 } from "lucide-react";
+import { GitBranch, Link2, Link2Off, Pencil, RotateCcw, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useBi } from "@/lib/i18n/context";
 import { toolSlug } from "@/lib/tools/catalog";
@@ -22,6 +22,7 @@ export function RunActions({
   parentRunId,
   childRunIds,
   versioned,
+  shareToken,
 }: {
   runId: string;
   toolId: string;
@@ -33,6 +34,8 @@ export function RunActions({
   childRunIds: string[];
   /** False before migration 0016: rename / move / versions aren't stored yet. */
   versioned: boolean;
+  /** The live public link's token; null for none, undefined when sharing isn't available. */
+  shareToken?: string | null;
 }) {
   const L = useBi();
   const router = useRouter();
@@ -54,6 +57,40 @@ export function RunActions({
   }
 
   const busy = status === "pending" || status === "streaming";
+  const [token, setToken] = useState(shareToken ?? null);
+  const [sharing, setSharing] = useState(false);
+  const shareUrl = (t: string) => `${window.location.origin}/share/${t}`;
+
+  async function copyLink(t: string) {
+    const url = shareUrl(t);
+    const ok = await navigator.clipboard.writeText(url).then(() => true, () => false);
+    if (ok) toast.success(L({ ko: "공유 링크를 복사했어요. 링크를 가진 누구나 이 결과를 볼 수 있어요.", en: "Link copied. Anyone with the link can view this result." }));
+    else window.prompt(L({ ko: "아래 링크를 복사해 주세요", en: "Copy this link" }), url);
+  }
+
+  async function share() {
+    if (token) return copyLink(token);
+    if (!window.confirm(L({ ko: "공유 링크를 만들까요? 링크를 가진 누구나 로그인 없이 이 결과(출처와 입력 일부 포함)를 볼 수 있어요. 언제든 끌 수 있어요.", en: "Create a share link? Anyone with it can view this result (with its sources and some inputs) without signing in. You can turn it off any time." }))) return;
+    setSharing(true);
+    const res = await fetch(`/api/runs/${runId}/share`, { method: "POST" }).catch(() => null);
+    setSharing(false);
+    const body = (await res?.json().catch(() => ({}))) as { token?: string; error?: string } | undefined;
+    if (res?.ok && body?.token) {
+      setToken(body.token);
+      await copyLink(body.token);
+    } else toast.error(body?.error ?? L({ ko: "공유 링크를 만들지 못했어요", en: "Couldn't create a link" }));
+  }
+
+  async function unshare() {
+    if (!window.confirm(L({ ko: "공유를 끌까요? 지금 링크는 더 이상 열리지 않아요.", en: "Turn off sharing? The current link will stop working." }))) return;
+    setSharing(true);
+    const res = await fetch(`/api/runs/${runId}/share`, { method: "DELETE" }).catch(() => null);
+    setSharing(false);
+    if (res?.ok) {
+      setToken(null);
+      toast.success(L({ ko: "공유를 껐어요", en: "Sharing turned off" }));
+    } else toast.error(L({ ko: "공유를 끄지 못했어요", en: "Couldn't turn off sharing" }));
+  }
 
   return (
     <div className="mt-3 flex flex-col gap-2">
@@ -90,6 +127,18 @@ export function RunActions({
         <Link href={`/tools/${toolSlug(toolId)}/run?fromInput=${runId}${projectId ? `&project=${projectId}` : ""}`} className="inline-flex items-center gap-1 rounded-full border border-hairline px-2.5 py-1 text-fg-muted hover:text-fg">
           <RotateCcw className="size-3" aria-hidden /> {L({ ko: "같은 입력으로 다시", en: "Run again" })}
         </Link>
+        {shareToken !== undefined && status === "done" ? (
+          <>
+            <button type="button" onClick={share} disabled={sharing} className="inline-flex items-center gap-1 rounded-full border border-hairline px-2.5 py-1 text-fg-muted hover:text-fg disabled:opacity-60">
+              <Link2 className="size-3" aria-hidden /> {token ? L({ ko: "공유 링크 복사", en: "Copy share link" }) : L({ ko: "공유 링크 만들기", en: "Share link" })}
+            </button>
+            {token ? (
+              <button type="button" onClick={unshare} disabled={sharing} className="inline-flex items-center gap-1 rounded-full border border-hairline px-2.5 py-1 text-fg-muted hover:text-fg disabled:opacity-60">
+                <Link2Off className="size-3" aria-hidden /> {L({ ko: "공유 끄기", en: "Stop sharing" })}
+              </button>
+            ) : null}
+          </>
+        ) : null}
         {!busy ? (
           <button type="button" onClick={remove} className="inline-flex items-center gap-1 rounded-full border border-hairline px-2.5 py-1 text-fg-muted hover:border-danger/40 hover:text-danger">
             <Trash2 className="size-3" aria-hidden /> {L({ ko: "삭제", en: "Delete" })}

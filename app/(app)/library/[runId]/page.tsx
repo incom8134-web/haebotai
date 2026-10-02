@@ -8,6 +8,7 @@ import { orderLike } from "@/lib/tools/output-order";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/supabase/user";
 import { listProjects } from "@/lib/projects/server";
+import { resignOutput } from "@/lib/run-assets-server";
 
 // HAEBOT_A_TOOLS_SPEC.md T2 — run history is only real if a past run's
 // actual output is reachable, not just its row in the list. Reuses the
@@ -44,11 +45,15 @@ export default async function LibraryRunPage({ params }: { params: Promise<{ run
 
   if (!run || !run.tool_id) notFound();
 
-  const [projects, children] = await Promise.all([
+  const [projects, children, output, share] = await Promise.all([
     listProjects(),
     run.parent_run_id !== undefined
       ? supabase.from("generations").select("id, created_at").eq("parent_run_id", run.id).eq("user_id", user.id).order("created_at", { ascending: true })
       : Promise.resolve({ data: [] as { id: string; created_at: string }[] }),
+    // Image links are signed when made; a fresh signature keeps old results' images loading.
+    run.status === "done" ? resignOutput(supabase, orderLike(getOutputSchema(run.tool_id) ?? z.unknown(), run.output), user.id) : Promise.resolve(null),
+    // The live public link, if any (migration 0017; none before it).
+    supabase.from("run_shares").select("token").eq("run_id", run.id).is("revoked_at", null).maybeSingle(),
   ]);
 
   return (
@@ -59,7 +64,7 @@ export default async function LibraryRunPage({ params }: { params: Promise<{ run
       input={run.input ?? undefined}
       // Older runs were stored in whatever key order the model returned.
       // An unfinished run's output is its working state, not a result.
-      output={run.status === "done" ? orderLike(getOutputSchema(run.tool_id) ?? z.unknown(), run.output) : null}
+      output={output}
       sources={(run.sources ?? []) as Source[]}
       creditsUsed={run.credits_used}
       provider={run.provider as ProviderId | null}
@@ -71,6 +76,7 @@ export default async function LibraryRunPage({ params }: { params: Promise<{ run
       childRunIds={(children.data ?? []).map((c) => c.id)}
       projects={projects.map((p) => ({ id: p.id, name: p.name }))}
       versioned={run.parent_run_id !== undefined}
+      shareToken={share.error ? undefined : (share.data?.token ?? null)}
     />
   );
 }

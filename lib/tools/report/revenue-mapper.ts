@@ -95,6 +95,33 @@ export function revenueMapperReport(o: Record<string, unknown>): Report {
     ]),
   });
 
+  if (streams.length) {
+    sections.push({
+      id: "streams",
+      kicker: "수익원",
+      title: "수익원별로 무엇을 팔고 얼마를 남기나",
+      blocks: [
+        {
+          type: "cards",
+          columns: streams.length >= 3 ? 2 : 1,
+          items: streams.map((s) => ({
+            title: s.name,
+            kicker: `${STREAM_TYPES[s.type] ?? s.type} · ${STREAM_ROLES[s.role] ?? s.role}`,
+            facts: [
+              { label: "고객", value: s.segmentIds.map((id) => segName.get(id) ?? id).join(", ") || "—" },
+              { label: "가격 모델", value: s.priceModel || "—" },
+              { label: "가격(추정)", value: range(s.low, s.high) },
+              { label: "빈도", value: s.frequency || "—" },
+              { label: "첫 매출까지", value: `${s.weeks}주` },
+            ],
+            lines: [s.what, s.margin && `마진: ${s.margin}`].filter((x): x is string => !!x),
+            meter: { value: Math.max(0, Math.min(1, s.effort / 5)), label: `드는 노력 ${s.effort}/5` },
+          })),
+        },
+      ],
+    });
+  }
+
   sections.push({
     id: "ladder",
     kicker: "가치 사다리",
