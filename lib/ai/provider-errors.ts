@@ -42,6 +42,18 @@ export function freeTierBlocked(err: unknown): boolean {
   return statusOf(err) === 429 && /free_tier/i.test(message) && /limit:\s*0\b/.test(message);
 }
 
+/** A free-tier key used up today's requests for one model (each model has its own daily quota). */
+export function freeTierDailyQuotaHit(err: unknown): boolean {
+  const message = err instanceof Error ? err.message : "";
+  return statusOf(err) === 429 && /free_tier/i.test(message) && /PerDay/.test(message) && !freeTierBlocked(err);
+}
+
+/** Google is overloaded (503, or 529 elsewhere): worth waiting and trying again. */
+export function isOverloaded(err: unknown): boolean {
+  const status = statusOf(err);
+  return status === 503 || status === 529;
+}
+
 /** Seconds Google asks us to wait before retrying a 429 ("Please retry in 23.4s" / "retryDelay": "23s"), or null. */
 export function retryAfterSeconds(err: unknown): number | null {
   if (statusOf(err) !== 429) return null;
