@@ -15,6 +15,7 @@ import { useBi } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
 import { HeroMock } from "./hero-mock";
 import { ConceptFilm } from "./concept-film";
+import { SceneVideo } from "./scene-video";
 import {
   BeforeAfterSection,
   CategorySection,
@@ -115,6 +116,13 @@ function Hero() {
   const L = useBi();
   const count = publicTools().length;
   return (
+    <div className="relative isolate overflow-hidden">
+      {/* A quiet paper-and-light scene that plays once, then holds. The wash keeps the headline readable. */}
+      <div aria-hidden className="absolute inset-0 -z-10">
+        <SceneVideo name="hero" priority className="opacity-90 dark:opacity-25" />
+        <div className="absolute inset-0 bg-gradient-to-r from-bg/90 via-bg/60 to-bg/20" />
+        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-bg to-transparent" />
+      </div>
     <section className="mx-auto grid max-w-[1200px] gap-10 px-4 pt-12 pb-16 md:px-6 md:pt-20 lg:grid-cols-[1fr_1.05fr] lg:items-center lg:gap-14">
       <motion.div
         initial={{ opacity: 0, y: 14 }}
@@ -178,6 +186,7 @@ function Hero() {
         <HeroMock />
       </motion.div>
     </section>
+    </div>
   );
 }
 

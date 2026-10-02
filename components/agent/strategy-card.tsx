@@ -7,7 +7,9 @@ import { useBi } from "@/lib/i18n/context";
 
 // How a result was made (output.agent, lib/agents/meta.ts): the request as
 // understood, the strategy chosen with the alternatives it was weighed
-// against, the assumptions made instead of asking, and the review rounds.
+// against (one honestly named as the obvious default), the workflow
+// planned for it, the assumptions made instead of asking, and the review
+// rounds.
 // "다른 전략으로" re-runs the same inputs asking for a different approach.
 
 export interface AgentMeta {
@@ -15,10 +17,14 @@ export interface AgentMeta {
   strategy?: {
     chosen: string;
     rationale: string;
-    considered: { name: string; summary: string; fit: number; why: string }[];
+    considered: { name: string; summary: string; fit: number; why: string; isDefault?: boolean }[];
     blueprint: string[];
     direction?: string;
+    /** Why the obvious default won, when it did. */
+    defaultReason?: string;
   } | null;
+  /** The workflow the planner chose for this request. */
+  plan?: { steps: { ko: string; en: string }; reason: string } | null;
   assumptions?: string[];
   answers?: { question: string; answer: string }[];
   review?: { rounds: number; scores: number[]; fixed: number } | null;
@@ -48,6 +54,12 @@ export function StrategyCard({ meta, onRerun }: { meta: AgentMeta; onRerun?: (ch
               {s.rationale ? <p className="mt-1 text-xs leading-relaxed break-keep text-fg-muted">{s.rationale}</p> : null}
             </>
           ) : null}
+          {meta.plan ? (
+            <p className="mt-1.5 text-2xs break-keep text-fg-subtle">
+              {L({ ko: "작업 순서", en: "Workflow" })}: {L(meta.plan.steps)}
+              {meta.plan.reason ? <span> — {meta.plan.reason}</span> : null}
+            </p>
+          ) : null}
           {scores.length ? (
             <p className="mt-1.5 font-mono text-2xs text-fg-subtle">
               {L({
@@ -75,8 +87,12 @@ export function StrategyCard({ meta, onRerun }: { meta: AgentMeta; onRerun?: (ch
                   <span className="font-medium">{c.name}</span>
                   <span className="ml-1.5 font-mono text-2xs text-fg-subtle">{L({ ko: `적합도 ${c.fit}/10`, en: `fit ${c.fit}/10` })}</span>
                   {c.name === s.chosen ? <span className="ml-1.5 text-2xs text-studio-violet">{L({ ko: "선택", en: "chosen" })}</span> : null}
+                  {c.isDefault ? (
+                    <span className="ml-1.5 rounded-full border border-hairline px-1.5 py-px text-2xs text-fg-subtle">{L({ ko: "뻔한 기본안", en: "the obvious default" })}</span>
+                  ) : null}
                   <p className="mt-0.5 text-fg-muted">{c.summary}</p>
                   {c.why ? <p className="mt-0.5 text-fg-subtle">{c.why}</p> : null}
+                  {c.isDefault && c.name === s.chosen && s.defaultReason ? <p className="mt-0.5 text-fg-subtle">{L({ ko: "기본안을 고른 이유", en: "Why the default" })}: {s.defaultReason}</p> : null}
                 </li>
               ))}
             </ul>

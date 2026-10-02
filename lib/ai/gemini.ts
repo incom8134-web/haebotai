@@ -130,11 +130,12 @@ export async function searchGrounding(
   manifest: ToolManifest,
   contextText: string,
   abortSignal: AbortSignal | undefined,
+  focus?: string,
 ): Promise<{ findings: string; sources: Source[]; usage: TokenUsage }> {
   const ai = getClient();
   const res = await ai.models.generateContent({
     model: TEXT_MODEL,
-    contents: buildResearchPrompt(manifest, contextText),
+    contents: buildResearchPrompt(manifest, contextText, focus),
     config: { tools: [{ googleSearch: {} }], abortSignal },
   });
 

@@ -21,6 +21,7 @@ const intentSchema = z.object({
   avoid: z.array(s(120)).max(6),
   unknowns: z.array(z.object({ item: s(120), critical: z.boolean(), assumption: s(200) })).max(6),
   summary: s(160),
+  memo: s(1200).optional(),
 });
 
 const requestSchema = z.object({

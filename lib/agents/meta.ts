@@ -1,4 +1,6 @@
 import { fingerprintOf } from "./diversity.ts";
+import { planLabel } from "./planner.ts";
+import { skeletonOf, skeletonSignature } from "./skeleton.ts";
 import type { AgentRunState, Critique } from "./types.ts";
 
 // What a finished run shows about how it was made (output.agent): the
@@ -18,12 +20,15 @@ export function runMeta(state: AgentRunState) {
           considered: state.strategy.considered,
           blueprint: state.strategy.blueprint.map((b) => b.part),
           direction: direction?.name ?? "",
+          ...(state.strategy.defaultReason ? { defaultReason: state.strategy.defaultReason } : {}),
         }
       : null,
+    // The workflow the planner chose for this request (absent: the tool's standard one).
+    plan: state.plan?.source === "planner" ? { steps: { ko: planLabel(state.plan), en: planLabel(state.plan, "en") }, reason: state.plan.reason ?? "" } : null,
     assumptions: (state.intent?.unknowns ?? []).filter((u) => u.assumption && !(u.critical && state.answers.length)).map((u) => `${u.item}: ${u.assumption}`),
     answers: state.answers,
     review: critiques.length ? { rounds: critiques.length, scores: critiques.map((c) => c.score), fixed: critiques.slice(0, -1).reduce((n, c) => n + c.issues.length, 0) } : null,
     steps: state.events.filter((e) => e.kind === "stage" && e.status === "done").map((e) => e.label),
-    fingerprint: fingerprintOf(state.strategy, direction?.id),
+    fingerprint: fingerprintOf(state.strategy, direction?.id, skeletonSignature(skeletonOf(state.work.final))),
   };
 }

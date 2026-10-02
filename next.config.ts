@@ -52,6 +52,12 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        // The landing-page videos and their posters: cached for a week
+        // (the files are not fingerprinted, so not for longer).
+        source: "/videos/:path*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=604800, stale-while-revalidate=86400" }],
+      },
+      {
         // Checkout return pages are left frameable in case Toss's payment
         // layer loads them inside its iframe.
         source: "/:path((?!account/membership/checkout).*)",

@@ -15,6 +15,7 @@ import { BEFORE_AFTER, FLOW, PERSONAS, STEPS } from "@/lib/site/landing";
 import { useBi } from "@/lib/i18n/context";
 import type { CategoryId } from "@/lib/tools/types";
 import { cn } from "@/lib/utils";
+import { SceneVideo, StoryVideo } from "./scene-video";
 
 export const reveal = {
   initial: { opacity: 0, y: 16 },
@@ -418,7 +419,10 @@ export function StepsSection() {
           en: "Five steps — and nothing you've settled gets asked twice",
         })}
       />
-      <ol className="mt-10 grid gap-3 md:grid-cols-5">
+      <motion.div {...reveal} aria-hidden className="mt-10 aspect-video overflow-hidden rounded-[28px] border border-hairline md:aspect-[21/9]">
+        <SceneVideo name="how" className="dark:opacity-50" />
+      </motion.div>
+      <ol className="mt-4 grid gap-3 md:grid-cols-5">
         {STEPS.map((s, i) => (
           <motion.li
             key={s.title.en}
@@ -573,7 +577,27 @@ export function PersonasSection() {
           en: "People running a business alone or with a small team",
         })}
       />
-      <div className="mt-10 grid gap-3 md:grid-cols-2 lg:grid-cols-5">
+      <motion.div {...reveal} className="mt-10 grid items-center gap-6 rounded-[28px] border border-hairline bg-surface p-4 md:grid-cols-[1.1fr_1fr] md:gap-10 md:p-6">
+        <StoryVideo />
+        <div>
+          <p className="text-xs font-semibold tracking-wide text-accent">
+            {L({ ko: "작은 가게의 하루", en: "A day at a small shop" })}
+          </p>
+          <p className="mt-3 font-display text-xl leading-snug font-bold break-keep text-fg md:text-2xl">
+            {L({
+              ko: "가게를 보면서, 문서와 홍보는 한 곳에서",
+              en: "Minding the shop, handling the paperwork and promotion in one place",
+            })}
+          </p>
+          <p className="mt-3 text-sm leading-relaxed break-keep text-fg-muted">
+            {L({
+              ko: "메뉴 소개, 상세페이지, 사업 문서까지 노트북 하나로 정리해요. 10초짜리 영상이에요.",
+              en: "Menus, sales pages and business documents, sorted from one laptop. A 10-second video.",
+            })}
+          </p>
+        </div>
+      </motion.div>
+      <div className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-5">
         {PERSONAS.map((p, i) => (
           <motion.article
             key={p.id}

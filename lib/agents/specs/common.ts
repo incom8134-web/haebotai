@@ -1,7 +1,8 @@
 import "server-only";
 import { critique, recentFingerprints, strategize, understand } from "../calls";
 import { intentToBrief } from "../intent";
-import { fingerprintOf, samenessNote, type Fingerprint } from "../diversity";
+import { fingerprintOf, samenessNote, shapeNote, type Fingerprint } from "../diversity";
+import { rejectedDefault } from "../strategy";
 import type { AgentRunState, Critique, Stage, StageContext } from "../types";
 import type { Direction } from "@/lib/tools/directions";
 import { referenceOf } from "@/lib/tools/generate-prompt";
@@ -176,10 +177,17 @@ export const strategizeStage = (next: string, extra?: (ctx: StageContext) => str
   },
 });
 
-/** Runs the critic on a draft; records the critique and the event. */
-export async function runCritic(ctx: StageContext, draft: string, round: number): Promise<Critique | null> {
+/**
+ * Runs the critic on a draft; records the critique and the event. `focus`
+ * is what the planner asked the critic to check hardest; `shape` the
+ * draft's skeleton signature, compared with the member's recent results
+ * (the template detector's memory).
+ */
+export async function runCritic(ctx: StageContext, draft: string, round: number, opts: { focus?: string[]; shape?: string[] } = {}): Promise<Critique | null> {
   const { state } = ctx;
   const fp = fingerprintOf(state.strategy, (state.work.direction as Direction | null | undefined)?.id);
+  const recent = (state.work.recent as Fingerprint[] | undefined) ?? [];
+  const sameness = [round === 0 ? samenessNote(fp, recent) : null, shapeNote(opts.shape, recent)].filter(Boolean).join("\n") || null;
   const r = await critique({
     manifest: ctx.manifest,
     input: ctx.input,
@@ -189,7 +197,9 @@ export async function runCritic(ctx: StageContext, draft: string, round: number)
     answers: state.answers,
     strategy: state.strategy,
     draft,
-    sameness: round === 0 ? samenessNote(fp, (state.work.recent as Fingerprint[] | undefined) ?? []) : null,
+    sameness,
+    focus: opts.focus,
+    avoidDefault: rejectedDefault(state.strategy),
     signal: ctx.signal,
   });
   ctx.addUsage(r.usage);
