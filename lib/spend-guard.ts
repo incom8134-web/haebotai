@@ -10,7 +10,7 @@ const redis = Redis.fromEnv();
 const TTL = 60 * 60 * 48;
 const TIMEOUT_MS = 1500;
 
-async function alert(text: string) {
+export async function alert(text: string) {
   console.error(`[BUDGET ALERT] ${text}`);
   const url = process.env.BUDGET_ALERT_WEBHOOK_URL;
   if (!url) return;
