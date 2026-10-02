@@ -46,3 +46,11 @@ test("a free-tier key asking for a paid-only model is told apart from a rate lim
   assert.equal(retryAfterSeconds(new Error('{"error":{"code":429,"details":[{"retryDelay": "17s"}]}}')), 17);
   assert.equal(retryAfterSeconds(raw(503, "UNAVAILABLE")), null);
 });
+
+test("a free model's daily quota is told apart from a paid-only refusal", async () => {
+  const { freeTierDailyQuotaHit } = await import("./provider-errors.ts");
+  const perDay = new Error(JSON.stringify({ error: { code: 429, message: "Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.8-flash", details: [{ violations: [{ quotaId: "GenerateRequestsPerDayPerProjectPerModel-FreeTier" }] }] } }));
+  const paidOnly = new Error(JSON.stringify({ error: { code: 429, message: "Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3-pro-image", details: [{ violations: [{ quotaId: "GenerateRequestsPerDayPerProjectPerModel-FreeTier" }] }] } }));
+  assert.equal(freeTierDailyQuotaHit(perDay), true);
+  assert.equal(freeTierDailyQuotaHit(paidOnly), false);
+});

@@ -74,8 +74,8 @@ function withFreeTierFallback(ai: GoogleGenAI): GoogleGenAI {
   const models = ai.models;
   const generate = models.generateContent.bind(models);
   const stream = models.generateContentStream.bind(models);
-  models.generateContent = (params) => freeTierAware(params, generate, { keyTag: currentKeyTag(), flashModel: TEXT_MODEL });
-  models.generateContentStream = (params) => freeTierAware(params, stream, { keyTag: currentKeyTag(), flashModel: TEXT_MODEL });
+  models.generateContent = (params) => freeTierAware(params, generate, { keyTag: currentKeyTag() });
+  models.generateContentStream = (params) => freeTierAware(params, stream, { keyTag: currentKeyTag() });
   return ai;
 }
 
