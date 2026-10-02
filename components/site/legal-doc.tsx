@@ -65,7 +65,7 @@ export function LegalDocView({ doc }: { doc: LegalDoc }) {
       <header className="border-b border-hairline pb-6">
         <h1 className="font-display text-[clamp(1.8rem,3.5vw,2.6rem)] leading-tight font-bold tracking-[-0.02em] text-fg">{doc.title}</h1>
         <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-fg-muted break-keep">{doc.lead}</p>
-        <p className="mt-3 font-mono text-2xs text-fg-subtle">시행일 {BUSINESS.effectiveDate} · This document is provided in Korean, which is the binding version.</p>
+        <p className="mt-3 font-mono text-2xs text-fg-subtle">시행일 {doc.effectiveDate ?? BUSINESS.effectiveDate} · This document is provided in Korean, which is the binding version.</p>
       </header>
 
       <nav aria-label="목차" className="mt-6 rounded-2xl bg-surface-2/50 p-4">
