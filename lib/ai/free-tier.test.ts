@@ -107,3 +107,24 @@ test("a short rate-limit wait is honoured once, a long one is not", async () => 
   assert.deepEqual(waits, [12_250]);
   await assert.rejects(freeTierAware({ model: "gemini-3.8-flash" }, async () => { throw quota(10, "x", 90); }, { keyTag: tag(), sleep }), /retry in 90s/);
 });
+
+test("a free key whose Search allowance is used up answers without Search", async () => {
+  const bare = Object.assign(new Error(JSON.stringify({ error: { code: 429, message: "You exceeded your current quota, please check your plan and billing details.", status: "RESOURCE_EXHAUSTED" } })), { status: 429 });
+  const seen: { model: string; search: boolean }[] = [];
+  const call = async (p: { model: string; config?: { tools?: unknown[] } }) => {
+    const search = !!p.config?.tools?.length;
+    seen.push({ model: p.model, search });
+    if (p.model.includes("pro")) throw quota(0, p.model);
+    if (search) throw bare;
+    return "ok";
+  };
+  const opts = { keyTag: tag(), sleep: noSleep };
+  const params = { model: "gemini-3.1-pro-preview", config: { tools: [{ googleSearch: {} }] } };
+  assert.equal(await freeTierAware(params, call, opts), "ok");
+  assert.deepEqual(seen.at(-1), { model: "gemini-3.8-flash", search: false });
+  seen.length = 0;
+  await freeTierAware(params, call, opts);
+  assert.deepEqual(seen, [{ model: "gemini-3.8-flash", search: false }]);
+  // A paid key (never marked free) keeps Search and gets the error.
+  await assert.rejects(freeTierAware({ model: "gemini-3.8-flash", config: { tools: [{ googleSearch: {} }] } }, async () => { throw bare; }, { keyTag: tag(), sleep: noSleep }), /exceeded/);
+});
