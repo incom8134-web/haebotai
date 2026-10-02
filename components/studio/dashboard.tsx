@@ -12,6 +12,7 @@ import {
   Plus,
   Search,
   Sparkles,
+  KeyRound,
 } from "lucide-react";
 import { catalogTool, publicTools } from "@/lib/tools/catalog";
 import { routeBrief } from "@/lib/tools/route-brief";
@@ -22,6 +23,7 @@ import { formatDateTime } from "@/lib/format-date";
 import { useBi, useLocale } from "@/lib/i18n/context";
 import { primaryButton, secondaryButton } from "@/components/site/page";
 import { cn } from "@/lib/utils";
+import { OWN_KEY_ONLY } from "@/lib/site/access";
 
 // The member's home. Everything here is real account state — no sample
 // numbers: what's running or just finished, the projects, the latest
@@ -245,7 +247,7 @@ function QuickCreate({
       )}
       <p className="text-2xs text-fg-subtle">
         {L({
-          ko: "도구 화면에서 내용을 확인하고 실행해요. 열기만 해서는 크레딧이 들지 않아요. 자료(PDF·Word·PPT)는 도구 화면에서 올릴 수 있어요.",
+          ko: "도구 화면에서 내용을 확인하고 실행해요. 자료(PDF·Word·PPT)는 도구 화면에서 올릴 수 있어요.",
           en: "You review it on the tool page before running — opening costs nothing. Upload PDFs, Word or PowerPoint files there.",
         })}
       </p>
@@ -287,7 +289,7 @@ export function Dashboard({
   runs: DashboardRun[];
   recommended: string[];
   lastTool: string | null;
-  usage: { balance: number | null; used30: number; runs30: number };
+  usage: { balance: number | null; used30: number; runs30: number; keyConnected?: boolean; team?: boolean };
 }) {
   const L = useBi();
   const { locale } = useLocale();
@@ -310,7 +312,7 @@ export function Dashboard({
         .filter((t): t is NonNullable<typeof t> => !!t && !!t.engine && !t.hidden)
         .sort((a, b) => rank(a.slug) - rank(b.slug))
     : [];
-  const low = usage.balance !== null && usage.balance < 100;
+  const low = !OWN_KEY_ONLY && usage.balance !== null && usage.balance < 100;
 
   return (
     <div className="mx-auto max-w-[1180px] px-4 pt-6 pb-12 md:px-8 md:pt-8">
@@ -340,15 +342,32 @@ export function Dashboard({
           </div>
           <Reveal delay={0.15}>
             <div className="grid grid-cols-2 gap-3">
-              <div className="col-span-2 rounded-[22px] border border-hairline bg-surface/85 p-4 backdrop-blur">
-                <p className="flex items-center gap-1.5 text-xs text-fg-muted">
-                  <Coins size={13} className="text-accent" aria-hidden /> {L({ ko: "남은 크레딧", en: "Credits left" })}
-                </p>
-                <p className="mt-1 font-display text-4xl font-bold text-fg">{usage.balance === null ? "—" : <CountUp value={usage.balance} />}</p>
-                <Link href="/account/membership" className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-accent hover:underline">
-                  {L({ ko: "충전·플랜", en: "Plans" })} <ArrowRight size={12} aria-hidden />
-                </Link>
-              </div>
+              {OWN_KEY_ONLY ? (
+                <div className={cn("col-span-2 rounded-[22px] border p-4 backdrop-blur", usage.keyConnected || usage.team ? "border-hairline bg-surface/85" : "border-accent/40 bg-accent-dim")}>
+                  <p className="flex items-center gap-1.5 text-xs text-fg-muted">
+                    <KeyRound size={13} className="text-accent" aria-hidden /> {L({ ko: "내 API 키", en: "My API key" })}
+                  </p>
+                  <p className="mt-1 font-display text-2xl font-bold break-keep text-fg">
+                    {usage.keyConnected ? L({ ko: "연결됨", en: "Connected" }) : usage.team ? L({ ko: "팀 테스트 키 사용 중", en: "Using the team test key" }) : L({ ko: "아직 없어요", en: "Not added yet" })}
+                  </p>
+                  {!usage.keyConnected && !usage.team ? (
+                    <p className="mt-1 text-xs break-keep text-fg-muted">{L({ ko: "도구를 쓰려면 Google AI Studio 키가 필요해요. 무료 발급, 5분.", en: "Tools run on your own Google AI Studio key. Free to get, about 5 minutes." })}</p>
+                  ) : null}
+                  <Link href="/account/api-key" className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-accent hover:underline">
+                    {usage.keyConnected ? L({ ko: "키 관리", en: "Manage key" }) : L({ ko: "API 키 등록하기", en: "Add my API key" })} <ArrowRight size={12} aria-hidden />
+                  </Link>
+                </div>
+              ) : (
+                <div className="col-span-2 rounded-[22px] border border-hairline bg-surface/85 p-4 backdrop-blur">
+                  <p className="flex items-center gap-1.5 text-xs text-fg-muted">
+                    <Coins size={13} className="text-accent" aria-hidden /> {L({ ko: "남은 크레딧", en: "Credits left" })}
+                  </p>
+                  <p className="mt-1 font-display text-4xl font-bold text-fg">{usage.balance === null ? "—" : <CountUp value={usage.balance} />}</p>
+                  <Link href="/account/membership" className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-accent hover:underline">
+                    {L({ ko: "충전·플랜", en: "Plans" })} <ArrowRight size={12} aria-hidden />
+                  </Link>
+                </div>
+              )}
               <div className="rounded-[22px] border border-hairline bg-surface/85 p-4 backdrop-blur">
                 <p className="text-xs text-fg-muted">{L({ ko: "30일 완료", en: "Done, 30 days" })}</p>
                 <p className="mt-1 font-display text-2xl font-bold text-fg"><CountUp value={usage.runs30} /></p>
@@ -479,7 +498,7 @@ export function Dashboard({
                     <span className="mt-1 line-clamp-2 text-xs leading-relaxed break-keep text-fg-muted">
                       {L(t.promise)}
                     </span>
-                    {m ? (
+                    {m && !OWN_KEY_ONLY ? (
                       <span className="mt-auto pt-2 font-mono text-2xs text-fg-subtle">
                         {m.estimatedCredits}{" "}
                         {L({ ko: "크레딧", en: "credits" })}

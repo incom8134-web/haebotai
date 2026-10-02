@@ -8,6 +8,7 @@ import { WORKFLOWS } from "@/lib/site/guides";
 import { useFavorites } from "@/lib/hooks/use-local-list";
 import { useBi, useLocale } from "@/lib/i18n/context";
 import { PageHeader } from "@/components/site/page";
+import { OWN_KEY_ONLY } from "@/lib/site/access";
 
 // /links — one screen of shortcuts: pinned tools, latest results, every
 // app page, flows, outside services small businesses use alongside
@@ -18,7 +19,7 @@ const PAGES = [
   { href: "/tools", icon: LayoutGrid, label: { ko: "전체 도구", en: "All tools" } },
   { href: "/library", icon: Library, label: { ko: "보관함", en: "Library" } },
   { href: "/brand", icon: UserRound, label: { ko: "비즈니스 프로필", en: "Business Profile" } },
-  { href: "/account/credits", icon: CircleGauge, label: { ko: "크레딧·한도", en: "Credits & limits" } },
+  OWN_KEY_ONLY ? { href: "/account/api-key", icon: CircleGauge, label: { ko: "내 API 키", en: "My API key" } } : { href: "/account/credits", icon: CircleGauge, label: { ko: "크레딧·한도", en: "Credits & limits" } },
   { href: "/account/membership", icon: Crown, label: { ko: "학생 멤버십", en: "Student membership" } },
   { href: "/help/contact", icon: Headset, label: { ko: "고객센터", en: "Customer service" } },
   { href: "/help/faq", icon: CircleHelp, label: { ko: "자주 묻는 질문", en: "FAQ" } },

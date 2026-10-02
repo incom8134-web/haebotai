@@ -11,6 +11,7 @@ import type { CategoryId } from "@/lib/tools/types";
 import { PATCH_NOTES } from "@/lib/site/patch-notes";
 import { REFERRAL } from "@/lib/referral";
 import { cn } from "@/lib/utils";
+import { OWN_KEY_ONLY } from "@/lib/site/access";
 
 // The Studio's richer home: an animated hero around the one-input
 // composer, the five areas with their tools, ready-made workflows, a
@@ -94,7 +95,7 @@ export function PromoStrip() {
   const L = useBi();
   const reduce = useReducedMotion();
   const latest = PATCH_NOTES[0];
-  const promos = [
+  const allPromos = [
     {
       icon: Sparkles,
       tone: "from-accent/15 to-studio-violet/10",
@@ -123,11 +124,15 @@ export function PromoStrip() {
       icon: KeyRound,
       tone: "from-accent/10 to-studio-cyan/15",
       kicker: { ko: "내 API 키", en: "Your own API key" },
-      title: { ko: "Gemini 키를 연결하면 실행할 때 크레딧이 들지 않아요", en: "Connect a Gemini key and runs cost no credits" },
+      title: OWN_KEY_ONLY
+        ? { ko: "도구는 내 Gemini 키로 실행돼요 — 무료 발급, 5분", en: "Tools run on your own Gemini key — free to get, about 5 minutes" }
+        : { ko: "Gemini 키를 연결하면 실행할 때 크레딧이 들지 않아요", en: "Connect a Gemini key and runs cost no credits" },
       href: "/account/api-key",
       cta: { ko: "연결하기", en: "Connect" },
     },
   ];
+  // Invites and the student plan granted credits; gone while members bring their own key.
+  const promos = OWN_KEY_ONLY ? allPromos.filter((p) => p.href !== "/account/referral" && p.href !== "/account/membership") : allPromos;
   const [i, setI] = useState(0);
   const [paused, setPaused] = useState(false);
   useEffect(() => {

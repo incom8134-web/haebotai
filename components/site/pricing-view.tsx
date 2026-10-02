@@ -6,6 +6,8 @@ import { catalogTool } from "@/lib/tools/catalog";
 import { FAQ } from "@/lib/site/faq";
 import { useBi } from "@/lib/i18n/context";
 import { PlanCards, PriceTable, toolPrices } from "@/components/site/plan-cards";
+import { OWN_KEY_ONLY } from "@/lib/site/access";
+import { OwnKeyPricing } from "@/components/site/own-key-pricing";
 
 // Public pricing: the plans, how credits are actually charged, what the
 // sign-up credits cover (computed from the real estimates), the price of
@@ -34,6 +36,35 @@ export function PricingView({ signedIn }: { signedIn: boolean }) {
     { icon: Wand2, title: { ko: "일부만 다시 만들기는 4분의 1", en: "Redoing one part costs a quarter" }, body: { ko: "결과의 한 부분만 고치면 그 도구 크레딧의 25%(최소 5)만 들어요.", en: "Rewriting one section costs 25% of the tool's credits (at least 5)." } },
     { icon: KeyRound, title: { ko: "내 API 키면 0 크레딧", en: "Your own API key: 0 credits" }, body: { ko: "Google AI Studio 키를 등록하면 크레딧이 차감되지 않아요. 요금은 내 Google 계정 한도로.", en: "Add a Google AI Studio key and runs cost no credits; usage goes to your Google quota." } },
   ];
+  if (OWN_KEY_ONLY) {
+    const keyFaq = FAQ.filter((f) => f.category === "api");
+    return (
+      <div className="mx-auto max-w-[1100px] px-4 pt-6 pb-14 md:px-8 md:pt-10">
+        <header className="max-w-2xl">
+          <h1 className="font-display text-[clamp(2rem,4vw,3rem)] leading-[1.05] font-bold tracking-[-0.02em] break-keep text-fg">{L({ ko: "요금", en: "Pricing" })}</h1>
+          <p className="mt-3 text-base leading-relaxed break-keep text-fg-muted">
+            {L({ ko: "해봇 이용료는 없어요. 25개 도구 모두 내 Gemini API 키로 실행되고, AI 사용 요금은 Google이 내 계정으로 직접 청구해요.", en: "Haebot charges nothing. All 25 tools run on your own Gemini API key, and Google bills any AI usage to your own account." })}
+          </p>
+        </header>
+        <div className="mt-8">
+          <OwnKeyPricing signedIn={signedIn} />
+        </div>
+        {keyFaq.length ? (
+          <section className="mt-12 max-w-3xl" aria-labelledby="key-faq">
+            <h2 id="key-faq" className="text-lg font-semibold text-fg">{L({ ko: "API 키에 관한 질문", en: "Questions about API keys" })}</h2>
+            <div className="mt-4 divide-y divide-hairline rounded-[22px] border border-hairline bg-surface">
+              {keyFaq.map((f) => (
+                <details key={f.q.en} className="px-5 py-4">
+                  <summary className="cursor-pointer font-medium break-keep text-fg">{L(f.q)}</summary>
+                  <p className="pt-2 text-sm leading-relaxed break-keep text-fg-muted">{L(f.a)}</p>
+                </details>
+              ))}
+            </div>
+          </section>
+        ) : null}
+      </div>
+    );
+  }
   return (
     <div className="mx-auto max-w-[1100px] px-4 pt-6 pb-14 md:px-8 md:pt-10">
       <header className="max-w-2xl">

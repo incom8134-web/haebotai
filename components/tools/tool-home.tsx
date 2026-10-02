@@ -16,6 +16,7 @@ import { useBi, useLocale } from "@/lib/i18n/context";
 import type { ToolManifest } from "@/lib/tools/types";
 import { primaryButton, secondaryButton } from "@/components/site/page";
 import { cn } from "@/lib/utils";
+import { OWN_KEY_ONLY } from "@/lib/site/access";
 
 // Tool overview. Split layout: a sticky glass identity card on the left
 // (what it is, what it costs, start), and a scrolling column on the right
@@ -86,10 +87,17 @@ function ToolHome({ toolId, pack }: { toolId: string; pack: ToolPack }) {
           </ul>
 
           <div className={cn("mt-6 grid gap-2 rounded-2xl border border-hairline bg-bg/30 p-3 text-center", engines.length > 1 ? "grid-cols-3" : "grid-cols-2")}>
-            <div>
-              <p className="font-mono text-lg">{tool.estimatedCredits}</p>
-              <p className="text-2xs text-fg-subtle">{L({ ko: "예상 크레딧", en: "est. credits" })}</p>
-            </div>
+            {OWN_KEY_ONLY ? (
+              <div>
+                <p className="text-lg">{L({ ko: "내 키", en: "Your key" })}</p>
+                <p className="text-2xs text-fg-subtle">{L({ ko: "Gemini API 키로 실행", en: "runs on your Gemini key" })}</p>
+              </div>
+            ) : (
+              <div>
+                <p className="font-mono text-lg">{tool.estimatedCredits}</p>
+                <p className="text-2xs text-fg-subtle">{L({ ko: "예상 크레딧", en: "est. credits" })}</p>
+              </div>
+            )}
             <div>
               <p className="font-mono text-lg">~{tool.estimatedSeconds}s</p>
               <p className="text-2xs text-fg-subtle">{L({ ko: "소요 시간", en: "to finish" })}</p>

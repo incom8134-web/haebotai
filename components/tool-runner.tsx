@@ -4,7 +4,7 @@ import { toolSlug } from "@/lib/tools/catalog";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { notFound, useRouter } from "next/navigation";
-import { AlertTriangle, RotateCcw, SquarePen, X } from "lucide-react";
+import { AlertTriangle, KeyRound, RotateCcw, SquarePen, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,6 +38,7 @@ import { Stage } from "@/components/tools/experience/stage";
 import { useLocale, useT, useBi } from "@/lib/i18n/context";
 import { useLocalValue } from "@/lib/hooks/use-local-list";
 import { resolveCost } from "@/lib/ai/resolve-provider";
+import { OWN_KEY_ONLY } from "@/lib/site/access";
 import { mapRunError } from "@/lib/ai/client-error-messages";
 import { PROVIDER_LABEL, type ProviderId } from "@/lib/ai/types";
 import type { DictKey } from "@/lib/i18n/dictionaries";
@@ -118,6 +119,7 @@ function ToolRunner({
   supportedProviders,
   defaultProvider,
   hasOwnKey,
+  team = false,
   isStudent,
   balance,
   projects = [],
@@ -140,6 +142,8 @@ function ToolRunner({
   defaultProvider: ProviderId;
   /** Which of availableProviders the user has their own (non-broken) key for — drives the live cost line. */
   hasOwnKey: Partial<Record<ProviderId, boolean>>;
+  /** On the team list: may run on the platform's key, free (lib/platform-access.ts). */
+  team?: boolean;
   isStudent: boolean;
   balance: number | null;
   /** The member's projects, for the picker above the form. */
@@ -159,7 +163,9 @@ function ToolRunner({
     savedProvider && availableProviders.includes(savedProvider as ProviderId)
       ? (savedProvider as ProviderId)
       : defaultProvider;
-  const cost = manifest ? resolveCost(provider, !!hasOwnKey[provider], isStudent, manifest.estimatedCredits) : 0;
+  // Members run on their own key, so nothing is charged; only the team may use the platform's (lib/site/access.ts).
+  const cost = !manifest || OWN_KEY_ONLY ? 0 : resolveCost(provider, !!hasOwnKey[provider], isStudent, manifest.estimatedCredits);
+  const needsKey = OWN_KEY_ONLY && !hasOwnKey[provider] && !(provider === "google" && team);
 
   const [projectId, setProjectId] = useState(initialProject && projects.some((p) => p.id === initialProject) ? initialProject : "");
   // Opened inside a project: the form fills from the project's memory, so
@@ -287,7 +293,7 @@ function ToolRunner({
       <Button variant="secondary" onClick={() => handleRun()} className="h-10 rounded-2xl px-4">
         <RotateCcw className="size-4" aria-hidden /> {L({ ko: "같은 조건으로 다시 만들기", en: "Run again with the same inputs" })}
       </Button>
-      <span className="text-2xs text-fg-subtle">{L({ ko: `다시 만들기는 크레딧 ${cost}가 다시 들어요`, en: `Running again uses ${cost} credits` })}</span>
+      {cost > 0 ? <span className="text-2xs text-fg-subtle">{L({ ko: `다시 만들기는 크레딧 ${cost}가 다시 들어요`, en: `Running again uses ${cost} credits` })}</span> : null}
     </div>
   );
 
@@ -558,14 +564,45 @@ function ToolRunner({
           </span>
           <span className="text-sm font-semibold break-keep">{locale === "en" ? manifest.name_en : manifest.name_ko}</span>
           <span className="rounded-full border border-hairline px-2.5 py-0.5 font-mono text-2xs whitespace-nowrap text-fg-subtle">
-            {t("estimated_credits")} {cost} {t("credits")} · ~{manifest.estimatedSeconds}
-            {t("seconds")}
+            {OWN_KEY_ONLY ? (
+              <>
+                ~{manifest.estimatedSeconds}
+                {t("seconds")} · {hasOwnKey[provider] ? L({ ko: "내 API 키로 실행", en: "Runs on your API key" }) : team ? L({ ko: "팀 테스트 키 (무료)", en: "Team test key (free)" }) : L({ ko: "API 키 필요", en: "API key needed" })}
+              </>
+            ) : (
+              <>
+                {t("estimated_credits")} {cost} {t("credits")} · ~{manifest.estimatedSeconds}
+                {t("seconds")}
+              </>
+            )}
           </span>
         </div>
         <h1 className="mt-4 font-display text-[clamp(1.75rem,4vw,2.6rem)] leading-[1.12] font-bold tracking-[-0.02em] [text-wrap:balance] break-keep text-fg">
           {exp ? exp.hero.title[locale] : locale === "en" ? manifest.name_en : manifest.name_ko}
         </h1>
         <p className="mt-3 text-base leading-relaxed [text-wrap:pretty] break-keep text-fg-muted">{exp ? exp.hero.story[locale] : manifest.summary}</p>
+        {needsKey ? (
+          <div role="alert" className="mt-4 rounded-2xl border border-accent/40 bg-accent-dim px-4 py-3.5 text-sm break-keep text-fg">
+            <p className="flex items-center gap-2 font-semibold">
+              <KeyRound size={16} className="shrink-0 text-accent" aria-hidden />
+              {L({ ko: "이 도구는 내 API 키로 실행돼요", en: "This tool runs on your own API key" })}
+            </p>
+            <p className="mt-1.5 text-fg-muted">
+              {L({
+                ko: "Google AI Studio에서 무료로 키를 발급해 등록하면 바로 쓸 수 있어요. 5분이면 끝나고, 요금은 내 Google 계정에서 직접 관리해요.",
+                en: "Get a free key from Google AI Studio and add it here — it takes about 5 minutes, and any usage is billed to your own Google account.",
+              })}
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Link href="/account/api-key" className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-accent px-3.5 text-sm font-semibold text-white hover:opacity-90">
+                {L({ ko: "API 키 등록하기", en: "Add my API key" })}
+              </Link>
+              <Link href="/help/api-guide" className="inline-flex h-9 items-center rounded-xl border border-hairline bg-surface px-3.5 text-sm font-medium text-fg hover:border-accent">
+                {L({ ko: "발급 방법 보기", en: "How to get a key" })}
+              </Link>
+            </div>
+          </div>
+        ) : null}
         {cost > 0 && balance !== null ? (
           balance < cost ? (
             <p role="alert" className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-xl border border-danger/30 bg-danger/10 px-3.5 py-2.5 text-sm break-keep text-fg">
@@ -710,6 +747,7 @@ function ToolRunner({
         <Button
           data-run-button
           onClick={() => handleRun()}
+          disabled={needsKey}
           loading={phase === "streaming" || phase === "understanding"}
           shortcut="⌘↵"
           className="studio-gradient-bg h-11 rounded-2xl px-5 text-white shadow-[inset_0_1px_0_oklch(1_0_0/30%),0_12px_32px_-12px_var(--studio-violet)] transition-transform duration-500 ease-[var(--spring)] hover:-translate-y-0.5"

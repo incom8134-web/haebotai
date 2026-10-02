@@ -11,6 +11,8 @@ import { listProjects } from "@/lib/projects/server";
 import { createClient } from "@/lib/supabase/server";
 import type { ProviderId } from "@/lib/ai/types";
 import { toolPack } from "@/lib/tools/pack";
+import { canUsePlatformKey } from "@/lib/platform-access";
+import { getCurrentUser } from "@/lib/supabase/user";
 
 // HAEBOT_A_TOOLS_SPEC.md §5.2 / Part 6 T4 — tool page anatomy: header,
 // profile chips, form (seeded from a chained run when ?fromRun is
@@ -41,7 +43,8 @@ export default async function ToolPage({
   // Everything below works with the engine id (what runs store).
   const toolId = tool.id;
 
-  const [profile, { fromRun, pick, brief, preset, project, fromInput }, keyStatus, membership, balance, projects] = await Promise.all([
+  const [user, profile, { fromRun, pick, brief, preset, project, fromInput }, keyStatus, membership, balance, projects] = await Promise.all([
+    getCurrentUser(),
     getBusinessProfile(),
     searchParams,
     getApiKeyStatus(),
@@ -58,7 +61,7 @@ export default async function ToolPage({
   const capability = getToolCapability(toolId) ?? DEFAULT_TOOL_CAPABILITY;
   const usable = (p: ProviderId) => keyStatus.providers[p].some((s) => s.connected && !s.broken);
   const availableProviders = capability.providers.filter((p) => p === "google" || usable(p));
-  const hasOwnKey = Object.fromEntries(capability.providers.map((p) => [p, usable(p)])) as Partial<Record<ProviderId, boolean>>;
+  const hasOwnKey = Object.fromEntries([...new Set<ProviderId>(["google", ...capability.providers])].map((p) => [p, usable(p)])) as Partial<Record<ProviderId, boolean>>;
 
   let chainedFrom: { runId: string; toolId: string; output: unknown; pick?: number } | null = null;
   if (fromRun) {
@@ -99,6 +102,7 @@ export default async function ToolPage({
       supportedProviders={capability.providers}
       defaultProvider={capability.default}
       hasOwnKey={hasOwnKey}
+      team={canUsePlatformKey(user?.email)}
       isStudent={membership.plan === "student"}
       balance={balance}
     />
