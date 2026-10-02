@@ -55,7 +55,7 @@ export const dictionaries = {
     sources: "출처",
     chain_prefix: "이어서 만들기 →",
     chained_from_suffix: "결과로 이어서 만드는 중",
-    cancelled_refunded: "취소됨 · 예약된 크레딧이 환불되었습니다",
+    cancelled_refunded: "취소됨 · 남은 단계는 실행하지 않았어요",
     estimated_credits: "예상",
     seconds: "초",
 
@@ -131,7 +131,7 @@ export const dictionaries = {
     sources: "Sources",
     chain_prefix: "Continue with →",
     chained_from_suffix: "result",
-    cancelled_refunded: "Cancelled · reserved credits refunded",
+    cancelled_refunded: "Cancelled · the remaining steps did not run",
     estimated_credits: "Est.",
     seconds: "s",
 

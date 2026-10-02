@@ -483,7 +483,7 @@ function ToolRunner({
       }
       if (!finished && !controller.signal.aborted) {
         setPhase("error");
-        setErrorMsg({ ko: "연결이 끊겨 진행 상황을 받지 못했어요. 작업은 계속되니 잠시 뒤 보관함에서 결과를 확인해 주세요. 실패한 실행의 크레딧은 자동으로 돌아가요.", en: "Lost the connection to the run. It keeps going — check the Library shortly. Failed runs are refunded automatically." });
+        setErrorMsg({ ko: "연결이 끊겨 진행 상황을 받지 못했어요. 작업은 계속되니 잠시 뒤 보관함에서 결과를 확인해 주세요.", en: "Lost the connection to the run. It keeps going — check the Library shortly." });
       }
     } catch {
       setPhase(controller.signal.aborted ? "cancelled" : "error");
