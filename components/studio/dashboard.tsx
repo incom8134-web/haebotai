@@ -86,7 +86,7 @@ function StatusChip({ status }: { status: string }) {
   if (status === "error")
     return (
       <span className="rounded-full bg-danger/10 px-2 py-0.5 text-[10px] font-medium text-danger">
-        {L({ ko: "실패 · 환불됨", en: "Failed · refunded" })}
+        {L({ ko: "실패", en: "Failed" })}
       </span>
     );
   if (status === "cancelled")

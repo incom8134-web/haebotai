@@ -42,7 +42,7 @@ const ITEMS: Item[] = [
       rows: [
         [{ ko: "구글·카카오 계정 이메일·이름·계정 식별자", en: "Google/Kakao email, name, account ID" }, { ko: "회원 식별, 로그인, 고객 응대", en: "Identify you, sign-in, support" }, { ko: "탈퇴 시까지", en: "Until you leave" }],
         [{ ko: "도구 입력 내용·업로드 파일·결과물, 실행 기록", en: "Tool inputs, uploads, results, run history" }, { ko: "결과물 생성과 보관함 제공", en: "Generate and keep your results" }, { ko: "삭제 또는 탈퇴 시까지", en: "Until deleted or you leave" }],
-        [{ ko: "결제 기록(주문번호·금액·일시)", en: "Payment records (order, amount, date)" }, { ko: "결제·환불 처리", en: "Payments and refunds" }, { ko: "5년 (전자상거래법)", en: "5 years (e-commerce law)" }],
+        ...(OWN_KEY_ONLY ? [] : [[{ ko: "결제 기록(주문번호·금액·일시)", en: "Payment records (order, amount, date)" }, { ko: "결제·환불 처리", en: "Payments and refunds" }, { ko: "5년 (전자상거래법)", en: "5 years (e-commerce law)" }]]),
         [{ ko: "접속 IP·기기 정보·접속 일시", en: "IP, device, access time" }, { ko: "부정 이용 방지, 보안", en: "Abuse prevention, security" }, { ko: "3개월", en: "3 months" }],
       ],
     },
