@@ -10,7 +10,11 @@ import { freeTierBlocked, freeTierDailyQuotaHit, isOverloaded, retryAfterSeconds
 // - when one free Flash model has used up today's quota, or stays busy
 //   after waits of 3, 8 and 15 s, the call moves to the next free Flash
 //   model (FREE_TEXT_MODELS), and the key skips that model for a while;
-// - a short rate-limit wait Google asks for is honoured once.
+// - a short rate-limit wait Google asks for is honoured once;
+// - a Google Search call refused with a bare quota 429 (no model or
+//   quota named: the free search allowance) is re-sent without Search,
+//   and the key skips Search for an hour. The step answers from the
+//   model's own knowledge instead of failing the run.
 // Paid keys never see these answers, so they behave as before. Image
 // calls have no free model; their error (provider-errors.ts) says
 // billing is needed.
@@ -23,6 +27,8 @@ export const FREE_TEXT_MODELS = ["gemini-3.8-flash", "gemini-3.6-flash", "gemini
 const PAID_ONLY_MS = 6 * 60 * 60 * 1000; // Pro refused: the key is free-tier
 const DAILY_QUOTA_MS = 6 * 60 * 60 * 1000; // quotas reset daily (Pacific midnight)
 const BUSY_MS = 10 * 60 * 1000;
+const NO_SEARCH_MS = 60 * 60 * 1000;
+const NO_SEARCH = "(google-search)";
 const MAX_RATE_WAIT_S = 40;
 const BUSY_WAITS_MS = [3_000, 8_000, 15_000];
 
@@ -39,7 +45,18 @@ export interface FreeTierOptions {
   sleep?: (ms: number) => Promise<void>;
 }
 
-type Params = { model: string; config?: { abortSignal?: AbortSignal } };
+type Params = { model: string; config?: { abortSignal?: AbortSignal; tools?: unknown[] } };
+
+const usesSearch = (p: Params) => !!p.config?.tools?.some((t) => !!t && typeof t === "object" && "googleSearch" in t);
+const withoutSearch = <P extends Params>(p: P): P => {
+  const tools = p.config!.tools!.filter((t) => !(t && typeof t === "object" && "googleSearch" in t));
+  return { ...p, config: { ...p.config, tools: tools.length ? tools : undefined } };
+};
+/** A 429 that names no model or quota: what Google returns when the free Search allowance is used up. */
+const bareQuota = (err: unknown) => {
+  const message = err instanceof Error ? err.message : "";
+  return (err as { status?: number } | null)?.status === 429 || /"code"\s*:\s*429/.test(message) ? !/Quota exceeded for metric/.test(message) : false;
+};
 
 function skip(keyTag: string, model: string, until: number) {
   let m = skipped.get(keyTag);
@@ -70,7 +87,9 @@ export async function freeTierAware<P extends Params, R>(params: P, call: (p: P)
   for (;;) {
     const model = pick(opts.keyTag, params.model, now());
     if (!model) throw lastErr; // every free model is used up or busy
-    const p = model === params.model ? params : { ...params, model };
+    const searchOff = (skipped.get(opts.keyTag)?.get(NO_SEARCH) ?? 0) > now();
+    let p = model === params.model ? params : { ...params, model };
+    if (searchOff && usesSearch(p)) p = withoutSearch(p);
     try {
       return await call(p);
     } catch (err) {
@@ -82,6 +101,10 @@ export async function freeTierAware<P extends Params, R>(params: P, call: (p: P)
       if (freeTierDailyQuotaHit(err) && isText(model)) {
         skip(opts.keyTag, model, now() + DAILY_QUOTA_MS);
         busyTries = 0;
+        continue;
+      }
+      if (bareQuota(err) && usesSearch(p) && skipped.has(opts.keyTag)) {
+        skip(opts.keyTag, NO_SEARCH, now() + NO_SEARCH_MS);
         continue;
       }
       if (isOverloaded(err) && !aborted()) {

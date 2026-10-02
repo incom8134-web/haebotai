@@ -28,6 +28,8 @@ export function classifyGeminiError(err: unknown): "retry-same" | "next-key" | "
 export function isAccessDenied(err: unknown): boolean {
   const status = statusOf(err);
   const message = err instanceof Error ? err.message : "";
+  // A quota 429 says "check your plan and billing details": a limit, not a refused key.
+  if (status === 429) return false;
   return status === 401 || status === 403 || /API_KEY_INVALID|API key not valid|PERMISSION_DENIED|dunning|billing/i.test(message);
 }
 

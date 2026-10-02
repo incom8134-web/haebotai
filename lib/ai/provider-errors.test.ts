@@ -54,3 +54,8 @@ test("a free model's daily quota is told apart from a paid-only refusal", async 
   assert.equal(freeTierDailyQuotaHit(perDay), true);
   assert.equal(freeTierDailyQuotaHit(paidOnly), false);
 });
+
+test("a quota 429 mentioning billing is a limit, not a refused key", () => {
+  const err = new Error(JSON.stringify({ error: { code: 429, message: "You exceeded your current quota, please check your plan and billing details.", status: "RESOURCE_EXHAUSTED" } }));
+  assert.equal(isAccessDenied(err), false);
+});
