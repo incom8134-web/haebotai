@@ -10,6 +10,7 @@ import { resolveRequestedProvider } from "@/lib/ai/resolve-provider";
 import { runWithApiKey } from "@/lib/tools/generate";
 import { understand } from "@/lib/agents/calls";
 import { isAgentic } from "@/lib/agents/specs";
+import { canUsePlatformKey } from "@/lib/platform-access";
 import { intentLimiter, checkRateLimit } from "@/lib/rate-limit";
 
 // Before a run: read the request into an understanding (lib/agents/intent.ts)
@@ -52,6 +53,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const profile = full && excluded.size ? (Object.fromEntries(Object.entries(full).filter(([k]) => !excluded.has(k))) as typeof full) : full;
 
   const keys = await getUserApiKeys("google", { excludeBroken: true });
+  // No own key and not on the team: the run itself will ask for a key, so don't spend the platform's.
+  if (!keys.length && !canUsePlatformKey(user.email)) return Response.json({ intent: null, questions: [] });
   try {
     const r = await runWithApiKey("google", user.id, keys, () => understand(manifest, values, profile, [], AbortSignal.timeout(25_000)));
     return Response.json({ intent: r.intent, questions: r.questions });

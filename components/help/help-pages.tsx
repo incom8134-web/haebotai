@@ -8,6 +8,7 @@ import { PATCH_NOTES } from "@/lib/site/patch-notes";
 import { useBi } from "@/lib/i18n/context";
 import { PageHeader, primaryButton, secondaryButton } from "@/components/site/page";
 import { cn } from "@/lib/utils";
+import { OWN_KEY_ONLY } from "@/lib/site/access";
 
 export function HelpTitle({ title, lead }: { title: { ko: string; en: string }; lead?: { ko: string; en: string } }) {
   const L = useBi();
@@ -25,7 +26,9 @@ export function HelpHome() {
     { href: "/help/contact", icon: Headset, title: { ko: "고객센터", en: "Customer service" }, body: { ko: "1:1 문의와 원격 지원", en: "Tickets and remote help" } },
     { href: "/help/api-guide", icon: BookOpenText, title: { ko: "API 키 설명서", en: "API key manual" }, body: { ko: "발급부터 문제 해결까지", en: "From getting a key to fixing errors" } },
     { href: "/onboarding", icon: Rocket, title: { ko: "처음 시작하기", en: "Getting started" }, body: { ko: "목표 → 프로젝트 → 첫 도구, 세 화면", en: "Goal → project → first tool, three screens" } },
-    { href: "/pricing", icon: CircleGauge, title: { ko: "요금·크레딧", en: "Pricing & credits" }, body: { ko: "플랜과 도구별 예상 크레딧", en: "Plans and credits per tool" } },
+    OWN_KEY_ONLY
+      ? { href: "/pricing", icon: CircleGauge, title: { ko: "요금", en: "Pricing" }, body: { ko: "해봇은 무료, AI는 내 키로", en: "Haebot is free; the AI runs on your key" } }
+      : { href: "/pricing", icon: CircleGauge, title: { ko: "요금·크레딧", en: "Pricing & credits" }, body: { ko: "플랜과 도구별 예상 크레딧", en: "Plans and credits per tool" } },
     { href: "/account/membership", icon: Crown, title: { ko: "학생 멤버십", en: "Student membership" }, body: { ko: "재학 인증으로 무제한", en: "Unlimited with enrollment" } },
     { href: "/legal/terms", icon: ShieldCheck, title: { ko: "약관·정책", en: "Terms & policies" }, body: { ko: "이용약관·개인정보·환불", en: "Terms, privacy, refunds" } },
     { href: "/help/whats-new", icon: Sparkle, title: { ko: "새로운 점", en: "What's new" }, body: { ko: `v${PATCH_NOTES[0].version} · ${PATCH_NOTES[0].date}`, en: `v${PATCH_NOTES[0].version} · ${PATCH_NOTES[0].date}` } },
@@ -92,7 +95,7 @@ export function ApiGuide() {
   const [copied, setCopied] = useState(false);
   return (
     <>
-      <PageHeader title={L({ ko: "API 키 설명서", en: "API key manual" })} lead={L({ ko: "내 Google AI Studio 키로 해봇을 쓰면 크레딧이 차감되지 않아요. 5분이면 끝나요.", en: "Run Haebot on your own Google AI Studio key and no credits are charged. Takes five minutes." })} />
+      <PageHeader title={L({ ko: "API 키 설명서", en: "API key manual" })} lead={L(OWN_KEY_ONLY ? { ko: "해봇의 도구는 내 Google AI Studio 키로 실행돼요. 발급과 등록은 5분이면 끝나요.", en: "Haebot's tools run on your own Google AI Studio key. Getting and adding one takes about 5 minutes." } : { ko: "내 Google AI Studio 키로 해봇을 쓰면 크레딧이 차감되지 않아요. 5분이면 끝나요.", en: "Run Haebot on your own Google AI Studio key and no credits are charged. Takes five minutes." })} />
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.3fr_1fr]">
         <section className="glass min-w-0 rounded-[24px] p-6">
           <h2 className="text-lg font-semibold">{L({ ko: "순서대로 따라 하기", en: "Step by step" })}</h2>

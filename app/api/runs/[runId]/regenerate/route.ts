@@ -11,6 +11,7 @@ import { getClient, runWithApiKey } from "@/lib/ai/gemini";
 import { getUserApiKeys } from "@/lib/api-keys";
 import { getMembership } from "@/lib/membership";
 import { resolveCost } from "@/lib/ai/resolve-provider";
+import { canUsePlatformKey } from "@/lib/platform-access";
 import { reserveCredits, releaseUnattachedReservation, settleGenerationCredits } from "@/lib/credits";
 import { runLimiter, checkRateLimit } from "@/lib/rate-limit";
 import { checkSpend } from "@/lib/spend-guard";
@@ -19,6 +20,8 @@ import { writeRunFacts } from "@/lib/projects/server";
 import { parseDocument } from "@/lib/agents/core/document";
 import { routeRevision } from "@/lib/agents/core/revise-request";
 import { reviseDocument } from "@/lib/agents/specs/doc-revise";
+
+const OWN_KEY_REQUIRED = "Gemini API 키를 먼저 등록해주세요 → /account/api-key";
 
 // Rewrite one part of a finished result (POST { section, instruction }).
 // The model gets the original input, the whole current result (so the
@@ -55,7 +58,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   // A document-agent result: the change is routed to the smallest edit (lib/agents/specs/doc-revise.ts).
   const document = parseDocument((run.output as Record<string, unknown> | null)?.document);
   if (manifest && document && (section === "document" || section.startsWith("doc:"))) {
-    return reviseDocumentRun({ user: { id: user.id }, run, manifest, document, section, instruction });
+    return reviseDocumentRun({ user: { id: user.id, email: user.email ?? null }, run, manifest, document, section, instruction });
   }
   const schema = getOutputSchema(run.tool_id);
   const shape = (schema as unknown as { shape?: Record<string, z.ZodType> } | undefined)?.shape;
@@ -64,7 +67,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }
 
   const [keys, membership] = await Promise.all([getUserApiKeys("google", { excludeBroken: true }), getMembership()]);
-  const cost = resolveCost("google", keys.length > 0, membership.plan === "student", regenerateCost(manifest.estimatedCredits));
+  // Own key only; the platform's key is the team's, for testing (lib/platform-access.ts).
+  const team = canUsePlatformKey(user.email);
+  if (!keys.length && !team) return Response.json({ error: OWN_KEY_REQUIRED, code: "own_key_required" }, { status: 400 });
+  const cost = team ? 0 : resolveCost("google", keys.length > 0, membership.plan === "student", regenerateCost(manifest.estimatedCredits));
   const usesPlatformKey = keys.length === 0;
   const spend = await checkSpend(user.id, usesPlatformKey ? regenerateCost(manifest.estimatedCredits) : 0, usesPlatformKey);
   if (!spend.ok) return Response.json({ error: spend.message }, { status: 429 });
@@ -153,7 +159,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
 /** Follow-up on a document: design-only and image-removal edits are free (no model call); the rest is charged like any partial redo. */
 async function reviseDocumentRun(opts: {
-  user: { id: string };
+  user: { id: string; email: string | null };
   run: { id: string; tool_id: string; input: unknown; output: unknown; sources: unknown; project_id: string | null; title: string | null };
   manifest: NonNullable<ReturnType<typeof getTool>>;
   document: NonNullable<ReturnType<typeof parseDocument>>;
@@ -166,7 +172,10 @@ async function reviseDocumentRun(opts: {
   if (route?.kind === "unknown") return Response.json({ error: "어느 섹션을 바꿀지 골라 주세요. (디자인만 바꾸기, 이미지·도표 조정은 그대로 적으면 돼요)" }, { status: 400 });
 
   const [keys, membership] = await Promise.all([getUserApiKeys("google", { excludeBroken: true }), getMembership()]);
-  const cost = free ? 0 : resolveCost("google", keys.length > 0, membership.plan === "student", regenerateCost(manifest.estimatedCredits));
+  // A design-only change calls no model; everything else needs the member's own key (or the team's access).
+  const team = canUsePlatformKey(user.email);
+  if (route?.kind !== "design" && !keys.length && !team) return Response.json({ error: OWN_KEY_REQUIRED, code: "own_key_required" }, { status: 400 });
+  const cost = free || team ? 0 : resolveCost("google", keys.length > 0, membership.plan === "student", regenerateCost(manifest.estimatedCredits));
   if (!free) {
     const usesPlatformKey = keys.length === 0;
     const spend = await checkSpend(user.id, usesPlatformKey ? regenerateCost(manifest.estimatedCredits) : 0, usesPlatformKey);

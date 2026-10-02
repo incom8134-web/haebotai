@@ -25,6 +25,8 @@ import {
   StepsSection,
   reveal,
 } from "./sections";
+import { OWN_KEY_ONLY } from "@/lib/site/access";
+import { OwnKeyPricing } from "@/components/site/own-key-pricing";
 
 // Public homepage (docs/redesign-plan.md §5). In order: the promise with a
 // live product mock → the idea-to-growth flow → five categories → how it
@@ -38,7 +40,7 @@ const SignedIn = createContext(false);
 const FAQ_ON_HOME = [
   "Can tools use each other's results?",
   "What if I don't like a result?",
-  "How are credits charged?",
+  OWN_KEY_ONLY ? "Why do I need my own API key?" : "How are credits charged?",
   'What\'s the "estimate" badge?',
   "Can I use outputs commercially?",
   "Is my data used for training?",
@@ -167,11 +169,18 @@ function Hero() {
           </Link>
         </div>
         <ul className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-sm text-fg-muted">
-          {[
-            { ko: "가입하면 500 크레딧", en: "500 credits on sign-up" },
-            { ko: "카드 등록 없음", en: "No card needed" },
-            { ko: "실패한 실행은 자동 환불", en: "Failed runs refunded" },
-          ].map((t) => (
+          {(OWN_KEY_ONLY
+            ? [
+                { ko: "해봇 이용료 없음", en: "No Haebot fees" },
+                { ko: "카드 등록 없음", en: "No card needed" },
+                { ko: "내 Gemini API 키로 실행", en: "Runs on your own Gemini key" },
+              ]
+            : [
+                { ko: "가입하면 500 크레딧", en: "500 credits on sign-up" },
+                { ko: "카드 등록 없음", en: "No card needed" },
+                { ko: "실패한 실행은 자동 환불", en: "Failed runs refunded" },
+              ]
+          ).map((t) => (
             <li key={t.en} className="flex items-center gap-1.5 break-keep">
               <Check size={15} className="text-grounded" aria-hidden /> {L(t)}
             </li>
@@ -198,28 +207,46 @@ function Pricing() {
       id="pricing"
       className="mx-auto max-w-[1200px] scroll-mt-24 px-4 py-16 md:px-6 md:py-20"
     >
-      <SectionHead
-        kicker={L({ ko: "요금", en: "Pricing" })}
-        title={L({
-          ko: "모든 플랜에 모든 도구. 다른 건 크레딧뿐",
-          en: "Every tool on every plan. Only credits differ",
-        })}
-        body={L({
-          ko: "실행 전에 크레딧이 얼마나 드는지 보여 드려요. 실패하거나 취소한 실행은 자동 환불되고, 내 API 키를 넣으면 크레딧이 들지 않아요.",
-          en: "You see the credit cost before every run. Failed or cancelled runs are refunded automatically, and with your own API key runs cost no credits.",
-        })}
-      />
-      <div className="mt-10">
-        <PlanCards signedIn={signedIn} />
-      </div>
-      <div className="mt-4">
-        <CreditPreview />
-      </div>
-      <p className="mt-4 text-sm text-fg-muted">
-        <Link href="/pricing#per-tool" className="text-accent underline underline-offset-2">
-          {L({ ko: "도구별 크레딧 전체 보기", en: "Credits for every tool" })}
-        </Link>
-      </p>
+      {OWN_KEY_ONLY ? (
+        <>
+          <SectionHead
+            kicker={L({ ko: "요금", en: "Pricing" })}
+            title={L({ ko: "해봇은 무료, AI는 내 키로", en: "Haebot is free. The AI runs on your own key" })}
+            body={L({
+              ko: "Google AI Studio에서 받은 내 Gemini API 키를 등록하면 25개 도구를 모두 쓸 수 있어요. 크레딧도, 플랜도, 카드 등록도 없어요.",
+              en: "Add your own Gemini API key from Google AI Studio and every one of the 25 tools is yours to use. No credits, no plans, no card.",
+            })}
+          />
+          <div className="mt-10">
+            <OwnKeyPricing signedIn={signedIn} />
+          </div>
+        </>
+      ) : (
+        <>
+          <SectionHead
+            kicker={L({ ko: "요금", en: "Pricing" })}
+            title={L({
+              ko: "모든 플랜에 모든 도구. 다른 건 크레딧뿐",
+              en: "Every tool on every plan. Only credits differ",
+            })}
+            body={L({
+              ko: "실행 전에 크레딧이 얼마나 드는지 보여 드려요. 실패하거나 취소한 실행은 자동 환불되고, 내 API 키를 넣으면 크레딧이 들지 않아요.",
+              en: "You see the credit cost before every run. Failed or cancelled runs are refunded automatically, and with your own API key runs cost no credits.",
+            })}
+          />
+          <div className="mt-10">
+            <PlanCards signedIn={signedIn} />
+          </div>
+          <div className="mt-4">
+            <CreditPreview />
+          </div>
+          <p className="mt-4 text-sm text-fg-muted">
+            <Link href="/pricing#per-tool" className="text-accent underline underline-offset-2">
+              {L({ ko: "도구별 크레딧 전체 보기", en: "Credits for every tool" })}
+            </Link>
+          </p>
+        </>
+      )}
     </section>
   );
 }

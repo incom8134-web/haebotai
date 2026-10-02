@@ -37,8 +37,12 @@ test("rejects an unknown tool id the same as a disallowed provider (falls back t
   assert.equal(result.ok, false);
 });
 
-test("ownKeyRequiredError: google never requires an own key", () => {
-  assert.equal(ownKeyRequiredError("google", { hasAnyKey: false, hasUsableKey: false }), null);
+test("ownKeyRequiredError: google needs an own key unless the member is on the team", () => {
+  assert.match(ownKeyRequiredError("google", { hasAnyKey: false, hasUsableKey: false })!, /API 키를 먼저 등록해주세요/);
+  assert.equal(ownKeyRequiredError("google", { hasAnyKey: false, hasUsableKey: false }, true), null);
+  assert.equal(ownKeyRequiredError("google", { hasAnyKey: true, hasUsableKey: true }), null);
+  // The team flag never opens Claude/ChatGPT: there is no platform key for them.
+  assert.ok(ownKeyRequiredError("anthropic", { hasAnyKey: false, hasUsableKey: false }, true));
 });
 
 test("ownKeyRequiredError: anthropic/openai with a usable key need no error", () => {

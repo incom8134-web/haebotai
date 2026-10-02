@@ -11,6 +11,7 @@ import { useBi } from "@/lib/i18n/context";
 import { primaryButton, secondaryButton } from "@/components/site/page";
 import { cn } from "@/lib/utils";
 import { seedBusinessProfile } from "@/lib/profile";
+import { OWN_KEY_ONLY } from "@/lib/site/access";
 
 // First visit (docs/redesign-plan.md §5): what are you building → the
 // project's basics → recommended tools and a first task. Three short
@@ -369,8 +370,7 @@ export function OnboardingFlow({ name }: { name: string | null }) {
                     </span>
                     {m ? (
                       <span className="mt-1 block font-mono text-2xs text-fg-subtle">
-                        {m.estimatedCredits}{" "}
-                        {L({ ko: "크레딧", en: "credits" })} · ~
+                        {OWN_KEY_ONLY ? null : <>{m.estimatedCredits} {L({ ko: "크레딧", en: "credits" })} · </>}~
                         {Math.max(1, Math.round(m.estimatedSeconds / 60))}
                         {L({ ko: "분", en: " min" })}
                       </span>
@@ -419,10 +419,19 @@ export function OnboardingFlow({ name }: { name: string | null }) {
             </Link>
           </div>
           <p className="mt-6 text-2xs text-fg-subtle">
-            {L({
-              ko: "가입 크레딧 500이면 위 세 도구를 모두 써 볼 수 있어요.",
-              en: "Your 500 sign-up credits cover all three.",
-            })}
+            {OWN_KEY_ONLY ? (
+              <>
+                {L({ ko: "도구는 내 Gemini API 키로 실행돼요. ", en: "Tools run on your own Gemini API key. " })}
+                <Link href="/account/api-key" className="font-medium text-accent hover:underline">
+                  {L({ ko: "API 키 등록하기", en: "Add my API key" })}
+                </Link>
+              </>
+            ) : (
+              L({
+                ko: "가입 크레딧 500이면 위 세 도구를 모두 써 볼 수 있어요.",
+                en: "Your 500 sign-up credits cover all three.",
+              })
+            )}
           </p>
         </section>
       ) : null}
