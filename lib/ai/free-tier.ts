@@ -77,6 +77,11 @@ function pick(keyTag: string, model: string, now: number): string | null {
   return FREE_TEXT_MODELS.find(usable) ?? null;
 }
 
+/** Every free model is skipped for this key: a quota 429, so the member sees "usage limit reached" and a second key is tried. */
+function allUsedUp(): Error {
+  return Object.assign(new Error(JSON.stringify({ error: { code: 429, message: "Every free Gemini model is used up for today on this key.", status: "RESOURCE_EXHAUSTED" } })), { status: 429 });
+}
+
 export async function freeTierAware<P extends Params, R>(params: P, call: (p: P) => Promise<R>, opts: FreeTierOptions): Promise<R> {
   const now = opts.now ?? Date.now;
   const sleep = opts.sleep ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
@@ -86,7 +91,7 @@ export async function freeTierAware<P extends Params, R>(params: P, call: (p: P)
   let lastErr: unknown;
   for (;;) {
     const model = pick(opts.keyTag, params.model, now());
-    if (!model) throw lastErr; // every free model is used up or busy
+    if (!model) throw lastErr ?? allUsedUp(); // every free model is used up or busy
     const searchOff = (skipped.get(opts.keyTag)?.get(NO_SEARCH) ?? 0) > now();
     let p = model === params.model ? params : { ...params, model };
     if (searchOff && usesSearch(p)) p = withoutSearch(p);
