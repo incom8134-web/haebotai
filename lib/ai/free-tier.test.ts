@@ -128,3 +128,16 @@ test("a free key whose Search allowance is used up answers without Search", asyn
   // A paid key (never marked free) keeps Search and gets the error.
   await assert.rejects(freeTierAware({ model: "gemini-3.8-flash", config: { tools: [{ googleSearch: {} }] } }, async () => { throw bare; }, { keyTag: tag(), sleep: noSleep }), /exceeded/);
 });
+
+test("once every free model is used up, later calls fail with a quota error, never an empty one", async () => {
+  const opts = { keyTag: tag(), sleep: noSleep };
+  const call = async (p: { model: string }) => {
+    throw p.model.includes("pro") ? quota(0, p.model) : daily(p.model);
+  };
+  await assert.rejects(freeTierAware({ model: "gemini-3.1-pro-preview" }, call, opts));
+  let called = false;
+  const err = await freeTierAware({ model: "gemini-3.8-flash" }, async () => { called = true; return "x"; }, opts).catch((e: unknown) => e);
+  assert.equal(called, false);
+  assert.ok(err instanceof Error);
+  assert.equal((err as { status?: number }).status, 429);
+});
