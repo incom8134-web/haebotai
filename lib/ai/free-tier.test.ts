@@ -92,7 +92,8 @@ test("busy: waits 3, 8 and 15 s; a free key then moves to another model, a paid 
     return p.model;
   };
   assert.equal(await freeTierAware({ model: "gemini-3.1-pro-preview" }, call, { keyTag: freeKey, sleep: noSleep }), "gemini-3.6-flash");
-  assert.deepEqual(seen.filter((m) => m === "gemini-3.8-flash").length, 4);
+  // A known free key waits once on a busy model, then moves on.
+  assert.deepEqual(seen.filter((m) => m === "gemini-3.8-flash").length, 2);
 });
 
 test("a short rate-limit wait is honoured once, a long one is not", async () => {
@@ -140,4 +141,19 @@ test("once every free model is used up, later calls fail with a quota error, nev
   assert.equal(called, false);
   assert.ok(err instanceof Error);
   assert.equal((err as { status?: number }).status, 429);
+});
+
+test("a fallback model that rejects the thinking level is asked again without it", async () => {
+  const bad = Object.assign(new Error(JSON.stringify({ error: { code: 400, message: "Request contains an invalid argument.", status: "INVALID_ARGUMENT" } })), { status: 400 });
+  const seen: { model: string; thinking: boolean }[] = [];
+  const call = async (p: { model: string; config?: { thinkingConfig?: unknown } }) => {
+    seen.push({ model: p.model, thinking: !!p.config?.thinkingConfig });
+    if (p.model.includes("pro")) throw quota(0, p.model);
+    if (p.config?.thinkingConfig) throw bad;
+    return "ok";
+  };
+  assert.equal(await freeTierAware({ model: "gemini-3.1-pro-preview", config: { thinkingConfig: { thinkingLevel: "low" } } }, call, { keyTag: tag(), sleep: noSleep }), "ok");
+  assert.deepEqual(seen.at(-1), { model: "gemini-3.8-flash", thinking: false });
+  // The model asked for keeps its error: a 400 there is a real bad request.
+  await assert.rejects(freeTierAware({ model: "gemini-3.8-flash", config: { thinkingConfig: {} } }, async () => { throw bad; }, { keyTag: tag(), sleep: noSleep }), /invalid argument/);
 });
