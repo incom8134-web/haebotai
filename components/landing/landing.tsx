@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "motion/react";
 import { ArrowRight, Check, Plus, Wand2 } from "lucide-react";
 import { BusinessInfo } from "@/components/site/business-info";
+import { BUSINESS } from "@/lib/site/business";
 import { BrandMark } from "@/components/brand-mark";
 import { ThemeLangControls } from "@/components/shell/app-shell";
 import { primaryButton, secondaryButton } from "@/components/site/page";
@@ -420,7 +421,7 @@ function Footer() {
         </nav>
         <BusinessInfo />
         <p className="text-xs text-fg-subtle">
-          © {new Date().getFullYear()} {L({ ko: "AI 해바", en: "AI Haeba" })}
+          © {new Date().getFullYear()} {BUSINESS.companyName}. All rights reserved.
         </p>
       </div>
     </footer>
