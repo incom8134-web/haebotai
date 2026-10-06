@@ -69,6 +69,13 @@ function Nav() {
             className="mx-auto hidden items-center gap-1 md:flex"
             aria-label={L({ ko: "페이지 안내", en: "Page" })}
           >
+            <Link
+              href="/quick"
+              className="mr-2 inline-flex h-9 items-center gap-1.5 rounded-xl bg-accent px-3.5 text-sm font-semibold whitespace-nowrap text-white shadow-[0_8px_20px_-10px_var(--color-accent)] transition-colors hover:bg-accent-hover"
+            >
+              <Wand2 size={15} aria-hidden />
+              {L({ ko: "가게 홍보 바로 시작하기", en: "Start shop marketing" })}
+            </Link>
             {[
               ["#flow", { ko: "흐름", en: "Flow" }],
               ["#tools", { ko: "도구", en: "Tools" }],
@@ -86,9 +93,14 @@ function Nav() {
             ))}
           </nav>
           <div className="ml-auto flex items-center gap-2 md:ml-0">
-            <div className="flex rounded-xl border border-hairline bg-surface p-0.5">
-              <ThemeLangControls />
-            </div>
+            {/* Phones have no room for the page links: the quick start keeps its place up here. */}
+            <Link
+              href="/quick"
+              className="inline-flex h-10 items-center gap-1 rounded-xl bg-accent px-3 text-sm font-semibold whitespace-nowrap text-white md:hidden"
+            >
+              <Wand2 size={15} aria-hidden />
+              {L({ ko: "홍보 바로 시작", en: "Quick start" })}
+            </Link>
             {signedIn ? (
               <Link href="/studio" className={cn(primaryButton, "h-10")}>
                 {L({ ko: "스튜디오로", en: "Go to Studio" })}
@@ -375,6 +387,12 @@ function Footer() {
             </Link>
           ))}
         </nav>
+      </div>
+      <div className="mx-auto mt-6 flex max-w-[1200px] items-center gap-3">
+        <span className="text-xs text-fg-subtle">{L({ ko: "화면·언어", en: "Theme & language" })}</span>
+        <div className="flex rounded-xl border border-hairline bg-surface p-0.5">
+          <ThemeLangControls />
+        </div>
       </div>
       <div className="mx-auto mt-8 flex max-w-[1200px] flex-col gap-3 border-t border-hairline pt-6">
         <nav

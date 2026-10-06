@@ -1,6 +1,6 @@
-// Renders every logo asset from one vector source (해바: a smiling sun with
-// sunflower petals — 해 = sun — in Haeba Sun colours). Run: node scripts/brand/render-brand.mjs
-// Outputs: public/brand/mark.svg + haeba-64/128/256.png, app/icon.png,
+// Renders every logo asset from one vector source (the H with the rising
+// sun — 해 = sun — in Haeba Sun colours, with the AI 해바 wordmark). Run: node scripts/brand/render-brand.mjs
+// Outputs: public/brand/mark.svg + mark-64/128/256.png, app/icon.png,
 // app/apple-icon.png, app/sublogo.png, app/fulllogo.png, app/opengraph-image.jpg.
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -15,18 +15,18 @@ const SUN_B = "#B8390B"; // ember
 const INK = "#1C1814";
 const PAPER = "#FAF8F5";
 
-/** The mark's inner drawing on a 1000×1000 canvas: 해바, a smiling sun —
- *  twelve rounded petals (해바라기, the sunflower) around a white face. */
-const glyph = (fill = "#fff", face = SUN_B) => `
+/** The mark's inner drawing on a 1000×1000 canvas (white H, sun arc, rays). */
+const glyph = (fill = "#fff") => `
   <g fill="${fill}">
-    ${Array.from({ length: 12 }, (_, i) => `<rect x="458" y="150" width="84" height="178" rx="42" transform="rotate(${i * 30} 500 500)"/>`).join("")}
-    <circle cx="500" cy="500" r="138"/>
+    <rect x="248" y="240" width="118" height="520" rx="59"/>
+    <rect x="634" y="240" width="118" height="520" rx="59"/>
   </g>
-  <g fill="${face}">
-    <circle cx="453" cy="476" r="17"/>
-    <circle cx="547" cy="476" r="17"/>
-  </g>
-  <path d="M440 530 Q500 582 560 530" fill="none" stroke="${face}" stroke-width="22" stroke-linecap="round"/>`;
+  <path d="M330 590 C 420 470, 580 470, 670 590" fill="none" stroke="${fill}" stroke-width="84" stroke-linecap="butt"/>
+  <g stroke="${fill}" stroke-width="40" stroke-linecap="round" fill="none">
+    <line x1="500" y1="318" x2="500" y2="378"/>
+    <line x1="416" y1="350" x2="446" y2="390"/>
+    <line x1="584" y1="350" x2="554" y2="390"/>
+  </g>`;
 
 const defs = `
   <defs>
@@ -49,7 +49,7 @@ function png(svg, width, background) {
 
 const mark = markSvg();
 writeFileSync(join(ROOT, "public/brand/mark.svg"), mark);
-for (const s of [64, 128, 256]) writeFileSync(join(ROOT, `public/brand/haeba-${s}.png`), png(mark, s));
+for (const s of [64, 128, 256]) writeFileSync(join(ROOT, `public/brand/mark-${s}.png`), png(mark, s));
 writeFileSync(join(ROOT, "app/icon.png"), png(mark, 256));
 writeFileSync(join(ROOT, "app/apple-icon.png"), await sharp(png(markSvg({ fullBleed: true }), 180)).flatten({ background: SUN_B }).png().toBuffer());
 // Square mark with breathing room (used for print and store listings).
