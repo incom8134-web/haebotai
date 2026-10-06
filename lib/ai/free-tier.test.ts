@@ -154,6 +154,26 @@ test("a fallback model that rejects the thinking level is asked again without it
   };
   assert.equal(await freeTierAware({ model: "gemini-3.1-pro-preview", config: { thinkingConfig: { thinkingLevel: "low" } } }, call, { keyTag: tag(), sleep: noSleep }), "ok");
   assert.deepEqual(seen.at(-1), { model: "gemini-3.8-flash", thinking: false });
-  // The model asked for keeps its error: a 400 there is a real bad request.
-  await assert.rejects(freeTierAware({ model: "gemini-3.8-flash", config: { thinkingConfig: {} } }, async () => { throw bad; }, { keyTag: tag(), sleep: noSleep }), /invalid argument/);
+  // A request that is bad either way still fails, after one relaxed retry.
+  let tries = 0;
+  await assert.rejects(freeTierAware({ model: "gemini-3.8-flash", config: { thinkingConfig: {} } }, async () => { tries++; throw bad; }, { keyTag: tag(), sleep: noSleep }), /invalid argument/);
+  assert.equal(tries, 2);
+  // Without thinking or limits there is nothing to relax: no retry.
+  tries = 0;
+  await assert.rejects(freeTierAware({ model: "gemini-3.8-flash" }, async () => { tries++; throw bad; }, { keyTag: tag(), sleep: noSleep }), /invalid argument/);
+  assert.equal(tries, 1);
+});
+
+test("a schema a Flash model rejects is retried without count and range limits", async () => {
+  const bad = Object.assign(new Error('{"error":{"code":400,"message":"Request contains an invalid argument."}}'), { status: 400 });
+  const schema = { type: "object", properties: { items: { type: "array", minItems: 3, maxItems: 40, items: { type: "integer", minimum: 1, maximum: 5 } } } };
+  const sent: unknown[] = [];
+  const call = async (p: { model: string; config?: { responseJsonSchema?: unknown } }) => {
+    sent.push(p.config?.responseJsonSchema);
+    if (JSON.stringify(p.config?.responseJsonSchema).includes("Items")) throw bad;
+    return "ok";
+  };
+  assert.equal(await freeTierAware({ model: "gemini-3.8-flash", config: { responseJsonSchema: schema } }, call, { keyTag: tag(), sleep: noSleep }), "ok");
+  assert.deepEqual(sent.at(-1), { type: "object", properties: { items: { type: "array", items: { type: "integer" } } } });
+  assert.deepEqual(schema.properties.items.maxItems, 40); // the caller's schema is untouched
 });
