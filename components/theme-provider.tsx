@@ -2,7 +2,7 @@
 
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 
-// Light is the default: Haebot's identity is light-first (warm paper base,
+// Light is the default: Haeba's identity is light-first (warm paper base,
 // one signature colour). Dark stays available via the toggle.
 function ThemeProvider({ children }: { children: React.ReactNode }) {
   return (

@@ -8,6 +8,7 @@ export const PATCH_NOTES: { version: string; date: string; title: Bilingual; ite
     date: "2026-10-06",
     title: { ko: "바로 만들기: 가게 홍보를 한 줄로", en: "Quick start: shop marketing from one line" },
     items: [
+      { kind: "new", text: { ko: "해봇 AI가 ‘AI 해바’로 이름을 바꾸고, 웃는 해 모양의 새 로고를 달았어요", en: "Haebot AI is now ‘AI Haeba’, with a new smiling-sun logo" } },
       { kind: "new", text: { ko: "바로 만들기 — SNS 게시물·홍보 문구·릴스 아이디어 중 하나를 고르고 가게 이야기를 한 줄 적으면, 긴 입력 없이 바로 만들어요", en: "Quick start — pick a social media post, promo copy or Reels ideas, write one line about your shop, and it's made without the long form" } },
       { kind: "new", text: { ko: "로그인 화면과 첫 화면에 '가게 홍보 바로 시작하기' 버튼이 생겼어요", en: "A “Start shop marketing now” button on the sign-in page and the homepage" } },
       { kind: "improved", text: { ko: "API 키가 없어 멈췄을 때, 키를 등록한 뒤 작성하던 요청으로 바로 돌아갈 수 있어요", en: "If a run stops for a missing API key, you can go straight back to your request after adding one" } },

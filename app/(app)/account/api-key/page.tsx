@@ -4,7 +4,7 @@ import { ApiKeyPanel } from "@/components/account/account-view";
 import { getApiKeyStatus } from "@/lib/api-keys";
 import { cookies } from "next/headers";
 
-export const metadata = { title: "내 API 키 — 해봇 AI" };
+export const metadata = { title: "내 API 키 — AI 해바" };
 
 // ?next= — the request the member was on when the key was missing (a tool
 // page, often from 바로 만들기). Only same-site paths are followed.

@@ -2,7 +2,7 @@ import { QuickStart } from "@/components/quick/quick-start";
 import { getCurrentUser } from "@/lib/supabase/user";
 
 export const metadata = {
-  title: "바로 만들기 — 해봇 AI",
+  title: "바로 만들기 — AI 해바",
   description: "SNS 게시물, 홍보 문구, 릴스·쇼츠 아이디어를 한 줄로 바로 만들어요.",
 };
 

@@ -23,7 +23,7 @@ export function ContactCard() {
       ) : null}
       <div className="rounded-2xl border border-hairline p-4">
         <p className="text-2xs text-fg-subtle">{L({ ko: "운영", en: "Operated by" })}</p>
-        <p className="mt-1 text-sm font-medium break-keep">{BUSINESS.companyName || L({ ko: "해봇 AI", en: "Haebot AI" })}</p>
+        <p className="mt-1 text-sm font-medium break-keep">{BUSINESS.companyName || L({ ko: "AI 해바", en: "AI Haeba" })}</p>
         <p className="text-2xs break-keep text-fg-muted">{BUSINESS.address}</p>
       </div>
     </section>

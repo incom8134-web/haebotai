@@ -78,7 +78,7 @@ const STEPS = [
   { title: { ko: "Google AI Studio 열기", en: "Open Google AI Studio" }, body: { ko: "Google 계정으로 로그인합니다. 처음이면 약관 동의 화면이 한 번 나와요.", en: "Sign in with a Google account. First time, you'll accept the terms once." } },
   { title: { ko: "키 만들기", en: "Create a key" }, body: { ko: "왼쪽 메뉴 'Get API key' → 'Create API key'. 프로젝트를 물으면 기본 프로젝트를 고르면 됩니다.", en: "Left menu \"Get API key\" → \"Create API key\". If asked for a project, the default one is fine." } },
   { title: { ko: "키 복사", en: "Copy the key" }, body: { ko: "'AQ.'로 시작하는 문자열이 키예요(예전에 만든 키는 'AIza'로 시작). 다른 사람에게 보여 주지 마세요.", en: "The key is a string starting with \"AQ.\" (older keys start with \"AIza\"). Don't share it." } },
-  { title: { ko: "해봇에 등록", en: "Add it to Haebot" }, body: { ko: "계정 → 내 API 키에 붙여 넣고 '확인 후 저장'. Google에 실제로 확인한 뒤에만 저장돼요.", en: "Account → My API key, paste, \"Verify & save\". It's only saved after Google confirms it works." } },
+  { title: { ko: "해바에 등록", en: "Add it to Haeba" }, body: { ko: "계정 → 내 API 키에 붙여 넣고 '확인 후 저장'. Google에 실제로 확인한 뒤에만 저장돼요.", en: "Account → My API key, paste, \"Verify & save\". It's only saved after Google confirms it works." } },
   { title: { ko: "한도 설정 (권장)", en: "Set a limit (recommended)" }, body: { ko: "요금은 내 Google 계정에 청구돼요. Google Cloud 결제 화면에서 예산 알림을 걸어 두세요.", en: "Usage bills to your Google account. Add a budget alert in Google Cloud billing." } },
 ];
 
@@ -95,7 +95,7 @@ export function ApiGuide() {
   const [copied, setCopied] = useState(false);
   return (
     <>
-      <PageHeader title={L({ ko: "API 키 설명서", en: "API key manual" })} lead={L(OWN_KEY_ONLY ? { ko: "해봇의 도구는 내 Google AI Studio 키로 실행돼요. 발급과 등록은 5분이면 끝나요.", en: "Haebot's tools run on your own Google AI Studio key. Getting and adding one takes about 5 minutes." } : { ko: "내 Google AI Studio 키로 해봇을 쓰면 크레딧이 차감되지 않아요. 5분이면 끝나요.", en: "Run Haebot on your own Google AI Studio key and no credits are charged. Takes five minutes." })} />
+      <PageHeader title={L({ ko: "API 키 설명서", en: "API key manual" })} lead={L(OWN_KEY_ONLY ? { ko: "해바의 도구는 내 Google AI Studio 키로 실행돼요. 발급과 등록은 5분이면 끝나요.", en: "Haeba's tools run on your own Google AI Studio key. Getting and adding one takes about 5 minutes." } : { ko: "내 Google AI Studio 키로 해바를 쓰면 크레딧이 차감되지 않아요. 5분이면 끝나요.", en: "Run Haeba on your own Google AI Studio key and no credits are charged. Takes five minutes." })} />
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.3fr_1fr]">
         <section className="glass min-w-0 rounded-[24px] p-6">
           <h2 className="text-lg font-semibold">{L({ ko: "순서대로 따라 하기", en: "Step by step" })}</h2>

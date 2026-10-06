@@ -62,7 +62,7 @@ export function ConceptFilm() {
         className="grid items-center gap-6 overflow-hidden rounded-[32px] bg-[#0b0d10] p-4 text-white shadow-[0_40px_100px_-50px_rgba(0,0,0,0.7)] md:grid-cols-[1fr_1.55fr] md:gap-10 md:p-8"
       >
         <div className="order-2 px-2 pb-2 md:order-1 md:px-2">
-          <p className="text-sm font-semibold text-[#ff9d6b]">{L({ ko: "10초로 보는 해봇", en: "Haebot in 10 seconds" })}</p>
+          <p className="text-sm font-semibold text-[#ff9d6b]">{L({ ko: "10초로 보는 해바", en: "Haeba in 10 seconds" })}</p>
           <h2 id="film-title" className="mt-2 font-display text-[clamp(1.6rem,3vw,2.3rem)] leading-tight font-bold tracking-[-0.02em] break-keep">
             {L({ ko: "적으면, 완성된 결과로 돌아와요", en: "Write it down. Get finished work back." })}
           </h2>

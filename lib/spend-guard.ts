@@ -54,7 +54,7 @@ export async function checkSpend(userId: string, cost: number, platform: boolean
   for (const level of decision.alerts) {
     // One alert per level per day, even with many servers.
     const first = await redis.set(`spend:alerted:${day}:${level}`, "1", { nx: true, ex: TTL }).catch(() => null);
-    if (first) void alert(`해봇 AI 플랫폼 AI 사용량이 오늘(${day}) 예산의 ${level}%에 도달했습니다 (한도 ${limits.platformDailyCredits.toLocaleString()} 크레딧). ${level >= 100 ? "새 플랫폼 실행을 멈췄습니다." : ""} Google Cloud 결제 화면도 확인하세요.`);
+    if (first) void alert(`AI 해바 플랫폼 AI 사용량이 오늘(${day}) 예산의 ${level}%에 도달했습니다 (한도 ${limits.platformDailyCredits.toLocaleString()} 크레딧). ${level >= 100 ? "새 플랫폼 실행을 멈췄습니다." : ""} Google Cloud 결제 화면도 확인하세요.`);
   }
   if (decision.ok) return { ok: true };
 

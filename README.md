@@ -1,4 +1,4 @@
-# 해봇 AI — Haebot AI Studio
+# AI 해바 — AI Haeba Studio (formerly 해봇 AI)
 
 Grounded AI marketing and business tools in one app. Eighteen tools share one
 Business Profile, one runner, and one sourcing standard: every number carries
