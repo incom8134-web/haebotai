@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * 해봇 AI design tokens. Light is the primary, tuned palette (these are
+ * AI 해바 design tokens. Light is the primary, tuned palette (these are
  * the default/unclassed values); `.dark` below overrides the raw palette
  * for the toggle. Every shadcn semantic slot is aliased via `var()` in
  * the inline block so it follows automatically.
@@ -26,7 +26,7 @@
   --color-fg-muted: #554d45;
   --color-fg-subtle: #675f57;
 
-  /* Brand accent — Haebot Sun (deep sunrise orange; white text on it clears AA) */
+  /* Brand accent — Haeba Sun (deep sunrise orange; white text on it clears AA) */
   --color-accent: #c2410c;
   --color-accent-hover: #9a3412;
   --color-accent-dim: #fff1e7;
@@ -90,7 +90,7 @@
   --font-sans: "Pretendard Variable", var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
   --font-heading: var(--font-sans);
-  /* Studio display face (from the Haebot AI Studio design) — Latin only,
+  /* Studio display face (from the AI Haeba Studio design) — Latin only,
      so Hangul falls through to Pretendard. */
   --font-display: var(--font-space-grotesk), "Pretendard Variable", ui-sans-serif, system-ui, sans-serif;
 
@@ -169,14 +169,14 @@
  */
 @layer components {
 /*
- * ── Haebot AI Studio layer ──────────────────────────────────────────────
+ * ── AI Haeba Studio layer ──────────────────────────────────────────────
  * Ported from the Lovable "haebot-ai-studio" prototype (cyan → violet,
  * glass panels, ambient glow). Scoped to .studio-* classes so the rest of
  * the app keeps the groundwork tokens. Dark values are the prototype's
  * exact palette; light values are tuned equivalents that clear AA on bg.
  */
 :root {
-  /* Haebot Sun: one signature colour (a deep sunrise orange) and its
+  /* Haeba Sun: one signature colour (a deep sunrise orange) and its
      darker ember for depth. The old cyan/violet names are kept as the
      variable names so every component follows the new identity. */
   --studio-cyan: oklch(0.55 0.18 45);

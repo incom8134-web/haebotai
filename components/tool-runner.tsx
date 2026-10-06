@@ -3,8 +3,8 @@
 import { toolSlug } from "@/lib/tools/catalog";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { notFound, useRouter } from "next/navigation";
-import { AlertTriangle, KeyRound, RotateCcw, SquarePen, X } from "lucide-react";
+import { notFound, usePathname, useRouter, useSearchParams } from "next/navigation";
+import { AlertTriangle, KeyRound, RotateCcw, SlidersHorizontal, SquarePen, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,7 +26,7 @@ import { getTool } from "@/lib/tools/registry";
 import { CATEGORY_LABELS } from "@/lib/tools/registry/categories";
 import { seedFromChain } from "@/lib/tools/chain";
 import { ProjectPicker } from "@/components/projects/project-picker";
-import { seedFromBrief } from "@/lib/tools/brief";
+import { briefField, seedFromBrief } from "@/lib/tools/brief";
 import { RunGuide } from "@/components/tools/run-guide";
 import { cn } from "@/lib/utils";
 import { ExField } from "@/components/tools/experience/controls";
@@ -125,6 +125,7 @@ function ToolRunner({
   projects = [],
   initialProject,
   initialValues,
+  simple = false,
 }: {
   toolId: string;
   /** This tool's content, experience and English strings (lib/tools/pack.ts). */
@@ -152,6 +153,8 @@ function ToolRunner({
   initialProject?: string;
   /** ?fromInput= — the inputs of an earlier run, to run again. */
   initialValues?: ToolFormValues;
+  /** Opened from 바로 만들기 (/quick, ?quick=1): the long form folds away behind the owner's one line, and the run starts by itself. */
+  simple?: boolean;
 }) {
   const manifest = getTool(toolId);
   const exp = (pack.experience ?? undefined);
@@ -232,6 +235,13 @@ function ToolRunner({
   const abortRef = useRef<AbortController | null>(null);
   const formTopRef = useRef<HTMLDivElement | null>(null);
   const runIdRef = useRef<string | null>(null);
+  // Simple mode (/quick): the form stays folded until the owner asks for it.
+  const [detailed, setDetailed] = useState(!simple);
+  const compact = simple && !detailed;
+  const autoStarted = useRef(false);
+  const pathname = usePathname();
+  const search = useSearchParams();
+  const here = `${pathname}${search.size ? `?${search.toString()}` : ""}`;
 
   // Chained from the image tool into the detail page: the generated images
   // become the product photos (a File field, so they're fetched once here).
@@ -270,6 +280,21 @@ function ToolRunner({
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
+  }, []);
+
+  // Simple mode starts the run as soon as the page opens — once, and only
+  // when it can run (a key is there) and the owner's line made it in.
+  const quickLine = (() => {
+    const f = manifest ? briefField(manifest) : null;
+    const v = f ? values[f.id] : undefined;
+    return typeof v === "string" ? v.trim() : "";
+  })();
+  useEffect(() => {
+    if (!simple || autoStarted.current || needsKey || !quickLine) return;
+    autoStarted.current = true;
+    void handleRun();
+    // Runs once on open; later changes are the owner's own runs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!manifest) return notFound();
@@ -567,7 +592,7 @@ function ToolRunner({
             {OWN_KEY_ONLY ? (
               <>
                 ~{manifest.estimatedSeconds}
-                {t("seconds")} · {hasOwnKey[provider] ? L({ ko: "내 API 키로 실행", en: "Runs on your API key" }) : team ? L({ ko: "팀 테스트 키 (무료)", en: "Team test key (free)" }) : L({ ko: "API 키 필요", en: "API key needed" })}
+                {t("seconds")} · {hasOwnKey[provider] ? L({ ko: "내 API 키로 실행", en: "Runs on your API key" }) : team ? L({ ko: "팀 테스트 키", en: "Team test key" }) : L({ ko: "API 키 필요", en: "API key needed" })}
               </>
             ) : (
               <>
@@ -589,12 +614,12 @@ function ToolRunner({
             </p>
             <p className="mt-1.5 text-fg-muted">
               {L({
-                ko: "Google AI Studio에서 무료로 키를 발급해 등록하면 바로 쓸 수 있어요. 5분이면 끝나고, 요금은 내 Google 계정에서 직접 관리해요.",
-                en: "Get a free key from Google AI Studio and add it here — it takes about 5 minutes, and any usage is billed to your own Google account.",
+                ko: "Google AI Studio에서 키를 발급해 등록하면 바로 쓸 수 있어요. 5분이면 끝나고, 요금은 내 Google 계정에서 직접 관리해요.",
+                en: "Get a key from Google AI Studio and add it here — it takes about 5 minutes, and any usage is billed to your own Google account.",
               })}
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <Link href="/account/api-key" className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-accent px-3.5 text-sm font-semibold text-white hover:opacity-90">
+              <Link href={`/account/api-key?next=${encodeURIComponent(here)}`} className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-accent px-3.5 text-sm font-semibold text-white hover:opacity-90">
                 {L({ ko: "API 키 등록하기", en: "Add my API key" })}
               </Link>
               <Link href="/help/api-guide" className="inline-flex h-9 items-center rounded-xl border border-hairline bg-surface px-3.5 text-sm font-medium text-fg hover:border-accent">
@@ -617,7 +642,7 @@ function ToolRunner({
         ) : null}
       </header>
 
-      {exp?.layout === "steps" ? (
+      {exp?.layout === "steps" && !compact ? (
         <div className="mt-8">
           <Stage exp={exp} values={values} compact />
         </div>
@@ -626,10 +651,10 @@ function ToolRunner({
       <div
         className={cn(
           "mt-8 grid gap-6 lg:items-start",
-          exp?.layout === "canvas" ? "lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]" : "lg:grid-cols-[minmax(0,1fr)_minmax(300px,380px)]",
+          compact ? "max-w-3xl" : exp?.layout === "canvas" ? "lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]" : "lg:grid-cols-[minmax(0,1fr)_minmax(300px,380px)]",
         )}
       >
-      {exp?.layout === "canvas" ? side : null}
+      {exp?.layout === "canvas" && !compact ? side : null}
       <div className="min-w-0">
 
       {chainedFrom ? (
@@ -641,107 +666,130 @@ function ToolRunner({
         </div>
       ) : null}
 
-      {manifest ? (
-        <ProjectPicker
-          projects={projects}
-          value={projectId}
-          onChange={setProjectId}
-          inputs={manifest.inputs}
-          onFill={(v) =>
-            setValues((prev) => {
-              // Still the untouched example → replace it, so none of the
-              // example's answers ride along with the project's facts.
-              const seed = seeded.current;
-              const untouched = !!seed && Object.keys(seed.values).every((k) => JSON.stringify(prev[k]) === JSON.stringify(presetValuesWith(pack.presetsEn, seed.index, seed.values, locale)[k]));
-              if (untouched) {
-                projectFilled.current = new Set(Object.keys(v));
-                return { ...v };
-              }
-              // Otherwise fill only empty fields (and ones a project filled
-              // before), never a brief or answers the member brought.
-              const merged = mergeProjectFill(prev, v, projectFilled.current);
-              projectFilled.current = merged.owned;
-              return merged.values;
-            })
-          }
-        />
-      ) : null}
-
-      {profileChips.length > 0 && (
-        <div className="mt-4 flex flex-wrap gap-1.5">
-          {profileChips.map(({ key, display }) =>
-            excludedProfileKeys.has(key) ? null : (
-              <Badge key={key} variant="secondary" className="gap-1">
-                {t(PROFILE_LABEL_KEYS[key])}: {display}
-                <button
-                  type="button"
-                  aria-label={`${t(PROFILE_LABEL_KEYS[key])} ${t("remove")}`}
-                  onClick={() =>
-                    setExcludedProfileKeys((prev) => new Set(prev).add(key))
-                  }
-                >
-                  <X className="size-3" />
-                </button>
-              </Badge>
-            ),
-          )}
-        </div>
-      )}
-
-      {availableProviders.length > 1 ? (
-        <div className="mt-4">
-          <Segmented
-            value={provider}
-            onChange={(v) => setSavedProvider(v)}
-            label={L({ ko: "엔진 선택", en: "Choose engine" })}
-            options={availableProviders.map((p) => ({ value: p, label: PROVIDER_LABEL[p] }))}
-          />
-        </div>
-      ) : supportedProviders.length > 1 ? (
-        <p className="mt-4 text-xs text-fg-subtle">
-          {L({ ko: "Claude/ChatGPT 엔진을 쓰려면 API 키를 등록하세요 → ", en: "Register an API key to use the Claude/ChatGPT engine → " })}
-          <Link href="/account/api-key" className="text-studio-cyan underline underline-offset-2">
-            {L({ ko: "API 키 관리", en: "Manage API keys" })}
-          </Link>
-        </p>
-      ) : null}
-
-      {exp ? (
-        <ol className="mt-5 space-y-4">
-          {exp.sections.map((section, si) => (
-            <li key={section.title.en} className="glass rounded-[24px] p-5 md:p-6">
-              <div className="mb-5 flex items-start gap-3">
-                <span className="studio-gradient-bg grid size-7 shrink-0 place-items-center rounded-full font-mono text-xs text-white">{si + 1}</span>
-                <div className="min-w-0">
-                  <h2 className="text-base leading-snug font-semibold break-keep">{section.title[locale]}</h2>
-                  <p className="mt-0.5 text-sm leading-relaxed break-keep text-fg-muted">{section.hint[locale]}</p>
-                </div>
-              </div>
-              <div className="space-y-5">
-                {section.fields.filter((fid) => fid !== "free_request").map((fid) => {
-                  const field = manifest.inputs.find((f) => f.id === fid);
-                  if (!field) return null;
-                  return <ExField key={fid} field={localizeWith(pack.fieldsEn, field, locale)} ui={exp.ui[fid]} value={values[fid]} onChange={(v) => setValues((p) => ({ ...p, [fid]: v }))} />;
-                })}
-              </div>
-            </li>
-          ))}
-        </ol>
-      ) : (
+      {compact ? (
         <div className="glass mt-6 rounded-[24px] p-5 md:p-6">
-          <div className="space-y-5">
-            {manifest.inputs
-              .filter((f) => f.id !== "free_request")
-              .map((field) => (
-                <ExField key={field.id} field={localizeWith(pack.fieldsEn, field, locale)} value={values[field.id]} onChange={(v) => setValues((p) => ({ ...p, [field.id]: v }))} />
-              ))}
+          <p className="text-xs font-semibold text-accent">{L({ ko: "내 요청", en: "Your request" })}</p>
+          <p className="mt-2 text-[15px] leading-relaxed whitespace-pre-wrap break-keep text-fg">
+            {quickLine || L({ ko: "아직 적은 내용이 없어요. ‘자세히 설정하기’를 눌러 적어 주세요.", en: "Nothing written yet. Open “More options” to write it." })}
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setDetailed(true)}
+              className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-hairline bg-surface px-3.5 text-sm font-medium text-fg hover:border-accent"
+            >
+              <SlidersHorizontal size={14} aria-hidden /> {L({ ko: "자세히 설정하기", en: "More options" })}
+            </button>
+            <Link href="/quick" className="inline-flex h-9 items-center rounded-xl px-3 text-sm text-fg-muted hover:text-fg">
+              {L({ ko: "다른 것 만들기", en: "Make something else" })}
+            </Link>
           </div>
         </div>
+      ) : (
+        <>
+        {manifest ? (
+          <ProjectPicker
+            projects={projects}
+            value={projectId}
+            onChange={setProjectId}
+            inputs={manifest.inputs}
+            onFill={(v) =>
+              setValues((prev) => {
+                // Still the untouched example → replace it, so none of the
+                // example's answers ride along with the project's facts.
+                const seed = seeded.current;
+                const untouched = !!seed && Object.keys(seed.values).every((k) => JSON.stringify(prev[k]) === JSON.stringify(presetValuesWith(pack.presetsEn, seed.index, seed.values, locale)[k]));
+                if (untouched) {
+                  projectFilled.current = new Set(Object.keys(v));
+                  return { ...v };
+                }
+                // Otherwise fill only empty fields (and ones a project filled
+                // before), never a brief or answers the member brought.
+                const merged = mergeProjectFill(prev, v, projectFilled.current);
+                projectFilled.current = merged.owned;
+                return merged.values;
+              })
+            }
+          />
+        ) : null}
+
+        {profileChips.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-1.5">
+            {profileChips.map(({ key, display }) =>
+              excludedProfileKeys.has(key) ? null : (
+                <Badge key={key} variant="secondary" className="gap-1">
+                  {t(PROFILE_LABEL_KEYS[key])}: {display}
+                  <button
+                    type="button"
+                    aria-label={`${t(PROFILE_LABEL_KEYS[key])} ${t("remove")}`}
+                    onClick={() =>
+                      setExcludedProfileKeys((prev) => new Set(prev).add(key))
+                    }
+                  >
+                    <X className="size-3" />
+                  </button>
+                </Badge>
+              ),
+            )}
+          </div>
+        )}
+
+        {availableProviders.length > 1 ? (
+          <div className="mt-4">
+            <Segmented
+              value={provider}
+              onChange={(v) => setSavedProvider(v)}
+              label={L({ ko: "엔진 선택", en: "Choose engine" })}
+              options={availableProviders.map((p) => ({ value: p, label: PROVIDER_LABEL[p] }))}
+            />
+          </div>
+        ) : supportedProviders.length > 1 ? (
+          <p className="mt-4 text-xs text-fg-subtle">
+            {L({ ko: "Claude/ChatGPT 엔진을 쓰려면 API 키를 등록하세요 → ", en: "Register an API key to use the Claude/ChatGPT engine → " })}
+            <Link href="/account/api-key" className="text-studio-cyan underline underline-offset-2">
+              {L({ ko: "API 키 관리", en: "Manage API keys" })}
+            </Link>
+          </p>
+        ) : null}
+
+        {exp ? (
+          <ol className="mt-5 space-y-4">
+            {exp.sections.map((section, si) => (
+              <li key={section.title.en} className="glass rounded-[24px] p-5 md:p-6">
+                <div className="mb-5 flex items-start gap-3">
+                  <span className="studio-gradient-bg grid size-7 shrink-0 place-items-center rounded-full font-mono text-xs text-white">{si + 1}</span>
+                  <div className="min-w-0">
+                    <h2 className="text-base leading-snug font-semibold break-keep">{section.title[locale]}</h2>
+                    <p className="mt-0.5 text-sm leading-relaxed break-keep text-fg-muted">{section.hint[locale]}</p>
+                  </div>
+                </div>
+                <div className="space-y-5">
+                  {section.fields.filter((fid) => fid !== "free_request").map((fid) => {
+                    const field = manifest.inputs.find((f) => f.id === fid);
+                    if (!field) return null;
+                    return <ExField key={fid} field={localizeWith(pack.fieldsEn, field, locale)} ui={exp.ui[fid]} value={values[fid]} onChange={(v) => setValues((p) => ({ ...p, [fid]: v }))} />;
+                  })}
+                </div>
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <div className="glass mt-6 rounded-[24px] p-5 md:p-6">
+            <div className="space-y-5">
+              {manifest.inputs
+                .filter((f) => f.id !== "free_request")
+                .map((field) => (
+                  <ExField key={field.id} field={localizeWith(pack.fieldsEn, field, locale)} value={values[field.id]} onChange={(v) => setValues((p) => ({ ...p, [field.id]: v }))} />
+                ))}
+            </div>
+          </div>
+        )}
+
+        <FreeRequest toolId={toolId} value={typeof values.free_request === "string" ? values.free_request : ""} onChange={(v) => setValues((p) => ({ ...p, free_request: v }))} />
+
+        <ReferencePanel toolId={toolId} value={reference} onChange={setReference} />
+        </>
       )}
-
-      <FreeRequest toolId={toolId} value={typeof values.free_request === "string" ? values.free_request : ""} onChange={(v) => setValues((p) => ({ ...p, free_request: v }))} />
-
-      <ReferencePanel toolId={toolId} value={reference} onChange={setReference} />
 
       <div className="mt-6 flex items-center gap-2">
         <Button
@@ -830,7 +878,7 @@ function ToolRunner({
         </div>
       ) : null}
       </div>
-      {exp?.layout === "canvas" ? null : side}
+      {exp?.layout === "canvas" || compact ? null : side}
       </div>
     </div>
   );

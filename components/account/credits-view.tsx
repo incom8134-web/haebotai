@@ -28,7 +28,7 @@ function OwnKeyUsagePanel({ ownKey }: { ownKey: OwnKeyUsage[] }) {
   return (
     <section className="glass mt-6 rounded-[28px] p-6">
       <h2 className="text-lg font-semibold">{L({ ko: "내 API 키 사용량 (이번 달)", en: "Your own API keys (this month)" })}</h2>
-      <p className="mt-1 text-sm break-keep text-fg-muted">{L({ ko: "이 실행들은 해봇이 아닌 각 제공사에서 직접 청구돼요. 예상치 못한 요금을 막으려면 제공사 콘솔에서 월 예산·한도 알림을 설정하세요.", en: "These runs are billed by each provider, not Haebot. To avoid surprise bills, set a monthly budget or spend limit in the provider's console." })}</p>
+      <p className="mt-1 text-sm break-keep text-fg-muted">{L({ ko: "이 실행들은 해바가 아닌 각 제공사에서 직접 청구돼요. 예상치 못한 요금을 막으려면 제공사 콘솔에서 월 예산·한도 알림을 설정하세요.", en: "These runs are billed by each provider, not Haeba. To avoid surprise bills, set a monthly budget or spend limit in the provider's console." })}</p>
       <ul className="mt-4 divide-y divide-hairline text-sm">
         {ownKey.map((o) => {
           const billing = PROVIDER_BILLING[o.provider];
@@ -87,7 +87,7 @@ function CreditsView({ balance, plan, apiKeyConnected, usage }: { balance: numbe
           <div className="mt-5 flex flex-wrap gap-2 text-sm">
             <Link href="/account/membership" className="text-studio-cyan underline underline-offset-2">{L({ ko: "학생 멤버십", en: "Student membership" })}</Link>
             <span className="text-fg-subtle">·</span>
-            <Link href="/account/api-key" className="inline-flex items-center gap-1 text-studio-cyan underline underline-offset-2"><KeyRound size={13} aria-hidden /> {L({ ko: "내 API 키로 무료 실행", en: "Run free on your own key" })}</Link>
+            <Link href="/account/api-key" className="inline-flex items-center gap-1 text-studio-cyan underline underline-offset-2"><KeyRound size={13} aria-hidden /> {L({ ko: "내 API 키로 실행", en: "Run on your own key" })}</Link>
           </div>
         </section>
 

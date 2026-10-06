@@ -4,7 +4,7 @@ import { listTickets, type TicketKind } from "@/lib/support";
 import { getCurrentUser } from "@/lib/supabase/user";
 import { ContactCard } from "@/components/help/contact-card";
 
-export const metadata = { title: "고객센터 — 해봇 AI" };
+export const metadata = { title: "고객센터 — AI 해바" };
 
 const KINDS: TicketKind[] = ["question", "bug", "billing", "feature", "remote"];
 

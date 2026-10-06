@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: { params: Promise<{ toolId: s
   const tool = getTool(toolId);
   if (!tool) return {};
   const content = getToolContent(tool.id);
-  return { title: `${tool.name_ko} — 해봇 AI`, description: content?.description.ko ?? tool.summary };
+  return { title: `${tool.name_ko} — AI 해바`, description: content?.description.ko ?? tool.summary };
 }
 
 export default async function ToolHomePage({ params }: { params: Promise<{ toolId: string }> }) {

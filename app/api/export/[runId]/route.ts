@@ -37,7 +37,7 @@ function fail(request: NextRequest, status: number, message: string, headers: He
     return Response.json(detail ? { error: message, detail } : { error: message }, { status, headers });
   }
   const escape = (t: string) => t.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
-  const html = `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>다운로드 실패 · 해봇 AI</title>
+  const html = `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>다운로드 실패 · AI 해바</title>
 <style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0e1116;color:#e8eaed;font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}main{max-width:420px;padding:32px 24px;text-align:center}h1{font-size:20px;margin:0 0 8px}p{color:#aeb4bb;line-height:1.6;margin:0 0 24px}a{display:inline-block;padding:12px 20px;border-radius:12px;background:#16b364;color:#fff;text-decoration:none;font-weight:600}</style></head>
 <body><main><h1>${escape(message)}</h1><p>${status === 401 ? "로그인한 뒤 다시 받아 주세요." : "잠시 후 다시 시도해 주세요. 계속 안 되면 다른 형식(PDF·Word)으로 받아 보세요."}</p><a href="javascript:history.back()">결과로 돌아가기</a></main></body></html>`;
   return new Response(html, { status, headers: { ...headers, "Content-Type": "text/html; charset=utf-8" } });

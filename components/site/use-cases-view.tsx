@@ -63,7 +63,7 @@ export function UseCasesView() {
       </div>
 
       <div className="mt-10 text-center">
-        <Link href="/auth" className={primaryButton}>{L({ ko: "무료로 시작하기", en: "Start free" })}</Link>
+        <Link href="/auth" className={primaryButton}>{L({ ko: "시작하기", en: "Get started" })}</Link>
       </div>
     </div>
   );

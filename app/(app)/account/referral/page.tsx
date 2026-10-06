@@ -4,7 +4,7 @@ import { OWN_KEY_ONLY } from "@/lib/site/access";
 import { getReferralStatus } from "@/lib/referral-server";
 import { getCurrentUser } from "@/lib/supabase/user";
 
-export const metadata = { title: "친구 초대 — 해봇 AI" };
+export const metadata = { title: "친구 초대 — AI 해바" };
 
 export default async function ReferralPage() {
   // Invites paid credits; members now bring their own key (lib/site/access.ts).

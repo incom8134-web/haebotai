@@ -3,7 +3,7 @@
 import { createContext, useContext } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
-import { ArrowRight, Check, Plus } from "lucide-react";
+import { ArrowRight, Check, Plus, Wand2 } from "lucide-react";
 import { BusinessInfo } from "@/components/site/business-info";
 import { BrandMark } from "@/components/brand-mark";
 import { ThemeLangControls } from "@/components/shell/app-shell";
@@ -62,7 +62,7 @@ function Nav() {
           <Link href="/" className="flex items-center gap-2 pr-2">
             <BrandMark size={30} priority />
             <span className="text-sm font-bold tracking-[-0.02em] text-fg">
-              {L({ ko: "해봇 AI", en: "Haebot AI" })}
+              {L({ ko: "AI 해바", en: "AI Haeba" })}
             </span>
           </Link>
           <nav
@@ -102,7 +102,7 @@ function Nav() {
                   {L({ ko: "로그인", en: "Sign in" })}
                 </Link>
                 <Link href="/auth" className={cn(primaryButton, "h-10")}>
-                  {L({ ko: "무료로 시작", en: "Start free" })}
+                  {L({ ko: "시작하기", en: "Get started" })}
                 </Link>
               </>
             )}
@@ -153,12 +153,19 @@ function Hero() {
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
           <Link
+            href="/quick"
+            className={cn(primaryButton, "h-12 w-full px-6 text-[15px] sm:w-auto")}
+          >
+            <Wand2 size={17} aria-hidden />
+            {L({ ko: "가게 홍보 바로 시작하기", en: "Start shop marketing now" })}
+          </Link>
+          <Link
             href={signedIn ? "/studio" : "/auth"}
-            className={cn(primaryButton, "h-12 px-6 text-[15px]")}
+            className={cn(secondaryButton, "h-12 px-6 text-[15px]")}
           >
             {signedIn
               ? L({ ko: "스튜디오로 가기", en: "Go to Studio" })
-              : L({ ko: "무료로 시작하기", en: "Start free" })}{" "}
+              : L({ ko: "시작하기", en: "Get started" })}{" "}
             <ArrowRight size={16} aria-hidden />
           </Link>
           <Link
@@ -171,7 +178,7 @@ function Hero() {
         <ul className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-sm text-fg-muted">
           {(OWN_KEY_ONLY
             ? [
-                { ko: "해봇 이용료 없음", en: "No Haebot fees" },
+                { ko: "한 줄이면 바로 시작", en: "Start with one line" },
                 { ko: "카드 등록 없음", en: "No card needed" },
                 { ko: "내 Gemini API 키로 실행", en: "Runs on your own Gemini key" },
               ]
@@ -211,10 +218,10 @@ function Pricing() {
         <>
           <SectionHead
             kicker={L({ ko: "요금", en: "Pricing" })}
-            title={L({ ko: "해봇은 무료, AI는 내 키로", en: "Haebot is free. The AI runs on your own key" })}
+            title={L({ ko: "AI는 내 키로 실행해요", en: "The AI runs on your own key" })}
             body={L({
-              ko: "Google AI Studio에서 받은 내 Gemini API 키를 등록하면 25개 도구를 모두 쓸 수 있어요. 크레딧도, 플랜도, 카드 등록도 없어요.",
-              en: "Add your own Gemini API key from Google AI Studio and every one of the 25 tools is yours to use. No credits, no plans, no card.",
+              ko: "Google AI Studio에서 받은 내 Gemini API 키를 등록하면 25개 도구를 모두 쓸 수 있어요. AI 사용 요금은 Google이 내 Google 계정으로 직접 청구해요.",
+              en: "Add your own Gemini API key from Google AI Studio and every one of the 25 tools is yours to use. Google bills the AI usage directly to your Google account.",
             })}
           />
           <div className="mt-10">
@@ -325,7 +332,7 @@ function FinalCta() {
         >
           {signedIn
             ? L({ ko: "스튜디오로 가기", en: "Go to Studio" })
-            : L({ ko: "무료로 시작하기", en: "Start free" })}{" "}
+            : L({ ko: "시작하기", en: "Get started" })}{" "}
           <ArrowRight size={16} aria-hidden />
         </Link>
       </motion.div>
@@ -340,7 +347,7 @@ function Footer() {
     <footer className="border-t border-hairline px-4 py-10 md:px-6">
       <div className="mx-auto flex max-w-[1200px] flex-col gap-6 md:flex-row md:items-center md:justify-between">
         <p className="flex items-center gap-2 text-sm font-semibold text-fg">
-          <BrandMark size={28} /> {L({ ko: "해봇 AI", en: "Haebot AI" })}
+          <BrandMark size={28} /> {L({ ko: "AI 해바", en: "AI Haeba" })}
         </p>
         <nav
           className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-fg-muted"
@@ -395,7 +402,7 @@ function Footer() {
         </nav>
         <BusinessInfo />
         <p className="text-xs text-fg-subtle">
-          © {new Date().getFullYear()} {L({ ko: "해봇 AI", en: "Haebot AI" })}
+          © {new Date().getFullYear()} {L({ ko: "AI 해바", en: "AI Haeba" })}
         </p>
       </div>
     </footer>

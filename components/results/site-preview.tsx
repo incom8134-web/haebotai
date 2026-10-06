@@ -60,7 +60,7 @@ export function SitePreview({ html, design }: { html: string; design?: Design })
     const win = window.open("", "_blank");
     if (!win) return;
     win.opener = null;
-    win.document.title = L({ ko: "홈페이지 미리보기 · 해봇 AI", en: "Website preview · Haebot AI" });
+    win.document.title = L({ ko: "홈페이지 미리보기 · AI 해바", en: "Website preview · AI Haeba" });
     win.document.body.style.margin = "0";
     const frame = win.document.createElement("iframe");
     frame.setAttribute("sandbox", "allow-scripts");
