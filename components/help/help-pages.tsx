@@ -27,7 +27,7 @@ export function HelpHome() {
     { href: "/help/api-guide", icon: BookOpenText, title: { ko: "API 키 설명서", en: "API key manual" }, body: { ko: "발급부터 문제 해결까지", en: "From getting a key to fixing errors" } },
     { href: "/onboarding", icon: Rocket, title: { ko: "처음 시작하기", en: "Getting started" }, body: { ko: "목표 → 프로젝트 → 첫 도구, 세 화면", en: "Goal → project → first tool, three screens" } },
     OWN_KEY_ONLY
-      ? { href: "/pricing", icon: CircleGauge, title: { ko: "요금", en: "Pricing" }, body: { ko: "해봇은 무료, AI는 내 키로", en: "Haebot is free; the AI runs on your key" } }
+      ? { href: "/pricing", icon: CircleGauge, title: { ko: "요금", en: "Pricing" }, body: { ko: "AI는 내 API 키로 실행", en: "The AI runs on your own key" } }
       : { href: "/pricing", icon: CircleGauge, title: { ko: "요금·크레딧", en: "Pricing & credits" }, body: { ko: "플랜과 도구별 예상 크레딧", en: "Plans and credits per tool" } },
     { href: "/account/membership", icon: Crown, title: { ko: "학생 멤버십", en: "Student membership" }, body: { ko: "재학 인증으로 무제한", en: "Unlimited with enrollment" } },
     { href: "/legal/terms", icon: ShieldCheck, title: { ko: "약관·정책", en: "Terms & policies" }, body: { ko: "이용약관·개인정보·환불", en: "Terms, privacy, refunds" } },
@@ -85,7 +85,7 @@ const STEPS = [
 const TROUBLE = [
   { q: { ko: "'Google이 이 키를 거절했어요'가 나와요", en: "\"Google rejected this key\"" }, a: { ko: "키를 삭제했거나 복사할 때 앞뒤가 잘렸을 수 있어요. 새 키를 만들어 다시 붙여 넣으세요. 회사 계정이라면 관리자가 Gemini API를 막아 뒀을 수 있어요.", en: "The key may be deleted or cut off when copying. Create a new one and paste again. On a work account, an admin may have blocked the Gemini API." } },
   { q: { ko: "'형식이 아니에요'가 나와요", en: "\"Not a valid format\"" }, a: { ko: "OpenAI(sk-…) 등 다른 서비스 키가 아니라 Google AI Studio 키('AQ.…' 또는 'AIza…')여야 해요. 키 전체를 빠짐없이 복사했는지 확인하세요.", en: "It must be a Google AI Studio key (\"AQ.…\" or \"AIza…\"), not another provider's (e.g. sk-…). Make sure you copied the whole key." } },
-  { q: { ko: "등록했는데 실행이 실패해요", en: "Runs fail after adding a key" }, a: { ko: "내 Google 계정의 무료 한도를 다 썼을 수 있어요. 계정 → 내 API 키에서 '확인'을 눌러 보고, 안 되면 키를 삭제하면 다시 크레딧으로 실행돼요.", en: "Your Google free quota may be used up. Press \"Test\" in Account → My API key; if it fails, delete the key and runs go back to credits." } },
+  { q: { ko: "등록했는데 실행이 실패해요", en: "Runs fail after adding a key" }, a: { ko: "내 Google 계정의 사용 한도를 다 썼거나 결제에 문제가 있을 수 있어요. 계정 → 내 API 키에서 '확인'을 눌러 보고, 안 되면 Google AI Studio에서 한도와 결제를 확인하거나 다른 키를 추가하세요.", en: "Your Google usage limit may be used up, or its billing has a problem. Press \"Test\" in Account → My API key; if it fails, check limits and billing in Google AI Studio or add another key." } },
   { q: { ko: "키를 바꾸고 싶어요", en: "I want to change keys" }, a: { ko: "새 키를 붙여 넣으면 기존 키를 덮어써요. 예전 키는 Google AI Studio에서 삭제하세요.", en: "Pasting a new key replaces the old one. Delete the old key in Google AI Studio." } },
 ];
 

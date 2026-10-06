@@ -567,7 +567,7 @@ function ToolRunner({
             {OWN_KEY_ONLY ? (
               <>
                 ~{manifest.estimatedSeconds}
-                {t("seconds")} · {hasOwnKey[provider] ? L({ ko: "내 API 키로 실행", en: "Runs on your API key" }) : team ? L({ ko: "팀 테스트 키 (무료)", en: "Team test key (free)" }) : L({ ko: "API 키 필요", en: "API key needed" })}
+                {t("seconds")} · {hasOwnKey[provider] ? L({ ko: "내 API 키로 실행", en: "Runs on your API key" }) : team ? L({ ko: "팀 테스트 키", en: "Team test key" }) : L({ ko: "API 키 필요", en: "API key needed" })}
               </>
             ) : (
               <>
@@ -589,8 +589,8 @@ function ToolRunner({
             </p>
             <p className="mt-1.5 text-fg-muted">
               {L({
-                ko: "Google AI Studio에서 무료로 키를 발급해 등록하면 바로 쓸 수 있어요. 5분이면 끝나고, 요금은 내 Google 계정에서 직접 관리해요.",
-                en: "Get a free key from Google AI Studio and add it here — it takes about 5 minutes, and any usage is billed to your own Google account.",
+                ko: "Google AI Studio에서 키를 발급해 등록하면 바로 쓸 수 있어요. 5분이면 끝나고, 요금은 내 Google 계정에서 직접 관리해요.",
+                en: "Get a key from Google AI Studio and add it here — it takes about 5 minutes, and any usage is billed to your own Google account.",
               })}
             </p>
             <div className="mt-3 flex flex-wrap gap-2">

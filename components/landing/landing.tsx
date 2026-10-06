@@ -102,7 +102,7 @@ function Nav() {
                   {L({ ko: "로그인", en: "Sign in" })}
                 </Link>
                 <Link href="/auth" className={cn(primaryButton, "h-10")}>
-                  {L({ ko: "무료로 시작", en: "Start free" })}
+                  {L({ ko: "시작하기", en: "Get started" })}
                 </Link>
               </>
             )}
@@ -158,7 +158,7 @@ function Hero() {
           >
             {signedIn
               ? L({ ko: "스튜디오로 가기", en: "Go to Studio" })
-              : L({ ko: "무료로 시작하기", en: "Start free" })}{" "}
+              : L({ ko: "시작하기", en: "Get started" })}{" "}
             <ArrowRight size={16} aria-hidden />
           </Link>
           <Link
@@ -211,10 +211,10 @@ function Pricing() {
         <>
           <SectionHead
             kicker={L({ ko: "요금", en: "Pricing" })}
-            title={L({ ko: "해봇은 무료, AI는 내 키로", en: "Haebot is free. The AI runs on your own key" })}
+            title={L({ ko: "AI는 내 키로 실행해요", en: "The AI runs on your own key" })}
             body={L({
-              ko: "Google AI Studio에서 받은 내 Gemini API 키를 등록하면 25개 도구를 모두 쓸 수 있어요. 크레딧도, 플랜도, 카드 등록도 없어요.",
-              en: "Add your own Gemini API key from Google AI Studio and every one of the 25 tools is yours to use. No credits, no plans, no card.",
+              ko: "Google AI Studio에서 받은 내 Gemini API 키를 등록하면 25개 도구를 모두 쓸 수 있어요. AI 사용 요금은 Google이 내 Google 계정으로 직접 청구해요.",
+              en: "Add your own Gemini API key from Google AI Studio and every one of the 25 tools is yours to use. Google bills the AI usage directly to your Google account.",
             })}
           />
           <div className="mt-10">
@@ -325,7 +325,7 @@ function FinalCta() {
         >
           {signedIn
             ? L({ ko: "스튜디오로 가기", en: "Go to Studio" })
-            : L({ ko: "무료로 시작하기", en: "Start free" })}{" "}
+            : L({ ko: "시작하기", en: "Get started" })}{" "}
           <ArrowRight size={16} aria-hidden />
         </Link>
       </motion.div>

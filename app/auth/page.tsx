@@ -129,14 +129,14 @@ function AuthCard() {
       <ul className="mt-7 space-y-3 border-t border-hairline pt-6 text-sm">
         {(OWN_KEY_ONLY
           ? [
-              { icon: Check, text: { ko: "가입은 무료, 카드 등록 없음", en: "Free to join, no card needed" } },
-              { icon: KeyRound, text: { ko: "도구는 내 Gemini API 키로 실행 — Google AI Studio에서 무료 발급", en: "Tools run on your own Gemini API key — free from Google AI Studio" } },
+              { icon: Check, text: { ko: "가입할 때 카드 등록 없음", en: "No card needed to sign up" } },
+              { icon: KeyRound, text: { ko: "도구는 내 Gemini API 키로 실행 — Google AI Studio에서 5분이면 발급", en: "Tools run on your own Gemini API key — about 5 minutes to get from Google AI Studio" } },
               { icon: RotateCcw, text: { ko: "요금은 내 Google 계정에서 직접 확인하고 관리", en: "Any usage is billed to, and managed in, your own Google account" } },
             ]
           : [
               { icon: Check, text: { ko: "가입하면 500 크레딧, 카드 등록 없음", en: "500 credits on sign-up, no card needed" } },
               { icon: GraduationCap, text: { ko: "학생은 재학 인증 후 무제한", en: "Students: unlimited after verification" } },
-              { icon: KeyRound, text: { ko: "내 API 키를 넣으면 크레딧 없이 실행", en: "Bring your own API key and runs are free" } },
+              { icon: KeyRound, text: { ko: "내 API 키를 넣으면 크레딧 없이 실행", en: "Bring your own API key and runs use no credits" } },
               { icon: RotateCcw, text: { ko: "실패하거나 취소한 실행은 자동 환불", en: "Failed or cancelled runs are refunded" } },
             ]
         ).map((item) => (

@@ -280,7 +280,7 @@ function MembershipPanel({ membership, payments }: { membership: Membership; pay
 
         <div className="glass mt-4 grid gap-6 rounded-[24px] p-6 md:grid-cols-[1fr_1.2fr]">
           <div>
-            <p className="flex items-center gap-2 font-semibold"><GraduationCap size={18} className="text-studio-cyan" aria-hidden /> {L({ ko: "학생이라면 무료로 무제한", en: "Students: unlimited, free" })}</p>
+            <p className="flex items-center gap-2 font-semibold"><GraduationCap size={18} className="text-studio-cyan" aria-hidden /> {L({ ko: "학생은 재학 인증 후 무제한", en: "Students: unlimited after verification" })}</p>
             <p className="mt-2 text-sm leading-relaxed text-fg-muted">{L({ ko: "재학 인증을 하면 1년 동안 크레딧 걱정 없이 써요. 학교 이메일이 있으면 가장 빨라요.", en: "Verify enrollment for a year without credit limits. A school email is fastest." })}</p>
           </div>
           {membership.plan === "student" ? (

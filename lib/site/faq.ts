@@ -44,16 +44,16 @@ const OWN_KEY_FAQ: Faq[] = [
     category: "api",
     q: { ko: "왜 내 API 키가 필요한가요?", en: "Why do I need my own API key?" },
     a: {
-      ko: "해봇의 모든 도구는 내 Google AI Studio(Gemini) 키로 실행돼요. 해봇 이용료는 없고, AI 사용 요금은 Google이 내 Google 계정으로 직접 청구해요. 키 발급은 무료이고 5분이면 끝나요.",
-      en: "Every Haebot tool runs on your own Google AI Studio (Gemini) key. Haebot charges nothing; Google bills any AI usage directly to your Google account. Getting a key is free and takes about 5 minutes.",
+      ko: "해봇의 모든 도구는 내 Google AI Studio(Gemini) 키로 실행돼요. AI 사용 요금은 Google이 내 Google 계정으로 직접 청구해요. 키 발급은 5분이면 끝나요.",
+      en: "Every Haebot tool runs on your own Google AI Studio (Gemini) key. Google bills any AI usage directly to your Google account. Getting a key takes about 5 minutes.",
     },
   },
   {
     category: "api",
     q: { ko: "AI 사용 요금은 얼마나 나오나요?", en: "How much will the AI usage cost?" },
     a: {
-      ko: "Google의 요금과 무료 한도를 따라요. 도구마다 쓰는 양이 다르니, Google AI Studio에서 사용량을 확인하고 Google Cloud에 예산 알림을 걸어 두는 걸 권해요.",
-      en: "It follows Google's prices and free limits. Tools use different amounts, so check your usage in Google AI Studio and set a budget alert in Google Cloud.",
+      ko: "Google의 요금과 사용 한도를 따라요. 도구마다 쓰는 양이 다르니, Google AI Studio에서 사용량을 확인하고 Google Cloud에 예산 알림을 걸어 두는 걸 권해요.",
+      en: "It follows Google's prices and usage limits. Tools use different amounts, so check your usage in Google AI Studio and set a budget alert in Google Cloud.",
     },
   },
   {
