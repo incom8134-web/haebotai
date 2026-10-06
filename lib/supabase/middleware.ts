@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { env } from "@/lib/env";
-import { hasCurrentConsent, safeNext } from "@/lib/consent";
+import { HOME_AFTER_SIGN_IN, hasCurrentConsent, safeNext } from "@/lib/consent";
 import { apiIpLimiter, checkRateLimit } from "@/lib/rate-limit";
 
 // Public inside the shell: /tools and /tools/<id> (overviews) and /help.
@@ -21,7 +21,7 @@ function redirectKeepingSession(url: URL, from: NextResponse): NextResponse {
 /** Where a signed-in member goes instead of /auth or a finished consent page (never back into /auth — that would loop). */
 function afterAuth(next: string | null): string {
   const target = safeNext(next);
-  return target === "/auth" || target.startsWith("/auth/") || target.startsWith("/auth?") ? "/studio" : target;
+  return target === "/auth" || target.startsWith("/auth/") || target.startsWith("/auth?") ? HOME_AFTER_SIGN_IN : target;
 }
 
 export async function updateSession(request: NextRequest) {
