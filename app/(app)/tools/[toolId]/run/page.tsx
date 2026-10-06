@@ -13,6 +13,8 @@ import type { ProviderId } from "@/lib/ai/types";
 import { toolPack } from "@/lib/tools/pack";
 import { canUsePlatformKey } from "@/lib/platform-access";
 import { getCurrentUser } from "@/lib/supabase/user";
+import { seedFromBrief } from "@/lib/tools/brief";
+import { quickSeed } from "@/lib/site/quick";
 
 // HAEBOT_A_TOOLS_SPEC.md §5.2 / Part 6 T4 — tool page anatomy: header,
 // profile chips, form (seeded from a chained run when ?fromRun is
@@ -27,7 +29,7 @@ export default async function ToolPage({
   searchParams,
 }: {
   params: Promise<{ toolId: string }>;
-  searchParams: Promise<{ fromRun?: string; pick?: string; brief?: string; preset?: string; project?: string; fromInput?: string }>;
+  searchParams: Promise<{ fromRun?: string; pick?: string; brief?: string; preset?: string; project?: string; fromInput?: string; quick?: string }>;
 }) {
   const { toolId: requested } = await params;
   const query = new URLSearchParams(Object.entries(await searchParams).filter((e): e is [string, string] => typeof e[1] === "string")).toString();
@@ -43,7 +45,7 @@ export default async function ToolPage({
   // Everything below works with the engine id (what runs store).
   const toolId = tool.id;
 
-  const [user, profile, { fromRun, pick, brief, preset, project, fromInput }, keyStatus, membership, balance, projects] = await Promise.all([
+  const [user, profile, { fromRun, pick, brief, preset, project, fromInput, quick }, keyStatus, membership, balance, projects] = await Promise.all([
     getCurrentUser(),
     getBusinessProfile(),
     searchParams,
@@ -87,8 +89,14 @@ export default async function ToolPage({
     }
   }
 
+  // 바로 만들기 (/quick): the owner's line plus the few choices made for
+  // them (lib/site/quick.ts), then the simple page that runs by itself.
+  const simple = quick === "1" && !chainedFrom && !initialValues;
+  if (simple) initialValues = { ...quickSeed(tool.slug ?? requested), ...seedFromBrief(tool, brief) };
+
   return (
     <ToolRunner
+      simple={simple}
       pack={toolPack(toolId)}
       projects={projects.map((p) => ({ id: p.id, name: p.name }))}
       initialProject={project}

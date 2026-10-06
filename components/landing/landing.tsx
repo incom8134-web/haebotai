@@ -3,7 +3,7 @@
 import { createContext, useContext } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
-import { ArrowRight, Check, Plus } from "lucide-react";
+import { ArrowRight, Check, Plus, Wand2 } from "lucide-react";
 import { BusinessInfo } from "@/components/site/business-info";
 import { BrandMark } from "@/components/brand-mark";
 import { ThemeLangControls } from "@/components/shell/app-shell";
@@ -153,8 +153,15 @@ function Hero() {
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
           <Link
+            href="/quick"
+            className={cn(primaryButton, "h-12 w-full px-6 text-[15px] sm:w-auto")}
+          >
+            <Wand2 size={17} aria-hidden />
+            {L({ ko: "가게 홍보 바로 시작하기", en: "Start shop marketing now" })}
+          </Link>
+          <Link
             href={signedIn ? "/studio" : "/auth"}
-            className={cn(primaryButton, "h-12 px-6 text-[15px]")}
+            className={cn(secondaryButton, "h-12 px-6 text-[15px]")}
           >
             {signedIn
               ? L({ ko: "스튜디오로 가기", en: "Go to Studio" })
@@ -171,7 +178,7 @@ function Hero() {
         <ul className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-sm text-fg-muted">
           {(OWN_KEY_ONLY
             ? [
-                { ko: "해봇 이용료 없음", en: "No Haebot fees" },
+                { ko: "한 줄이면 바로 시작", en: "Start with one line" },
                 { ko: "카드 등록 없음", en: "No card needed" },
                 { ko: "내 Gemini API 키로 실행", en: "Runs on your own Gemini key" },
               ]
