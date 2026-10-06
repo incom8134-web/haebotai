@@ -32,7 +32,7 @@ export interface QuickTool {
   note?: Bilingual;
 }
 
-/** The three to start with: text only, so they run on any Gemini key. */
+/** The three to start with: a social post, promo copy and an image. */
 export const QUICK_MAIN: QuickTool[] = [
   {
     id: "social",
@@ -63,6 +63,25 @@ export const QUICK_MAIN: QuickTool[] = [
     seed: { channels: ["instagram", "paid_social", "sms"] },
   },
   {
+    id: "photo",
+    slug: "ad-photo",
+    engine: "image",
+    title: b("이미지 생성기", "Image generator"),
+    gives: b("글로 설명하면 SNS·광고에 쓸 이미지 4장", "Describe it and get four images for social posts and ads"),
+    ask: b("어떤 이미지를 만들지 적어 주세요", "What image should we make?"),
+    examples: [
+      b("딸기 타르트가 놓인 카페 창가 테이블, 따뜻한 봄 햇살, 인스타그램 정사각형 사진", "A strawberry tart on a café window table, warm spring sunlight, square Instagram photo"),
+      b("유리병에 담긴 수제 유자청, 나무 테이블 위, 밝고 깨끗한 제품 사진", "Homemade yuzu preserve in a glass jar on a wooden table, bright clean product shot"),
+      b("어버이날 카네이션 꽃바구니, 분홍빛 배경, 선물하고 싶은 느낌", "A Parents' Day carnation basket on a soft pink background, gift-worthy feel"),
+    ],
+    seed: { ratio: "1:1" },
+    note: b("이미지는 결제를 켠 Google 키가 있어야 만들어져요", "Images need a Google key with billing turned on"),
+  },
+];
+
+/** More marketing essentials, one tap away from the same box. */
+export const QUICK_MORE: QuickTool[] = [
+  {
     id: "shortform",
     slug: "hook-lab",
     engine: "hook-lab",
@@ -76,10 +95,6 @@ export const QUICK_MAIN: QuickTool[] = [
     ],
     seed: { platforms: ["reels", "shorts"], goal: "awareness" },
   },
-];
-
-/** More marketing essentials, one tap away from the same box. */
-export const QUICK_MORE: QuickTool[] = [
   {
     id: "blog",
     slug: "seo-composer",
@@ -89,17 +104,6 @@ export const QUICK_MORE: QuickTool[] = [
     ask: b("블로그 글의 주제를 적어 주세요", "What should the post be about?"),
     examples: [b("강남역 근처 회식하기 좋은 고깃집, 단체석과 주차 안내", "A BBQ place near Gangnam Station for team dinners: group seating and parking")],
     seed: { platform: "naver", post_type: "info" },
-  },
-  {
-    id: "photo",
-    slug: "ad-photo",
-    engine: "image",
-    title: b("제품 광고 사진", "Product ad photos"),
-    gives: b("광고에 쓸 제품 사진 4컷", "Four product shots for ads"),
-    ask: b("어떤 제품을 어떤 느낌으로 찍을지 적어 주세요", "Which product, and what feel?"),
-    examples: [b("유리병에 담긴 수제 유자청, 따뜻한 봄 햇살 느낌", "Homemade yuzu preserve in a glass jar, warm spring sunlight")],
-    seed: {},
-    note: b("사진은 결제를 켠 Google 키가 있어야 만들어져요", "Photos need a Google key with billing turned on"),
   },
   {
     id: "plan",

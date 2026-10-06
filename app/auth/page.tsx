@@ -12,6 +12,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useBi } from "@/lib/i18n/context";
 import { ThemeLangControls } from "@/components/shell/app-shell";
 import { AUTH_PROVIDERS, type AuthProvider } from "@/lib/auth-providers";
+import { HOME_AFTER_SIGN_IN } from "@/lib/consent";
 import { OWN_KEY_ONLY } from "@/lib/site/access";
 
 // Sign-in (docs/redesign-plan.md §5). Google, plus Kakao when it's switched
@@ -29,7 +30,7 @@ function useReturning() {
 }
 
 function safeNext(raw: string | null) {
-  return raw && raw.startsWith("/") && !raw.startsWith("//") ? raw : "/studio";
+  return raw && raw.startsWith("/") && !raw.startsWith("//") ? raw : HOME_AFTER_SIGN_IN;
 }
 
 function AuthCard() {
@@ -77,7 +78,7 @@ function AuthCard() {
       <BrandMark size={48} priority />
       <h1 className="mt-6 font-display text-[28px] leading-tight font-bold tracking-[-0.02em] break-keep">{L({ ko: "AI 해바 시작하기", en: "Start with AI Haeba" })}</h1>
       <p className="mt-2 text-sm leading-relaxed break-keep text-fg-muted">
-        {next !== "/studio"
+        {next !== HOME_AFTER_SIGN_IN
           ? L({ ko: "로그인하면 보던 화면으로 바로 돌아가요.", en: "Sign in and you'll land right back where you were." })
           : returning
             ? L({ ko: "다시 오셨네요. 로그인하면 하던 작업과 프로젝트로 바로 돌아가요.", en: "Welcome back. Sign in to pick up your work and projects." })
@@ -127,7 +128,7 @@ function AuthCard() {
       ) : null}
 
       {/* For owners who just want to get something out today: the easy page, one tap away. */}
-      {next === "/studio" ? (
+      {next === HOME_AFTER_SIGN_IN ? (
       <Link
         href="/quick"
         className="group mt-5 flex items-center gap-3 rounded-2xl border-2 border-accent/30 bg-accent-dim px-4 py-3.5 transition-colors hover:border-accent"
@@ -137,7 +138,7 @@ function AuthCard() {
         </span>
         <span className="min-w-0 flex-1">
           <span className="block text-[15px] font-bold break-keep text-fg">{L({ ko: "가게 홍보 바로 시작하기", en: "Start shop marketing now" })}</span>
-          <span className="mt-0.5 block text-xs leading-relaxed break-keep text-fg-muted">{L({ ko: "SNS 게시물·홍보 문구를 한 줄로 만들어요", en: "Social posts and promo copy from one line" })}</span>
+          <span className="mt-0.5 block text-xs leading-relaxed break-keep text-fg-muted">{L({ ko: "SNS 게시물·홍보 문구·이미지를 한 줄로 만들어요", en: "Social posts, promo copy and images from one line" })}</span>
         </span>
         <ArrowRight size={18} className="shrink-0 text-accent transition-transform group-hover:translate-x-0.5" aria-hidden />
       </Link>

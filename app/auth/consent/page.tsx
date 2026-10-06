@@ -10,6 +10,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useBi } from "@/lib/i18n/context";
 import { BUSINESS } from "@/lib/site/business";
 import { REFERRAL, normalizeReferralCode } from "@/lib/referral";
+import { HOME_AFTER_SIGN_IN } from "@/lib/consent";
 import { OWN_KEY_ONLY } from "@/lib/site/access";
 
 // The consent step right after Google/Kakao sign-in (lib/consent.ts). Each item
@@ -110,7 +111,7 @@ function ConsentForm() {
   const router = useRouter();
   const params = useSearchParams();
   const rawNext = params.get("next");
-  const next = rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/studio";
+  const next = rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : HOME_AFTER_SIGN_IN;
   const [checked, setChecked] = useState<Record<Key, boolean>>({ age14: false, terms: false, privacy: false, overseas: false, marketing: false });
   const [busy, setBusy] = useState<"" | "save" | "leave" | "delete">("");
   const [error, setError] = useState("");
