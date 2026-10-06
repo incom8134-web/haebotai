@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { motion } from "motion/react";
-import { ArrowLeft, Check, GraduationCap, Sparkles, KeyRound, LoaderCircle, LockKeyhole, RotateCcw } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, GraduationCap, Sparkles, Wand2, KeyRound, LoaderCircle, LockKeyhole, RotateCcw } from "lucide-react";
 import { CATEGORIES, CATEGORY_ORDER, toolsIn } from "@/lib/tools/catalog";
 import { createClient } from "@/lib/supabase/client";
 import { useBi } from "@/lib/i18n/context";
@@ -124,6 +124,23 @@ function AuthCard() {
           )}
           {loading === "kakao" ? L({ ko: "카카오로 이동하는 중…", en: "Opening Kakao…" }) : L({ ko: "카카오로 계속하기", en: "Continue with Kakao" })}
         </button>
+      ) : null}
+
+      {/* For owners who just want to get something out today: the easy page, one tap away. */}
+      {next === "/studio" ? (
+      <Link
+        href="/quick"
+        className="group mt-5 flex items-center gap-3 rounded-2xl border-2 border-accent/30 bg-accent-dim px-4 py-3.5 transition-colors hover:border-accent"
+      >
+        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent text-white">
+          <Wand2 size={18} aria-hidden />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-[15px] font-bold break-keep text-fg">{L({ ko: "가게 홍보 바로 시작하기", en: "Start shop marketing now" })}</span>
+          <span className="mt-0.5 block text-xs leading-relaxed break-keep text-fg-muted">{L({ ko: "SNS 게시물·홍보 문구를 한 줄로 만들어요", en: "Social posts and promo copy from one line" })}</span>
+        </span>
+        <ArrowRight size={18} className="shrink-0 text-accent transition-transform group-hover:translate-x-0.5" aria-hidden />
+      </Link>
       ) : null}
 
       <ul className="mt-7 space-y-3 border-t border-hairline pt-6 text-sm">
