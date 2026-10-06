@@ -23,7 +23,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Display face for the Studio (ported from the Haebot AI Studio design).
+// Display face for the Studio (ported from the AI Haeba Studio design).
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
   subsets: ["latin"],
@@ -35,10 +35,10 @@ const description = "AI marketing and business tools for small businesses, built
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
-  title: "해봇 AI",
+  title: "AI 해바",
   description,
-  openGraph: { type: "website", siteName: "해봇 AI", locale: "ko_KR", title: "해봇 AI", description },
-  twitter: { card: "summary_large_image", title: "해봇 AI", description },
+  openGraph: { type: "website", siteName: "AI 해바", locale: "ko_KR", title: "AI 해바", description },
+  twitter: { card: "summary_large_image", title: "AI 해바", description },
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {

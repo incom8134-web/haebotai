@@ -7,7 +7,7 @@
 
 export const dictionaries = {
   ko: {
-    brand: "해봇 AI",
+    brand: "AI 해바",
     library: "보관함",
     library_desc: "최근 실행한 도구 기록입니다.",
     library_empty: "아직 실행한 도구가 없습니다.",
@@ -83,7 +83,7 @@ export const dictionaries = {
     studio_uses: "사용",
   },
   en: {
-    brand: "해봇 AI",
+    brand: "AI 해바",
     library: "Library",
     library_desc: "Your recent tool runs.",
     library_empty: "No runs yet.",

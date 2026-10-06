@@ -9,7 +9,7 @@ export const PRO_ORDER = {
   amount: 19_900,
   days: 30,
   credits: 2_000,
-  orderName: "해봇 AI 프로 30일",
+  orderName: "AI 해바 프로 30일",
 } as const;
 
 /** Toss orderId: 6–64 chars of [A-Za-z0-9_-]. */

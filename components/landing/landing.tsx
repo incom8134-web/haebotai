@@ -62,7 +62,7 @@ function Nav() {
           <Link href="/" className="flex items-center gap-2 pr-2">
             <BrandMark size={30} priority />
             <span className="text-sm font-bold tracking-[-0.02em] text-fg">
-              {L({ ko: "해봇 AI", en: "Haebot AI" })}
+              {L({ ko: "AI 해바", en: "AI Haeba" })}
             </span>
           </Link>
           <nav
@@ -347,7 +347,7 @@ function Footer() {
     <footer className="border-t border-hairline px-4 py-10 md:px-6">
       <div className="mx-auto flex max-w-[1200px] flex-col gap-6 md:flex-row md:items-center md:justify-between">
         <p className="flex items-center gap-2 text-sm font-semibold text-fg">
-          <BrandMark size={28} /> {L({ ko: "해봇 AI", en: "Haebot AI" })}
+          <BrandMark size={28} /> {L({ ko: "AI 해바", en: "AI Haeba" })}
         </p>
         <nav
           className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-fg-muted"
@@ -402,7 +402,7 @@ function Footer() {
         </nav>
         <BusinessInfo />
         <p className="text-xs text-fg-subtle">
-          © {new Date().getFullYear()} {L({ ko: "해봇 AI", en: "Haebot AI" })}
+          © {new Date().getFullYear()} {L({ ko: "AI 해바", en: "AI Haeba" })}
         </p>
       </div>
     </footer>

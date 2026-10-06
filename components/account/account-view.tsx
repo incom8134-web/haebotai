@@ -65,8 +65,8 @@ const PROVIDER_FALLBACK_DESCRIPTION: Partial<Record<ApiKeyProvider, { ko: string
 function providerDescription(provider: ApiKeyProvider): { ko: string; en: string } {
   if (provider === "google") {
     return {
-      ko: "1순위부터 차례로 쓰고, 한도가 차면 다음 순위 키로 자동 전환해요. 비용은 해봇이 아닌 본인 Google 계정으로 청구돼요.",
-      en: "Used in priority order, switching automatically when one hits its quota. Costs are billed to your own Google account, not Haebot.",
+      ko: "1순위부터 차례로 쓰고, 한도가 차면 다음 순위 키로 자동 전환해요. 비용은 해바가 아닌 본인 Google 계정으로 청구돼요.",
+      en: "Used in priority order, switching automatically when one hits its quota. Costs are billed to your own Google account, not Haeba.",
     };
   }
   const tools = toolNamesForProvider(provider);

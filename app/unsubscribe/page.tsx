@@ -1,7 +1,7 @@
 import { verifyUnsubscribeToken } from "@/lib/consent-server";
 import { UnsubscribeCard } from "./unsubscribe-card";
 
-export const metadata = { title: "수신 거부 — 해봇 AI", robots: { index: false } };
+export const metadata = { title: "수신 거부 — AI 해바", robots: { index: false } };
 
 // Landing page for the unsubscribe link in every marketing email. No
 // login: the signed token in the link is the proof. One button, no

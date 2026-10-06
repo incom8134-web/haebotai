@@ -75,7 +75,7 @@ function AuthCard() {
       className="w-full max-w-[420px] rounded-[28px] border border-hairline bg-surface p-7 shadow-[0_30px_80px_-50px_rgba(43,30,18,0.5)] sm:p-9"
     >
       <BrandMark size={48} priority />
-      <h1 className="mt-6 font-display text-[28px] leading-tight font-bold tracking-[-0.02em] break-keep">{L({ ko: "해봇 AI 시작하기", en: "Start with Haebot AI" })}</h1>
+      <h1 className="mt-6 font-display text-[28px] leading-tight font-bold tracking-[-0.02em] break-keep">{L({ ko: "AI 해바 시작하기", en: "Start with AI Haeba" })}</h1>
       <p className="mt-2 text-sm leading-relaxed break-keep text-fg-muted">
         {next !== "/studio"
           ? L({ ko: "로그인하면 보던 화면으로 바로 돌아가요.", en: "Sign in and you'll land right back where you were." })

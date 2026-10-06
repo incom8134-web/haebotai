@@ -123,7 +123,7 @@ function CheckoutView({ customerKey, membership }: { customerKey: string; member
 
         <aside className="glass rounded-[24px] p-5 lg:sticky lg:top-24">
           <p className="flex items-center gap-2 font-semibold">
-            <Crown size={17} className="text-studio-warning" aria-hidden /> {L({ ko: "해봇 AI 프로", en: "Haebot AI Pro" })}
+            <Crown size={17} className="text-studio-warning" aria-hidden /> {L({ ko: "AI 해바 프로", en: "AI Haeba Pro" })}
           </p>
           <dl className="mt-4 space-y-2 text-sm">
             <div className="flex justify-between"><dt className="text-fg-muted">{L({ ko: "기간", en: "Period" })}</dt><dd>{L({ ko: `${PRO_ORDER.days}일`, en: `${PRO_ORDER.days} days` })}</dd></div>
@@ -144,7 +144,7 @@ function CheckoutView({ customerKey, membership }: { customerKey: string; member
             {paying ? L({ ko: "결제창 여는 중…", en: "Opening…" }) : L({ ko: `${won(PRO_ORDER.amount)} 결제하기`, en: `Pay ${won(PRO_ORDER.amount)}` })}
           </button>
           <p className="mt-3 text-2xs leading-relaxed text-fg-subtle">
-            {L({ ko: "결제는 토스페이먼츠가 처리해요. 카드 정보는 해봇 AI에 저장되지 않아요.", en: "Payments are processed by Toss Payments. Card details never reach Haebot AI." })}
+            {L({ ko: "결제는 토스페이먼츠가 처리해요. 카드 정보는 AI 해바에 저장되지 않아요.", en: "Payments are processed by Toss Payments. Card details never reach AI Haeba." })}
           </p>
         </aside>
       </div>

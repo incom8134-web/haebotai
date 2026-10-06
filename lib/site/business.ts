@@ -5,7 +5,7 @@
 // here once and every page picks them up.
 
 export const BUSINESS = {
-  serviceName: "해봇 AI",
+  serviceName: "AI 해바",
   /** 상호 (법인명) */
   companyName: "지니에듀테크 주식회사",
   /** 대표자 */

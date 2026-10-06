@@ -23,7 +23,7 @@ import type { CategoryId, ToolManifest } from "@/lib/tools/types";
 import type { PlanId } from "@/lib/site/plans";
 import { cn } from "@/lib/utils";
 
-// Haebot's own shell: content first, navigation as a floating liquid-glass
+// Haeba's own shell: content first, navigation as a floating liquid-glass
 // dock on the RIGHT edge (bottom tab bar on phones), and a small floating
 // brand + search cluster at the top. No sidebar tree, no quick-link bar —
 // tools are browsed on /tools and found with ⌘K.
@@ -272,7 +272,7 @@ function AppShell({ user, balance, plan, answeredTickets, children }: ShellProps
         <div className="mx-auto flex max-w-[1240px] items-center gap-2">
           <Link href="/studio" className="glass pointer-events-auto flex h-11 items-center gap-2.5 rounded-2xl pr-4 pl-1.5">
             <BrandMark size={32} priority />
-            <span className="hidden text-sm font-bold tracking-[-0.02em] whitespace-nowrap min-[440px]:inline">{L({ ko: "해봇 AI", en: "Haebot AI" })}</span>
+            <span className="hidden text-sm font-bold tracking-[-0.02em] whitespace-nowrap min-[440px]:inline">{L({ ko: "AI 해바", en: "AI Haeba" })}</span>
           </Link>
           <button
             type="button"

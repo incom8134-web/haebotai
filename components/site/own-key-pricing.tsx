@@ -7,7 +7,7 @@ import { primaryButton, secondaryButton } from "@/components/site/page";
 import { cn } from "@/lib/utils";
 
 // Pricing while members bring their own API key (lib/site/access.ts):
-// Haebot sells no credits for now; the AI runs on the
+// Haeba sells no credits for now; the AI runs on the
 // member's own Google AI Studio key, billed by Google to their account.
 // Shared by the landing page and /pricing.
 
@@ -19,7 +19,7 @@ const STEPS = [
   },
   {
     icon: ShieldCheck,
-    title: { ko: "2. 해봇에 등록", en: "2. Add it to Haebot" },
+    title: { ko: "2. 해바에 등록", en: "2. Add it to Haeba" },
     body: { ko: "계정 → 내 API 키에 붙여 넣으면 Google에 확인한 뒤 암호화해 저장해요.", en: "Paste it under Account → My API key. We check it with Google, then store it encrypted." },
   },
   {

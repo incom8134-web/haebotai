@@ -12,7 +12,7 @@ import { chainTargets } from "@/lib/tools/registry";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/supabase/user";
 
-export const metadata = { title: "스튜디오 — 해봇 AI" };
+export const metadata = { title: "스튜디오 — AI 해바" };
 
 // The member's home (docs/redesign-plan.md §5): continue working,
 // projects, recent results, what to run next, a quick start and real
