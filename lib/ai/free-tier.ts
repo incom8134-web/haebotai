@@ -11,8 +11,9 @@ import { freeTierBlocked, freeTierDailyQuotaHit, isOverloaded, retryAfterSeconds
 //   after a 3 s wait, the call moves to the next free Flash model
 //   (FREE_TEXT_MODELS), and the key skips that model for a while (other
 //   keys wait 3, 8 and 15 s on a busy model);
-// - a fallback model that rejects the request (400) is asked again once
-//   without the thinking level, which not every model accepts;
+// - a request a model rejects (400) is asked again once without the
+//   thinking level and the schema's count/range limits, which Flash
+//   models do not all accept;
 // - a short rate-limit wait Google asks for is honoured once;
 // - a Google Search call refused with a bare quota 429 (no model or
 //   quota named: the free search allowance) is re-sent without Search,
@@ -48,11 +49,16 @@ interface FreeTierOptions {
   sleep?: (ms: number) => Promise<void>;
 }
 
-type Params = { model: string; config?: { abortSignal?: AbortSignal; tools?: unknown[]; thinkingConfig?: unknown } };
+type Params = { model: string; config?: { abortSignal?: AbortSignal; tools?: unknown[]; thinkingConfig?: unknown; responseJsonSchema?: unknown } };
 
-const withoutThinking = <P extends Params>(p: P): P => {
+// Flash models answer 400 to some schemas Pro takes: count and range limits
+// (minItems, maxItems, minimum, maximum). Our parsers enforce those anyway.
+const LIMIT_KEYS = new Set(["minItems", "maxItems", "minimum", "maximum"]);
+const hasLimits = (schema: unknown): boolean => JSON.stringify(schema ?? null).match(/"(minItems|maxItems|minimum|maximum)"/) !== null;
+const relaxed = <P extends Params>(p: P): P => {
   const config = { ...p.config };
   delete config.thinkingConfig;
+  if (config.responseJsonSchema) config.responseJsonSchema = JSON.parse(JSON.stringify(config.responseJsonSchema), (k, v) => (LIMIT_KEYS.has(k) ? undefined : v));
   return { ...p, config };
 };
 const badArgument = (err: unknown) => {
@@ -101,7 +107,7 @@ export async function freeTierAware<P extends Params, R>(params: P, call: (p: P)
   const aborted = () => !!params.config?.abortSignal?.aborted;
   let waited = false;
   let busyTries = 0;
-  let noThinking = false;
+  let relax = false;
   let lastErr: unknown;
   for (;;) {
     const model = pick(opts.keyTag, params.model, now());
@@ -109,7 +115,7 @@ export async function freeTierAware<P extends Params, R>(params: P, call: (p: P)
     const searchOff = (skipped.get(opts.keyTag)?.get(NO_SEARCH) ?? 0) > now();
     let p = model === params.model ? params : { ...params, model };
     if (searchOff && usesSearch(p)) p = withoutSearch(p);
-    if (noThinking && p.config?.thinkingConfig) p = withoutThinking(p);
+    if (relax) p = relaxed(p);
     try {
       return await call(p);
     } catch (err) {
@@ -123,9 +129,9 @@ export async function freeTierAware<P extends Params, R>(params: P, call: (p: P)
         busyTries = 0;
         continue;
       }
-      // A fallback model may not take the thinking level set for the model asked for.
-      if (badArgument(err) && model !== params.model && p.config?.thinkingConfig && !noThinking) {
-        noThinking = true;
+      // A Flash model may not take the thinking level or the schema's limits.
+      if (badArgument(err) && !relax && (p.config?.thinkingConfig || hasLimits(p.config?.responseJsonSchema))) {
+        relax = true;
         continue;
       }
       if (bareQuota(err) && usesSearch(p) && skipped.has(opts.keyTag)) {
