@@ -257,12 +257,11 @@ export default function AuthPage() {
   const L = useBi();
 
   return (
-    <main className="relative grid min-h-dvh bg-bg lg:grid-cols-[1.05fr_1fr]">
+    <main className="relative grid min-h-dvh bg-bg lg:grid-cols-[1.05fr_1fr] lg:grid-rows-[1fr_auto]">
       <div className="absolute top-[max(16px,env(safe-area-inset-top))] right-4 left-4 z-10 flex items-center justify-between">
         <Link href="/" className="flex h-10 items-center gap-2 rounded-xl border border-hairline bg-surface px-3.5 text-sm text-fg-muted transition-colors hover:text-fg">
           <ArrowLeft size={15} aria-hidden /> {L({ ko: "처음으로", en: "Home" })}
         </Link>
-        <div className="flex rounded-xl border border-hairline bg-surface p-0.5"><ThemeLangControls /></div>
       </div>
 
       {/* What you can build — beside the card on large screens, under it on phones. */}
@@ -285,6 +284,12 @@ export default function AuthPage() {
           <AuthCard />
         </Suspense>
       </section>
+
+      {/* Theme and language: at the foot of the page, out of the way of signing in. */}
+      <div className="order-3 flex items-center justify-center gap-3 border-t border-hairline px-4 py-6 lg:col-span-2">
+        <span className="text-xs text-fg-subtle">{L({ ko: "화면·언어", en: "Theme & language" })}</span>
+        <div className="flex rounded-xl border border-hairline bg-surface p-0.5"><ThemeLangControls /></div>
+      </div>
     </main>
   );
 }

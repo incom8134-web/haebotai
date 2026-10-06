@@ -292,10 +292,6 @@ function AppShell({ user, balance, plan, answeredTickets, children }: ShellProps
               <Coins size={14} className="text-studio-cyan" aria-hidden /> {credits}
             </Link>
           )}
-          {/* Phones have no side dock, so theme/language live up here. */}
-          <div className="glass pointer-events-auto flex h-11 items-center rounded-2xl px-0.5 lg:hidden">
-            <ThemeLangControls />
-          </div>
           {user ? (
             <UserMenu email={user.email} plan={plan} credits={credits} />
           ) : (
@@ -307,7 +303,16 @@ function AppShell({ user, balance, plan, answeredTickets, children }: ShellProps
         {!OWN_KEY_ONLY && user && plan !== "student" && balance !== null && balance < LOW_CREDIT_THRESHOLD ? <LowCreditBanner balance={balance} /> : null}
       </header>
 
-      <main id="main" tabIndex={-1} className="pb-28 outline-none lg:pr-24 lg:pb-10">{children}</main>
+      <main id="main" tabIndex={-1} className="pb-28 outline-none lg:pr-24 lg:pb-10">
+        {children}
+        {/* Phones have no side dock: theme and language sit at the foot of each page, not in the top bar. */}
+        <div className="mx-auto mt-6 flex max-w-[1240px] items-center justify-center gap-3 px-4 lg:hidden">
+          <span className="text-xs text-fg-subtle">{L({ ko: "화면·언어", en: "Theme & language" })}</span>
+          <div className="glass flex h-11 items-center rounded-2xl px-0.5">
+            <ThemeLangControls />
+          </div>
+        </div>
+      </main>
 
       {/* Right-side dock (desktop). */}
       <nav aria-label={L({ ko: "주 메뉴", en: "Main" })} className="glass-strong fixed top-1/2 right-4 z-40 hidden -translate-y-1/2 flex-col items-center gap-1 rounded-[28px] p-2 lg:flex">
