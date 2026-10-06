@@ -7,7 +7,7 @@ import { useEffect, useMemo, useState, useSyncExternalStore, useTransition } fro
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "motion/react";
-import { FolderKanban, AlertTriangle, CircleGauge, CircleHelp, CircleUserRound, Coins, KeyRound, LayoutGrid, Library, LogOut, Moon, Search, Sparkles, Sun, UserRound, X, Zap, type LucideIcon } from "lucide-react";
+import { FolderKanban, AlertTriangle, CircleGauge, CircleHelp, CircleUserRound, Coins, KeyRound, LayoutGrid, Library, LogOut, Moon, Search, Sparkles, Sun, UserRound, Wand2, X, Zap, type LucideIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { CommandPalette, type CommandPaletteGroup } from "@/components/command-palette";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -23,7 +23,7 @@ import type { CategoryId, ToolManifest } from "@/lib/tools/types";
 import type { PlanId } from "@/lib/site/plans";
 import { cn } from "@/lib/utils";
 
-// Haebot's own shell: content first, navigation as a floating liquid-glass
+// Haeba's own shell: content first, navigation as a floating liquid-glass
 // dock on the RIGHT edge (bottom tab bar on phones), and a small floating
 // brand + search cluster at the top. No sidebar tree, no quick-link bar —
 // tools are browsed on /tools and found with ⌘K.
@@ -40,6 +40,7 @@ type Item = { href: string; label: { ko: string; en: string }; icon: LucideIcon;
 
 const ITEMS: Item[] = [
   { href: "/studio", label: { ko: "스튜디오", en: "Studio" }, icon: Sparkles, match: (p) => p === "/studio" },
+  { href: "/quick", label: { ko: "바로 만들기", en: "Quick start" }, icon: Wand2, match: (p) => p === "/quick" },
   { href: "/tools", label: { ko: "도구", en: "Tools" }, icon: LayoutGrid, match: (p) => p.startsWith("/tools") },
   { href: "/links", label: { ko: "바로가기", en: "Quick links" }, icon: Zap, match: (p) => p.startsWith("/links") },
   { href: "/projects", label: { ko: "프로젝트", en: "Projects" }, icon: FolderKanban, match: (p) => p.startsWith("/projects") },
@@ -49,7 +50,7 @@ const ITEMS: Item[] = [
   { href: "/account", label: { ko: "계정", en: "Account" }, icon: CircleUserRound, match: (p) => p.startsWith("/account") },
 ];
 
-const MOBILE = ["/studio", "/tools", "/library", "/help", "/account"];
+const MOBILE = ["/studio", "/quick", "/tools", "/library", "/account"];
 const CATEGORY_ORDER: CategoryId[] = CATEGORY_ORDER_ALL;
 
 function useHelpBadge(answeredTickets: number) {
@@ -271,7 +272,7 @@ function AppShell({ user, balance, plan, answeredTickets, children }: ShellProps
         <div className="mx-auto flex max-w-[1240px] items-center gap-2">
           <Link href="/studio" className="glass pointer-events-auto flex h-11 items-center gap-2.5 rounded-2xl pr-4 pl-1.5">
             <BrandMark size={32} priority />
-            <span className="hidden text-sm font-bold tracking-[-0.02em] whitespace-nowrap min-[440px]:inline">{L({ ko: "해봇 AI", en: "Haebot AI" })}</span>
+            <span className="hidden text-sm font-bold tracking-[-0.02em] whitespace-nowrap min-[440px]:inline">{L({ ko: "AI 해바", en: "AI Haeba" })}</span>
           </Link>
           <button
             type="button"

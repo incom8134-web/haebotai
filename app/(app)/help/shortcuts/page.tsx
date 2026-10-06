@@ -1,7 +1,7 @@
 import { HelpTitle } from "@/components/help/help-pages";
 import { ShortcutsView } from "@/components/help/shortcuts";
 
-export const metadata = { title: "단축키 — 해봇 AI" };
+export const metadata = { title: "단축키 — AI 해바" };
 
 export default function ShortcutsPage() {
   return (

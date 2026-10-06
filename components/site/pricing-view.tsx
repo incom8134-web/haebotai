@@ -43,7 +43,7 @@ export function PricingView({ signedIn }: { signedIn: boolean }) {
         <header className="max-w-2xl">
           <h1 className="font-display text-[clamp(2rem,4vw,3rem)] leading-[1.05] font-bold tracking-[-0.02em] break-keep text-fg">{L({ ko: "요금", en: "Pricing" })}</h1>
           <p className="mt-3 text-base leading-relaxed break-keep text-fg-muted">
-            {L({ ko: "해봇 이용료는 없어요. 25개 도구 모두 내 Gemini API 키로 실행되고, AI 사용 요금은 Google이 내 계정으로 직접 청구해요.", en: "Haebot charges nothing. All 25 tools run on your own Gemini API key, and Google bills any AI usage to your own account." })}
+            {L({ ko: "25개 도구 모두 내 Gemini API 키로 실행되고, AI 사용 요금은 Google이 내 계정으로 직접 청구해요.", en: "All 25 tools run on your own Gemini API key, and Google bills any AI usage to your own account." })}
           </p>
         </header>
         <div className="mt-8">

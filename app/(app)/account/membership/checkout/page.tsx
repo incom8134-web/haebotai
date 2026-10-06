@@ -3,7 +3,7 @@ import { CheckoutView } from "@/components/account/checkout";
 import { getMembership } from "@/lib/membership";
 import { getCurrentUser } from "@/lib/supabase/user";
 
-export const metadata = { title: "프로 결제 — 해봇 AI" };
+export const metadata = { title: "프로 결제 — AI 해바" };
 
 export default async function CheckoutPage() {
   const user = await getCurrentUser();

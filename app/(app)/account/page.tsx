@@ -7,7 +7,7 @@ import { getBusinessProfile } from "@/lib/profile";
 import { getCurrentUser } from "@/lib/supabase/user";
 import { consentOf } from "@/lib/consent";
 
-export const metadata = { title: "내 계정 — 해봇 AI" };
+export const metadata = { title: "내 계정 — AI 해바" };
 
 export default async function AccountPage() {
   const user = await getCurrentUser();

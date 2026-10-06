@@ -28,7 +28,7 @@ export function StatusView({ report }: { report: StatusReport }) {
 
   return (
     <div className="mx-auto max-w-[900px] px-4 pt-6 pb-10 md:px-8 md:pt-10">
-      <PageHeader title={L({ ko: "서비스 상태", en: "Service status" })} lead={L({ ko: "해봇 AI를 이루는 서비스들의 지금 상태예요. 1분마다 새로 확인해요.", en: "The live state of the services behind Haebot AI, re-checked every minute." })} />
+      <PageHeader title={L({ ko: "서비스 상태", en: "Service status" })} lead={L({ ko: "AI 해바를 이루는 서비스들의 지금 상태예요. 1분마다 새로 확인해요.", en: "The live state of the services behind AI Haeba, re-checked every minute." })} />
       <section className={cn("rounded-[24px] border p-5", allUp ? "border-studio-success/40 bg-studio-success/10" : "border-danger/40 bg-danger/10")} role="status">
         <p className="font-semibold">{allUp ? L({ ko: "모든 서비스가 정상 작동 중이에요", en: "All systems operational" }) : L({ ko: "일부 서비스에 문제가 있어요", en: "Some services are disrupted" })}</p>
         <p className="mt-1 text-xs text-fg-muted">{L({ ko: `마지막 확인 ${checked}`, en: `Last checked ${checked}` })}</p>

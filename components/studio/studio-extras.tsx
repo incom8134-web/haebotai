@@ -16,7 +16,7 @@ import { OWN_KEY_ONLY } from "@/lib/site/access";
 // The Studio's richer home: an animated hero around the one-input
 // composer, the five areas with their tools, ready-made workflows, a
 // gallery of what the tools make, and a rotating strip of what's new
-// and what's free. Motion respects reduced-motion settings.
+// and what to set up. Motion respects reduced-motion settings.
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -89,7 +89,7 @@ export function useRotatingExample(examples: string[], ms = 3200): string {
   return examples[i] ?? "";
 }
 
-// ── What's new and what's free ─────────────────────────────────────────
+// ── What's new and what to set up ─────────────────────────────────────────
 
 export function PromoStrip() {
   const L = useBi();
@@ -125,7 +125,7 @@ export function PromoStrip() {
       tone: "from-accent/10 to-studio-cyan/15",
       kicker: { ko: "내 API 키", en: "Your own API key" },
       title: OWN_KEY_ONLY
-        ? { ko: "도구는 내 Gemini 키로 실행돼요 — 무료 발급, 5분", en: "Tools run on your own Gemini key — free to get, about 5 minutes" }
+        ? { ko: "도구는 내 Gemini 키로 실행돼요 — 발급은 5분", en: "Tools run on your own Gemini key — about 5 minutes to get one" }
         : { ko: "Gemini 키를 연결하면 실행할 때 크레딧이 들지 않아요", en: "Connect a Gemini key and runs cost no credits" },
       href: "/account/api-key",
       cta: { ko: "연결하기", en: "Connect" },

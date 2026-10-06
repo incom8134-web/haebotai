@@ -23,7 +23,7 @@ export function SharedResult({ toolId, title, output, input, sources, createdAt 
     <main id="main" className="mx-auto w-full max-w-3xl px-4 pt-6 pb-16 md:px-8">
       <header className="flex items-center justify-between gap-3">
         <Link href="/" className="flex items-center gap-2 text-sm font-semibold text-fg">
-          <BrandMark size={28} /> {L({ ko: "해봇 AI", en: "Haebot AI" })}
+          <BrandMark size={28} /> {L({ ko: "AI 해바", en: "AI Haeba" })}
         </Link>
         <Link href={`/tools/${toolSlug(toolId)}`} className={cn(primaryButton, "h-9 px-4 text-sm")}>
           {L({ ko: "나도 만들어 보기", en: "Make your own" })} <ArrowRight className="size-4" aria-hidden />
@@ -68,7 +68,7 @@ export function SharedResult({ toolId, title, output, input, sources, createdAt 
 
       <section className="mt-10 rounded-[24px] border border-hairline bg-surface p-6 text-center">
         <p className="font-display text-xl font-bold break-keep text-fg">{L({ ko: `이런 ${toolName} 결과, 내 사업으로도 만들어 보세요`, en: `Make a ${toolName} result for your own business` })}</p>
-        <p className="mt-1 text-sm text-fg-muted">{OWN_KEY_ONLY ? L({ ko: "가입은 무료, 내 Gemini API 키로 실행해요", en: "Free to join; tools run on your own Gemini API key" }) : L({ ko: "가입하면 500 크레딧, 카드 등록 없음", en: "500 credits on sign-up, no card needed" })}</p>
+        <p className="mt-1 text-sm text-fg-muted">{OWN_KEY_ONLY ? L({ ko: "도구는 내 Gemini API 키로 실행해요", en: "Tools run on your own Gemini API key" }) : L({ ko: "가입하면 500 크레딧, 카드 등록 없음", en: "500 credits on sign-up, no card needed" })}</p>
         <Link href={`/tools/${toolSlug(toolId)}`} className={cn(primaryButton, "mt-4 inline-flex h-11 px-6")}>
           {L({ ko: "나도 만들어 보기", en: "Make your own" })} <ArrowRight className="size-4" aria-hidden />
         </Link>

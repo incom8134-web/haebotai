@@ -12,7 +12,7 @@ import { OWN_KEY_ONLY } from "@/lib/site/access";
 
 // /links — one screen of shortcuts: pinned tools, latest results, every
 // app page, flows, outside services small businesses use alongside
-// Haebot, and keyboard shortcuts.
+// Haeba, and keyboard shortcuts.
 
 const PAGES = [
   { href: "/studio", icon: Sparkles, label: { ko: "스튜디오", en: "Studio" } },

@@ -541,7 +541,7 @@ export default function KitchenSinkPage() {
         <Calendar mode="single" className="rounded-lg border border-hairline" />
         <Field className="max-w-xs">
           <FieldLabel>브랜드명</FieldLabel>
-          <Input placeholder="해봇 AI" />
+          <Input placeholder="AI 해바" />
           <FieldDescription>실제 상호명을 입력하세요.</FieldDescription>
         </Field>
         <FormDemo />

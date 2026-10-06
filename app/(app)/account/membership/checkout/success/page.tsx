@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { CheckoutSuccess } from "@/components/account/checkout";
 
-export const metadata = { title: "결제 확인 — 해봇 AI" };
+export const metadata = { title: "결제 확인 — AI 해바" };
 
 // Toss redirects here with ?paymentKey&orderId&amount&paymentType. The
 // confirm happens client-side via POST (not during this render), so a

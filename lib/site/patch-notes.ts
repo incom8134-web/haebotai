@@ -4,6 +4,17 @@ export type NoteKind = "new" | "improved" | "fixed";
 
 export const PATCH_NOTES: { version: string; date: string; title: Bilingual; items: { kind: NoteKind; text: Bilingual }[] }[] = [
   {
+    version: "2.12.0",
+    date: "2026-10-06",
+    title: { ko: "바로 만들기: 가게 홍보를 한 줄로", en: "Quick start: shop marketing from one line" },
+    items: [
+      { kind: "new", text: { ko: "해봇 AI가 ‘AI 해바’로 이름을 바꾸고, 웃는 해 모양의 새 로고를 달았어요", en: "Haebot AI is now ‘AI Haeba’, with a new smiling-sun logo" } },
+      { kind: "new", text: { ko: "바로 만들기 — SNS 게시물·홍보 문구·릴스 아이디어 중 하나를 고르고 가게 이야기를 한 줄 적으면, 긴 입력 없이 바로 만들어요", en: "Quick start — pick a social media post, promo copy or Reels ideas, write one line about your shop, and it's made without the long form" } },
+      { kind: "new", text: { ko: "로그인 화면과 첫 화면에 '가게 홍보 바로 시작하기' 버튼이 생겼어요", en: "A “Start shop marketing now” button on the sign-in page and the homepage" } },
+      { kind: "improved", text: { ko: "API 키가 없어 멈췄을 때, 키를 등록한 뒤 작성하던 요청으로 바로 돌아갈 수 있어요", en: "If a run stops for a missing API key, you can go straight back to your request after adding one" } },
+    ],
+  },
+  {
     version: "2.11.0",
     date: "2026-10-01",
     title: { ko: "요청을 읽고 일하는 방식을 바꾸는 문서 에이전트", en: "A document agent that changes how it works to fit the request" },
@@ -11,7 +22,7 @@ export const PATCH_NOTES: { version: string; date: string; title: Bilingual; ite
       { kind: "new", text: { ko: "제안서·사업계획서: '내용은 그대로 디자인만', '순서는 유지하고 다듬기', '참고만 하고 새로' 같은 요청마다 작업 순서 자체가 달라져요", en: "Proposals and business plans: \"keep the content, redesign it\", \"keep the order, polish it\" and \"use it only as inspiration\" now run different workflows" } },
       { kind: "new", text: { ko: "올린 PDF·Word·PPT를 끝까지 읽어요 — 목차·쪽·표를 파악하고, 섹션마다 필요한 부분을 찾아 써요", en: "Uploaded PDF, Word and PowerPoint files are read to the end — outline, pages and tables — and each section uses the parts it needs" } },
       { kind: "new", text: { ko: "긴 문서는 섹션별로 쓰고, 실제 PDF로 그려 쪽수를 확인해요. 결과마다 '작업 보고서'로 검증 결과·출처·가정을 보여 드려요", en: "Long documents are written section by section and rendered to check the page count; each result has a work report with checks, sources and assumptions" } },
-      { kind: "new", text: { ko: "결과 고치기: '디자인만 더 고급스럽게'는 문장을 건드리지 않고 무료로, '5장을 더 기술적으로'는 그 섹션만 고쳐요", en: "Follow-ups: \"make the design more premium\" changes no words and is free; \"make section 5 more technical\" rewrites only that section" } },
+      { kind: "new", text: { ko: "결과 고치기: '디자인만 더 고급스럽게'는 문장을 건드리지 않고 크레딧 없이, '5장을 더 기술적으로'는 그 섹션만 고쳐요", en: "Follow-ups: \"make the design more premium\" changes no words and costs no credits; \"make section 5 more technical\" rewrites only that section" } },
       { kind: "improved", text: { ko: "모든 도구가 조사할 질문을 먼저 정해 하나씩 검색하고, 올린 자료와 다른 조사 결과는 알려 드려요", en: "Every tool plans its research questions and searches them one by one, and flags research that disagrees with your files" } },
       { kind: "improved", text: { ko: "PDF 내보내기에 표지·목차가 생기고, 발표자료는 제목·카드·장 구성이 더 깔끔해졌어요. 수익 구조 지도는 수익원별 상세까지 담아요", en: "PDF exports get a cover and contents; decks have cleaner titles, cards and sections; Revenue Mapper exports include each stream's details" } },
       { kind: "new", text: { ko: "홈페이지: 첫 화면 바로 아래에 10초 콘셉트 영상 — 소리 없이, 화면에 보일 때만 재생돼요", en: "Homepage: a 10-second concept film right below the hero — silent, playing only while it's on screen" } },

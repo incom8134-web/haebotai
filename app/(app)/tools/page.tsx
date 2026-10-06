@@ -4,7 +4,7 @@ import { CATEGORY_ORDER as CATEGORIES } from "@/lib/tools/catalog";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/supabase/user";
 
-export const metadata = { title: "도구 — 해봇 AI" };
+export const metadata = { title: "도구 — AI 해바" };
 
 // "Recently used" comes from the member's own run history (tool ids as
 // stored on runs), newest first, one entry per tool.

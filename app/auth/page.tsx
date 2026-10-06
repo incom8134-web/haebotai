@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { motion } from "motion/react";
-import { ArrowLeft, Check, GraduationCap, Sparkles, KeyRound, LoaderCircle, LockKeyhole, RotateCcw } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, GraduationCap, Sparkles, Wand2, KeyRound, LoaderCircle, LockKeyhole, RotateCcw } from "lucide-react";
 import { CATEGORIES, CATEGORY_ORDER, toolsIn } from "@/lib/tools/catalog";
 import { createClient } from "@/lib/supabase/client";
 import { useBi } from "@/lib/i18n/context";
@@ -75,7 +75,7 @@ function AuthCard() {
       className="w-full max-w-[420px] rounded-[28px] border border-hairline bg-surface p-7 shadow-[0_30px_80px_-50px_rgba(43,30,18,0.5)] sm:p-9"
     >
       <BrandMark size={48} priority />
-      <h1 className="mt-6 font-display text-[28px] leading-tight font-bold tracking-[-0.02em] break-keep">{L({ ko: "해봇 AI 시작하기", en: "Start with Haebot AI" })}</h1>
+      <h1 className="mt-6 font-display text-[28px] leading-tight font-bold tracking-[-0.02em] break-keep">{L({ ko: "AI 해바 시작하기", en: "Start with AI Haeba" })}</h1>
       <p className="mt-2 text-sm leading-relaxed break-keep text-fg-muted">
         {next !== "/studio"
           ? L({ ko: "로그인하면 보던 화면으로 바로 돌아가요.", en: "Sign in and you'll land right back where you were." })
@@ -126,17 +126,34 @@ function AuthCard() {
         </button>
       ) : null}
 
+      {/* For owners who just want to get something out today: the easy page, one tap away. */}
+      {next === "/studio" ? (
+      <Link
+        href="/quick"
+        className="group mt-5 flex items-center gap-3 rounded-2xl border-2 border-accent/30 bg-accent-dim px-4 py-3.5 transition-colors hover:border-accent"
+      >
+        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent text-white">
+          <Wand2 size={18} aria-hidden />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-[15px] font-bold break-keep text-fg">{L({ ko: "가게 홍보 바로 시작하기", en: "Start shop marketing now" })}</span>
+          <span className="mt-0.5 block text-xs leading-relaxed break-keep text-fg-muted">{L({ ko: "SNS 게시물·홍보 문구를 한 줄로 만들어요", en: "Social posts and promo copy from one line" })}</span>
+        </span>
+        <ArrowRight size={18} className="shrink-0 text-accent transition-transform group-hover:translate-x-0.5" aria-hidden />
+      </Link>
+      ) : null}
+
       <ul className="mt-7 space-y-3 border-t border-hairline pt-6 text-sm">
         {(OWN_KEY_ONLY
           ? [
-              { icon: Check, text: { ko: "가입은 무료, 카드 등록 없음", en: "Free to join, no card needed" } },
-              { icon: KeyRound, text: { ko: "도구는 내 Gemini API 키로 실행 — Google AI Studio에서 무료 발급", en: "Tools run on your own Gemini API key — free from Google AI Studio" } },
+              { icon: Check, text: { ko: "가입할 때 카드 등록 없음", en: "No card needed to sign up" } },
+              { icon: KeyRound, text: { ko: "도구는 내 Gemini API 키로 실행 — Google AI Studio에서 5분이면 발급", en: "Tools run on your own Gemini API key — about 5 minutes to get from Google AI Studio" } },
               { icon: RotateCcw, text: { ko: "요금은 내 Google 계정에서 직접 확인하고 관리", en: "Any usage is billed to, and managed in, your own Google account" } },
             ]
           : [
               { icon: Check, text: { ko: "가입하면 500 크레딧, 카드 등록 없음", en: "500 credits on sign-up, no card needed" } },
               { icon: GraduationCap, text: { ko: "학생은 재학 인증 후 무제한", en: "Students: unlimited after verification" } },
-              { icon: KeyRound, text: { ko: "내 API 키를 넣으면 크레딧 없이 실행", en: "Bring your own API key and runs are free" } },
+              { icon: KeyRound, text: { ko: "내 API 키를 넣으면 크레딧 없이 실행", en: "Bring your own API key and runs use no credits" } },
               { icon: RotateCcw, text: { ko: "실패하거나 취소한 실행은 자동 환불", en: "Failed or cancelled runs are refunded" } },
             ]
         ).map((item) => (
