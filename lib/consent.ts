@@ -67,6 +67,9 @@ export function nextConsentState(prev: ConsentState | null, input: ConsentInput,
 }
 
 /** Same-site relative path, else the Studio. */
+/** Where a member lands after signing in when nothing else was asked for: the easy start page (바로 만들기). */
+export const HOME_AFTER_SIGN_IN = "/quick";
+
 export function safeNext(raw: string | null | undefined): string {
-  return raw && raw.startsWith("/") && !raw.startsWith("//") && !raw.startsWith("/\\") ? raw : "/studio";
+  return raw && raw.startsWith("/") && !raw.startsWith("//") && !raw.startsWith("/\\") ? raw : HOME_AFTER_SIGN_IN;
 }

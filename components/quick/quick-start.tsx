@@ -7,7 +7,8 @@ import { motion, useReducedMotion } from "motion/react";
 import {
   ArrowRight,
   CalendarRange,
-  Camera,
+  ImagePlus,
+  KeyRound,
   Check,
   Clapperboard,
   Megaphone,
@@ -34,7 +35,7 @@ const ICONS: Record<QuickId, LucideIcon> = {
   promo: Megaphone,
   shortform: Clapperboard,
   blog: Newspaper,
-  photo: Camera,
+  photo: ImagePlus,
   plan: CalendarRange,
   reviews: MessagesSquare,
 };
@@ -146,10 +147,10 @@ export function QuickStart({ signedIn }: { signedIn: boolean }) {
             );
           })}
         </div>
-        {QUICK_MORE.includes(pick) ? (
-          <p className="mt-2 text-sm break-keep text-fg-muted">
-            {L(pick.gives)}
-            {pick.note ? <span className="mt-0.5 block text-xs text-fg-subtle">{L(pick.note)}</span> : null}
+        {QUICK_MORE.includes(pick) ? <p className="mt-2 text-sm break-keep text-fg-muted">{L(pick.gives)}</p> : null}
+        {pick.note ? (
+          <p className="mt-2 inline-flex items-center gap-1.5 rounded-xl bg-surface-2 px-3 py-1.5 text-xs break-keep text-fg-muted">
+            <KeyRound size={13} className="shrink-0 text-accent" aria-hidden /> {L(pick.note)}
           </p>
         ) : null}
       </section>
