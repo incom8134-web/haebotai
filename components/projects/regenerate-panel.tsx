@@ -52,7 +52,7 @@ export function RegeneratePanel({ runId, toolId, output, estimatedCredits, isFre
     <details className="mt-4 rounded-2xl border border-hairline bg-surface px-4 py-3">
       <summary className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-fg">
         <Wand2 className="size-4 text-accent" aria-hidden /> {L({ ko: "이 부분만 다시 만들기", en: "Redo one part" })}
-        <span className="ml-auto text-2xs font-normal text-fg-subtle">{OWN_KEY_ONLY ? L({ ko: "내 API 키로 실행", en: "Runs on your API key" }) : isFree ? L({ ko: "무료", en: "Free" }) : L({ ko: `${cost} 크레딧`, en: `${cost} credits` })}</span>
+        <span className="ml-auto text-2xs font-normal text-fg-subtle">{OWN_KEY_ONLY ? L({ ko: "내 API 키로 실행", en: "Runs on your API key" }) : isFree ? L({ ko: "0 크레딧", en: "0 credits" }) : L({ ko: `${cost} 크레딧`, en: `${cost} credits` })}</span>
       </summary>
       <div className="mt-3 flex flex-col gap-2">
         <label className="flex flex-col gap-1 text-xs text-fg-muted">
@@ -74,7 +74,7 @@ export function RegeneratePanel({ runId, toolId, output, estimatedCredits, isFre
         <div className="flex items-center gap-2">
           <p className="text-2xs text-fg-subtle">
             {isDoc && section === "document"
-              ? L({ ko: "디자인만 바꾸거나 이미지를 빼는 요청은 문장을 건드리지 않고 무료로 처리돼요. 새 버전으로 저장됩니다.", en: "Design-only and remove-images requests don't touch the wording and are free. Saved as a new version." })
+              ? L({ ko: "디자인만 바꾸거나 이미지를 빼는 요청은 문장을 건드리지 않고 AI 호출 없이 처리돼요. 새 버전으로 저장됩니다.", en: "Design-only and remove-images requests don't touch the wording and need no AI call. Saved as a new version." })
               : L({ ko: "새 버전으로 저장돼요. 지금 결과는 그대로 남습니다.", en: "Saved as a new version; this result stays as it is." })}
           </p>
           <button type="button" disabled={busy || !instruction.trim() || !section} onClick={run} className="ml-auto rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50">

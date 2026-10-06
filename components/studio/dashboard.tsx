@@ -351,7 +351,7 @@ export function Dashboard({
                     {usage.keyConnected ? L({ ko: "연결됨", en: "Connected" }) : usage.team ? L({ ko: "팀 테스트 키 사용 중", en: "Using the team test key" }) : L({ ko: "아직 없어요", en: "Not added yet" })}
                   </p>
                   {!usage.keyConnected && !usage.team ? (
-                    <p className="mt-1 text-xs break-keep text-fg-muted">{L({ ko: "도구를 쓰려면 Google AI Studio 키가 필요해요. 무료 발급, 5분.", en: "Tools run on your own Google AI Studio key. Free to get, about 5 minutes." })}</p>
+                    <p className="mt-1 text-xs break-keep text-fg-muted">{L({ ko: "도구를 쓰려면 Google AI Studio 키가 필요해요. 발급은 5분이면 끝나요.", en: "Tools run on your own Google AI Studio key. Getting one takes about 5 minutes." })}</p>
                   ) : null}
                   <Link href="/account/api-key" className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-accent hover:underline">
                     {usage.keyConnected ? L({ ko: "키 관리", en: "Manage key" }) : L({ ko: "API 키 등록하기", en: "Add my API key" })} <ArrowRight size={12} aria-hidden />
