@@ -6,7 +6,7 @@ import { z } from "zod";
 // with how they feel at each stage. data_basis says what came from the
 // member's data and what is assumed.
 
-export const JOURNEY_STAGES = ["aware", "consider", "decide", "use", "advocate"] as const;
+const JOURNEY_STAGES = ["aware", "consider", "decide", "use", "advocate"] as const;
 
 const outputSchema = z.object({
   summary: z.string(),

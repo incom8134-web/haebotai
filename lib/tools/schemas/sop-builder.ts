@@ -7,7 +7,7 @@ import { z } from "zod";
 // bounds: Gemini rejected the schema with all five bounded (its limit is
 // on the schema's overall complexity — see scripts/check-gemini-schemas.mts).
 
-export const SOP_STEP_TYPES = ["task", "decision", "check", "handoff"] as const;
+const SOP_STEP_TYPES = ["task", "decision", "check", "handoff"] as const;
 
 const outputSchema = z.object({
   summary: z.string(),

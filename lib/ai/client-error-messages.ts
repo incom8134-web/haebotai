@@ -8,7 +8,7 @@
 // to yet) falls back to showing the original Korean in both locales
 // rather than hiding the error.
 
-export interface MappedError {
+interface MappedError {
   ko: string;
   en: string;
   /** Where the user can fix it (the API key screen unless linkLabel says otherwise). */

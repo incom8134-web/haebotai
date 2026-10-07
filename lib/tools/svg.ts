@@ -22,7 +22,7 @@
 // untrusted markup run script or exfiltrate, so there's no safe partial
 // form of them to keep.
 
-export interface SvgSanitizeResult {
+interface SvgSanitizeResult {
   ok: boolean;
   svg?: string;
   reason?: string;

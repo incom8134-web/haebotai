@@ -67,7 +67,7 @@ export function flowFor(plan: Plan, stepId: string): Flow | null {
 const step = (id: string, capability: string, args?: Record<string, unknown>): PlanStep => (args ? { id, capability, args } : { id, capability });
 
 /** Tools whose one-shot pipeline stays a single step (nothing to plan). */
-export const ONE_SHOT_TOOLS = new Set(["grant"]);
+const ONE_SHOT_TOOLS = new Set(["grant"]);
 
 /** Whether a run on this tool and engine goes through the agent layers (intent, strategy, critic). */
 export function agenticFor(toolId: string, provider: string): boolean {

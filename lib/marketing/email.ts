@@ -13,7 +13,7 @@ import type { ConsentState } from "@/lib/consent";
 // Transactional mail (sign-in links, payment receipts) is not advertising
 // and does not go through this.
 
-export interface Sender {
+interface Sender {
   serviceName: string;
   companyName: string;
   address: string;
@@ -21,12 +21,12 @@ export interface Sender {
   email: string;
 }
 
-export type SendCheck = { ok: true } | { ok: false; reason: "not_opted_in" | "quiet_hours" | "consent_expired" };
+type SendCheck = { ok: true } | { ok: false; reason: "not_opted_in" | "quiet_hours" | "consent_expired" };
 
 const TWO_YEARS_MS = 2 * 365 * 24 * 60 * 60 * 1000;
 
 /** Hour of the day in Korea (0-23). */
-export function kstHour(now: Date): number {
+function kstHour(now: Date): number {
   return (now.getUTCHours() + 9) % 24;
 }
 

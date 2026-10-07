@@ -14,12 +14,12 @@
 // (BUDGET_ALERT_WEBHOOK_URL — Slack/Discord/any JSON webhook — and the
 // server log).
 
-export interface SpendLimits {
+interface SpendLimits {
   platformDailyCredits: number;
   userDailyRuns: number;
 }
 
-export const DEFAULT_LIMITS: SpendLimits = {
+const DEFAULT_LIMITS: SpendLimits = {
   // ≈ 830 homepage runs or 5,000 short runs a day before new platform
   // runs pause. Calibrate against your Google Cloud billing.
   platformDailyCredits: 150_000,
@@ -44,7 +44,7 @@ export function kstDay(now: Date): string {
 
 export type SpendDecision = { ok: true; alerts: number[] } | { ok: false; reason: "killswitch" | "platform_budget" | "user_daily_runs"; alerts: number[] };
 
-export const ALERT_LEVELS = [50, 80, 100] as const;
+const ALERT_LEVELS = [50, 80, 100] as const;
 
 /**
  * Decide after counting this run: platformSpent/userRuns already include

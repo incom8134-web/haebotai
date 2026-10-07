@@ -22,10 +22,10 @@ import { getCurrentUser } from "@/lib/supabase/user";
 // Each provider allows up to 3 keys, priority 1-3. getUserApiKeys()
 // returns them in priority order for the caller to try in turn and
 // advance past on a quota error (see runWithApiKey in lib/tools/generate.ts).
-// Gemini and Anthropic both call out for real now; OpenAI keys are
-// stored and verified but sit unused until a tool calls them.
+// Members register Gemini and Anthropic keys. OpenAI is not offered:
+// no tool runs on it, so a key there would be collected and never used.
 
-export const API_KEY_PROVIDERS = ["google", "anthropic", "openai"] as const;
+export const API_KEY_PROVIDERS = ["google", "anthropic"] as const;
 export type ApiKeyProvider = (typeof API_KEY_PROVIDERS)[number];
 export type ApiKeyPriority = 1 | 2 | 3;
 
@@ -150,19 +150,6 @@ export async function verifyAnthropicKey(key: string): Promise<boolean> {
   try {
     const res = await fetch("https://api.anthropic.com/v1/models", {
       headers: { "x-api-key": key, "anthropic-version": "2023-06-01" },
-      cache: "no-store",
-      signal: AbortSignal.timeout(8000),
-    });
-    return res.ok;
-  } catch {
-    return false;
-  }
-}
-
-export async function verifyOpenAIKey(key: string): Promise<boolean> {
-  try {
-    const res = await fetch("https://api.openai.com/v1/models", {
-      headers: { Authorization: `Bearer ${key}` },
       cache: "no-store",
       signal: AbortSignal.timeout(8000),
     });

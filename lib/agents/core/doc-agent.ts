@@ -75,7 +75,7 @@ export interface DocAgentCtx {
   addUsage: (u: Usage) => void;
 }
 
-export const MAX_REVISIONS = 2;
+const MAX_REVISIONS = 2;
 const PASS_SCORE = 80;
 
 // ── Workflow selection ─────────────────────────────────────────────────
@@ -396,7 +396,7 @@ export function assembleStage(ctx: DocAgentCtx): void {
   ctx.work.doc = { title: plan.title, subtitle: plan.subtitle, docType: plan.docType, design: ctx.work.design?.design ?? plan.design, sections };
 }
 
-export const DOC_CRITIC_SCHEMA = {
+const DOC_CRITIC_SCHEMA = {
   type: "object",
   properties: {
     score: { type: "integer", minimum: 0, maximum: 100 },

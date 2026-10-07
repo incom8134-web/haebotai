@@ -28,7 +28,7 @@ import { cn } from "@/lib/utils";
 // brand + search cluster at the top. No sidebar tree, no quick-link bar —
 // tools are browsed on /tools and found with ⌘K.
 
-export interface ShellProps {
+interface ShellProps {
   user: { email: string } | null;
   balance: number | null;
   plan: PlanId;
@@ -255,11 +255,7 @@ function AppShell({ user, balance, plan, answeredTickets, children }: ShellProps
 
   return (
     <div className="relative min-h-dvh">
-      <div className="app-backdrop" aria-hidden>
-        <span className="orb orb-a" />
-        <span className="orb orb-b" />
-        <span className="orb orb-c" />
-      </div>
+      <div className="app-backdrop" aria-hidden />
 
       <a href="#main" className="sr-only fixed top-3 left-3 z-[100] rounded-full bg-fg px-4 py-2 text-sm font-semibold text-bg focus:not-sr-only">
         {L({ ko: "본문으로 건너뛰기", en: "Skip to content" })}

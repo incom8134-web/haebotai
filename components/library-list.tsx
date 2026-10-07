@@ -13,7 +13,7 @@ import type { DictKey } from "@/lib/i18n/dictionaries";
 import { formatDateTime } from "@/lib/format-date";
 import { cn } from "@/lib/utils";
 
-export interface LibraryRun {
+interface LibraryRun {
   id: string;
   toolId: string | null;
   toolNameKo: string;

@@ -35,7 +35,7 @@ export interface Series {
   values: number[];
 }
 
-export interface ChartTheme {
+interface ChartTheme {
   fg: string;
   muted: string;
   grid: string;
@@ -62,7 +62,7 @@ export const PRINT_THEME: ChartTheme = {
   font: "Pretendard",
 };
 
-export const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 const r1 = (n: number) => Math.round(n * 10) / 10;
 
 /** Rough rendered width: Hangul and CJK ≈ 1em, digits and Latin ≈ 0.56em. */
@@ -622,7 +622,7 @@ const RENDER: { [K in ChartSpec["kind"]]: (c: Ctx, s: Extract<ChartSpec, { kind:
 const list = (xs: string[]) => (xs.length > 6 ? `${xs.slice(0, 6).join(", ")} 외 ${xs.length - 6}개` : xs.join(", "));
 
 /** A short text alternative for a chart: its kind and what it compares. */
-export function describeChart(spec: ChartSpec): string {
+function describeChart(spec: ChartSpec): string {
   switch (spec.kind) {
     case "bar":
       return `막대 그래프: ${list(spec.categories)}${spec.series.length > 1 ? ` (${spec.series.map((x) => x.name).join(", ")})` : ""}`;

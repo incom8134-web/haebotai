@@ -33,7 +33,7 @@ const ALL_FAQ: Faq[] = [
   { category: "sources", q: { ko: "출처는 어디서 오나요?", en: "Where do sources come from?" }, a: { ko: "웹 검색이 필요한 도구는 실행 중 실제 검색을 하고, 찾은 페이지의 제목·도메인·링크를 출처 패널에 보여 줍니다.", en: "Tools that need web evidence search live during the run and list each page's title, domain and link in the Sources panel." } },
   { category: "api", q: { ko: "내 API 키를 등록하면 무엇이 좋나요?", en: "Why add my own API key?" }, a: { ko: "본인 Google AI Studio 키로 실행하면 크레딧이 차감되지 않고, 본인 계정의 한도를 사용합니다.", en: "Runs use your Google AI Studio key — no credits are charged and your own quota applies." } },
   { category: "api", q: { ko: "API 키는 안전하게 보관되나요?", en: "Is my API key stored safely?" }, a: { ko: "서버에서 AES-256-GCM으로 암호화해 저장하고, 화면에는 마지막 4자리만 보여 줍니다. 브라우저로는 절대 다시 전송되지 않습니다.", en: "It's encrypted server-side with AES-256-GCM and only the last 4 characters are ever shown. It's never sent back to the browser." } },
-  { category: "account", q: { ko: "내 데이터로 AI를 학습하나요?", en: "Is my data used for training?" }, a: { ko: "AI 해바는 입력과 결과를 학습에 쓰지 않고, 결과 제공과 보관함 저장에만 써요. 다만 도구는 회원님의 API 키로 실행되므로 AI 회사가 데이터를 어떻게 쓰는지는 그 키의 약관을 따라요. Google Gemini의 무료 등급 키는 입력이 Google 제품 개선에 쓰일 수 있고, 결제를 켠 유료 등급 키는 쓰이지 않아요. Claude·OpenAI API 키는 기본적으로 학습에 쓰이지 않아요.", en: "AI Haeba doesn't train on your inputs or results; they're used only to produce results and keep your Library. Tools run on your own API key, though, so what the AI company does with the data follows that key's terms: Google Gemini's free tier may use inputs to improve Google's products, while a key with billing turned on (paid tier) does not. Claude and OpenAI API keys aren't used for training by default." } },
+  { category: "account", q: { ko: "내 데이터로 AI를 학습하나요?", en: "Is my data used for training?" }, a: { ko: "AI 해바는 입력과 결과를 학습에 쓰지 않고, 결과 제공과 보관함 저장에만 써요. 다만 도구는 회원님의 API 키로 실행되므로 AI 회사가 데이터를 어떻게 쓰는지는 그 키의 약관을 따라요. Google Gemini의 무료 등급 키는 입력이 Google 제품 개선에 쓰일 수 있고, 결제를 켠 유료 등급 키는 쓰이지 않아요. Claude API 키는 기본적으로 학습에 쓰이지 않아요.", en: "AI Haeba doesn't train on your inputs or results; they're used only to produce results and keep your Library. Tools run on your own API key, though, so what the AI company does with the data follows that key's terms: Google Gemini's free tier may use inputs to improve Google's products, while a key with billing turned on (paid tier) does not. A Claude API key isn't used for training by default." } },
   { category: "account", q: { ko: "보관함 결과를 삭제할 수 있나요?", en: "Can I delete Library results?" }, a: { ko: "네, 보관함 목록이나 각 결과에서 삭제할 수 있어요(만드는 중인 결과는 끝난 뒤에). 결과와 함께 만든 이미지 파일도 지워지고, 복구되지 않아요. 계정 → 계정 삭제에서 모든 데이터를 한 번에 지울 수도 있어요.", en: "Yes, from the Library list or each result (once it has finished). The images it made are deleted with it, and nothing can be recovered. Account → Delete account removes all your data at once." } },
 ];
 
@@ -58,10 +58,10 @@ const OWN_KEY_FAQ: Faq[] = [
   },
   {
     category: "api",
-    q: { ko: "Claude나 ChatGPT 키도 쓸 수 있나요?", en: "Can I use a Claude or ChatGPT key?" },
+    q: { ko: "Claude 키도 쓸 수 있나요?", en: "Can I use a Claude key?" },
     a: {
-      ko: "Claude 키는 일부 도구에서 쓸 수 있어요. 대부분의 도구와 전략·검토 단계는 Gemini 키에서 동작하니 Gemini 키를 먼저 등록하세요. ChatGPT 키는 지금은 저장만 돼요.",
-      en: "A Claude key works on some tools. Most tools, and the strategy and review steps, run on a Gemini key, so add a Gemini key first. A ChatGPT key is only stored for now.",
+      ko: "Claude 키는 일부 도구에서 쓸 수 있어요. 대부분의 도구와 전략·검토 단계는 Gemini 키에서 동작하니 Gemini 키를 먼저 등록하세요. ChatGPT(OpenAI) 키는 받지 않아요.",
+      en: "A Claude key works on some tools. Most tools, and the strategy and review steps, run on a Gemini key, so add a Gemini key first. ChatGPT (OpenAI) keys aren't accepted.",
     },
   },
 ];

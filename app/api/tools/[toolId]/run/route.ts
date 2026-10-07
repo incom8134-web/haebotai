@@ -86,8 +86,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     );
   }
 
-  // Engine selection (§Phase 2): google is always allowed; anthropic/
-  // openai only if this tool's capability entry offers them AND the user
+  // Engine selection (§Phase 2): google is always allowed; anthropic
+  // only if this tool's capability entry offers them AND the user
   // has at least one key for that provider — never a silent Gemini
   // fallback (product decision).
   const providerResolution = resolveRequestedProvider(manifest.id, requestedProvider);
@@ -145,8 +145,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   // run records 0 credits. Multiple keys (priority 1-3) are tried in
   // order inside runWithApiKey below, switching past any that hit a
   // quota error. A slot the rotation classifier already flagged broken
-  // (401/403) is excluded here rather than retried every run — Claude/
-  // ChatGPT are own-key only (product decision): no platform key, always
+  // (401/403) is excluded here rather than retried every run — Claude
+  // is own-key only (product decision): no platform key, always
   // 0 credits, never a silent Gemini fallback.
   const [userApiKeys, membership] = await Promise.all([getUserApiKeys(provider, { excludeBroken: true }), getMembership()]);
   const hasUsableKey = userApiKeys.length > 0;

@@ -82,7 +82,7 @@ export async function failRun(db: SupabaseClient, runId: string, status: "error"
  * could save or hand off): no heartbeat for longer than one invocation can
  * last. Fails it and refunds, so a member never waits on a dead run.
  */
-export const STALE_AFTER_MS = 330_000;
+const STALE_AFTER_MS = 330_000;
 
 export function isStale(heartbeatAt: string | null | undefined, now = Date.now()): boolean {
   if (!heartbeatAt) return false;

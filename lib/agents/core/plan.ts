@@ -13,7 +13,7 @@ import type { DesignSystem } from "./document.ts";
 //
 // Pure logic (tested); the model call is in the document agent.
 
-export const VISUAL_KINDS = ["none", "table", "bar", "line", "donut", "timeline", "process", "kpis", "callout", "image", "comparison"] as const;
+const VISUAL_KINDS = ["none", "table", "bar", "line", "donut", "timeline", "process", "kpis", "callout", "image", "comparison"] as const;
 export type VisualKind = (typeof VISUAL_KINDS)[number];
 
 export interface PlanSection {
@@ -241,14 +241,4 @@ export function checkPlan(plan: DocumentPlan, contract: TaskContract, analysis: 
   if (contract.visuals.level === "none") for (const s of plan.sections) s.visual = { kind: "none", purpose: "", spec: "" };
   if (contract.visuals.avoid.some((a) => /사진|이미지|image|photo/i.test(a))) for (const s of plan.sections) if (s.visual.kind === "image") s.visual = { kind: "none", purpose: "", spec: "" };
   return [...new Set(issues)];
-}
-
-export function planBlock(plan: DocumentPlan): string {
-  return [
-    `[문서 설계] ${plan.title}${plan.docType ? ` (${plan.docType})` : ""}`,
-    plan.narrative ? `흐름: ${plan.narrative}` : "",
-    ...plan.sections.map((s, i) => `${i + 1}. ${"  ".repeat(s.level - 1)}${s.title} — ${s.purpose}${s.targetChars ? ` (~${s.targetChars}자)` : ""}${s.visual.kind !== "none" ? ` [시각: ${s.visual.kind}]` : ""}`),
-  ]
-    .filter(Boolean)
-    .join("\n");
 }

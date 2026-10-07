@@ -12,7 +12,7 @@ import { CONSENT_VERSION, consentOf, type ConsentState } from "@/lib/consent";
 
 const BUCKET = "consents";
 
-export interface ConsentEvent {
+interface ConsentEvent {
   at: string;
   kind: "signup_consent" | "marketing_opt_in" | "marketing_opt_out" | "unsubscribe_link";
   v: string;
@@ -69,11 +69,6 @@ export async function setMarketing(userId: string, optIn: boolean, kind: Consent
   await appendConsentLog(userId, { at: now, kind, v: prev.v ?? CONSENT_VERSION, items: { marketing: optIn }, ...meta }, admin);
 }
 
-/** Deletes the user's consent log (account deletion). */
-export async function deleteConsentLog(userId: string, admin: Admin = createAdminClient()) {
-  await admin.storage.from(BUCKET).remove([`${userId}/log.jsonl`]);
-}
-
 // ------------------------------------------------------------ unsubscribe
 
 function unsubscribeKey(): string {
@@ -83,7 +78,7 @@ function unsubscribeKey(): string {
 }
 
 /** Token for the one-click unsubscribe link in marketing emails. */
-export function unsubscribeToken(userId: string): string {
+function unsubscribeToken(userId: string): string {
   return createHmac("sha256", unsubscribeKey()).update(userId).digest("base64url");
 }
 

@@ -26,8 +26,8 @@ export interface ConsentState {
   marketing_at: string | null;
 }
 
-export const REQUIRED_ITEMS = ["age14", "terms", "privacy", "overseas"] as const;
-export type RequiredItem = (typeof REQUIRED_ITEMS)[number];
+const REQUIRED_ITEMS = ["age14", "terms", "privacy", "overseas"] as const;
+type RequiredItem = (typeof REQUIRED_ITEMS)[number];
 
 /** The consent stored in a user's app_metadata (or null). */
 export function consentOf(appMetadata: unknown): ConsentState | null {
@@ -42,7 +42,7 @@ export function hasCurrentConsent(appMetadata: unknown): boolean {
   return !!c && c.v === CONSENT_VERSION && !!c.age14_at && !!c.terms_at && !!c.privacy_at && !!c.overseas_at;
 }
 
-export type ConsentInput = Record<RequiredItem, boolean> & { marketing: boolean };
+type ConsentInput = Record<RequiredItem, boolean> & { marketing: boolean };
 
 /** Validates a consent submission; every required item must be true. */
 export function parseConsentInput(body: unknown): { ok: true; value: ConsentInput } | { ok: false; missing: RequiredItem[] } {

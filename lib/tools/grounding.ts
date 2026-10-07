@@ -7,7 +7,7 @@ import type { ToolManifest } from "./types";
 // This is the enforcement step; the 출처 panel and 추정 badge (rendered
 // in ToolRunner) are just this rule made visible.
 
-export interface GroundingResult {
+interface GroundingResult {
   ok: boolean;
   reason?: string;
 }

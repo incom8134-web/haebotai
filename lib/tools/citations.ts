@@ -4,7 +4,7 @@
 // drop numbers that point at no source (a model can't cite what it wasn't
 // given).
 
-export type CitedPart = { text: string } | { cite: number };
+type CitedPart = { text: string } | { cite: number };
 
 const MARK = /\s?\[(\d{1,2}(?:\s*,\s*\d{1,2})*)\]/g;
 

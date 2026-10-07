@@ -16,7 +16,7 @@ export interface Policy {
 
 const COMMON_NEVER = ["입력·자료·조사에 없는 사업 사실을 사실처럼 쓰기", "요청한 분량을 의미 없는 문장으로 채우기"];
 
-export const POLICIES: Record<string, Policy> = {
+const POLICIES: Record<string, Policy> = {
   proposal: {
     role: "제안서 에이전트 — 근거·구조·격식 있는 문장·문서 완성도",
     priorities: ["사용자의 명시적 지시", "사용자가 올린 자료", "사실의 정확성", "독자(발주처·심사위원)의 판단 기준", "제안의 목적", "외부 조사", "제안서 관례", "창의성"],

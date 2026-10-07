@@ -59,7 +59,7 @@ export interface LongDocument {
   sections: DocSection[];
 }
 
-export const DEFAULT_DESIGN: DesignSystem = { tone: "formal", accent: "#1F4E79", density: "standard", numbering: true };
+const DEFAULT_DESIGN: DesignSystem = { tone: "formal", accent: "#1F4E79", density: "standard", numbering: true };
 
 const TONE_PALETTE: Record<DesignSystem["tone"], string[]> = {
   formal: ["#1F4E79", "#4A7AB0", "#8FB0D6", "#C9D8EA", "#5B6770"],
@@ -94,7 +94,7 @@ export function blockText(b: DocBlock): string {
   }
 }
 
-export function sectionPlainText(s: DocSection): string {
+function sectionPlainText(s: DocSection): string {
   return [s.title, ...s.blocks.map(blockText)].join("\n");
 }
 
@@ -127,7 +127,7 @@ function toChart(b: Extract<DocBlock, { type: "chart" }>): ChartSpec {
   return { kind: "bar", categories: b.labels, series: [{ name: b.title, values: b.values }], unit: b.unit };
 }
 
-export function toReportBlocks(blocks: DocBlock[]): ReportBlock[] {
+function toReportBlocks(blocks: DocBlock[]): ReportBlock[] {
   const out: ReportBlock[] = [];
   for (const b of blocks) {
     switch (b.type) {

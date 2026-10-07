@@ -10,7 +10,7 @@ import { sectionText, type SourceDoc, type SourceSection } from "./source.ts";
 // No embeddings: lexical scoring is free, instant, deterministic and
 // strong for documents whose terms the query shares. Pure logic (tested).
 
-export interface Passage {
+interface Passage {
   docId: string;
   sectionId: string;
   /** Position in the corpus (document order). */
@@ -19,7 +19,7 @@ export interface Passage {
   text: string;
 }
 
-export interface SourceIndex {
+interface SourceIndex {
   passages: Passage[];
   df: Map<string, number>;
   avgLen: number;
@@ -73,7 +73,7 @@ export function buildIndex(docs: SourceDoc[]): SourceIndex {
 }
 
 /** BM25 scores of every passage for the query. */
-export function score(index: SourceIndex, query: string): number[] {
+function score(index: SourceIndex, query: string): number[] {
   const q = [...new Set(tokenize(query))];
   const N = index.passages.length;
   const k1 = 1.4;

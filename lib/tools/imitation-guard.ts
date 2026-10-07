@@ -6,7 +6,7 @@
 // so each rule needs an intent word next to the name. This is a
 // keyword layer in front of the model's own refusals, not a classifier.
 
-export const IMITATION_GUARDED_TOOLS = new Set(["logo", "image", "brand-model", "copy", "sangsepage", "homepage"]);
+const IMITATION_GUARDED_TOOLS = new Set(["logo", "image", "brand-model", "copy", "sangsepage", "homepage"]);
 
 const BRANDS = [
   "nike", "나이키", "adidas", "아디다스", "apple", "애플", "samsung", "삼성", "starbucks", "스타벅스", "coca-?cola", "코카콜라", "pepsi", "펩시",

@@ -61,7 +61,6 @@ const ITEMS: Item[] = [
         [{ ko: "Supabase Inc. (미국 법인, 저장은 서울)", en: "Supabase Inc. (US company, stored in Seoul)" }, { ko: "회원 정보·결과물 — 인증과 저장", en: "Account data, results — auth and storage" }, { ko: "탈퇴 시까지", en: "Until you leave" }],
         [{ ko: "Upstash, Inc. (미국 법인)", en: "Upstash, Inc. (US company)" }, { ko: "회원 식별자·요청 시각 — 요청 횟수 제한", en: "User ID, request time — rate limiting" }, { ko: "최대 2일 후 자동 삭제", en: "Auto-deleted within 2 days" }],
         [{ ko: "Anthropic, PBC (미국)", en: "Anthropic, PBC (USA)" }, { ko: "도구 입력 내용 — AI 결과물 생성 (Claude 키를 등록한 경우에만)", en: "Tool inputs — AI generation (only if you add a Claude key)" }, { ko: "처리 후 각 사 정책", en: "Per provider policy" }],
-        [{ ko: "OpenAI, L.L.C. (미국)", en: "OpenAI, L.L.C. (USA)" }, { ko: "도구 입력 내용 — AI 결과물 생성 (OpenAI 키를 등록한 경우에만)", en: "Tool inputs — AI generation (only if you add an OpenAI key)" }, { ko: "처리 후 각 사 정책", en: "Per provider policy" }],
       ],
     },
   },

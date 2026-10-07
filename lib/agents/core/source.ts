@@ -125,7 +125,7 @@ function levelOf(line: SourceLine, body: number | null): { level: number; number
 
 const NUMBER_RX = /\d[\d,.]*\s*(%|퍼센트|원|천원|만원|억원|억|만|천|명|개|건|곳|개소|년|개월|월|일|시간|분|초|배|위|kg|km|㎡|평|TB|GB)?/g;
 
-export function countNumbers(text: string): number {
+function countNumbers(text: string): number {
   return (text.match(NUMBER_RX) ?? []).filter((n) => /\d{2,}|\d[.,]\d|%|원|명|개/.test(n)).length;
 }
 

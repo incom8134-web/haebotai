@@ -29,7 +29,7 @@ import type { AgentRunState, StageContext } from "./types";
 // the run row's status (app/api/runs/[runId]/cancel), polled here.
 
 /** The platform's limit per invocation (route maxDuration). */
-export const INVOCATION_SECONDS = 300;
+const INVOCATION_SECONDS = 300;
 /** Stop this long before the platform would, so state is always saved. */
 const SAFETY_SECONDS = 15;
 

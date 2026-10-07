@@ -745,7 +745,7 @@ function ToolRunner({
           </div>
         ) : supportedProviders.length > 1 ? (
           <p className="mt-4 text-xs text-fg-subtle">
-            {L({ ko: "Claude/ChatGPT 엔진을 쓰려면 API 키를 등록하세요 → ", en: "Register an API key to use the Claude/ChatGPT engine → " })}
+            {L({ ko: "Claude 엔진을 쓰려면 API 키를 등록하세요 → ", en: "Register an API key to use the Claude engine → " })}
             <Link href="/account/api-key" className="text-studio-cyan underline underline-offset-2">
               {L({ ko: "API 키 관리", en: "Manage API keys" })}
             </Link>

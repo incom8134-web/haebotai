@@ -4,7 +4,7 @@ import { keep, num, obj, objs, PALETTES, str, strs } from "./util.ts";
 // 훅 연구소 export: average strength per hook family, then each family's
 // hooks with on-screen text, first scene, follow-up line and versions.
 
-export const FAMILY_KO: Record<string, string> = {
+const FAMILY_KO: Record<string, string> = {
   question: "질문",
   contrarian: "통념 뒤집기",
   number: "숫자",
