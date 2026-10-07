@@ -4,6 +4,17 @@ export type NoteKind = "new" | "improved" | "fixed";
 
 export const PATCH_NOTES: { version: string; date: string; title: Bilingual; items: { kind: NoteKind; text: Bilingual }[] }[] = [
   {
+    version: "2.12.1",
+    date: "2026-10-07",
+    title: { ko: "AI 표시와 개인정보 안내를 더 정확하게", en: "Clearer AI labelling and privacy notices" },
+    items: [
+      { kind: "improved", text: { ko: "만든 이미지 파일에 ‘생성형 AI로 만든 이미지’라는 표시(메타데이터)를 함께 저장해요. 화면의 이미지는 그대로예요", en: "Generated image files now carry a built-in “made with generative AI” label (metadata); the picture itself is unchanged" } },
+      { kind: "improved", text: { ko: "내 API 키의 AI 회사가 데이터를 어떻게 쓰는지 안내를 고쳤어요 — Google Gemini 무료 등급 키는 입력이 Google 제품 개선에 쓰일 수 있어요", en: "Corrected how your own AI key's provider uses data — Google Gemini's free tier may use inputs to improve Google's products" } },
+      { kind: "improved", text: { ko: "가입 동의 화면의 국외 이전 목록에 Anthropic·OpenAI를 추가했어요. 다음 방문 때 한 번 다시 동의를 받아요", en: "Anthropic and OpenAI added to the overseas-transfer list on the consent screen; you'll be asked to agree once more on your next visit" } },
+      { kind: "fixed", text: { ko: "보안 업데이트: 웹 프레임워크와 이미지 처리 라이브러리의 알려진 취약점을 고쳤어요", en: "Security update: patched known vulnerabilities in the web framework and the image library" } },
+    ],
+  },
+  {
     version: "2.12.0",
     date: "2026-10-06",
     title: { ko: "바로 만들기: 가게 홍보를 한 줄로", en: "Quick start: shop marketing from one line" },
