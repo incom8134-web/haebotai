@@ -19,7 +19,7 @@ export const PATCH_NOTES: { version: string; date: string; title: Bilingual; ite
     date: "2026-10-06",
     title: { ko: "바로 만들기: 가게 홍보를 한 줄로", en: "Quick start: shop marketing from one line" },
     items: [
-      { kind: "new", text: { ko: "해봇 AI가 ‘AI 해바’로 이름을 바꾸고, 지니에듀테크의 보석 위로 해가 뜨는 새 로고를 달았어요", en: "Haebot AI is now ‘AI Haeba’, with a new logo: a sunrise H over the 지니에듀테크 gem" } },
+      { kind: "new", text: { ko: "해봇 AI가 ‘AI 해바’로 이름을 바꾸고, 지니에듀테크의 보석과 굵은 글자로 된 새 로고를 달았어요 (영어 화면에서는 ‘AI Haeba’)", en: "Haebot AI is now ‘AI Haeba’, with a new logo: the 지니에듀테크 gem beside a bold wordmark (‘AI Haeba’ on the English site)" } },
       { kind: "new", text: { ko: "바로 만들기 — SNS 게시물·홍보 문구·이미지 중 하나를 고르고 가게 이야기를 한 줄 적으면, 긴 입력 없이 바로 만들어요", en: "Quick start — pick a social media post, promo copy or an image, write one line about your shop, and it's made without the long form" } },
       { kind: "new", text: { ko: "로그인 화면과 첫 화면 맨 위에 '가게 홍보 바로 시작하기' 버튼이 생기고, 화면·언어 버튼은 페이지 아래로 옮겼어요", en: "A “Start shop marketing” button at the top of the homepage and on the sign-in page; theme and language moved to the foot of the page" } },
       { kind: "improved", text: { ko: "로그인하면 바로 만들기 화면부터 열려요", en: "Signing in now opens Quick start first" } },
