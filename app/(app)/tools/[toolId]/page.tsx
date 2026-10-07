@@ -5,6 +5,7 @@ import { getTool } from "@/lib/tools/registry";
 import { getToolContent } from "@/lib/tools/content";
 import { redirectFor } from "@/lib/tools/catalog";
 import { toolPack } from "@/lib/tools/pack";
+import { BRAND_NAME, siteLocale } from "@/lib/site/meta";
 
 // Tool overview page: what the tool makes, presets to start from, sample
 // output, how-to, tips, chaining and FAQ. Running happens at ./run.
@@ -15,7 +16,8 @@ export async function generateMetadata({ params }: { params: Promise<{ toolId: s
   const tool = getTool(toolId);
   if (!tool) return {};
   const content = getToolContent(tool.id);
-  return { title: `${tool.name_ko} — AI 해바`, description: content?.description.ko ?? tool.summary };
+  const locale = await siteLocale();
+  return { title: `${locale === "en" ? tool.name_en : tool.name_ko} — ${BRAND_NAME[locale]}`, description: content?.description.ko ?? tool.summary };
 }
 
 export default async function ToolHomePage({ params }: { params: Promise<{ toolId: string }> }) {
