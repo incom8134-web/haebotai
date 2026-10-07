@@ -13,12 +13,12 @@ import type { AgentRunState, AgentSpec, Stage } from "../types";
 // own Gemini keys) gets its agent; other engines keep the one-shot
 // pipeline as a single step until their adapters expose the same calls.
 
-export function planFor(manifest: ToolManifest, provider: ProviderId, state?: Pick<AgentRunState, "plan"> | null): Plan {
+function planFor(manifest: ToolManifest, provider: ProviderId, state?: Pick<AgentRunState, "plan"> | null): Plan {
   return state?.plan ?? defaultPlan(manifest.id, provider);
 }
 
 /** The runner's view of a plan: one stage per step, each running its capability. */
-export function specFromPlan(toolId: string, plan: Plan): AgentSpec {
+function specFromPlan(toolId: string, plan: Plan): AgentSpec {
   const stages: Record<string, Stage> = {};
   for (const step of plan.steps) {
     const cap = CAPABILITIES[step.capability];
@@ -55,7 +55,7 @@ export function isAgentic(manifest: ToolManifest, provider: ProviderId): boolean
 }
 
 /** Adds what the result page and exports read: who it was for, the tone and the chosen direction. */
-export function withBrief(state: AgentRunState, output: unknown): unknown {
+function withBrief(state: AgentRunState, output: unknown): unknown {
   if (!output || typeof output !== "object" || Array.isArray(output)) return output;
   const direction = state.work.direction as { id: string; name: string } | null | undefined;
   return {

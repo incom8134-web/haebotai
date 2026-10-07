@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 // motion or have Data Saver on; phones get a smaller file; background
 // scenes are decorative (aria-hidden) and carry no text of their own.
 
-export type SceneName = "hero" | "how";
+type SceneName = "hero" | "how";
 
 const subscribeStill = (notify: () => void) => {
   const mq = window.matchMedia("(prefers-reduced-motion: reduce)");

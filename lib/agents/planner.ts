@@ -40,7 +40,7 @@ export function plannable(toolId: string, provider: string): boolean {
   return agenticFor(toolId, provider) && !OWN_WORKFLOW.has(toolId);
 }
 
-export const MAX_STEPS = 12;
+const MAX_STEPS = 12;
 const TERMINAL = new Set(["finish_output", "assemble_site", "draw_logo", "render_photos", "one_shot"]);
 
 export function plannerSchema(webSearch: boolean) {

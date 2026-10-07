@@ -8,7 +8,7 @@ import { numbersOf } from "./verify.ts";
 //
 // Pure logic (tested).
 
-export interface StructuredIssue {
+interface StructuredIssue {
   where: string;
   problem: string;
   fix: string;

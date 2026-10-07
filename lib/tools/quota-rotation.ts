@@ -23,7 +23,7 @@ export interface KeyRotationState {
 //   surface the error immediately.
 export type RotationAction = "retry-same" | "next-key" | "next-key-mark-broken" | "fail";
 
-export interface RotationOptions {
+interface RotationOptions {
   onBrokenKey?: (index: number) => void;
   /** Delay before a same-key retry (e.g. a provider's retry-after header). Omit to retry immediately. */
   getRetryDelayMs?: (err: unknown) => number;

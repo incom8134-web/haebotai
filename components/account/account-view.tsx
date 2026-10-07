@@ -54,12 +54,6 @@ const KEY_MSG: Record<string, { ko: string; en: string }> = {
 const PROVIDER_INFO: Record<ApiKeyProvider, { name: string; placeholder: string }> = {
   google: { name: "Google Gemini", placeholder: "AQ.… / AIza…" },
   anthropic: { name: "Anthropic (Claude)", placeholder: "sk-ant-…" },
-  openai: { name: "ChatGPT (OpenAI)", placeholder: "sk-…" },
-};
-
-/** Static fallback for a provider with no tools enabled yet (openai, pre-Stage-5). */
-const PROVIDER_FALLBACK_DESCRIPTION: Partial<Record<ApiKeyProvider, { ko: string; en: string }>> = {
-  openai: { ko: "GPT 기반 도구가 추가되면 사용돼요. 지금은 안전하게 등록·보관만 해요.", en: "Will be used once GPT-based tools are added. For now it's only securely registered and stored." },
 };
 
 function providerDescription(provider: ApiKeyProvider): { ko: string; en: string } {
@@ -70,7 +64,7 @@ function providerDescription(provider: ApiKeyProvider): { ko: string; en: string
     };
   }
   const tools = toolNamesForProvider(provider);
-  if (tools.length === 0) return PROVIDER_FALLBACK_DESCRIPTION[provider] ?? { ko: "", en: "" };
+  if (tools.length === 0) return { ko: "", en: "" };
   return {
     ko: `${tools.map((t) => t.ko).join(", ")}에 쓰여요. 1순위부터 차례로 자동 전환돼요.`,
     en: `Powers ${tools.map((t) => t.en).join(", ")}. Switches automatically in priority order.`,
@@ -430,13 +424,12 @@ function ApiKeyPanel({ apiKey }: { apiKey: ApiKeyStatus }) {
   const L = useBi();
   return (
     <>
-      <PageHeader title={L({ ko: "내 API 키", en: "My API key" })} lead={L({ ko: "직접 발급받은 키를 넣으면 그 도구는 크레딧을 쓰지 않아요. 각 제공사마다 우선순위 키를 최대 3개까지 등록할 수 있고, 한도가 차면 다음 키로 자동 전환돼요.", en: "Bring your own key and that provider's tools stop using credits. Register up to 3 priority-ordered keys per provider — quota runs out on one, it switches to the next." })} />
+      <PageHeader title={L({ ko: "내 API 키", en: "My API key" })} lead={L({ ko: "도구는 직접 발급받은 내 API 키로 실행돼요. 제공사마다 키를 최대 3개까지 우선순위로 등록할 수 있고, 한도가 차면 다음 키로 자동 전환돼요.", en: "Tools run on API keys you get yourself. Register up to 3 priority-ordered keys per provider — when one hits its quota, the next takes over." })} />
       <section className="space-y-6">
         {apiKey.enabled ? (
           <>
             <ProviderKeyCard provider="google" slots={apiKey.providers.google} />
             <ProviderKeyCard provider="anthropic" slots={apiKey.providers.anthropic} />
-            <ProviderKeyCard provider="openai" slots={apiKey.providers.openai} />
           </>
         ) : (
           <p className="rounded-xl bg-studio-warning/10 p-3 text-sm text-fg-muted">{L(KEY_MSG.server_disabled)}</p>

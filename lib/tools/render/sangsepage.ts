@@ -20,7 +20,7 @@ const WIDTH = 860;
 const PAD = 64;
 const INNER = WIDTH - PAD * 2;
 
-export interface SangsepageContent {
+interface SangsepageContent {
   productName: string;
   price?: number | null;
   painPoints: string[];

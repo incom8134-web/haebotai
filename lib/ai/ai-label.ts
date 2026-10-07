@@ -7,14 +7,14 @@
 // segment) without re-encoding a single pixel. Other formats pass
 // through unchanged. Pure Buffer work, no dependencies.
 
-export type AiSource = "trainedAlgorithmicMedia" | "compositeWithTrainedAlgorithmicMedia";
+type AiSource = "trainedAlgorithmicMedia" | "compositeWithTrainedAlgorithmicMedia";
 
 const MARK = "Iptc4xmpExt:DigitalSourceType";
 
-export function aiXmp(source: AiSource = "trainedAlgorithmicMedia"): string {
+function aiXmp(source: AiSource = "trainedAlgorithmicMedia"): string {
   const what = source === "trainedAlgorithmicMedia" ? "AI-generated image (생성형 AI로 만든 이미지)" : "Image containing AI-generated content (생성형 AI 결과물을 포함한 이미지)";
   return (
-    `<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>` +
+    `<?xpacket begin="\uFEFF" id="W5M0MpCehiHzreSzNTczkc9d"?>` +
     `<x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">` +
     `<rdf:Description rdf:about="" xmlns:Iptc4xmpExt="http://iptc.org/std/Iptc4xmpExt/2008-02-29/" xmlns:xmp="http://ns.adobe.com/xap/1.0/" xmlns:dc="http://purl.org/dc/elements/1.1/"` +
     ` ${MARK}="http://cv.iptc.org/newscodes/digitalsourcetype/${source}" xmp:CreatorTool="AI 해바 (AI Haeba)">` +

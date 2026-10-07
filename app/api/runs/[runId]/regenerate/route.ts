@@ -122,7 +122,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   } catch (err) {
     if (cost > 0) await releaseUnattachedReservation(user.id, cost);
     console.warn("regenerate failed", (err as Error).message);
-    return Response.json({ error: "다시 만들지 못했어요. 크레딧은 돌려드렸어요." }, { status: 502 });
+    return Response.json({ error: cost > 0 ? "다시 만들지 못했어요. 크레딧은 돌려드렸어요." : "다시 만들지 못했어요. 잠시 후 다시 시도해 주세요." }, { status: 502 });
   }
 
   const nextOutput = { ...output, [section]: result.value, agent: { ...((output.agent as object) ?? {}), regenerated: { section, instruction } } };
@@ -195,7 +195,7 @@ async function reviseDocumentRun(opts: {
     result = keys.length ? await runWithApiKey(keys, go) : await go();
   } catch (err) {
     console.warn("document revise failed", (err as Error).message);
-    result = { ok: false, status: 502, error: "다시 만들지 못했어요. 크레딧은 돌려드렸어요." };
+    result = { ok: false, status: 502, error: cost > 0 ? "다시 만들지 못했어요. 크레딧은 돌려드렸어요." : "다시 만들지 못했어요. 잠시 후 다시 시도해 주세요." };
   }
   if (!result.ok) {
     if (cost > 0) await releaseUnattachedReservation(user.id, cost);

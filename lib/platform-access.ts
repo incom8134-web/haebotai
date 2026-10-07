@@ -9,7 +9,7 @@
 //
 // Pure (tested).
 
-export function teamList(env: Record<string, string | undefined>): string[] {
+function teamList(env: Record<string, string | undefined>): string[] {
   return [env.PLATFORM_KEY_EMAILS, env.ADMIN_EMAILS]
     .flatMap((v) => (v ?? "").split(","))
     .map((s) => s.trim().toLowerCase())

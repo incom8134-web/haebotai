@@ -35,7 +35,7 @@ const RevenueMap = dynamic(() => import("./discover/revenue-map").then((m) => m.
 // runs saved in an older shape, which fall back to the generic renderers
 // in components/run-result.tsx. Exports use lib/tools/report instead.
 
-export interface ViewProps {
+interface ViewProps {
   output: Record<string, unknown>;
   input?: Record<string, unknown>;
   runId?: string;

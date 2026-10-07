@@ -26,7 +26,7 @@ export interface CommandPaletteGroup {
   items: CommandPaletteItem[];
 }
 
-export interface CommandPaletteProps {
+interface CommandPaletteProps {
   groups: CommandPaletteGroup[];
   open?: boolean;
   onOpenChange?: (open: boolean) => void;

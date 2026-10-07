@@ -12,7 +12,7 @@ import { CopyButton, Kicker } from "@/components/results/discover/shared";
 // timed table, a thread as numbered posts — with a length check against
 // that platform's usual limit and a copy button.
 
-export const TARGET_LABELS: Record<string, { ko: string; en: string; limit?: number }> = {
+const TARGET_LABELS: Record<string, { ko: string; en: string; limit?: number }> = {
   instagram_carousel: { ko: "인스타 카드뉴스", en: "IG carousel" },
   instagram_caption: { ko: "인스타 캡션", en: "IG caption", limit: 2200 },
   threads: { ko: "스레드", en: "Threads", limit: 500 },

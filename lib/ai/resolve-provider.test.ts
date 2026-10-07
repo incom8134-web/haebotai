@@ -28,12 +28,12 @@ test("allows anthropic for a tool the capability map has enabled it for (strateg
 });
 
 test("rejects garbage input, not just unsupported providers", () => {
-  const result = resolveRequestedProvider("grant", "not-a-real-provider");
-  assert.equal(result.ok, false);
+  assert.equal(resolveRequestedProvider("grant", "not-a-real-provider").ok, false);
+  assert.equal(resolveRequestedProvider("copy", "openai").ok, false, "OpenAI is not an engine");
 });
 
 test("rejects an unknown tool id the same as a disallowed provider (falls back to google-only default)", () => {
-  const result = resolveRequestedProvider("no-such-tool", "openai");
+  const result = resolveRequestedProvider("no-such-tool", "anthropic");
   assert.equal(result.ok, false);
 });
 
@@ -41,11 +41,11 @@ test("ownKeyRequiredError: google needs an own key unless the member is on the t
   assert.match(ownKeyRequiredError("google", { hasAnyKey: false, hasUsableKey: false })!, /API 키를 먼저 등록해주세요/);
   assert.equal(ownKeyRequiredError("google", { hasAnyKey: false, hasUsableKey: false }, true), null);
   assert.equal(ownKeyRequiredError("google", { hasAnyKey: true, hasUsableKey: true }), null);
-  // The team flag never opens Claude/ChatGPT: there is no platform key for them.
+  // The team flag never opens Claude: there is no platform key for it.
   assert.ok(ownKeyRequiredError("anthropic", { hasAnyKey: false, hasUsableKey: false }, true));
 });
 
-test("ownKeyRequiredError: anthropic/openai with a usable key need no error", () => {
+test("ownKeyRequiredError: anthropic with a usable key needs no error", () => {
   assert.equal(ownKeyRequiredError("anthropic", { hasAnyKey: true, hasUsableKey: true }), null);
 });
 
@@ -56,7 +56,7 @@ test("ownKeyRequiredError: never registered a key points at registering one", ()
 });
 
 test("ownKeyRequiredError: registered but every slot is broken/exhausted names that, not 'register a key'", () => {
-  const message = ownKeyRequiredError("openai", { hasAnyKey: true, hasUsableKey: false });
+  const message = ownKeyRequiredError("anthropic", { hasAnyKey: true, hasUsableKey: false });
   assert.ok(message);
   assert.match(message, /한도 초과|인증 실패/);
   assert.doesNotMatch(message, /먼저 등록/);
@@ -68,8 +68,8 @@ test("resolveCost: google charges the estimate unless own-key or student", () =>
   assert.equal(resolveCost("google", false, true, 30), 0);
 });
 
-test("resolveCost: anthropic/openai are always 0, plan and key status aside", () => {
+test("resolveCost: anthropic is always 0, plan and key status aside", () => {
   assert.equal(resolveCost("anthropic", true, false, 30), 0);
   assert.equal(resolveCost("anthropic", false, false, 30), 0);
-  assert.equal(resolveCost("openai", false, true, 30), 0);
+  assert.equal(resolveCost("anthropic", false, true, 30), 0);
 });

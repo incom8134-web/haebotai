@@ -3,7 +3,7 @@ import { z } from "zod";
 // Task categories are fixed so the report can stack weekly hours by
 // kind of work; phases draw the roadmap bars; north_star + checkpoints
 // draw the target line the 13 weeks are aiming at.
-export const TASK_CATEGORIES = ["기획·준비", "콘텐츠·홍보", "영업·판매", "제작·운영", "학습", "점검·회고"] as const;
+const TASK_CATEGORIES = ["기획·준비", "콘텐츠·홍보", "영업·판매", "제작·운영", "학습", "점검·회고"] as const;
 
 const outputSchema = z.object({
   goal: z.string(),

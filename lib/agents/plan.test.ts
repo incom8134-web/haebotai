@@ -20,7 +20,6 @@ test("one-shot plans store the output as produced; agent plans add the brief", (
   assert.equal(defaultPlan("copy", "anthropic").finalize, "raw");
   assert.equal(defaultPlan("copy", "google").finalize, "brief");
   assert.equal(agenticFor("grant", "google"), false);
-  assert.equal(agenticFor("copy", "openai"), false);
   assert.equal(agenticFor("copy", "google"), true);
 });
 

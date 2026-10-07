@@ -186,7 +186,6 @@ const COMMON_PROCESSORS = [
   ["(주)카카오", "카카오 계정 로그인 (회원이 카카오 로그인을 선택한 경우)", "대한민국"],
   ["Upstash, Inc.", "과도한 요청을 막기 위한 요청 횟수 제한", "미국 법인"],
   ["Anthropic, PBC", "회원이 Claude API 키를 등록한 경우 그 키로 결과물 생성", "미국"],
-  ["OpenAI, L.L.C.", "회원이 ChatGPT(OpenAI) API 키를 등록한 경우 그 키로 결과물 생성", "미국"],
 ];
 
 export const PRIVACY: LegalDoc = {
@@ -278,7 +277,6 @@ export const PRIVACY: LegalDoc = {
               ["Google LLC (구글 개인정보처리방침의 문의처)", "미국", "구글 로그인 정보, 도구에 입력한 내용과 이미지, 비즈니스 프로필 중 해당 도구가 쓰는 항목", "로그인, 결과물 생성", "로그인: 탈퇴 시까지 / 생성 요청: 처리 후 Google 정책에 따름 (회원 키가 유료 등급이면 학습 미이용, 무료 등급이면 제품 개선에 이용될 수 있음)"],
               ["Upstash, Inc. (support@upstash.com)", "미국 법인", "회원 식별자, 접속 IP, 요청 시각과 일일 실행 횟수", "요청 횟수 제한, 과도한 이용 방지", "최대 2일 후 자동 삭제"],
               ["Anthropic, PBC (privacy@anthropic.com)", "미국", "회원이 Claude 키로 실행한 도구의 입력 내용", "결과물 생성 (회원이 Claude 키를 등록한 경우에만)", "처리 후 각 사 정책에 따름"],
-              ["OpenAI, L.L.C. (privacy@openai.com)", "미국", "회원이 OpenAI 키로 실행한 도구의 입력 내용", "결과물 생성 (회원이 OpenAI 키를 등록한 경우에만)", "처리 후 각 사 정책에 따름"],
             ],
           },
         },
@@ -453,7 +451,7 @@ const LICENSE_ROWS: string[][] = [
   ["Geist, Geist Mono, Space Grotesk", "SIL Open Font License 1.1", "서비스 화면의 영문·숫자 서체 (빌드 시 포함, 외부 요청 없음)"],
   ["Google Fonts (Noto Sans/Serif KR, Gowun, Nanum 등)", "SIL Open Font License 1.1 / Apache 2.0", "생성한 홈페이지에서 Google Fonts로 불러오는 서체"],
   ["Next.js, React", "MIT", "웹 서비스 프레임워크"],
-  ["three.js, @react-three/fiber, @react-three/drei", "MIT", "3D 화면, 생성한 홈페이지의 3D 장면"],
+  ["three.js", "MIT", "생성한 홈페이지의 3D 장면"],
   ["GSAP (GreenSock)", "GSAP Standard 'No Charge' License (Webflow)", "생성한 홈페이지의 스크롤 애니메이션. AI가 생성한 코드는 라이선스상 허용되는 이용입니다."],
   ["Lenis", "MIT", "생성한 홈페이지의 부드러운 스크롤"],
   ["Motion", "MIT", "서비스 화면 애니메이션"],
@@ -464,8 +462,7 @@ const LICENSE_ROWS: string[][] = [
   ["docx, pptxgenjs, exceljs, pdfkit, jszip", "MIT", "Word·PowerPoint·Excel·PDF·ZIP 내보내기"],
   ["resvg-js, satori", "Mozilla Public License 2.0", "이미지 렌더링 (수정 없이 사용)"],
   ["sharp", "Apache 2.0 (libvips: LGPL 3.0, 동적 링크)", "이미지 변환"],
-  ["recharts", "MIT", "차트"],
-  ["zod, sonner, cmdk, embla-carousel, Base UI, input-otp, react-day-picker, next-themes", "MIT", "화면 구성 요소"],
+  ["zod, sonner, cmdk, Base UI, next-themes", "MIT", "화면 구성 요소"],
 ];
 
 export const LICENSES: LegalDoc = {
@@ -485,5 +482,3 @@ export const LICENSES: LegalDoc = {
     { id: "full", title: "3. 라이선스 전문", body: ["각 라이선스 전문은 해당 프로젝트 저장소와 서비스 배포본의 node_modules에 포함되어 있습니다. 전문이 필요하시면 고객센터로 요청해 주세요."] },
   ],
 };
-
-export const LEGAL_DOCS = [TERMS, PRIVACY, REFUND, COOKIES, LICENSES];

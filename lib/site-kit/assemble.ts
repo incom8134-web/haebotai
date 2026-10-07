@@ -30,7 +30,6 @@ const IMPORTS: Record<string, string> = {
   lenis: `${CDN}/lenis@${SITE_PACKAGES.lenis}/dist/lenis.mjs`,
 };
 export const KIT_SPECIFIER = "@site/kit";
-export const ALLOWED_IMPORTS = [...Object.keys(IMPORTS).filter((k) => !k.endsWith("/")), "three/addons/…", KIT_SPECIFIER];
 
 let kitTs: string | null = null;
 let kitJs: string | null = null;

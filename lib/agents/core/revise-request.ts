@@ -7,7 +7,7 @@ import type { DesignSystem, LongDocument } from "./document.ts";
 //   "make section 5 more technical"                 → section 5 only
 // Anything else needs a section picked. Pure logic (tested).
 
-export type RevisionRoute =
+type RevisionRoute =
   | { kind: "design"; patch: Partial<DesignSystem>; note: string }
   | { kind: "visuals"; fewerImages: boolean; moreDiagrams: boolean }
   | { kind: "sections"; ids: string[] }
@@ -28,7 +28,7 @@ const TONES: [RegExp, DesignSystem["tone"]][] = [
   [/(격식|공식|보수적|formal|official|conservative)/i, "formal"],
 ];
 
-export function designPatch(instruction: string): Partial<DesignSystem> {
+function designPatch(instruction: string): Partial<DesignSystem> {
   const patch: Partial<DesignSystem> = {};
   for (const [rx, tone] of TONES) if (rx.test(instruction)) {
     patch.tone = tone;

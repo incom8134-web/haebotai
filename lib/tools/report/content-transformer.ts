@@ -4,7 +4,7 @@ import { keep, objs, PALETTES, str, strs } from "./util.ts";
 // 콘텐츠 변환기 export: the core message, how long each version runs, then
 // every version in its own shape (slides, script, posts or body).
 
-export const TARGET_KO: Record<string, string> = {
+const TARGET_KO: Record<string, string> = {
   instagram_carousel: "인스타 카드뉴스",
   instagram_caption: "인스타 캡션",
   threads: "스레드",

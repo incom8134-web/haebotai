@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 // File-saving helpers shared by the result views.
 
-export function downloadBlob(filename: string, blob: Blob) {
+function downloadBlob(filename: string, blob: Blob) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;

@@ -400,7 +400,7 @@ const REVIEW_BRIEF = `You are the creative director and senior front-end reviewe
 Fix everything you find: rewrite weak copy, strengthen layouts, add what's missing, remove clutter. Keep the same class prefix and the same image placeholders. Do not shorten the page.`;
 
 /** What's wrong with a generated page, if anything (for choosing between drafts). */
-export function pageProblems(html: string, imageIds: string[], needsScene = true): string[] {
+function pageProblems(html: string, imageIds: string[], needsScene = true): string[] {
   const problems: string[] = [];
   if (!/<!doctype html>/i.test(html) || !/<\/html>\s*$/i.test(html.trim())) problems.push("incomplete document");
   for (const id of imageIds) {
@@ -608,7 +608,7 @@ export async function reviseSite(
   );
 }
 
-export function siteImageIds(plan: SitePlan): string[] {
+function siteImageIds(plan: SitePlan): string[] {
   return plan.images.map((i) => i.id);
 }
 

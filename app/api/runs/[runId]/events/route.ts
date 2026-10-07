@@ -87,7 +87,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
           return close();
         }
         if (isStale(row.beat as string | null)) {
-          await failRun(admin, runId, "error", "작업이 중단되었습니다. 크레딧은 돌려드렸어요. 다시 실행해 주세요.");
+          await failRun(admin, runId, "error", "작업이 중단되었습니다. 다시 실행해 주세요.");
           continue;
         }
         await new Promise((r) => setTimeout(r, POLL_MS));

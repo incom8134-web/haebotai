@@ -4,7 +4,7 @@ import { keep, num, obj, objs, PALETTES, str, strs } from "./util.ts";
 // MVP 설계도: must/should/later features, the journey, the tool stack,
 // the stages on a timeline (gantt) and the launch checklist.
 
-export const PRIORITY_LABELS: Record<string, string> = { must: "Must · 꼭", should: "Should · 있으면 좋음", later: "Later · 다음에" };
+const PRIORITY_LABELS: Record<string, string> = { must: "Must · 꼭", should: "Should · 있으면 좋음", later: "Later · 다음에" };
 export const MOMENT_LABELS: Record<string, string> = { discover: "발견", try: "체험", value: "가치", pay: "결제", return: "재방문" };
 export const CHECK_LABELS: Record<string, string> = { product: "제품", legal: "법·신고", payment: "결제", marketing: "마케팅", support: "고객 지원" };
 

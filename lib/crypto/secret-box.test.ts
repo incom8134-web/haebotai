@@ -1,6 +1,6 @@
 import assert from "node:assert";
 import { test } from "node:test";
-import { looksLikeAnthropicKey, looksLikeGoogleKey, looksLikeOpenAIKey, open, seal } from "./secret-box.ts";
+import { looksLikeAnthropicKey, looksLikeGoogleKey, open, seal } from "./secret-box.ts";
 
 const secret = "test-secret-at-least-16-chars";
 
@@ -30,6 +30,4 @@ test("refuses short secrets and validates key shape", () => {
   assert.ok(!looksLikeGoogleKey("sk-not-a-google-key"));
   assert.ok(looksLikeAnthropicKey("sk-ant-" + "a".repeat(20)));
   assert.ok(!looksLikeAnthropicKey("sk-" + "a".repeat(20)));
-  assert.ok(looksLikeOpenAIKey("sk-" + "a".repeat(20)));
-  assert.ok(!looksLikeOpenAIKey("AIza" + "a".repeat(35)));
 });

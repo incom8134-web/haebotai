@@ -25,9 +25,9 @@ export interface Domain {
   archetypes: string[];
 }
 
-export const MIN_DIFFERENT = 2;
+const MIN_DIFFERENT = 2;
 
-export const DOMAINS: Record<string, Domain> = {
+const DOMAINS: Record<string, Domain> = {
   web: {
     id: "web",
     dimensions: [

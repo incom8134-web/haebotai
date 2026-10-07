@@ -13,7 +13,7 @@ import { BLOCK_TYPES, parseSection, SECTION_SCHEMA, WRITER_SYSTEM } from "../cor
 // strategy alone, or only the sections named — and everything else is
 // kept exactly. The result is a new version; the original stays.
 
-export type DocRevision =
+type DocRevision =
   | { ok: true; doc: LongDocument; usage: TokenUsage; free: boolean; note: string; changed: string[] }
   | { ok: false; error: string; status: number };
 

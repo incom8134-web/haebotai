@@ -30,7 +30,7 @@ function sentences(text: string): string[] {
   return text.split(/(?<=[.!?。다요])\s+/).map((s) => s.trim()).filter((s) => s.length > 8);
 }
 
-export function lintText(text: string, where = ""): LintFinding[] {
+function lintText(text: string, where = ""): LintFinding[] {
   const out: LintFinding[] = [];
   for (const rx of STOCK) {
     const m = rx.exec(text);

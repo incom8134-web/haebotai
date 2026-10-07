@@ -21,7 +21,7 @@ const LAYOUT: Record<string, { ko: string; en: string }> = {
   statement: { ko: "한 문장", en: "Statement" },
 };
 
-export const speakSeconds = (notes: string, headline: string) => Math.max(15, Math.round((notes.replace(/\s/g, "").length + headline.length) / 5.5));
+const speakSeconds = (notes: string, headline: string) => Math.max(15, Math.round((notes.replace(/\s/g, "").length + headline.length) / 5.5));
 
 export function Storyboard({ output }: { output: Record<string, unknown> }) {
   const L = useBi();

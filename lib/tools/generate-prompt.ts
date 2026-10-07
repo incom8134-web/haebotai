@@ -24,7 +24,7 @@ import { contractBlock, type TaskContract } from "../agents/core/contract.ts";
 // visible blank.
 const NO_INVENTED_CONTACTS = '입력에 없는 URL·단축 링크·전화번호·계정명은 지어내지 말고 "[예약 링크]", "[전화번호]"처럼 대괄호 자리 표시로 쓰세요.';
 
-export const GUARDS: Partial<Record<string, string>> = {
+const GUARDS: Partial<Record<string, string>> = {
   copy: NO_INVENTED_CONTACTS,
   blog: NO_INVENTED_CONTACTS,
   proposal: NO_INVENTED_CONTACTS,
@@ -105,7 +105,7 @@ export function referenceParts(input: Record<string, unknown>, opts: { documents
 }
 
 /** The user's own words: above every default of the tool, the creative direction included. */
-export function freeRequestPrompt(text: string): string {
+function freeRequestPrompt(text: string): string {
   return [
     "[사용자의 자유 요청 — 가장 우선]",
     text,
@@ -190,7 +190,7 @@ export function buildBaseInstruction(manifest: ToolManifest, opts: { houseRules?
 // Grounded tools whose results are read as reports: their sentences carry
 // "[n]" marks pointing at the numbered sources (components/results/cited.tsx).
 // Not the blog — its text is published as-is.
-export const CITED_TOOLS = new Set(["market-desk", "market-gap", "trend", "competitor-lens", "business-plan", "strategy"]);
+const CITED_TOOLS = new Set(["market-desk", "market-gap", "trend", "competitor-lens", "business-plan", "strategy"]);
 const CITE_RULE =
   "검색 근거로 뒷받침한 문장이나 수치 바로 뒤에 [사용 가능한 출처]의 번호를 [1] 또는 [1, 3]처럼 붙이세요. 목록에 있는 번호만 쓰고, 근거가 없는 문장에는 붙이지 마세요. 제목·이름·짧은 라벨에는 붙이지 마세요.";
 
