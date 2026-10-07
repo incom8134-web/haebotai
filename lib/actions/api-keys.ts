@@ -4,8 +4,8 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { env } from "@/lib/env";
-import { looksLikeAnthropicKey, looksLikeGoogleKey, looksLikeOpenAIKey, seal } from "@/lib/crypto/secret-box";
-import { getUserApiKeySlot, verifyAnthropicKey, verifyGoogleKey, verifyOpenAIKey, type ApiKeyPriority, type ApiKeyProvider } from "@/lib/api-keys";
+import { looksLikeAnthropicKey, looksLikeGoogleKey, seal } from "@/lib/crypto/secret-box";
+import { getUserApiKeySlot, verifyAnthropicKey, verifyGoogleKey, type ApiKeyPriority, type ApiKeyProvider } from "@/lib/api-keys";
 import { limitSensitive } from "@/lib/rate-limit";
 
 export type ApiKeyActionState = { ok: boolean; message: string } | null;
@@ -13,7 +13,6 @@ export type ApiKeyActionState = { ok: boolean; message: string } | null;
 const CHECKS: Record<ApiKeyProvider, { looksLike: (key: string) => boolean; verify: (key: string) => Promise<boolean> }> = {
   google: { looksLike: looksLikeGoogleKey, verify: verifyGoogleKey },
   anthropic: { looksLike: looksLikeAnthropicKey, verify: verifyAnthropicKey },
-  openai: { looksLike: looksLikeOpenAIKey, verify: verifyOpenAIKey },
 };
 
 function parsePriority(value: FormDataEntryValue | null): ApiKeyPriority | null {

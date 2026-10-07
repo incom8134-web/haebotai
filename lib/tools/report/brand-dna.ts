@@ -23,7 +23,7 @@ export function normHex(v: string): string | null {
 }
 
 /** WCAG 2.x relative luminance and contrast ratio. */
-export function luminance(hex: string): number {
+function luminance(hex: string): number {
   const n = parseInt(hex.slice(1), 16);
   const ch = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((c) => {
     const s = c / 255;

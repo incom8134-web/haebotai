@@ -53,7 +53,7 @@ function sourcesOf(input: Record<string, unknown>): SourceDoc[] {
 }
 
 /** The tool's output: the document, plus the fields older views and chaining read. */
-export function documentOutput(toolId: string, doc: LongDocument, extra: Record<string, unknown> = {}): Record<string, unknown> {
+function documentOutput(toolId: string, doc: LongDocument, extra: Record<string, unknown> = {}): Record<string, unknown> {
   const firstText = doc.sections.flatMap((s) => s.blocks).find((b) => b.type === "paragraph") as { text: string } | undefined;
   const summary = firstText?.text.split(/(?<=[.다요])\s/).slice(0, 3).join(" ") ?? "";
   if (toolId === "business-plan") {

@@ -50,8 +50,6 @@ const BUILDERS: Record<string, (o: Record<string, unknown>, input: Record<string
   "insight-miner": insightMinerReport,
 };
 
-export const hasReport = (toolId: string) => toolId in BUILDERS;
-
 /** The tool's report, or null for tools that render their output another way. */
 export function buildReport(toolId: string, output: unknown, input: unknown = {}): Report | null {
   const build = BUILDERS[toolId];

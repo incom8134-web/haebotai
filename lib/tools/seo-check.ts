@@ -3,7 +3,7 @@
 // thresholds are common Korean-blog guidance (Naver/Google), stated on
 // each check rather than hidden in a single score.
 
-export interface SeoCheck {
+interface SeoCheck {
   id: string;
   label: string;
   pass: boolean;

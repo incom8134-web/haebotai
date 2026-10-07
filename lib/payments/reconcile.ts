@@ -9,7 +9,7 @@ import { isRetryable, planReconcile, PRO_ORDER, type LedgerOrder, type TossView 
 
 type Admin = ReturnType<typeof createAdminClient>;
 
-export type ReconcileOutcome = "activated" | "activate_failed" | "closed" | "waiting" | "amount_mismatch" | "unknown_order" | "toss_error" | "noop";
+type ReconcileOutcome = "activated" | "activate_failed" | "closed" | "waiting" | "amount_mismatch" | "unknown_order" | "toss_error" | "noop";
 
 /** pending → done + Pro days + credits, in one transaction (activate_pro, migration 0012). */
 export async function activateOrder(admin: Admin, orderId: string, payment: TossPayment): Promise<boolean> {

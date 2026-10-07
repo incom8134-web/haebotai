@@ -25,7 +25,7 @@ export interface FinancialAssumptions {
   notes: string[];
 }
 
-export interface MemberFigures {
+interface MemberFigures {
   unit_price?: number;
   /** The member's monthly sales target: read as the month-12 volume. */
   monthly_sales_target?: number;

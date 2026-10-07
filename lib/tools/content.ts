@@ -48,7 +48,3 @@ const content = raw as unknown as Record<string, ToolContent>;
 export function getToolContent(toolId: string): ToolContent | undefined {
   return content[toolId];
 }
-
-export function allToolContent(): [string, ToolContent][] {
-  return Object.entries(content);
-}

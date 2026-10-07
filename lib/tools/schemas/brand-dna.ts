@@ -8,7 +8,7 @@ import { z } from "zod";
 
 // Google Fonts families with Korean glyphs, so the board can render the
 // specimen for real and every later tool can use the same fonts.
-export const BRAND_FONTS = [
+const BRAND_FONTS = [
   "Noto Sans KR",
   "Noto Serif KR",
   "IBM Plex Sans KR",

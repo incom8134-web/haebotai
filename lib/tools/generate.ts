@@ -13,6 +13,7 @@ import { orderLike } from "./output-order";
 import { applyFinancialModel } from "./financial-model";
 import { outputSchemaFor } from "./schemas";
 import { analyzeRequest } from "@/lib/ai/request-brief";
+import { labelAiImage } from "@/lib/ai/ai-label";
 
 // HAEBOT_A_TOOLS_SPEC.md §3.2 — real generation for all 15 tools. Thin
 // dispatcher: provider-specific logic (search grounding, image
@@ -220,7 +221,7 @@ export async function finishStructured(
     });
     // A multi-MB PNG belongs in storage, not in the run row.
     const path = `${storage.userId}/sangsepage/${storage.runId}/page.png`;
-    const { error } = await storage.supabase.storage.from("exports").upload(path, png, { contentType: "image/png", upsert: true });
+    const { error } = await storage.supabase.storage.from("exports").upload(path, labelAiImage(png, "compositeWithTrainedAlgorithmicMedia"), { contentType: "image/png", upsert: true });
     if (error) throw new Error(`상세페이지 저장 실패: ${error.message}`);
     const { data: signed } = await storage.supabase.storage.from("exports").createSignedUrl(path, 60 * 60 * 24 * 365);
     output = { ...page, rendered_images: signed ? [signed.signedUrl] : [] };

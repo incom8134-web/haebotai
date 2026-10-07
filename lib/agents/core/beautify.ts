@@ -19,7 +19,7 @@ const KV = /^([^:：]{2,30})\s*[:：]\s*(.{1,200})$/;
 const WORD_END = /[이가은는을를의에와과로도만고며서다요함음등및됨임,.)]$/;
 
 /** Wrapped lines → paragraphs (a PDF line break is not a paragraph break). */
-export function reflow(lines: string[]): string[] {
+function reflow(lines: string[]): string[] {
   const out: string[] = [];
   for (const raw of lines) {
     const line = raw.trim();
@@ -45,7 +45,7 @@ function numericColumn(rows: string[][]): number {
 }
 
 /** One source section → blocks, every word kept. */
-export function sectionBlocks(s: SourceSection): DocBlock[] {
+function sectionBlocks(s: SourceSection): DocBlock[] {
   const blocks: DocBlock[] = [];
   const paras = reflow(s.text.split("\n"));
   let bullets: string[] = [];

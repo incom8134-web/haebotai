@@ -5,7 +5,7 @@
 // separates a result a small-business owner can use tomorrow from a
 // generic one. Read by lib/tools/generate-prompt.ts for every provider.
 
-export interface Playbook {
+interface Playbook {
   /** Who the model writes as. */
   role: string;
   /** How that expert works, in order. */

@@ -103,7 +103,7 @@ interface PdfItem {
 }
 
 /** PDF text items (per page) → lines with font size and page. */
-export function pdfLines(pages: PdfItem[][]): SourceLine[] {
+function pdfLines(pages: PdfItem[][]): SourceLine[] {
   const out: SourceLine[] = [];
   pages.forEach((items, p) => {
     let text = "";
@@ -136,7 +136,7 @@ export async function parsePdf(name: string, bytes: Uint8Array): Promise<SourceD
   return buildSource(name, "pdf", pdfLines(items), { pages: totalPages });
 }
 
-export function parseHtml(name: string, html: string): SourceDoc {
+function parseHtml(name: string, html: string): SourceDoc {
   const md = html
     .replace(/<(script|style|svg|noscript)[\s\S]*?<\/\1>/gi, " ")
     .replace(/<h([1-6])[^>]*>([\s\S]*?)<\/h\1>/gi, (_, n, inner) => `\n${"#".repeat(Number(n))} ${inner.replace(/<[^>]+>/g, " ")}\n`)

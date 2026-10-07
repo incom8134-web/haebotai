@@ -4,7 +4,7 @@ import { z } from "zod";
 // same text trimmed, but re-shaped for how that platform is read: a
 // carousel as slides, a short video as a timed script, a thread as posts.
 
-export const TRANSFORM_TARGETS = ["instagram_carousel", "instagram_caption", "threads", "linkedin", "shorts_script", "newsletter", "naver_blog", "kakao"] as const;
+const TRANSFORM_TARGETS = ["instagram_carousel", "instagram_caption", "threads", "linkedin", "shorts_script", "newsletter", "naver_blog", "kakao"] as const;
 
 const outputSchema = z.object({
   core_message: z.string(),

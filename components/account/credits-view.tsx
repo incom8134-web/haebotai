@@ -18,7 +18,6 @@ const ALLOWANCE: Record<PlanId, number | null> = { free: 500, pro: 2000, student
 const PROVIDER_BILLING: Record<string, { name: string; href: string }> = {
   google: { name: "Google Gemini", href: "https://console.cloud.google.com/billing" },
   anthropic: { name: "Anthropic (Claude)", href: "https://console.anthropic.com/settings/limits" },
-  openai: { name: "OpenAI", href: "https://platform.openai.com/settings/organization/limits" },
 };
 
 // Own-key runs are billed by the provider, not in credits, so we can't

@@ -4,7 +4,7 @@ import { addDays, toIcsDate } from "./calendar.ts";
 // calendar events. Actions without a date are left out (the board says
 // how many), never placed on a guessed day.
 
-export interface DatedAction {
+interface DatedAction {
   task: string;
   owner: string;
   due: string;

@@ -1,9 +1,6 @@
-// ponytail: covers the app shell, landing, auth, library, and business
-// profile — the surfaces every user sees regardless of which tool they
-// pick. The 15 tool manifests' own field labels stay Korean-only for now
-// (150+ strings across registry/*.ts); upgrade path is adding an
-// `label_en` alongside each `label` in lib/tools/types.ts when that's
-// worth the mechanical pass.
+// Shared UI strings: the app shell, landing, auth, library and business
+// profile. Tool field labels and presets have their English in
+// lib/tools/fields-en.ts and lib/tools/presets-en.ts.
 
 export const dictionaries = {
   ko: {

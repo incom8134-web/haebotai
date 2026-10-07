@@ -7,7 +7,7 @@ import { pretendardFiles } from "./fonts.ts";
 // result page draws, in the print theme on white, rendered at 2× so it
 // stays sharp when printed or projected.
 
-export const CHART_WIDTH = 680;
+const CHART_WIDTH = 680;
 
 export function chartPng(spec: ChartSpec, palette: string[], width = CHART_WIDTH): { data: Buffer; width: number; height: number } | null {
   const svg = renderChart(spec, { width, palette, theme: PRINT_THEME, background: "#FFFFFF" });

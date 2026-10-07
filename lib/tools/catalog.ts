@@ -444,10 +444,6 @@ export function toolSlug(slugOrEngine: string): string {
   return catalogTool(slugOrEngine)?.slug ?? slugOrEngine;
 }
 
-export function toolHref(slugOrEngine: string, sub = ""): string {
-  return `/tools/${toolSlug(slugOrEngine)}${sub}`;
-}
-
 /** The 25 public tools, in catalog order. */
 export function publicTools(): CatalogTool[] {
   return CATALOG.filter((t) => !t.hidden);

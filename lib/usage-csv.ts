@@ -1,4 +1,4 @@
-export interface UsageRow {
+interface UsageRow {
   createdAt: string;
   tool: string;
   provider: string | null;

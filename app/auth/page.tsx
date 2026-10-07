@@ -1,6 +1,6 @@
 "use client";
 
-import { BrandMark } from "@/components/brand-mark";
+import { BrandLogo } from "@/components/brand-mark";
 import { Suspense, useEffect, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -75,7 +75,7 @@ function AuthCard() {
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       className="w-full max-w-[420px] rounded-[28px] border border-hairline bg-surface p-7 shadow-[0_30px_80px_-50px_rgba(43,30,18,0.5)] sm:p-9"
     >
-      <BrandMark size={48} priority />
+      <BrandLogo height={30} />
       <h1 className="mt-6 font-display text-[28px] leading-tight font-bold tracking-[-0.02em] break-keep">{L({ ko: "AI 해바 시작하기", en: "Start with AI Haeba" })}</h1>
       <p className="mt-2 text-sm leading-relaxed break-keep text-fg-muted">
         {next !== HOME_AFTER_SIGN_IN
@@ -169,7 +169,7 @@ function AuthCard() {
         <ul className="mt-1.5 space-y-1 text-2xs leading-relaxed break-keep text-fg-muted">
           <li>{hasKakao ? L({ ko: "Google·카카오 계정으로만 로그인해요. 비밀번호를 만들거나 저장하지 않아요.", en: "Google or Kakao sign-in only — no password is created or stored." }) : L({ ko: "Google로만 로그인해요. 비밀번호를 만들거나 저장하지 않아요.", en: "Google sign-in only — no password is created or stored." })}</li>
           <li>{L({ ko: "이름과 이메일만 쓰고, 프로필 사진은 저장하지 않아요.", en: "We use your name and email; your profile photo isn't kept." })}</li>
-          <li>{L({ ko: "입력과 결과는 AI 학습에 쓰지 않아요. 계정에서 언제든 지울 수 있어요.", en: "Inputs and results are never used for training, and you can delete them any time." })}</li>
+          <li>{L({ ko: "AI 해바는 입력과 결과를 학습에 쓰지 않아요. 계정에서 언제든 지울 수 있어요.", en: "AI Haeba doesn't train on your inputs or results, and you can delete them any time." })}</li>
         </ul>
       </div>
 

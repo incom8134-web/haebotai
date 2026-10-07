@@ -54,7 +54,7 @@ export interface TaskContract {
   rationale: string;
 }
 
-export const TASK_MODES: TaskMode[] = ["create", "create_from_source", "transform", "answer_requirements", "rewrite", "polish", "beautify", "inspire"];
+const TASK_MODES: TaskMode[] = ["create", "create_from_source", "transform", "answer_requirements", "rewrite", "polish", "beautify", "inspire"];
 const SOURCE_ROLES: SourceRole[] = ["none", "primary", "requirements", "inspiration", "style", "data"];
 const UNITS: LengthUnit[] = ["pages", "slides", "words", "chars", "sections", "none"];
 
@@ -285,7 +285,7 @@ export function parseContract(raw: unknown): TaskContract | null {
 }
 
 /** A contract from the explicit rules alone (the model call failed or was skipped). */
-export function defaultContract(): TaskContract {
+function defaultContract(): TaskContract {
   return {
     mode: "create",
     sourceRole: "none",

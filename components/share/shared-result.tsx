@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ArrowRight, Info } from "lucide-react";
-import { BrandMark } from "@/components/brand-mark";
+import { BrandLogo } from "@/components/brand-mark";
 import { OutputPreview } from "@/components/run-result";
 import { useBi } from "@/lib/i18n/context";
 import { catalogTool, toolSlug } from "@/lib/tools/catalog";
@@ -22,8 +22,8 @@ export function SharedResult({ toolId, title, output, input, sources, createdAt 
   return (
     <main id="main" className="mx-auto w-full max-w-3xl px-4 pt-6 pb-16 md:px-8">
       <header className="flex items-center justify-between gap-3">
-        <Link href="/" className="flex items-center gap-2 text-sm font-semibold text-fg">
-          <BrandMark size={28} /> {L({ ko: "AI 해바", en: "AI Haeba" })}
+        <Link href="/" className="flex items-center">
+          <BrandLogo height={22} />
         </Link>
         <Link href={`/tools/${toolSlug(toolId)}`} className={cn(primaryButton, "h-9 px-4 text-sm")}>
           {L({ ko: "나도 만들어 보기", en: "Make your own" })} <ArrowRight className="size-4" aria-hidden />

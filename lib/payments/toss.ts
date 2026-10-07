@@ -20,7 +20,7 @@ export interface TossPayment {
   raw: unknown;
 }
 
-export type TossResult = { ok: true; payment: TossPayment } | { ok: false; code: string; message: string; raw: unknown };
+type TossResult = { ok: true; payment: TossPayment } | { ok: false; code: string; message: string; raw: unknown };
 
 export function tossConfigured(): boolean {
   if (!env.TOSS_SECRET_KEY || !process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY) return false;
@@ -37,7 +37,7 @@ function authHeader(secretKey: string): string {
 
 type RawPayment = { paymentKey?: string; orderId?: string; status?: string; totalAmount?: number; method?: string; approvedAt?: string; receipt?: { url?: string } | null; code?: string; message?: string };
 
-export function parsePayment(data: RawPayment, fallback: { paymentKey?: string; orderId?: string } = {}): TossPayment {
+function parsePayment(data: RawPayment, fallback: { paymentKey?: string; orderId?: string } = {}): TossPayment {
   return {
     paymentKey: data.paymentKey ?? fallback.paymentKey ?? "",
     orderId: data.orderId ?? fallback.orderId ?? "",

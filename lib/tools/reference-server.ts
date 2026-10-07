@@ -30,7 +30,7 @@ const MAX_TEXT = 80_000;
 const MAX_IMAGE_SIDE = 2048;
 
 /** Reading a stored upload (and cleaning it up afterwards) — supplied by the route. */
-export interface ReferenceStore {
+interface ReferenceStore {
   /** Folder every path must sit in: the user's own ("<uid>/"). */
   prefix: string;
   download(path: string): Promise<Buffer | null>;
@@ -38,7 +38,7 @@ export interface ReferenceStore {
 }
 
 /** A photo re-encoded to at most 2048px JPEG when it's bigger than a model needs. */
-export async function shrinkImage(bytes: Buffer, mime: string): Promise<{ data: Buffer; mimeType: string }> {
+async function shrinkImage(bytes: Buffer, mime: string): Promise<{ data: Buffer; mimeType: string }> {
   if (bytes.length <= 1.5 * 1024 * 1024) return { data: bytes, mimeType: mime };
   try {
     const sharp = (await import("sharp")).default;

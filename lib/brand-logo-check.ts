@@ -4,7 +4,7 @@
 
 export const LOGO_MAX_BYTES = 5 * 1024 * 1024;
 
-export type LogoType = { mime: "image/png" | "image/jpeg" | "image/webp"; ext: "png" | "jpg" | "webp" };
+type LogoType = { mime: "image/png" | "image/jpeg" | "image/webp"; ext: "png" | "jpg" | "webp" };
 
 export function sniffLogoType(bytes: Uint8Array): LogoType | null {
   if (bytes.length >= 8 && bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) return { mime: "image/png", ext: "png" };

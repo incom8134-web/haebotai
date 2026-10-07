@@ -6,12 +6,12 @@ import { PROVIDER_LABEL, type ProviderId } from "./types.ts";
 // so it's unit-testable without mocking Supabase/credits/rate-limit. The
 // route still owns the actual I/O (getUserApiKeys, membership).
 
-export const providerSchema = z.enum(["google", "anthropic", "openai"]);
+const providerSchema = z.enum(["google", "anthropic"]);
 
-export type ProviderResolution = { ok: true; provider: ProviderId } | { ok: false; error: string };
+type ProviderResolution = { ok: true; provider: ProviderId } | { ok: false; error: string };
 
 /**
- * google is always allowed. anthropic/openai only if this tool's
+ * google is always allowed. anthropic only if this tool's
  * capability entry offers them — never a silent Gemini fallback
  * (product decision): an unsupported request is a 400, not a downgrade.
  */
@@ -29,7 +29,7 @@ export function resolveRequestedProvider(toolId: string, requestedProvider: unkn
   return { ok: true, provider };
 }
 
-export interface KeyAvailability {
+interface KeyAvailability {
   /** Any key registered for this provider, broken or not. */
   hasAnyKey: boolean;
   /** At least one non-broken, non-exhausted key ready to try. */
@@ -54,7 +54,7 @@ export function ownKeyRequiredError(provider: ProviderId, keys: KeyAvailability,
 
 /**
  * Own key (any provider) or student plan (google only) → 0 credits.
- * Claude/ChatGPT are always 0 — the user pays the provider directly,
+ * Claude is always 0 — the user pays the provider directly,
  * never the platform (product decision).
  */
 export function resolveCost(provider: ProviderId, hasOwnKey: boolean, isStudent: boolean, estimatedCredits: number): number {

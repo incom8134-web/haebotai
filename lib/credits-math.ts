@@ -7,13 +7,13 @@
 // arithmetic: a settlement never refunds more than was reserved, and a
 // second call against an already-settled run is a no-op.
 
-export interface SettlementInput {
+interface SettlementInput {
   reserved: number;
   creditsUsed: number;
   alreadySettled: boolean;
 }
 
-export interface SettlementResult {
+interface SettlementResult {
   used: number;
   refund: number;
   /** false when the run was already settled — the ledger was not touched. */

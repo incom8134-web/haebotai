@@ -9,7 +9,7 @@ export default function NotFound() {
   const L = useBi();
   return (
     <div className="relative grid min-h-dvh place-items-center px-4">
-      <div className="app-backdrop" aria-hidden><span className="orb orb-a" /><span className="orb orb-b" /></div>
+      <div className="app-backdrop" aria-hidden />
       <div className="glass-strong w-full max-w-lg rounded-[32px] p-8 text-center">
         <span className="studio-gradient-bg mx-auto grid size-14 place-items-center rounded-2xl text-white"><Compass size={26} aria-hidden /></span>
         <p className="mt-6 font-mono text-sm text-studio-cyan">404</p>

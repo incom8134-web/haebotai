@@ -2,16 +2,15 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { BusinessProfile, ToolManifest } from "@/lib/tools/types";
 import type { Source } from "@/lib/tools/registry/shared";
 
-// Provider-neutral contract every engine (Gemini today; Claude/OpenAI in
-// later phases) implements. generate.ts dispatches to whichever adapter
+// Provider-neutral contract every engine (Gemini and Claude)
+// implements. generate.ts dispatches to whichever adapter
 // a run resolved to; nothing above that layer knows which provider ran.
 
-export type ProviderId = "google" | "anthropic" | "openai";
+export type ProviderId = "google" | "anthropic";
 
 export const PROVIDER_LABEL: Record<ProviderId, string> = {
   google: "Gemini",
   anthropic: "Claude",
-  openai: "ChatGPT",
 };
 
 export interface TokenUsage {
@@ -34,7 +33,7 @@ export interface GenerationResult {
 // Streaming decision (fixed for every provider, not just Gemini): call
 // the model non-streaming, validate the full structured output, then let
 // route.ts replay it as the client-facing typing effect exactly as
-// today. No adapter — Gemini, Anthropic, or OpenAI — does real
+// today. No adapter — Gemini or Anthropic — does real
 // token-by-token streaming from its provider; `generateStructured`
 // always emits the complete text as a single `chunk` before `done`.
 // Consequence for key rotation: the entire generation (the whole

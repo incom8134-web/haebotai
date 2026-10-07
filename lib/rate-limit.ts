@@ -2,7 +2,7 @@ import "server-only";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { checkRateLimit } from "./rate-limit-check";
-export { checkRateLimit, type RateLimitResult } from "./rate-limit-check";
+export { checkRateLimit } from "./rate-limit-check";
 
 // Credits cap total spend per user, but not burst *rate* — a retry loop
 // (buggy client, scripted abuse) can fire far faster than any human,
@@ -44,7 +44,7 @@ export const exportLimiter = new Ratelimit({
 // consent changes, support tickets, API-key tests, account deletion —
 // keyed per action and member. 10 per 10 minutes stops scripted abuse
 // (and a payment-order loop) without ever touching a real user.
-export const sensitiveLimiter = new Ratelimit({
+const sensitiveLimiter = new Ratelimit({
   redis,
   limiter: Ratelimit.slidingWindow(10, "10 m"),
   prefix: "ratelimit:sensitive",

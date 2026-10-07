@@ -17,12 +17,12 @@ export function newOrderId(randomUUID: () => string = () => crypto.randomUUID())
   return `pro_${randomUUID().replace(/-/g, "")}`;
 }
 
-export interface PendingOrder {
+interface PendingOrder {
   amount: number;
   status: "pending" | "done" | "failed";
 }
 
-export type ConfirmCheck = { ok: true } | { ok: false; reason: "already_done" | "not_pending" | "amount_mismatch" };
+type ConfirmCheck = { ok: true } | { ok: false; reason: "already_done" | "not_pending" | "amount_mismatch" };
 
 export interface LedgerOrder {
   status: "pending" | "done" | "failed" | "canceled";
@@ -34,7 +34,7 @@ export interface LedgerOrder {
 /** What Toss reports for the order; `found: false` = Toss never saw a payment for it. */
 export type TossView = { found: false } | { found: true; status: string; totalAmount: number };
 
-export type ReconcileAction =
+type ReconcileAction =
   | { kind: "none" }
   | { kind: "activate" }
   | { kind: "close"; status: "failed" | "canceled"; reason: string }

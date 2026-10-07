@@ -4,11 +4,22 @@ export type NoteKind = "new" | "improved" | "fixed";
 
 export const PATCH_NOTES: { version: string; date: string; title: Bilingual; items: { kind: NoteKind; text: Bilingual }[] }[] = [
   {
+    version: "2.12.1",
+    date: "2026-10-07",
+    title: { ko: "AI 표시와 개인정보 안내를 더 정확하게", en: "Clearer AI labelling and privacy notices" },
+    items: [
+      { kind: "improved", text: { ko: "만든 이미지 파일에 ‘생성형 AI로 만든 이미지’라는 표시(메타데이터)를 함께 저장해요. 화면의 이미지는 그대로예요", en: "Generated image files now carry a built-in “made with generative AI” label (metadata); the picture itself is unchanged" } },
+      { kind: "improved", text: { ko: "내 API 키의 AI 회사가 데이터를 어떻게 쓰는지 안내를 고쳤어요 — Google Gemini 무료 등급 키는 입력이 Google 제품 개선에 쓰일 수 있어요", en: "Corrected how your own AI key's provider uses data — Google Gemini's free tier may use inputs to improve Google's products" } },
+      { kind: "improved", text: { ko: "가입 동의 화면의 국외 이전 목록에 Anthropic을 추가했어요. 다음 방문 때 한 번 다시 동의를 받아요", en: "Anthropic added to the overseas-transfer list on the consent screen; you'll be asked to agree once more on your next visit" } },
+      { kind: "fixed", text: { ko: "보안 업데이트: 웹 프레임워크와 이미지 처리 라이브러리의 알려진 취약점을 고쳤어요", en: "Security update: patched known vulnerabilities in the web framework and the image library" } },
+    ],
+  },
+  {
     version: "2.12.0",
     date: "2026-10-06",
     title: { ko: "바로 만들기: 가게 홍보를 한 줄로", en: "Quick start: shop marketing from one line" },
     items: [
-      { kind: "new", text: { ko: "해봇 AI가 ‘AI 해바’로 이름을 바꿨어요", en: "Haebot AI is now ‘AI Haeba’" } },
+      { kind: "new", text: { ko: "해봇 AI가 ‘AI 해바’로 이름을 바꾸고, 지니에듀테크의 보석과 굵은 글자로 된 새 로고를 달았어요 (영어 화면에서는 ‘AI Haeba’)", en: "Haebot AI is now ‘AI Haeba’, with a new logo: the 지니에듀테크 gem beside a bold wordmark (‘AI Haeba’ on the English site)" } },
       { kind: "new", text: { ko: "바로 만들기 — SNS 게시물·홍보 문구·이미지 중 하나를 고르고 가게 이야기를 한 줄 적으면, 긴 입력 없이 바로 만들어요", en: "Quick start — pick a social media post, promo copy or an image, write one line about your shop, and it's made without the long form" } },
       { kind: "new", text: { ko: "로그인 화면과 첫 화면 맨 위에 '가게 홍보 바로 시작하기' 버튼이 생기고, 화면·언어 버튼은 페이지 아래로 옮겼어요", en: "A “Start shop marketing” button at the top of the homepage and on the sign-in page; theme and language moved to the foot of the page" } },
       { kind: "improved", text: { ko: "로그인하면 바로 만들기 화면부터 열려요", en: "Signing in now opens Quick start first" } },
