@@ -91,7 +91,7 @@ function StagePhoto({ active }: { active: number }) {
   const L = useBi();
   const stage = FLOW[active];
   return (
-    <div className="relative aspect-[16/10] overflow-hidden bg-[#1a1410] lg:aspect-auto lg:min-h-[460px]">
+    <div className="relative aspect-[16/10] overflow-hidden bg-[#0f172a] lg:aspect-auto lg:min-h-[460px]">
       {FLOW.map((s, i) => (
         <div
           key={s.id}
@@ -506,7 +506,7 @@ export function BeforeAfterSection() {
         <motion.div
           {...reveal}
           transition={{ ...reveal.transition, delay: 0.1 }}
-          className="rounded-[24px] border border-hairline bg-surface p-5 shadow-[0_24px_60px_-40px_rgba(43,30,18,0.5)]"
+          className="rounded-[24px] border border-hairline bg-surface p-5 shadow-[0_24px_60px_-40px_rgba(15,30,60,0.5)]"
         >
           <p className="text-xs font-semibold text-accent">
             {L({ ko: "결과 (발췌)", en: "Result (excerpt)" })}

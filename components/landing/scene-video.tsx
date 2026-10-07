@@ -116,7 +116,7 @@ export function StoryVideo({ className }: { className?: string }) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/videos/story-poster.jpg" alt="" loading="lazy" decoding="async" className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.02]" />
           <span className="absolute inset-0 grid place-items-center bg-black/10 transition-colors group-hover:bg-black/20">
-            <span className="grid size-16 place-items-center rounded-full bg-white/90 text-[#9a3412] shadow-lg ring-1 ring-black/5 transition-transform group-hover:scale-105">
+            <span className="grid size-16 place-items-center rounded-full bg-white/90 text-accent-hover shadow-lg ring-1 ring-black/5 transition-transform group-hover:scale-105">
               <Play size={26} className="translate-x-0.5 fill-current" aria-hidden />
             </span>
           </span>
