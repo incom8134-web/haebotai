@@ -69,9 +69,9 @@ function TagList({
   return (
     <div className="flex flex-wrap items-center gap-1.5 rounded-lg border border-input px-2.5 py-1.5">
       {values.map((v, i) => (
-        <Badge key={`${v}-${i}`} variant="secondary" className="gap-1">
-          {v}
-          <button type="button" aria-label={`${v} 삭제`} onClick={() => onChange(values.filter((_, j) => j !== i))}>
+        <Badge key={`${v}-${i}`} variant="secondary" className="gap-1" title={v}>
+          <span className="min-w-0 truncate">{v}</span>
+          <button type="button" className="shrink-0" aria-label={`${v} 삭제`} onClick={() => onChange(values.filter((_, j) => j !== i))}>
             <X className="size-3" />
           </button>
         </Badge>

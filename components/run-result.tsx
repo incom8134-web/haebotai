@@ -477,12 +477,12 @@ function RunResult({
         ) : null}
         {direction?.name ? (
           <Badge variant="outline" className="border-studio-violet/40 text-studio-violet" title={direction.reason || (locale === "en" ? "Chosen to fit this request's tone" : "이 요청의 톤에 맞춰 고른 방향")}>
-            {locale === "en" ? "Direction" : "이번 방향"} · {direction.name}
+            <span className="min-w-0 truncate">{locale === "en" ? "Direction" : "이번 방향"} · {direction.name}</span>
           </Badge>
         ) : null}
         {brief?.tone ? (
           <Badge variant="outline" className="text-2xs" title={locale === "en" ? "The tone this result follows, read from your request" : "요청에서 읽은, 이 결과가 따르는 톤"}>
-            {locale === "en" ? "Tone" : "톤"} · {brief.tone}
+            <span className="min-w-0 truncate">{locale === "en" ? "Tone" : "톤"} · {brief.tone}</span>
           </Badge>
         ) : null}
         {manifest.grounding.estimateBadge ? (
