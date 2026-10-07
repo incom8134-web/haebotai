@@ -717,10 +717,14 @@ function ToolRunner({
           <div className="mt-4 flex flex-wrap gap-1.5">
             {profileChips.map(({ key, display }) =>
               excludedProfileKeys.has(key) ? null : (
-                <Badge key={key} variant="secondary" className="gap-1">
-                  {t(PROFILE_LABEL_KEYS[key])}: {display}
+                // A long value (e.g. a voice example) shortens with "…" instead of widening the page on phones.
+                <Badge key={key} variant="secondary" className="max-w-full gap-1" title={`${t(PROFILE_LABEL_KEYS[key])}: ${display}`}>
+                  <span className="min-w-0 truncate">
+                    {t(PROFILE_LABEL_KEYS[key])}: {display}
+                  </span>
                   <button
                     type="button"
+                    className="shrink-0"
                     aria-label={`${t(PROFILE_LABEL_KEYS[key])} ${t("remove")}`}
                     onClick={() =>
                       setExcludedProfileKeys((prev) => new Set(prev).add(key))
