@@ -3,8 +3,9 @@ import type { CategoryId } from "@/lib/tools/types";
 import { CATEGORY_ORDER as CATEGORIES } from "@/lib/tools/catalog";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/supabase/user";
+import { titled } from "@/lib/site/meta";
 
-export const metadata = { title: "도구 — AI 해바" };
+export const generateMetadata = titled("도구", "Tools");
 
 // "Recently used" comes from the member's own run history (tool ids as
 // stored on runs), newest first, one entry per tool.

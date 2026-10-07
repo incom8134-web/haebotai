@@ -1,7 +1,8 @@
 import { LegalDocView } from "@/components/site/legal-doc";
 import { LICENSES } from "@/lib/site/legal";
+import { titled } from "@/lib/site/meta";
 
-export const metadata = { title: "오픈소스·서체 라이선스 — AI 해바" };
+export const generateMetadata = titled("오픈소스·서체 라이선스", "Open-source & font licenses");
 
 export default function Page() {
   return <LegalDocView doc={LICENSES} />;

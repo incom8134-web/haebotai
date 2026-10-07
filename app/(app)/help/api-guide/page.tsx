@@ -1,6 +1,7 @@
 import { ApiGuide } from "@/components/help/help-pages";
+import { titled } from "@/lib/site/meta";
 
-export const metadata = { title: "API 키 설명서 — AI 해바" };
+export const generateMetadata = titled("API 키 설명서", "API key manual");
 
 export default function ApiGuidePage() {
   return <ApiGuide />;

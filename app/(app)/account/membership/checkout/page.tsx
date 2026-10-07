@@ -2,8 +2,9 @@ import { redirect } from "next/navigation";
 import { CheckoutView } from "@/components/account/checkout";
 import { getMembership } from "@/lib/membership";
 import { getCurrentUser } from "@/lib/supabase/user";
+import { titled } from "@/lib/site/meta";
 
-export const metadata = { title: "프로 결제 — AI 해바" };
+export const generateMetadata = titled("프로 결제", "Pro checkout");
 
 export default async function CheckoutPage() {
   const user = await getCurrentUser();

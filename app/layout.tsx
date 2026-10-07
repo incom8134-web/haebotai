@@ -12,6 +12,7 @@ import { LocaleProvider } from "@/lib/i18n/context";
 import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 import "./globals.css";
 import { CookieNotice } from "@/components/site/cookie-notice";
+import { BRAND_NAME, siteLocale } from "@/lib/site/meta";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,13 +34,19 @@ const spaceGrotesk = Space_Grotesk({
 
 const description = "AI marketing and business tools for small businesses, built on your own facts — researched claims come with their sources.";
 
-export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
-  title: "AI 해바",
-  description,
-  openGraph: { type: "website", siteName: "AI 해바", locale: "ko_KR", title: "AI 해바", description },
-  twitter: { card: "summary_large_image", title: "AI 해바", description },
-};
+// The brand in the site's language: "AI Haeba" on the English site, so a
+// browser translator never renders 해바 as a word ("Sunflower").
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await siteLocale();
+  const name = BRAND_NAME[locale];
+  return {
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+    title: name,
+    description,
+    openGraph: { type: "website", siteName: name, locale: locale === "en" ? "en_US" : "ko_KR", title: name, description },
+    twitter: { card: "summary_large_image", title: name, description },
+  };
+}
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const locale = (await cookies()).get("locale")?.value === "en" ? "en" : "ko";

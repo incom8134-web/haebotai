@@ -5,8 +5,9 @@ import { getBalance } from "@/lib/credits";
 import { getMembership } from "@/lib/membership";
 import { getApiKeyStatus } from "@/lib/api-keys";
 import { getMonthlyUsage } from "@/lib/usage";
+import { titled } from "@/lib/site/meta";
 
-export const metadata = { title: "크레딧·한도 — AI 해바" };
+export const generateMetadata = titled("크레딧·한도", "Credits & limits");
 
 export default async function CreditsPage() {
   // No credits while members bring their own key (lib/site/access.ts).
