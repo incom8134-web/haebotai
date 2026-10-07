@@ -4,6 +4,15 @@ export type NoteKind = "new" | "improved" | "fixed";
 
 export const PATCH_NOTES: { version: string; date: string; title: Bilingual; items: { kind: NoteKind; text: Bilingual }[] }[] = [
   {
+    version: "2.13.0",
+    date: "2026-10-07",
+    title: { ko: "지니에듀테크의 파란색으로, 바로 만들기는 맨 앞에", en: "In 지니에듀테크 blue, with Quick start up front" },
+    items: [
+      { kind: "improved", text: { ko: "화면 색을 로고의 보석과 같은 파란색으로 바꿨어요. 어두운 화면도 남색으로 맞췄어요", en: "The site now uses the blue of the logo's gem, with navy in dark mode" } },
+      { kind: "improved", text: { ko: "‘바로 만들기’ 버튼이 메뉴 맨 위와 휴대폰 하단 가운데에 크게 자리 잡았어요", en: "The Quick start button now leads the menu and sits raised in the middle of the phone tab bar" } },
+    ],
+  },
+  {
     version: "2.12.1",
     date: "2026-10-07",
     title: { ko: "AI 표시와 개인정보 안내를 더 정확하게", en: "Clearer AI labelling and privacy notices" },

@@ -12,24 +12,24 @@
  */
 @theme {
   /* Surfaces */
-  --color-bg: #faf8f5;
+  --color-bg: #f6f8fb;
   --color-surface: #ffffff;
-  --color-surface-2: #f3efe9;
-  --color-hairline: rgba(43, 30, 18, 0.09);
-  --color-hairline-str: rgba(43, 30, 18, 0.16);
+  --color-surface-2: #edf1f7;
+  --color-hairline: rgba(15, 30, 60, 0.09);
+  --color-hairline-str: rgba(15, 30, 60, 0.16);
 
   /* Text — muted/subtle measured against bg, surface, and surface-2 to
      clear WCAG AA (4.5:1) on all three; the original slate-500/slate-400
      pairing read fine in isolation but measured as low as 2.4:1 on some
      surfaces. */
-  --color-fg: #1c1814;
-  --color-fg-muted: #554d45;
-  --color-fg-subtle: #675f57;
+  --color-fg: #111827;
+  --color-fg-muted: #475467;
+  --color-fg-subtle: #5a6577;
 
-  /* Brand accent — Haeba Sun (deep sunrise orange; white text on it clears AA) */
-  --color-accent: #c2410c;
-  --color-accent-hover: #9a3412;
-  --color-accent-dim: #fff1e7;
+  /* Brand accent — the 지니에듀테크 gem's blue (white text on it is 7.7:1) */
+  --color-accent: #1450a8;
+  --color-accent-hover: #0f3d85;
+  --color-accent-dim: #e8f0fb;
 
   /* AI / intelligence accent — deep teal */
   --color-ai: #0f766e;
@@ -112,9 +112,6 @@
   --color-ring: var(--color-accent);
 }
 
-/* Dark mode — the toggle-only theme. These are the previously-shipped,
- * already-tuned dark values, carried forward as the `.dark` override now
- * that light is the primary target. */
 /* The 지니에듀테크 gem in the logo (components/brand-mark.tsx): deep blues on
    light, lighter blues on dark so the facets stay visible. */
 :root {
@@ -128,21 +125,22 @@
   --gem-3: #2b66d9;
 }
 
+/* Dark mode — the toggle theme: deep navy surfaces under the same blue. */
 .dark {
-  --color-bg: #13110f;
-  --color-surface: #1b1815;
-  --color-surface-2: #24201c;
-  --color-hairline: rgba(255, 244, 232, 0.09);
-  --color-hairline-str: rgba(255, 244, 232, 0.16);
+  --color-bg: #0e131f;
+  --color-surface: #151c2c;
+  --color-surface-2: #1d2538;
+  --color-hairline: rgba(220, 230, 255, 0.09);
+  --color-hairline-str: rgba(220, 230, 255, 0.16);
 
-  --color-fg: #f6f1ea;
-  --color-fg-muted: #b8afa5;
-  --color-fg-subtle: #a0978d;
+  --color-fg: #eef2f8;
+  --color-fg-muted: #aab4c5;
+  --color-fg-subtle: #939eb2;
   --color-danger: #fb7185;
 
-  --color-accent: #c2410c;
-  --color-accent-hover: #ea580c;
-  --color-accent-dim: rgba(234, 88, 12, 0.16);
+  --color-accent: #2563c9;
+  --color-accent-hover: #2f72dc;
+  --color-accent-dim: rgba(63, 142, 240, 0.16);
 
   --color-ai: #2dd4bf;
   --color-ai-dim: rgba(45, 212, 191, 0.14);
@@ -152,11 +150,11 @@
   --color-warn: #f5a524;
 }
 
-/* In dark mode the deep accent stays for fills (white text on it clears
-   AA) but is too dark as text on the dark surfaces (3.4–3.6:1). Accent
-   text, links and icons use a lighter sunrise orange there (≈8:1). */
-.dark :is(.text-accent, .hover\:text-accent:hover, .group:hover .group-hover\:text-accent) {
-  color: #fb923c;
+/* In dark mode the accent stays for fills (white text on it clears AA)
+   but is too dark as text on the dark surfaces. Accent text, links and
+   icons use a lighter gem blue there (≈8:1). */
+.dark :is(.text-accent, .hover\:text-accent:hover, .group:hover .group-hover\:text-accent, .text-studio-cyan, .hover\:text-studio-cyan:hover, .group:hover .group-hover\:text-studio-cyan) {
+  color: #7ab6ff;
 }
 
 /*
@@ -172,18 +170,18 @@
  * clear AA on the page background; dark values are tuned for the dark theme.
  */
 :root {
-  /* Haeba Sun: one signature colour (a deep sunrise orange) and its
-     darker ember for depth. The old cyan/violet names are kept as the
-     variable names so every component follows the new identity. */
-  --studio-cyan: oklch(0.55 0.18 45);
-  --studio-violet: oklch(0.47 0.15 38);
+  /* The gem's blues: the gradient on primary buttons and highlighted
+     text runs from the lighter to the deeper one. (The cyan/violet names
+     are from the first prototype; every component reads them.) */
+  --studio-cyan: #2a6fd0;
+  --studio-violet: #12449a;
   --studio-success: oklch(0.55 0.13 160);
   --studio-warning: oklch(0.7 0.16 75);
-  --studio-grid: oklch(0.3 0.03 50 / 4%);
+  --studio-grid: oklch(0.3 0.04 255 / 4%);
 }
 .dark {
-  --studio-cyan: oklch(0.75 0.16 55);
-  --studio-violet: oklch(0.64 0.18 42);
+  --studio-cyan: #2a6ad0;
+  --studio-violet: #1a47a3;
   --studio-success: oklch(0.79 0.17 160);
   --studio-warning: oklch(0.78 0.16 78);
   --studio-grid: oklch(1 0 0 / 2.5%);
@@ -211,7 +209,7 @@
   --glass-rim: transparent;
   --glass-edge: var(--color-hairline);
   --glass-sheen: transparent;
-  --glass-shadow: 0 1px 2px oklch(0.3 0.03 50 / 6%), 0 10px 28px -18px oklch(0.3 0.04 50 / 20%);
+  --glass-shadow: 0 1px 2px oklch(0.3 0.03 255 / 6%), 0 10px 28px -18px oklch(0.3 0.05 255 / 20%);
   --spring: cubic-bezier(0.22, 1.25, 0.36, 1);
   --ease-glide: cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -354,6 +352,12 @@ p { text-wrap: pretty; }
 @keyframes page-enter { from { transform: translateY(8px); } to { transform: none; } }
 .page-enter { animation: page-enter 0.25s cubic-bezier(0.22, 1, 0.36, 1); }
 @media (prefers-reduced-motion: reduce) { .page-enter { animation: none; } }
+
+/* The Quick start button (components/shell/app-shell.tsx): a ring that
+   swells out three times after load, then rests. */
+@keyframes quick-pulse { from { box-shadow: 0 0 0 0 color-mix(in oklch, var(--studio-cyan) 55%, transparent); } to { box-shadow: 0 0 0 14px transparent; } }
+.quick-pulse { animation: quick-pulse 1.8s ease-out 0.6s 3; }
+@media (prefers-reduced-motion: reduce) { .quick-pulse { animation: none; } }
 
 /* Run progress bar (components/run-progress.tsx): a light sweep across the fill. */
 @keyframes run-progress-shimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }

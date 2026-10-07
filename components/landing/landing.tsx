@@ -71,10 +71,11 @@ function Nav() {
           >
             <Link
               href="/quick"
-              className="mr-2 inline-flex h-9 items-center gap-1.5 rounded-xl bg-accent px-3.5 text-sm font-semibold whitespace-nowrap text-white shadow-[0_8px_20px_-10px_var(--color-accent)] transition-colors hover:bg-accent-hover"
+              className="studio-gradient-bg relative mr-2 inline-flex h-10 items-center gap-1.5 rounded-xl px-4 text-sm font-bold whitespace-nowrap text-white shadow-[inset_0_1px_0_oklch(1_0_0/30%),0_10px_24px_-10px_var(--studio-violet)] transition-transform duration-500 ease-[var(--spring)] hover:-translate-y-0.5"
             >
-              <Wand2 size={15} aria-hidden />
-              {L({ ko: "가게 홍보 바로 시작하기", en: "Start shop marketing" })}
+              <span className="quick-pulse absolute inset-0 rounded-xl" aria-hidden />
+              <Wand2 size={16} className="relative" aria-hidden />
+              <span className="relative">{L({ ko: "가게 홍보 바로 시작하기", en: "Start shop marketing" })}</span>
             </Link>
             {[
               ["#flow", { ko: "흐름", en: "Flow" }],
@@ -96,10 +97,11 @@ function Nav() {
             {/* Phones have no room for the page links: the quick start keeps its place up here. */}
             <Link
               href="/quick"
-              className="inline-flex h-10 items-center gap-1 rounded-xl bg-accent px-3 text-sm font-semibold whitespace-nowrap text-white md:hidden"
+              className="studio-gradient-bg relative inline-flex h-10 items-center gap-1 rounded-xl px-3 text-sm font-bold whitespace-nowrap text-white shadow-[0_10px_24px_-10px_var(--studio-violet)] md:hidden"
             >
-              <Wand2 size={15} aria-hidden />
-              {L({ ko: "홍보 바로 시작", en: "Quick start" })}
+              <span className="quick-pulse absolute inset-0 rounded-xl" aria-hidden />
+              <Wand2 size={15} className="relative" aria-hidden />
+              <span className="relative">{L({ ko: "홍보 바로 시작", en: "Quick start" })}</span>
             </Link>
             {signedIn ? (
               <Link href="/studio" className={cn(primaryButton, "h-10 whitespace-nowrap max-sm:px-3.5")}>
@@ -113,7 +115,8 @@ function Nav() {
                 >
                   {L({ ko: "로그인", en: "Sign in" })}
                 </Link>
-                <Link href="/auth" className={cn(primaryButton, "h-10 whitespace-nowrap max-sm:px-3.5")}>
+                {/* Outlined, so the quick start stays the one filled button up here. */}
+                <Link href="/auth" className={cn(secondaryButton, "h-10 whitespace-nowrap max-sm:px-3.5")}>
                   {L({ ko: "시작하기", en: "Get started" })}
                 </Link>
               </>
