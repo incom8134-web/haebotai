@@ -1,6 +1,6 @@
 "use client";
 
-import { BrandMark } from "@/components/brand-mark";
+import { BrandLogo } from "@/components/brand-mark";
 import { Suspense, useEffect, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -75,7 +75,7 @@ function AuthCard() {
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       className="w-full max-w-[420px] rounded-[28px] border border-hairline bg-surface p-7 shadow-[0_30px_80px_-50px_rgba(43,30,18,0.5)] sm:p-9"
     >
-      <BrandMark size={48} priority />
+      <BrandLogo height={30} />
       <h1 className="mt-6 font-display text-[28px] leading-tight font-bold tracking-[-0.02em] break-keep">{L({ ko: "AI 해바 시작하기", en: "Start with AI Haeba" })}</h1>
       <p className="mt-2 text-sm leading-relaxed break-keep text-fg-muted">
         {next !== HOME_AFTER_SIGN_IN

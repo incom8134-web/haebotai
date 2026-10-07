@@ -130,6 +130,19 @@
 /* Dark mode — the toggle-only theme. These are the previously-shipped,
  * already-tuned dark values, carried forward as the `.dark` override now
  * that light is the primary target. */
+/* The 지니에듀테크 gem in the logo (components/brand-mark.tsx): deep blues on
+   light, lighter blues on dark so the facets stay visible. */
+:root {
+  --gem-1: #2a86d6;
+  --gem-2: #1450a8;
+  --gem-3: #0b2a6e;
+}
+.dark {
+  --gem-1: #6cb8ff;
+  --gem-2: #3f8ef0;
+  --gem-3: #2b66d9;
+}
+
 .dark {
   --color-bg: #13110f;
   --color-surface: #1b1815;

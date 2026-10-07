@@ -6,7 +6,7 @@ import { motion } from "motion/react";
 import { ArrowRight, Check, Plus, Wand2 } from "lucide-react";
 import { BusinessInfo } from "@/components/site/business-info";
 import { BUSINESS } from "@/lib/site/business";
-import { BrandMark } from "@/components/brand-mark";
+import { BrandLogo, BrandMark } from "@/components/brand-mark";
 import { ThemeLangControls } from "@/components/shell/app-shell";
 import { primaryButton, secondaryButton } from "@/components/site/page";
 import { CreditPreview, PlanCards } from "@/components/site/plan-cards";
@@ -60,11 +60,10 @@ function Nav() {
       </a>
       <header className="sticky top-0 z-40 border-b border-hairline bg-bg/85 px-3 pt-[env(safe-area-inset-top)] backdrop-blur md:px-6">
         <div className="mx-auto flex h-16 max-w-[1200px] items-center gap-2">
-          <Link href="/" className="flex items-center gap-2 pr-2">
-            <BrandMark size={30} priority />
-            <span className="text-sm font-bold tracking-[-0.02em] text-fg">
-              {L({ ko: "AI 해바", en: "AI Haeba" })}
-            </span>
+          <Link href="/" className="flex items-center pr-2">
+            {/* "AI Haeba" is wider than "AI 해바": on the narrowest phones the English header shows the gem alone. */}
+            <BrandMark size={30} label="AI Haeba" className={L({ ko: "hidden", en: "min-[400px]:hidden" })} />
+            <BrandLogo height={24} className={cn("h-[19px] w-auto sm:h-6", L({ ko: "", en: "hidden min-[400px]:block" }))} />
           </Link>
           <nav
             className="mx-auto hidden items-center gap-1 md:flex"
@@ -103,7 +102,7 @@ function Nav() {
               {L({ ko: "홍보 바로 시작", en: "Quick start" })}
             </Link>
             {signedIn ? (
-              <Link href="/studio" className={cn(primaryButton, "h-10")}>
+              <Link href="/studio" className={cn(primaryButton, "h-10 whitespace-nowrap max-sm:px-3.5")}>
                 {L({ ko: "스튜디오로", en: "Go to Studio" })}
               </Link>
             ) : (
@@ -114,7 +113,7 @@ function Nav() {
                 >
                   {L({ ko: "로그인", en: "Sign in" })}
                 </Link>
-                <Link href="/auth" className={cn(primaryButton, "h-10")}>
+                <Link href="/auth" className={cn(primaryButton, "h-10 whitespace-nowrap max-sm:px-3.5")}>
                   {L({ ko: "시작하기", en: "Get started" })}
                 </Link>
               </>
@@ -360,7 +359,7 @@ function Footer() {
     <footer className="border-t border-hairline px-4 py-10 md:px-6">
       <div className="mx-auto flex max-w-[1200px] flex-col gap-6 md:flex-row md:items-center md:justify-between">
         <p className="flex items-center gap-2 text-sm font-semibold text-fg">
-          <BrandMark size={28} /> {L({ ko: "AI 해바", en: "AI Haeba" })}
+          <BrandLogo height={22} />
         </p>
         <nav
           className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-fg-muted"

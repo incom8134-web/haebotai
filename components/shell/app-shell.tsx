@@ -2,7 +2,7 @@
 
 import { toolSlug } from "@/lib/tools/catalog";
 import { CATEGORY_ORDER as CATEGORY_ORDER_ALL } from "@/lib/tools/catalog";
-import { BrandMark } from "@/components/brand-mark";
+import { BrandLogo, BrandMark } from "@/components/brand-mark";
 import { useEffect, useMemo, useState, useSyncExternalStore, useTransition } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -271,8 +271,8 @@ function AppShell({ user, balance, plan, answeredTickets, children }: ShellProps
         <div aria-hidden className="absolute inset-x-0 top-0 -z-10 h-[88px] bg-gradient-to-b from-bg via-bg/80 to-transparent" />
         <div className="mx-auto flex max-w-[1240px] items-center gap-2">
           <Link href="/studio" className="glass pointer-events-auto flex h-11 items-center gap-2.5 rounded-2xl pr-4 pl-1.5">
-            <BrandMark size={32} priority />
-            <span className="hidden text-sm font-bold tracking-[-0.02em] whitespace-nowrap min-[440px]:inline">{L({ ko: "AI 해바", en: "AI Haeba" })}</span>
+            <BrandMark size={30} label={L({ ko: "AI 해바", en: "AI Haeba" })} className="ml-1 min-[440px]:hidden" />
+            <BrandLogo height={21} className="ml-1.5 hidden min-[440px]:block" />
           </Link>
           <button
             type="button"
