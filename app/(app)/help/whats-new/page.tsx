@@ -1,7 +1,8 @@
 import { HelpTitle } from "@/components/help/help-pages";
 import { WhatsNew } from "@/components/help/help-view";
+import { titled } from "@/lib/site/meta";
 
-export const metadata = { title: "새로운 점 — AI 해바" };
+export const generateMetadata = titled("새로운 점", "What's new");
 
 export default function WhatsNewPage() {
   return (

@@ -1,6 +1,7 @@
 import { CheckoutFail } from "@/components/account/checkout";
+import { titled } from "@/lib/site/meta";
 
-export const metadata = { title: "결제 실패 — AI 해바" };
+export const generateMetadata = titled("결제 실패", "Payment failed");
 
 // Toss redirects here with ?code&message&orderId when the payment window
 // fails or the buyer closes it. Nothing was charged, and the pending

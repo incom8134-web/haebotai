@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useEffect, useSyncExternalStore } from "react";
+import { createContext, useContext, useEffect, useRef, useSyncExternalStore } from "react";
+import { useRouter } from "next/navigation";
 import { dictionaries, type DictKey, type Locale } from "./dictionaries";
 
 // The choice lives in a `locale` cookie so the server renders the right
@@ -47,6 +48,16 @@ function LocaleProvider({ initialLocale, children }: { initialLocale: Locale; ch
   useEffect(() => {
     document.documentElement.lang = locale;
   }, [locale]);
+
+  // Switching language re-renders the server parts too, so the tab title
+  // ("Pricing — AI Haeba" / "요금 — AI 해바", lib/site/meta.ts) follows at once.
+  const router = useRouter();
+  const shown = useRef(locale);
+  useEffect(() => {
+    if (shown.current === locale) return;
+    shown.current = locale;
+    router.refresh();
+  }, [locale, router]);
 
   // One-time move of a choice saved by the older localStorage version.
   useEffect(() => {

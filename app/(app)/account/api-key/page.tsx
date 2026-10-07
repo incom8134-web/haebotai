@@ -3,8 +3,9 @@ import { ArrowLeft } from "lucide-react";
 import { ApiKeyPanel } from "@/components/account/account-view";
 import { getApiKeyStatus } from "@/lib/api-keys";
 import { cookies } from "next/headers";
+import { titled } from "@/lib/site/meta";
 
-export const metadata = { title: "내 API 키 — AI 해바" };
+export const generateMetadata = titled("내 API 키", "My API key");
 
 // ?next= — the request the member was on when the key was missing (a tool
 // page, often from 바로 만들기). Only same-site paths are followed.

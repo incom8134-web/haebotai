@@ -1,7 +1,8 @@
 import { LegalDocView } from "@/components/site/legal-doc";
 import { PRIVACY } from "@/lib/site/legal";
+import { titled } from "@/lib/site/meta";
 
-export const metadata = { title: "개인정보 처리방침 — AI 해바" };
+export const generateMetadata = titled("개인정보 처리방침", "Privacy policy");
 
 export default function Page() {
   return <LegalDocView doc={PRIVACY} />;

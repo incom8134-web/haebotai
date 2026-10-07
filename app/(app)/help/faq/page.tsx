@@ -1,7 +1,8 @@
 import { HelpTitle } from "@/components/help/help-pages";
 import { Faq } from "@/components/help/help-view";
+import { titled } from "@/lib/site/meta";
 
-export const metadata = { title: "자주 묻는 질문 — AI 해바" };
+export const generateMetadata = titled("자주 묻는 질문", "FAQ");
 
 export default function FaqPage() {
   return (

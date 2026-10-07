@@ -1,8 +1,9 @@
 import { OnboardingFlow } from "@/components/onboarding/onboarding-flow";
 import { displayName } from "@/lib/site/display-name";
 import { getCurrentUser } from "@/lib/supabase/user";
+import { titled } from "@/lib/site/meta";
 
-export const metadata = { title: "시작하기 — AI 해바" };
+export const generateMetadata = titled("시작하기", "Get started");
 
 export default async function OnboardingPage() {
   const user = await getCurrentUser();

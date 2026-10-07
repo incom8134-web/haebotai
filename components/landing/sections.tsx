@@ -420,7 +420,7 @@ export function StepsSection() {
         })}
       />
       <motion.div {...reveal} aria-hidden className="mt-10 aspect-video overflow-hidden rounded-[28px] border border-hairline md:aspect-[21/9]">
-        <SceneVideo name="how" className="dark:opacity-50" />
+        <SceneVideo name="how" loop className="dark:opacity-50" />
       </motion.div>
       <ol className="mt-4 grid gap-3 md:grid-cols-5">
         {STEPS.map((s, i) => (

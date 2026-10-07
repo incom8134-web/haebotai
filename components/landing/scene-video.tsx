@@ -6,9 +6,11 @@ import { useBi } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
 
 // The three landing-page videos (public/videos). Two are quiet background
-// scenes — a paper-and-light build-up that plays once when it scrolls into
-// view and then holds its last frame (they are builds, not loops, and a
-// held frame costs no CPU). The third is a short story you start yourself.
+// scenes — a paper-and-light build-up. The hero plays once when it scrolls
+// into view and holds its last frame (a held frame costs no CPU); the
+// "how" scene loops while visible, using a `-loop` file that plays the
+// build forward then backward, so the loop has no visible cut. The third
+// is a short story you start yourself.
 //
 // Rules for all of them: the poster shows first (it is the page's image
 // while nothing plays); nothing plays for people who prefer reduced
@@ -37,8 +39,8 @@ function useStill(): boolean {
 
 const noop = () => () => {};
 
-/** A decorative scene that plays once when visible, then holds its last frame. */
-export function SceneVideo({ name, className, priority = false }: { name: SceneName; className?: string; priority?: boolean }) {
+/** A decorative scene that plays when visible: once (holding its last frame), or on a seamless loop. */
+export function SceneVideo({ name, className, priority = false, loop = false }: { name: SceneName; className?: string; priority?: boolean; loop?: boolean }) {
   const still = useStill();
   // The server renders no <source>: the browser must not start downloading
   // before we know whether motion is wanted.
@@ -77,10 +79,12 @@ export function SceneVideo({ name, className, priority = false }: { name: SceneN
   }, [armed]);
 
   const src = `/videos/${name}`;
+  const file = loop ? `${src}-loop` : src;
   return (
     <video
       ref={ref}
       muted
+      loop={loop}
       playsInline
       preload={armed ? "auto" : "none"}
       poster={`${src}-poster.jpg`}
@@ -91,8 +95,8 @@ export function SceneVideo({ name, className, priority = false }: { name: SceneN
     >
       {armed ? (
         <>
-          <source src={`${src}-sm.mp4`} media="(max-width: 767px)" type="video/mp4" />
-          <source src={`${src}.mp4`} type="video/mp4" />
+          <source src={`${file}-sm.mp4`} media="(max-width: 767px)" type="video/mp4" />
+          <source src={`${file}.mp4`} type="video/mp4" />
         </>
       ) : null}
     </video>
