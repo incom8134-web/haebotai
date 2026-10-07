@@ -9,6 +9,7 @@ import { addUsage, generateOneImage, getClient, PRO_IMAGE_MODEL, TEXT_MODEL, toG
 import type { ImageStorageContext, TokenUsage } from "./types";
 import type { SceneType } from "@/lib/site-kit/kit";
 import { assembleSite, toJs, unknownImports, viteProject } from "@/lib/site-kit/assemble";
+import { labelAiImage } from "./ai-label";
 
 // The two visual tools, done the way a design studio would: an art
 // director first fixes the concept, palette, type and shot list; the
@@ -40,7 +41,7 @@ async function shoot(
     const { image, usage } = await generateOneImage(manifest, [{ text }], Math.floor(Math.random() * 2 ** 31), abortSignal, ratio);
     const ext = image.mimeType.includes("png") ? "png" : "jpg";
     const path = `${storage.userId}/${folder}/${storage.runId}/${name}.${ext}`;
-    const { error } = await storage.supabase.storage.from("exports").upload(path, Buffer.from(image.data, "base64"), { contentType: image.mimeType, upsert: true });
+    const { error } = await storage.supabase.storage.from("exports").upload(path, labelAiImage(Buffer.from(image.data, "base64")), { contentType: image.mimeType, upsert: true });
     if (error) throw new Error(error.message);
     const { data } = await storage.supabase.storage.from("exports").createSignedUrl(path, YEAR);
     if (!data?.signedUrl) throw new Error("signed url");

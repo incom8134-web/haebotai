@@ -23,6 +23,7 @@ import { zodToJsonSchema } from "./schema";
 import { renderLogoLockup, type LogoTracking, type LogoWeight } from "@/lib/tools/render/logo";
 import type { AiAdapter, AiStreamEvent, GenerationResult, ImageStorageContext, TokenUsage } from "./types";
 import { outputSchemaFor } from "@/lib/tools/schemas";
+import { labelAiImage } from "./ai-label";
 
 // Moved from lib/tools/generate.ts verbatim (rotation, search grounding,
 // image generation) — this is the Gemini half of the provider-neutral
@@ -522,7 +523,8 @@ export async function drawLogo(
   let usage: TokenUsage = { inputTokens: 0, outputTokens: 0 };
 
   const upload = async (path: string, bytes: Buffer, contentType = "image/png") => {
-    const { error } = await storage.supabase.storage.from("exports").upload(path, bytes, { contentType, upsert: true });
+    // A logo is an AI symbol with the name typeset beside it, so it is labelled as containing AI content.
+    const { error } = await storage.supabase.storage.from("exports").upload(path, labelAiImage(bytes, "compositeWithTrainedAlgorithmicMedia"), { contentType, upsert: true });
     if (error) throw new Error(`이미지 저장 실패: ${error.message}`);
     const { data: signed, error: signError } = await storage.supabase.storage.from("exports").createSignedUrl(path, 60 * 60 * 24 * 365);
     if (signError || !signed) throw new Error(`이미지 URL 생성 실패: ${signError?.message ?? "알 수 없는 오류"}`);
@@ -622,7 +624,7 @@ async function generateImages(
 
       const { error: uploadError } = await storage.supabase.storage
         .from("exports")
-        .upload(path, Buffer.from(image.data, "base64"), { contentType: image.mimeType, upsert: true });
+        .upload(path, labelAiImage(Buffer.from(image.data, "base64")), { contentType: image.mimeType, upsert: true });
       if (uploadError) throw new Error(`이미지 저장 실패: ${uploadError.message}`);
 
       // ponytail: 1-year signed URL baked straight into the stored run —

@@ -169,7 +169,7 @@ function AuthCard() {
         <ul className="mt-1.5 space-y-1 text-2xs leading-relaxed break-keep text-fg-muted">
           <li>{hasKakao ? L({ ko: "Google·카카오 계정으로만 로그인해요. 비밀번호를 만들거나 저장하지 않아요.", en: "Google or Kakao sign-in only — no password is created or stored." }) : L({ ko: "Google로만 로그인해요. 비밀번호를 만들거나 저장하지 않아요.", en: "Google sign-in only — no password is created or stored." })}</li>
           <li>{L({ ko: "이름과 이메일만 쓰고, 프로필 사진은 저장하지 않아요.", en: "We use your name and email; your profile photo isn't kept." })}</li>
-          <li>{L({ ko: "입력과 결과는 AI 학습에 쓰지 않아요. 계정에서 언제든 지울 수 있어요.", en: "Inputs and results are never used for training, and you can delete them any time." })}</li>
+          <li>{L({ ko: "AI 해바는 입력과 결과를 학습에 쓰지 않아요. 계정에서 언제든 지울 수 있어요.", en: "AI Haeba doesn't train on your inputs or results, and you can delete them any time." })}</li>
         </ul>
       </div>
 
