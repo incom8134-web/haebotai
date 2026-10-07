@@ -1,8 +1,9 @@
 import { QuickLinks } from "@/components/links/quick-links";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/supabase/user";
+import { titled } from "@/lib/site/meta";
 
-export const metadata = { title: "바로가기 — AI 해바" };
+export const generateMetadata = titled("바로가기", "Quick links");
 
 export default async function LinksPage() {
   const supabase = await createClient();

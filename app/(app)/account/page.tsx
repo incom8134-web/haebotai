@@ -6,8 +6,9 @@ import { getApiKeyStatus } from "@/lib/api-keys";
 import { getBusinessProfile } from "@/lib/profile";
 import { getCurrentUser } from "@/lib/supabase/user";
 import { consentOf } from "@/lib/consent";
+import { titled } from "@/lib/site/meta";
 
-export const metadata = { title: "내 계정 — AI 해바" };
+export const generateMetadata = titled("내 계정", "My account");
 
 export default async function AccountPage() {
   const user = await getCurrentUser();
