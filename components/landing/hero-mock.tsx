@@ -297,7 +297,7 @@ export function HeroMock() {
     <div
       // Sized for the tallest stage, so the page below never jumps as the
       // stages change.
-      className="flex min-h-[584px] flex-col overflow-hidden rounded-[24px] border border-hairline bg-surface shadow-[0_30px_80px_-40px_rgba(43,30,18,0.45)] sm:min-h-[430px]"
+      className="flex min-h-[584px] flex-col overflow-hidden rounded-[24px] border border-hairline bg-surface shadow-[0_30px_80px_-40px_rgba(15,30,60,0.45)] sm:min-h-[430px]"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
