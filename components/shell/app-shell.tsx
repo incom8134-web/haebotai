@@ -50,7 +50,10 @@ const ITEMS: Item[] = [
   { href: "/account", label: { ko: "계정", en: "Account" }, icon: CircleUserRound, match: (p) => p.startsWith("/account") },
 ];
 
-const MOBILE = ["/studio", "/quick", "/tools", "/library", "/account"];
+// Quick start is the first thing an owner should press: it leads the dock
+// and sits raised in the middle of the phone tab bar.
+const FEATURED = "/quick";
+const MOBILE = ["/studio", "/tools", FEATURED, "/library", "/account"];
 const CATEGORY_ORDER: CategoryId[] = CATEGORY_ORDER_ALL;
 
 function useHelpBadge(answeredTickets: number) {
@@ -84,6 +87,29 @@ function DockButton({ item, active, badge, onClick }: { item: Item; active: bool
       <span className="glass-strong pointer-events-none absolute top-1/2 right-[calc(100%+12px)] translate-x-2 -translate-y-1/2 rounded-xl px-3 py-1.5 text-xs font-medium whitespace-nowrap text-fg opacity-0 transition-all duration-300 ease-[var(--ease-glide)] group-hover:translate-x-0 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:opacity-100">
         {L(item.label)}
       </span>
+    </Link>
+  );
+}
+
+/** The dock's lead button: always filled, labelled, and pulsing a few times on load. */
+function FeaturedDockButton({ item, active }: { item: Item; active: boolean }) {
+  const L = useBi();
+  return (
+    <Link
+      href={item.href}
+      aria-current={active ? "page" : undefined}
+      className="group flex w-14 flex-col items-center gap-1 rounded-2xl pt-1 pb-0.5 outline-none focus-visible:ring-2 focus-visible:ring-studio-cyan"
+    >
+      <span
+        className={cn(
+          "studio-gradient-bg relative grid size-12 place-items-center rounded-2xl text-white shadow-[inset_0_1px_0_oklch(1_0_0/30%),0_10px_24px_-8px_var(--studio-violet)] transition-transform duration-500 ease-[var(--spring)] group-hover:scale-105",
+          active && "ring-2 ring-studio-cyan ring-offset-2 ring-offset-surface",
+        )}
+      >
+        {active ? null : <span className="quick-pulse absolute inset-0 rounded-2xl" aria-hidden />}
+        <item.icon size={21} strokeWidth={2} className="relative" aria-hidden />
+      </span>
+      <span className="text-[10px] leading-tight font-bold whitespace-nowrap text-accent">{L(item.label)}</span>
     </Link>
   );
 }
@@ -312,7 +338,11 @@ function AppShell({ user, balance, plan, answeredTickets, children }: ShellProps
 
       {/* Right-side dock (desktop). */}
       <nav aria-label={L({ ko: "주 메뉴", en: "Main" })} className="glass-strong fixed top-1/2 right-4 z-40 hidden -translate-y-1/2 flex-col items-center gap-1 rounded-[28px] p-2 lg:flex">
-        {ITEMS.map((item) => (
+        {ITEMS.filter((item) => item.href === FEATURED).map((item) => (
+          <FeaturedDockButton key={item.href} item={item} active={item.match(pathname)} />
+        ))}
+        <span className="my-1 h-px w-8 bg-hairline" aria-hidden />
+        {ITEMS.filter((item) => item.href !== FEATURED).map((item) => (
           <DockButton
             key={item.href}
             item={item}
@@ -346,8 +376,24 @@ function AppShell({ user, balance, plan, answeredTickets, children }: ShellProps
         aria-label={L({ ko: "주 메뉴", en: "Main" })}
         className="glass-strong tab-bar fixed inset-x-3 bottom-[max(12px,env(safe-area-inset-bottom))] z-40 flex items-center justify-around rounded-[26px] p-1.5 lg:hidden"
       >
-        {ITEMS.filter((i) => MOBILE.includes(i.href)).map((item) => {
+        {MOBILE.map((href) => ITEMS.find((i) => i.href === href)!).map((item) => {
           const active = item.match(pathname);
+          if (item.href === FEATURED) {
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={active ? "page" : undefined}
+                className="relative -mt-7 flex min-w-0 flex-1 flex-col items-center gap-1 text-[10px] font-bold text-accent"
+              >
+                <span className="studio-gradient-bg relative grid size-14 place-items-center rounded-full text-white shadow-[0_12px_28px_-10px_var(--studio-violet)] ring-4 ring-bg">
+                  {active ? null : <span className="quick-pulse absolute inset-0 rounded-full" aria-hidden />}
+                  <item.icon size={23} strokeWidth={2} className="relative" aria-hidden />
+                </span>
+                <span className="relative">{L(item.label)}</span>
+              </Link>
+            );
+          }
           return (
             <Link
               key={item.href}

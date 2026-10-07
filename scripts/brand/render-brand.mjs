@@ -21,7 +21,7 @@ const BLACK = fontkit.openSync(join(FONT_DIR, "Pretendard-Black.otf"));
 const FONTS = ["Pretendard-Bold.otf", "Pretendard-ExtraBold.otf", "Pretendard-Medium.otf", "Pretendard-Regular.otf"].map((f) => join(FONT_DIR, f));
 
 const INK = "#111111";
-const PAPER = "#FAF8F5";
+const PAPER = "#F6F8FB";
 const GEM_LIGHT = ["#2A86D6", "#1450A8", "#0B2A6E"]; // on light backgrounds
 const GEM_DARK = ["#6CB8FF", "#3F8EF0", "#2B66D9"]; // on dark backgrounds
 const r1 = (n) => Math.round(n * 10) / 10;
@@ -143,8 +143,8 @@ const og = png(
   <circle cx="1060" cy="700" r="300" fill="url(#glow)" opacity="0.12"/>
   <text x="88" y="330" font-family="Pretendard" font-weight="800" font-size="58" fill="${INK}" letter-spacing="-1.5">아이디어를 사업으로,</text>
   <text x="88" y="408" font-family="Pretendard" font-weight="800" font-size="58" fill="${GEM_LIGHT[1]}" letter-spacing="-1.5">결과물까지 끝내는 AI 스튜디오</text>
-  <text x="88" y="486" font-family="Pretendard" font-weight="500" font-size="28" fill="#554D45">발견 · 브랜드 · 캠페인 · 문서 · 리서치 — 전문 도구들이 결과를 이어 받습니다</text>
-  <text x="88" y="532" font-family="Pretendard" font-weight="400" font-size="24" fill="#675F57">From idea to brand, sales and operations — tools that hand results forward</text></svg>`,
+  <text x="88" y="486" font-family="Pretendard" font-weight="500" font-size="28" fill="#475467">발견 · 브랜드 · 캠페인 · 문서 · 리서치 — 전문 도구들이 결과를 이어 받습니다</text>
+  <text x="88" y="532" font-family="Pretendard" font-weight="400" font-size="24" fill="#5A6577">From idea to brand, sales and operations — tools that hand results forward</text></svg>`,
   1200,
 );
 const ogLogoH = 84, ogLogoW = Math.round((ogLogoH * ko.width) / ko.height);

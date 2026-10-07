@@ -73,7 +73,7 @@ function AuthCard() {
       initial={{ opacity: 0, y: 16, filter: "blur(6px)" }}
       animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      className="w-full max-w-[420px] rounded-[28px] border border-hairline bg-surface p-7 shadow-[0_30px_80px_-50px_rgba(43,30,18,0.5)] sm:p-9"
+      className="w-full max-w-[420px] rounded-[28px] border border-hairline bg-surface p-7 shadow-[0_30px_80px_-50px_rgba(15,30,60,0.5)] sm:p-9"
     >
       <BrandLogo height={30} />
       <h1 className="mt-6 font-display text-[28px] leading-tight font-bold tracking-[-0.02em] break-keep">{L({ ko: "AI 해바 시작하기", en: "Start with AI Haeba" })}</h1>
@@ -219,7 +219,7 @@ function AuthPhoto() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-      className="relative max-w-xl overflow-hidden rounded-[28px] bg-[#2a1d14] shadow-[0_40px_90px_-50px_rgba(43,30,18,0.7)]"
+      className="relative max-w-xl overflow-hidden rounded-[28px] bg-[#0f172a] shadow-[0_40px_90px_-50px_rgba(15,30,60,0.7)]"
     >
       <div className="relative aspect-[16/10] lg:aspect-[2/1]">
         <Image
@@ -236,16 +236,16 @@ function AuthPhoto() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.5 }}
-          className="max-w-[85%] self-start rounded-2xl rounded-bl-md bg-white/92 px-3.5 py-2 text-xs leading-relaxed break-keep text-[#1f1b16] shadow-lg backdrop-blur sm:text-sm"
+          className="max-w-[85%] self-start rounded-2xl rounded-bl-md bg-white/92 px-3.5 py-2 text-xs leading-relaxed break-keep text-[#111827] shadow-lg backdrop-blur sm:text-sm"
         >
-          <span className="mr-1.5 text-[10px] font-semibold text-[#c2410c]">{L({ ko: "예시 요청", en: "Example" })}</span>
+          <span className="mr-1.5 text-[10px] font-semibold text-accent">{L({ ko: "예시 요청", en: "Example" })}</span>
           {L({ ko: "딸기 타르트 신메뉴, 인스타 홍보 문구랑 2주 게시 일정 짜 줘", en: "New strawberry tart — write the Instagram copy and a two-week posting plan" })}
         </motion.p>
         <motion.p
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.1, duration: 0.5 }}
-          className="flex items-center gap-1.5 self-end rounded-2xl rounded-br-md bg-[#c2410c] px-3.5 py-2 text-xs font-semibold text-white shadow-lg sm:text-sm"
+          className="flex items-center gap-1.5 self-end rounded-2xl rounded-br-md bg-accent px-3.5 py-2 text-xs font-semibold text-white shadow-lg sm:text-sm"
         >
           <Sparkles size={13} aria-hidden /> {L({ ko: "카피 3안 · 게시 일정 14일 · 이미지 4장", en: "3 copy options · 14-day plan · 4 images" })}
         </motion.p>
