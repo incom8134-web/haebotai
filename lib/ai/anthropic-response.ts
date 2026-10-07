@@ -70,7 +70,7 @@ export function describeFinalAnthropicError(err: unknown): Error {
   return err instanceof Error ? err : new Error(String(err));
 }
 
-export interface AnthropicImage {
+interface AnthropicImage {
   mimeType: string;
   data: string;
 }
@@ -118,7 +118,7 @@ function assertUsableStopReason(response: Pick<Anthropic.Message, "stop_reason">
   }
 }
 
-export interface StructuredResponseLike {
+interface StructuredResponseLike {
   stop_reason: Anthropic.Message["stop_reason"];
   content: Anthropic.Message["content"];
 }

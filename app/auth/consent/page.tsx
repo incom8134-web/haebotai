@@ -4,7 +4,7 @@ import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronDown, LoaderCircle } from "lucide-react";
-import { BrandMark } from "@/components/brand-mark";
+import { BrandLogo } from "@/components/brand-mark";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 import { useBi } from "@/lib/i18n/context";
@@ -56,10 +56,11 @@ const ITEMS: Item[] = [
     detail: {
       head: [{ ko: "이전받는 자 (국가)", en: "Recipient (country)" }, { ko: "항목·목적", en: "Items · purpose" }, { ko: "보유 기간", en: "Kept" }],
       rows: [
-        [{ ko: "Google LLC (미국)", en: "Google LLC (USA)" }, { ko: "로그인 정보, 도구 입력 내용 — 로그인과 AI 결과물 생성", en: "Sign-in data, tool inputs — sign-in and AI generation" }, { ko: "처리 후 각 사 정책 (학습 미이용)", en: "Per provider policy (not used for training)" }],
+        [{ ko: "Google LLC (미국)", en: "Google LLC (USA)" }, { ko: "로그인 정보, 도구 입력 내용 — 로그인과 AI 결과물 생성", en: "Sign-in data, tool inputs — sign-in and AI generation" }, { ko: "처리 후 Google 정책 (유료 등급 키는 학습 미이용, 무료 등급 키는 제품 개선에 쓰일 수 있음)", en: "Per Google's policy (paid-tier keys: not used for training; free-tier keys: may be used to improve products)" }],
         [{ ko: "Vercel Inc. (미국 법인, 서버는 서울)", en: "Vercel Inc. (US company, servers in Seoul)" }, { ko: "요청 처리 중 정보 — 서비스 호스팅", en: "Request data — hosting" }, { ko: "처리 후 즉시", en: "Deleted after processing" }],
         [{ ko: "Supabase Inc. (미국 법인, 저장은 서울)", en: "Supabase Inc. (US company, stored in Seoul)" }, { ko: "회원 정보·결과물 — 인증과 저장", en: "Account data, results — auth and storage" }, { ko: "탈퇴 시까지", en: "Until you leave" }],
-        [{ ko: "Upstash, Inc. (미국 법인)", en: "Upstash, Inc. (US company)" }, { ko: "회원 식별자·요청 시각 — 요청 횟수 제한", en: "User ID, request time — rate limiting" }, { ko: "수 분 ~ 하루 이내 자동 삭제", en: "Auto-deleted within minutes to a day" }],
+        [{ ko: "Upstash, Inc. (미국 법인)", en: "Upstash, Inc. (US company)" }, { ko: "회원 식별자·요청 시각 — 요청 횟수 제한", en: "User ID, request time — rate limiting" }, { ko: "최대 2일 후 자동 삭제", en: "Auto-deleted within 2 days" }],
+        [{ ko: "Anthropic, PBC (미국)", en: "Anthropic, PBC (USA)" }, { ko: "도구 입력 내용 — AI 결과물 생성 (Claude 키를 등록한 경우에만)", en: "Tool inputs — AI generation (only if you add a Claude key)" }, { ko: "처리 후 각 사 정책", en: "Per provider policy" }],
       ],
     },
   },
@@ -178,10 +179,12 @@ function ConsentForm() {
   return (
     <main id="main" className="mx-auto flex min-h-dvh w-full max-w-[560px] flex-col justify-center px-4 py-10">
       <div className="glass-strong rounded-[28px] p-6 sm:p-8">
-        <BrandMark size={40} />
+        <BrandLogo height={26} />
         <h1 className="mt-5 font-display text-2xl leading-tight font-bold break-keep">{L({ ko: "시작하기 전에 확인해 주세요", en: "Before you start" })}</h1>
         <p className="mt-2 text-sm leading-relaxed text-fg-muted break-keep">
           {L({ ko: `${BUSINESS.serviceName}를 쓰려면 아래 필수 항목에 동의가 필요해요. 선택 항목은 동의하지 않아도 됩니다.`, en: "The required items below are needed to use the service. Optional items are up to you." })}
+          {" "}
+          {L({ ko: `${BUSINESS.serviceName}는 생성형 AI 기반 서비스로, 만든 결과물은 AI가 생성한 것이에요.`, en: "AI Haeba is a generative-AI service; everything it makes is AI-generated." })}
         </p>
 
         <fieldset className="mt-6">

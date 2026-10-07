@@ -17,7 +17,7 @@ function key(): string {
   return `agent-continue:${env.SUPABASE_SERVICE_ROLE_KEY}`;
 }
 
-export function signContinuation(runId: string, invocation: number): string {
+function signContinuation(runId: string, invocation: number): string {
   return createHmac("sha256", key()).update(`${runId}:${invocation}`).digest("hex");
 }
 

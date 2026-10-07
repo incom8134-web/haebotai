@@ -12,7 +12,7 @@ import { CopyButton, Kicker, useLocalSet } from "@/components/results/discover/s
 // follows; a platform filter swaps in that platform's version. Hooks can
 // be starred (kept in this browser) and copied.
 
-export const FAMILY_LABELS: Record<string, { ko: string; en: string }> = {
+const FAMILY_LABELS: Record<string, { ko: string; en: string }> = {
   question: { ko: "질문", en: "Question" },
   contrarian: { ko: "통념 뒤집기", en: "Myth-busting" },
   number: { ko: "숫자", en: "Number" },

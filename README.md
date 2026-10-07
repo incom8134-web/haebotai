@@ -133,7 +133,7 @@ Enable the Google provider in Supabase Auth and add
   before changing framework-level code.
 - Engines: Gemini is the platform engine for every tool. Claude runs every
   text tool with the user's own Anthropic key (`/account/api-key`); image
-  tools stay Gemini-only. OpenAI keys can be stored but no tool uses them yet.
+  tools stay Gemini-only. OpenAI keys are not accepted (no tool runs on them).
 - The grant matcher (`grant`) is marked `comingSoon` until a real K-Startup /
   기업마당 data source is wired in: it is listed with a 준비 중 badge, and
   its run page and run route refuse it before any credits are reserved.

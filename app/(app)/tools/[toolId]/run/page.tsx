@@ -56,7 +56,7 @@ export default async function ToolPage({
   ]);
 
   // Which engines this run page actually offers: google is always
-  // available; anthropic/openai only when the capability map lists them
+  // available; anthropic only when the capability map lists them
   // for this tool AND the user has at least one non-broken key — never
   // offer an engine the run route would just reject (product decision:
   // no silent fallback, so don't dangle an option that can't work).

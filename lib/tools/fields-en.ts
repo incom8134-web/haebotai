@@ -1,5 +1,4 @@
-import type { ToolField } from "./types";
-import { localizeWith, type FieldEn, type FieldsEn } from "./localize";
+import type { FieldEn, FieldsEn } from "./localize";
 
 // English labels for every tool's form. The manifests in
 // lib/tools/registry keep Korean labels (they also feed the model
@@ -265,20 +264,7 @@ const FIELDS_EN: Record<string, Record<string, FieldEn>> = {
   },
 };
 
-/** The field as it should read in the UI's language (labels and option labels only). */
 /** This tool's English strings (shared ones included), for a client-side pack. */
 export function fieldsEnFor(toolId: string): FieldsEn {
   return { ...COMMON, ...FIELDS_EN[toolId] };
-}
-
-export function localizeField(toolId: string, field: ToolField, locale: string): ToolField {
-  return localizeWith(fieldsEnFor(toolId), field, locale);
-}
-export function localizeFields(toolId: string, fields: ToolField[], locale: string): ToolField[] {
-  return fields.map((f) => localizeField(toolId, f, locale));
-}
-
-/** Every Korean-labelled field has an English label (checked in tests). */
-export function missingEnglish(toolId: string, fields: ToolField[]): string[] {
-  return fields.filter((f) => !(FIELDS_EN[toolId]?.[f.id] ?? COMMON[f.id])).map((f) => f.id);
 }

@@ -7,10 +7,9 @@ import type { ProviderId } from "./types.ts";
 export const PROVIDER_CAPS: Record<ProviderId, { webSearch: boolean; images: boolean }> = {
   google: { webSearch: true, images: true },
   anthropic: { webSearch: true, images: false },
-  openai: { webSearch: true, images: true },
 };
 
-export interface ToolCapability {
+interface ToolCapability {
   /** Providers currently offered for this tool, in display order. */
   providers: ProviderId[];
   /** Always "google" — Gemini is the platform engine (product decision). */
@@ -25,8 +24,7 @@ export interface ToolCapability {
 // `image`/`brand-model`/`logo` stay google-only — Claude has no image API, no
 // fake integrations. `grant` stays google-only too: it's a static
 // placeholder (lib/tools/generate.ts) that never reaches any adapter, so
-// listing another provider for it would be pure decoration. OpenAI joins
-// the same way in Stage 5. Never hand-list a provider a tool's
+// listing another provider for it would be pure decoration. Never hand-list a provider a tool's
 // requirements rule out (checked against PROVIDER_CAPS by
 // capabilities.test.ts).
 export const TOOL_CAPABILITIES: Record<string, ToolCapability> = {

@@ -35,7 +35,7 @@ export function directives(state: AgentRunState, input: Record<string, unknown>)
 }
 
 /** The agent core's context for a structured tool's run (contract, sources, research). */
-export function coreContext(ctx: StageContext): DocAgentCtx {
+function coreContext(ctx: StageContext): DocAgentCtx {
   const { state } = ctx;
   const values = Object.fromEntries(Object.entries(ctx.input).filter(([k]) => !k.startsWith("_")));
   return {

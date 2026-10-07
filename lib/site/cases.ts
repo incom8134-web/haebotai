@@ -4,7 +4,7 @@ import type { Bilingual } from "@/lib/tools/content";
 // consenting customers (with their permission to publish name and
 // results) — invented testimonials break our own Terms (제10조) and the
 // 표시광고법. The section stays hidden while this list is empty.
-export interface CustomerStory {
+interface CustomerStory {
   id: string;
   business: Bilingual;
   quote: Bilingual;

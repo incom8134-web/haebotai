@@ -23,14 +23,6 @@ export function PageHeader({ title, lead, actions, eyebrow }: { title: string; l
   );
 }
 
-export function Panel({ children, className, as: Tag = "div", id }: { children: React.ReactNode; className?: string; as?: "div" | "section" | "article"; id?: string }) {
-  return (
-    <Tag id={id} className={cn("glass rounded-[24px] p-6", className)}>
-      {children}
-    </Tag>
-  );
-}
-
 export const primaryButton =
   "studio-gradient-bg inline-flex h-11 items-center justify-center gap-2 rounded-2xl px-5 text-sm font-semibold text-white shadow-[inset_0_1px_0_oklch(1_0_0/30%),0_12px_32px_-12px_var(--studio-violet)] transition-[transform,box-shadow] duration-500 ease-[var(--spring)] hover:-translate-y-0.5 hover:shadow-[inset_0_1px_0_oklch(1_0_0/35%),0_18px_40px_-12px_var(--studio-violet)] active:translate-y-0 active:scale-[0.98] disabled:opacity-60 disabled:hover:translate-y-0";
 export const secondaryButton =

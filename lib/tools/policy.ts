@@ -21,7 +21,7 @@
 import { sanitizeSvg } from "./svg.ts";
 import { checkImitation } from "./imitation-guard.ts";
 
-export interface PolicyResult {
+interface PolicyResult {
   ok: boolean;
   reason?: string;
   /** Present when the output was rewritten (e.g. logo SVGs with unrecognized-but-harmless attributes stripped) — the caller should use this in place of the original. */

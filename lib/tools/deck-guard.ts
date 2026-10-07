@@ -36,10 +36,10 @@ const wonValue = (m: RegExpMatchArray) => {
   if (m[4]) return a * 1e3;
   return a;
 };
-export const wonAmountsIn = (text: string) => new Set([...text.matchAll(WON)].map(wonValue));
+const wonAmountsIn = (text: string) => new Set([...text.matchAll(WON)].map(wonValue));
 
 /** Replace won amounts the user never gave with a fill-in marker. */
-export function redactUnknownWon(text: string, allowed: Set<number>): string {
+function redactUnknownWon(text: string, allowed: Set<number>): string {
   return text.replace(WON, (...args) => {
     const m = args as unknown as RegExpMatchArray;
     return allowed.has(wonValue(m)) ? m[0] : "[확인 필요: 금액]";

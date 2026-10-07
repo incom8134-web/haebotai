@@ -11,7 +11,7 @@ export interface FetchedImage {
   type: "png" | "jpg";
 }
 
-export async function fetchImage(url: string): Promise<FetchedImage | null> {
+async function fetchImage(url: string): Promise<FetchedImage | null> {
   if (!isAllowedImageUrl(url, process.env.NEXT_PUBLIC_SUPABASE_URL)) return null;
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(15_000), cache: "no-store" });

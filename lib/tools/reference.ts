@@ -33,7 +33,7 @@ const IMPROVE = (what: string): ReferenceMode => ({
   instruction: `참고 자료는 사용자가 이미 만든 ${what}입니다. 핵심 내용과 사실, 사용자의 의도는 그대로 살리되, 약한 부분(모호한 문장, 근거 없는 주장, 흐름이 끊기는 곳, 뻔한 표현)을 찾아 이 도구의 완성 기준까지 끌어올린 개선판을 만드세요. 사용자가 명시한 수치·이름·일정은 바꾸지 마세요.`,
 });
 
-export const REFERENCE_MODES: Record<string, ReferenceMode[]> = {
+const REFERENCE_MODES: Record<string, ReferenceMode[]> = {
   presentation: [
     REFERENCE,
     {

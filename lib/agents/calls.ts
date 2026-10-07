@@ -63,7 +63,7 @@ export async function smartCall(opts: Parameters<typeof jsonCall>[0]): Promise<{
   }
 }
 
-export function profileText(profile: BusinessProfile | null): string {
+function profileText(profile: BusinessProfile | null): string {
   if (!profile) return "";
   return (Object.keys(PROFILE_LABELS) as (keyof BusinessProfile)[])
     .filter((k) => k !== "logo_asset_id" && profile[k] !== undefined && profile[k] !== null && profile[k] !== "")

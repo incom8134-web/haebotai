@@ -1,80 +1,155 @@
-// Renders every logo asset from one vector source (the H with the rising
-// sun — 해 = sun — in Haeba Sun colours, with the AI 해바 wordmark). Run: node scripts/brand/render-brand.mjs
-// Outputs: public/brand/mark.svg + mark-64/128/256.png, app/icon.png,
-// app/apple-icon.png, app/sublogo.png, app/fulllogo.png, app/opengraph-image.jpg.
-import { writeFileSync } from "node:fs";
+// Renders every AI 해바 logo asset from two vector sources defined here:
+// the 지니에듀테크 gem (redrawn from the company's 83px mark) and the
+// wordmark, outlined from Pretendard Black with fontkit so no file needs
+// the font. Korean ("AI 해바") is the main logo, English ("AI Haeba") its
+// pair. Run: node scripts/brand/render-brand.mjs
+// Outputs:
+//   lib/brand/logo-data.ts            geometry for components/brand-mark.tsx (inline SVG)
+//   public/brand/haeba-gem.svg        the gem alone
+//   public/brand/haeba-logo-{ko,en}[-white].svg  the lockups (black / white text)
+//   app/icon.png, app/apple-icon.png, app/sublogo.png, app/fulllogo.png, app/opengraph-image.jpg
+// fontkit comes with pdfkit (a dependency), so it is always installed.
+import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { Resvg } from "@resvg/resvg-js";
 import sharp from "sharp";
+import * as fontkit from "fontkit";
 
 const ROOT = process.cwd();
-const FONTS = ["Pretendard-Bold.otf", "Pretendard-ExtraBold.otf", "Pretendard-Medium.otf", "Pretendard-Regular.otf"].map((f) => join(ROOT, "node_modules/pretendard/dist/public/static", f));
+const FONT_DIR = join(ROOT, "node_modules/pretendard/dist/public/static");
+const BLACK = fontkit.openSync(join(FONT_DIR, "Pretendard-Black.otf"));
+const FONTS = ["Pretendard-Bold.otf", "Pretendard-ExtraBold.otf", "Pretendard-Medium.otf", "Pretendard-Regular.otf"].map((f) => join(FONT_DIR, f));
 
-const SUN_A = "#FB8B3C"; // sunrise
-const SUN_B = "#B8390B"; // ember
-const INK = "#1C1814";
+const INK = "#111111";
 const PAPER = "#FAF8F5";
+const GEM_LIGHT = ["#2A86D6", "#1450A8", "#0B2A6E"]; // on light backgrounds
+const GEM_DARK = ["#6CB8FF", "#3F8EF0", "#2B66D9"]; // on dark backgrounds
+const r1 = (n) => Math.round(n * 10) / 10;
 
-/** The mark's inner drawing on a 1000×1000 canvas (white H, sun arc, rays). */
-const glyph = (fill = "#fff") => `
-  <g fill="${fill}">
-    <rect x="248" y="240" width="118" height="520" rx="59"/>
-    <rect x="634" y="240" width="118" height="520" rx="59"/>
-  </g>
-  <path d="M330 590 C 420 470, 580 470, 670 590" fill="none" stroke="${fill}" stroke-width="84" stroke-linecap="butt"/>
-  <g stroke="${fill}" stroke-width="40" stroke-linecap="round" fill="none">
-    <line x1="500" y1="318" x2="500" y2="378"/>
-    <line x1="416" y1="350" x2="446" y2="390"/>
-    <line x1="584" y1="350" x2="554" y2="390"/>
-  </g>`;
+// The gem: ten triangular facets with rounded corners (a stroke in the
+// facet's own fill) and white seams between them. Grid units; the stroke
+// overhangs each facet by half its width, so the box includes it.
+const STROKE = 24;
+const RAW = [
+  [[300, 112], [530, 112], [330, 168]],
+  [[238, 138], [292, 188], [100, 365]],
+  [[404, 208], [596, 142], [656, 358]],
+  [[650, 186], [760, 390], [726, 398]],
+  [[300, 258], [300, 575], [95, 416]],
+  [[350, 255], [632, 416], [350, 577]],
+  [[388, 625], [660, 478], [585, 720]],
+  [[758, 438], [630, 690], [718, 445]],
+  [[100, 470], [285, 640], [232, 697]],
+  [[338, 662], [538, 742], [292, 742]],
+];
+const OX = 95 - STROKE / 2, OY = 112 - STROKE / 2;
+const GEM_W = 760 - 95 + STROKE, GEM_H = 742 - 112 + STROKE;
+const FACETS = RAW.map((f) => f.map(([x, y]) => `${x - OX},${y - OY}`).join(" "));
 
-const defs = `
-  <defs>
-    <linearGradient id="sun" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="${SUN_A}"/>
-      <stop offset="1" stop-color="${SUN_B}"/>
-    </linearGradient>
-  </defs>`;
+const gemSvg = (stops, id = "gem") =>
+  `<defs><linearGradient id="${id}" x1="0" y1="0" x2="${GEM_W}" y2="0" gradientUnits="userSpaceOnUse">${stops.map((c, i) => `<stop offset="${i / (stops.length - 1)}" stop-color="${c}"/>`).join("")}</linearGradient></defs>` +
+  FACETS.map((p) => `<polygon points="${p}" fill="url(#${id})" stroke="url(#${id})" stroke-width="${STROKE}" stroke-linejoin="round"/>`).join("");
 
-/** App-icon mark: rounded square (or full bleed for Apple) with the glyph. */
-const markSvg = ({ fullBleed = false } = {}) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">${defs}
-  <rect x="0" y="0" width="1000" height="1000" rx="${fullBleed ? 0 : 228}" fill="url(#sun)"/>
-  ${glyph()}
-</svg>`;
-
-function png(svg, width, background) {
-  const r = new Resvg(svg, { fitTo: { mode: "width", value: width }, background, font: { fontFiles: FONTS, loadSystemFonts: false, defaultFontFamily: "Pretendard" } });
-  return r.render().asPng();
+// Text → one path, baseline at y=0, from x=0.
+function outline(text, size, tracking) {
+  const run = BLACK.layout(text);
+  const s = size / BLACK.unitsPerEm;
+  let x = 0, top = Infinity, bottom = -Infinity;
+  const parts = run.glyphs.map((g, i) => {
+    const p = g.path.scale(s, -s).translate(x, 0);
+    if (Number.isFinite(p.bbox.minY)) { top = Math.min(top, p.bbox.minY); bottom = Math.max(bottom, p.bbox.maxY); }
+    x += run.positions[i].xAdvance * s + tracking;
+    return p.toSVG();
+  });
+  return { d: parts.join(""), width: x - tracking, top, bottom };
 }
 
-const mark = markSvg();
-writeFileSync(join(ROOT, "public/brand/mark.svg"), mark);
-for (const s of [64, 128, 256]) writeFileSync(join(ROOT, `public/brand/mark-${s}.png`), png(mark, s));
-writeFileSync(join(ROOT, "app/icon.png"), png(mark, 256));
-writeFileSync(join(ROOT, "app/apple-icon.png"), await sharp(png(markSvg({ fullBleed: true }), 180)).flatten({ background: SUN_B }).png().toBuffer());
-// Square mark with breathing room (used for print and store listings).
-writeFileSync(join(ROOT, "app/sublogo.png"), png(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1254 1254" width="1254" height="1254"><g transform="translate(192 192) scale(0.87)">${mark.replace(/^<svg[^>]*>|<\/svg>$/g, "")}</g></svg>`, 1254));
+// Lockup: gem as tall as the word, a fifth of that as the gap, then
+// "AI" and the name with a narrow word space. Tight box, no padding.
+function lockup(word, track, gapEm) {
+  const S = 400;
+  const ai = outline("AI", S, -6);
+  const name = outline(word, S, track);
+  const top = Math.min(ai.top, name.top), H = Math.max(ai.bottom, name.bottom) - top;
+  const k = H / GEM_H;
+  const x0 = GEM_W * k + H * 0.2;
+  const x1 = x0 + ai.width + S * gapEm;
+  const width = x1 + name.width;
+  return {
+    width: r1(width),
+    height: r1(H),
+    gem: `scale(${(Math.round(k * 10000) / 10000)})`,
+    words: [
+      { d: ai.d, transform: `translate(${r1(x0)},${r1(-top)})` },
+      { d: name.d, transform: `translate(${r1(x1)},${r1(-top)})` },
+    ],
+  };
+}
+const LOGOS = { ko: lockup("해바", -10, 0.12), en: lockup("Haeba", -4, 0.2) };
 
-// Full logo: mark + wordmark on paper.
-const full = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1774 887" width="1774" height="887">${defs}
-  <rect width="1774" height="887" fill="${PAPER}"/>
-  <g transform="translate(300 233) scale(0.42)"><rect width="1000" height="1000" rx="228" fill="url(#sun)"/>${glyph()}</g>
-  <text x="790" y="535" font-family="Pretendard" font-weight="800" font-size="236" fill="${INK}" letter-spacing="-6">AI 해바</text>
-</svg>`;
-writeFileSync(join(ROOT, "app/fulllogo.png"), png(full, 1774));
+const lockupSvg = (l, ink, stops) =>
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${l.width} ${l.height}" width="${l.width}" height="${l.height}"><g transform="${l.gem}">${gemSvg(stops)}</g>${l.words.map((w) => `<path transform="${w.transform}" d="${w.d}" fill="${ink}"/>`).join("")}</svg>`;
+const gemOnly = (stops) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${GEM_W} ${GEM_H}" width="${GEM_W}" height="${GEM_H}">${gemSvg(stops)}</svg>`;
 
-// Social share image (1200×630): warm paper, the mark, the promise.
-const og = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">${defs}
+// 1 · Geometry for the inline component.
+mkdirSync(join(ROOT, "lib/brand"), { recursive: true });
+writeFileSync(
+  join(ROOT, "lib/brand/logo-data.ts"),
+  `// Generated by scripts/brand/render-brand.mjs — do not edit by hand.\n` +
+    `// The 지니에듀테크 gem and the AI 해바 / AI Haeba wordmarks as SVG geometry.\n\n` +
+    `export const GEM = ${JSON.stringify({ width: GEM_W, height: GEM_H, stroke: STROKE, facets: FACETS })} as const;\n\n` +
+    `export const LOGO = ${JSON.stringify(LOGOS)} as const;\n`,
+);
+
+// 2 · Vector files (press kit, Canva/Figma).
+writeFileSync(join(ROOT, "public/brand/haeba-gem.svg"), gemOnly(GEM_LIGHT));
+for (const [lang, l] of Object.entries(LOGOS)) {
+  writeFileSync(join(ROOT, `public/brand/haeba-logo-${lang}.svg`), lockupSvg(l, INK, GEM_LIGHT));
+  writeFileSync(join(ROOT, `public/brand/haeba-logo-${lang}-white.svg`), lockupSvg(l, "#FFFFFF", GEM_DARK));
+}
+
+// 3 · Raster icons and images.
+const png = (svg, width) => new Resvg(svg, { fitTo: { mode: "width", value: width }, font: { fontFiles: FONTS, loadSystemFonts: false, defaultFontFamily: "Pretendard" } }).render().asPng();
+const gemAt = (side) => sharp(png(gemOnly(GEM_LIGHT), side)).resize(side, side, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } }).png().toBuffer();
+async function onSquare(side, scale, background) {
+  const inner = await gemAt(Math.round(side * scale));
+  return sharp({ create: { width: side, height: side, channels: 4, background } }).composite([{ input: inner, gravity: "center" }]).png().toBuffer();
+}
+const clear = { r: 0, g: 0, b: 0, alpha: 0 };
+const white = { r: 255, g: 255, b: 255, alpha: 1 };
+
+writeFileSync(join(ROOT, "app/icon.png"), await gemAt(256));
+// Apple touch icons can't be transparent: the gem on white, with room around it.
+writeFileSync(join(ROOT, "app/apple-icon.png"), await sharp(await onSquare(180, 0.76, white)).flatten({ background: "#ffffff" }).png().toBuffer());
+// Square gem with breathing room (print and store listings).
+writeFileSync(join(ROOT, "app/sublogo.png"), await onSquare(1254, 0.8, clear));
+
+// Full logo: the Korean lockup centred on paper.
+const ko = LOGOS.ko;
+const fullW = 1774, fullH = 887, logoW = 1300;
+const logoPng = png(lockupSvg(ko, INK, GEM_LIGHT), logoW);
+const logoH = Math.round((logoW * ko.height) / ko.width);
+writeFileSync(
+  join(ROOT, "app/fulllogo.png"),
+  await sharp({ create: { width: fullW, height: fullH, channels: 4, background: PAPER } }).composite([{ input: logoPng, left: Math.round((fullW - logoW) / 2), top: Math.round((fullH - logoH) / 2) }]).png().toBuffer(),
+);
+
+// Social share image (1200×630): paper, the Korean lockup, the promise.
+const og = png(
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs><linearGradient id="glow" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${GEM_LIGHT[0]}"/><stop offset="1" stop-color="${GEM_LIGHT[2]}"/></linearGradient></defs>
   <rect width="1200" height="630" fill="${PAPER}"/>
-  <circle cx="1060" cy="700" r="420" fill="url(#sun)" opacity="0.14"/>
-  <circle cx="1060" cy="700" r="300" fill="url(#sun)" opacity="0.18"/>
-  <circle cx="1060" cy="700" r="180" fill="url(#sun)" opacity="0.9"/>
-  <g transform="translate(88 96) scale(0.13)"><rect width="1000" height="1000" rx="228" fill="url(#sun)"/>${glyph()}</g>
-  <text x="236" y="182" font-family="Pretendard" font-weight="800" font-size="64" fill="${INK}" letter-spacing="-1.5">AI 해바</text>
+  <circle cx="1060" cy="700" r="420" fill="url(#glow)" opacity="0.08"/>
+  <circle cx="1060" cy="700" r="300" fill="url(#glow)" opacity="0.12"/>
   <text x="88" y="330" font-family="Pretendard" font-weight="800" font-size="58" fill="${INK}" letter-spacing="-1.5">아이디어를 사업으로,</text>
-  <text x="88" y="408" font-family="Pretendard" font-weight="800" font-size="58" fill="${SUN_B}" letter-spacing="-1.5">결과물까지 끝내는 AI 스튜디오</text>
+  <text x="88" y="408" font-family="Pretendard" font-weight="800" font-size="58" fill="${GEM_LIGHT[1]}" letter-spacing="-1.5">결과물까지 끝내는 AI 스튜디오</text>
   <text x="88" y="486" font-family="Pretendard" font-weight="500" font-size="28" fill="#554D45">발견 · 브랜드 · 캠페인 · 문서 · 리서치 — 전문 도구들이 결과를 이어 받습니다</text>
-  <text x="88" y="532" font-family="Pretendard" font-weight="400" font-size="24" fill="#675F57">From idea to brand, sales and operations — tools that hand results forward</text>
-</svg>`;
-writeFileSync(join(ROOT, "app/opengraph-image.jpg"), await sharp(png(og, 1200)).jpeg({ quality: 90 }).toBuffer());
+  <text x="88" y="532" font-family="Pretendard" font-weight="400" font-size="24" fill="#675F57">From idea to brand, sales and operations — tools that hand results forward</text></svg>`,
+  1200,
+);
+const ogLogoH = 84, ogLogoW = Math.round((ogLogoH * ko.width) / ko.height);
+writeFileSync(
+  join(ROOT, "app/opengraph-image.jpg"),
+  await sharp(og).composite([{ input: png(lockupSvg(ko, INK, GEM_LIGHT), ogLogoW), left: 88, top: 110 }]).flatten({ background: PAPER }).jpeg({ quality: 90 }).toBuffer(),
+);
 console.log("brand assets written");

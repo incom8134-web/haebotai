@@ -6,7 +6,7 @@ import { z } from "zod";
 // material, or a labeled estimate), a table, a side-by-side comparison,
 // a process, a quote, a full-bleed photo or a single statement. The
 // web preview, the .pptx and the PDF all lay the slide out from these.
-export const SLIDE_LAYOUTS = ["points", "big_number", "chart", "table", "comparison", "process", "quote", "photo", "statement"] as const;
+const SLIDE_LAYOUTS = ["points", "big_number", "chart", "table", "comparison", "process", "quote", "photo", "statement"] as const;
 
 const slideSchema = z.object({
   layout: z.enum(SLIDE_LAYOUTS),
@@ -39,5 +39,4 @@ const outputSchema = z.object({
   closing_ask: z.string(),
 });
 
-export type DeckSlide = z.infer<typeof slideSchema>;
 export default outputSchema;

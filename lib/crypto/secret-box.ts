@@ -39,8 +39,3 @@ export function looksLikeGoogleKey(key: string) {
 export function looksLikeAnthropicKey(key: string) {
   return /^sk-ant-[0-9A-Za-z_-]{20,}$/.test(key.trim());
 }
-
-/** OpenAI keys start with "sk-" (checked after the more specific sk-ant- prefix). */
-export function looksLikeOpenAIKey(key: string) {
-  return /^sk-[0-9A-Za-z_-]{20,}$/.test(key.trim());
-}

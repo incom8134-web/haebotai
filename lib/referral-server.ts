@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { REFERRAL, normalizeReferralCode } from "./referral";
 
-export type RedeemOutcome = "ok" | "invalid" | "self" | "not_new" | "already" | "unavailable";
+type RedeemOutcome = "ok" | "invalid" | "self" | "not_new" | "already" | "unavailable";
 
 // PostgREST's "function not found" — the database is behind this code.
 const missingFunction = (code: string | undefined) => code === "PGRST202" || code === "42883";

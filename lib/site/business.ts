@@ -31,7 +31,7 @@ export const BUSINESS = {
   effectiveDate: "2026년 9월 29일",
 } as const;
 
-export const PENDING = "(등록 예정)";
+const PENDING = "(등록 예정)";
 
 /** A business field, or the pending marker when it hasn't been filled in. */
 export const biz = (value: string) => value.trim() || PENDING;

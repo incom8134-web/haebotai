@@ -1,11 +1,11 @@
-import { presetValuesWith, type PresetsEn } from "./localize";
+import type { PresetsEn } from "./localize";
 
 // English versions of the example presets' sample text (lib/tools/
 // content.json keeps the Korean). Keyed by tool id, then preset index;
 // only the text values are here — option values are the same in both
 // languages. Used when the UI is in English.
 
-export const PRESET_VALUES_EN: Record<string, Record<number, Record<string, string | string[]>>> = {
+const PRESET_VALUES_EN: Record<string, Record<number, Record<string, string | string[]>>> = {
   "market-desk": {
     0: { question: "Is there enough demand for home-visit care for senior dogs in Seoul, and what do owners pay now?", decision: "Whether to launch a pilot in two districts", market: "Pet care services", region: "Seoul" },
     1: { question: "How big is the market for adult hobby classes (pottery, baking) on weekday evenings?", decision: "Whether to open a second studio", market: "Adult hobby classes", region: "Busan" },
@@ -140,11 +140,6 @@ export const PRESET_VALUES_EN: Record<string, Record<number, Record<string, stri
     2: { brief: "Seed investment for an inventory and ordering automation SaaS for small businesses", audience: "Early-stage investors" },
   },
 };
-
-/** A preset's values in the UI's language. */
-export function presetValues<T extends Record<string, unknown>>(toolId: string, index: number, values: T, locale: string): T {
-  return presetValuesWith(PRESET_VALUES_EN[toolId], index, values, locale);
-}
 
 /** This tool's English preset text, for a client-side pack. */
 export function presetsEnFor(toolId: string): PresetsEn {

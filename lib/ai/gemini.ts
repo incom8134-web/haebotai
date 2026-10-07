@@ -23,6 +23,7 @@ import { zodToJsonSchema } from "./schema";
 import { renderLogoLockup, type LogoTracking, type LogoWeight } from "@/lib/tools/render/logo";
 import type { AiAdapter, AiStreamEvent, GenerationResult, ImageStorageContext, TokenUsage } from "./types";
 import { outputSchemaFor } from "@/lib/tools/schemas";
+import { labelAiImage } from "./ai-label";
 
 // Moved from lib/tools/generate.ts verbatim (rotation, search grounding,
 // image generation) — this is the Gemini half of the provider-neutral
@@ -312,21 +313,6 @@ export async function generateProductPhotos(
   return { photos, usage };
 }
 
-// Homepage hero photo, embedded as a data URL so the downloaded HTML is
-// self-contained (no signed URL that expires). Called from generate.ts
-// after the page itself is written.
-export async function generateHeroImage(prompt: string, abortSignal: AbortSignal | undefined): Promise<{ dataUrl: string; usage: TokenUsage }> {
-  const heroManifest = { id: "image", name_ko: "홈페이지", summary: "홈페이지 히어로 사진", model: PRO_IMAGE_MODEL } as ToolManifest;
-  const { image, usage } = await generateOneImage(
-    heroManifest,
-    [{ text: `Website hero photograph, wide banner composition with calm negative space on one side for a headline. ${prompt} Photorealistic, natural light, high detail. No text, no logos, no watermark.` }],
-    Math.floor(Math.random() * 2 ** 31),
-    abortSignal,
-    "16:9",
-  );
-  return { dataUrl: `data:${image.mimeType};base64,${image.data}`, usage };
-}
-
 export type AspectRatio = "1:1" | "4:5" | "16:9" | "9:16" | "3:4" | "4:3";
 
 // What each image preset is for — the shot planner's art direction.
@@ -522,7 +508,8 @@ export async function drawLogo(
   let usage: TokenUsage = { inputTokens: 0, outputTokens: 0 };
 
   const upload = async (path: string, bytes: Buffer, contentType = "image/png") => {
-    const { error } = await storage.supabase.storage.from("exports").upload(path, bytes, { contentType, upsert: true });
+    // A logo is an AI symbol with the name typeset beside it, so it is labelled as containing AI content.
+    const { error } = await storage.supabase.storage.from("exports").upload(path, labelAiImage(bytes, "compositeWithTrainedAlgorithmicMedia"), { contentType, upsert: true });
     if (error) throw new Error(`이미지 저장 실패: ${error.message}`);
     const { data: signed, error: signError } = await storage.supabase.storage.from("exports").createSignedUrl(path, 60 * 60 * 24 * 365);
     if (signError || !signed) throw new Error(`이미지 URL 생성 실패: ${signError?.message ?? "알 수 없는 오류"}`);
@@ -622,12 +609,11 @@ async function generateImages(
 
       const { error: uploadError } = await storage.supabase.storage
         .from("exports")
-        .upload(path, Buffer.from(image.data, "base64"), { contentType: image.mimeType, upsert: true });
+        .upload(path, labelAiImage(Buffer.from(image.data, "base64")), { contentType: image.mimeType, upsert: true });
       if (uploadError) throw new Error(`이미지 저장 실패: ${uploadError.message}`);
 
-      // ponytail: 1-year signed URL baked straight into the stored run —
-      // simplest thing that works for v1. Upgrade path if that's too
-      // short: store `path` instead of a URL and re-sign on read.
+      // A 1-year signed URL is stored in the run; the path is kept too
+      // (asset_id) so the URL can be re-signed if it ever expires.
       const { data: signed, error: signError } = await storage.supabase.storage
         .from("exports")
         .createSignedUrl(path, 60 * 60 * 24 * 365);
