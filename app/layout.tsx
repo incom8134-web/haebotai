@@ -32,6 +32,12 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 
+// Search-engine ownership checks (Google Search Console, Naver Search
+// Advisor): each is the `content` value of the meta tag the console shows.
+// Optional; server-side only, so changing one needs a redeploy.
+const googleVerification = process.env.GOOGLE_SITE_VERIFICATION;
+const naverVerification = process.env.NAVER_SITE_VERIFICATION;
+
 const description = "AI marketing and business tools for small businesses, built on your own facts — researched claims come with their sources.";
 
 // The brand in the site's language: "AI Haeba" on the English site, so a
@@ -45,6 +51,10 @@ export async function generateMetadata(): Promise<Metadata> {
     description,
     openGraph: { type: "website", siteName: name, locale: locale === "en" ? "en_US" : "ko_KR", title: name, description },
     twitter: { card: "summary_large_image", title: name, description },
+    verification: {
+      ...(googleVerification ? { google: googleVerification } : {}),
+      ...(naverVerification ? { other: { "naver-site-verification": naverVerification } } : {}),
+    },
   };
 }
 
