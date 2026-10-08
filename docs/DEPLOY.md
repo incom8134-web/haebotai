@@ -84,13 +84,14 @@ broken pages.
 | `SUPABASE_SERVICE_ROLE_KEY` | yes | **Server-only.** Bypasses RLS entirely. Treat a leak as a full DB compromise. |
 | `GOOGLE_GENAI_API_KEY` | yes | Platform Gemini key — from ai.google.dev. Used for every user's Gemini runs (unless they've registered their own) |
 | `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | yes | Rate limiting (`lib/rate-limit.ts`) |
-| `NEXT_PUBLIC_SITE_URL` | yes | This deployment's own origin |
+| `NEXT_PUBLIC_SITE_URL` | yes | This deployment's own origin. Production page requests on any other host are redirected to it (`lib/canonical-host.ts`), so it must be the host Vercel serves directly: if `www` redirects to the apex in Vercel's Domains, use the apex here, never the reverse (that is a redirect loop). |
+| `NEXT_PUBLIC_AUTH_PROVIDERS` | optional | `google,kakao` shows the Kakao button (Google is always on). Enable Kakao in Supabase first. Type **Config**, not Secret; inlined at build time, so redeploy. |
+| `GOOGLE_SITE_VERIFICATION` / `NAVER_SITE_VERIFICATION` | optional | The `content` value of the HTML-tag ownership check from Google Search Console / Naver Search Advisor. Rendered as a meta tag; redeploy after setting. |
 | `NEXT_PUBLIC_TOSS_CLIENT_KEY` / `TOSS_SECRET_KEY` | optional | Toss Payments 결제위젯 client key (`test_gck_…`/`live_gck_…`) and its secret key (`…_gsk_…`, **server-only**). Both set → the Pro checkout at `/account/membership/checkout` works; either missing → it shows "not set up". The client key is inlined at build time, so redeploy after changing it. |
-| `API_KEY_ENCRYPTION_SECRET` | optional | Enables BYOK (Claude/OpenAI/own-Gemini keys). Random 32+ byte value — `openssl rand -base64 32`. **Losing this after users have stored keys means every stored key is unrecoverable and must be re-entered.** Omitting it entirely disables BYOK; Claude/OpenAI tools then show no usable engine. |
+| `API_KEY_ENCRYPTION_SECRET` | optional | Enables BYOK (Claude / own-Gemini keys). Random 32+ byte value — `openssl rand -base64 32`. **Losing this after users have stored keys means every stored key is unrecoverable and must be re-entered.** Omitting it entirely disables BYOK; Claude tools then show no usable engine. |
 
-Anthropic and OpenAI keys are never platform-wide env vars — Claude/ChatGPT
-are own-key-only by design (product decision), so there is no
-`ANTHROPIC_API_KEY`/`OPENAI_API_KEY` to set here.
+Anthropic keys are never platform-wide env vars — Claude is own-key-only by
+design (product decision), so there is no `ANTHROPIC_API_KEY` to set here.
 
 ## 3. Host settings
 

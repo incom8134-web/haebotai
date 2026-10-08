@@ -5,7 +5,7 @@
 //
 // PLATFORM_KEY_EMAILS (comma-separated) lists the team; ADMIN_EMAILS is
 // read too, so admins never lock themselves out. An entry starting with
-// "@" allows a whole domain ("@genieedutech.com").
+// "@" allows a whole domain ("@aihaeba.com").
 //
 // Pure (tested).
 
