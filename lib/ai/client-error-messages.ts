@@ -56,6 +56,15 @@ const PATTERNS: { test: (msg: string) => boolean; map: (msg: string) => MappedEr
     }),
   },
   {
+    test: (m) => m.includes("출처 없이 사실 주장을 생성할 수 없습니다"),
+    map: () => ({
+      ko: "이 도구는 웹 검색 출처가 꼭 필요한데, 이번에는 검색 결과를 받지 못했어요. 잠시 후 다시 시도해 주세요. 무료 키는 하루 검색 한도가 있어서, 자주 막히면 내일 다시 하거나 결제를 켠 키를 쓰세요.",
+      en: "This tool needs web sources, and no search results came back this time. Please try again shortly. Free keys have a daily search limit; if it keeps happening, try tomorrow or use a key with billing turned on.",
+      link: "/account/api-key",
+      linkLabel: { ko: "내 API 키 확인", en: "Check my API key" },
+    }),
+  },
+  {
     test: (m) => m.includes("최대 토큰 한도"),
     map: () => ({
       ko: "응답이 최대 토큰 한도에 도달해 완성되지 못했습니다 — 다시 시도해주세요.",
