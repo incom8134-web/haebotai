@@ -11,10 +11,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FieldSeparator } from "@/components/ui/field";
+import { MapPin, Store, UsersRound, type LucideIcon } from "lucide-react";
 import { TagList } from "@/components/tool-form";
 import { upsertBusinessProfile } from "@/lib/profile";
-import { useT } from "@/lib/i18n/context";
+import { useBi, useT } from "@/lib/i18n/context";
+import { IconTile, type Tone } from "@/components/site/tone";
 import type { DictKey } from "@/lib/i18n/dictionaries";
 import type { BusinessProfile } from "@/lib/tools/types";
 import { LogoField } from "@/components/brand/logo-field";
@@ -52,9 +53,22 @@ function Field({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-sm font-medium break-keep text-fg">{label}</label>
+      <label className="text-sm font-semibold break-keep text-fg">{label}</label>
       {children}
     </div>
+  );
+}
+
+/** One group of fields: a card with a coloured icon header. */
+function Group({ icon, tone, title, children }: { icon: LucideIcon; tone: Tone; title: string; children: React.ReactNode }) {
+  return (
+    <section className="glass flex flex-col gap-4 rounded-[24px] p-5 md:p-6">
+      <h2 className="flex items-center gap-3 text-lg font-bold break-keep">
+        <IconTile icon={icon} tone={tone} />
+        {title}
+      </h2>
+      {children}
+    </section>
   );
 }
 
@@ -66,6 +80,7 @@ function BusinessProfileForm({ initial, logoUrl = null }: { initial: BusinessPro
   const [saved, setSaved] = useState(false);
   const [hasLogo, setHasLogo] = useState(!!logoUrl);
   const t = useT();
+  const L = useBi();
 
   function set<K extends keyof BusinessProfile>(
     key: K,
@@ -96,7 +111,8 @@ function BusinessProfileForm({ initial, logoUrl = null }: { initial: BusinessPro
       </h1>
       <p className="mt-3 text-base leading-relaxed break-keep text-fg-muted">{t("profile_desc")}</p>
 
-      <div className="mt-6 flex flex-col gap-4">
+      <div className="mt-6 flex flex-col gap-5">
+        <Group icon={Store} tone="brand" title={L({ ko: "기본 정보", en: "Basics" })}>
         <Field label={t("profile_brand_name")}>
           <Input
             value={profile.brand_name}
@@ -131,7 +147,9 @@ function BusinessProfileForm({ initial, logoUrl = null }: { initial: BusinessPro
           </Select>
         </Field>
 
-        <FieldSeparator>{t("profile_group_audience")}</FieldSeparator>
+        </Group>
+
+        <Group icon={UsersRound} tone="campaign" title={t("profile_group_audience")}>
 
         <Field label={t("profile_target_customer")}>
           <Input
@@ -169,7 +187,9 @@ function BusinessProfileForm({ initial, logoUrl = null }: { initial: BusinessPro
           />
         </Field>
 
-        <FieldSeparator>{t("profile_group_ops")}</FieldSeparator>
+        </Group>
+
+        <Group icon={MapPin} tone="operate" title={t("profile_group_ops")}>
 
         <Field label={t("profile_region")}>
           <Input
@@ -193,7 +213,9 @@ function BusinessProfileForm({ initial, logoUrl = null }: { initial: BusinessPro
           />
         </Field>
 
-        <Button className="mt-2" onClick={handleSave} loading={pending}>
+        </Group>
+
+        <Button className="mt-1 h-11 self-start px-8 text-base" onClick={handleSave} loading={pending}>
           {t("save")}
         </Button>
       </div>
