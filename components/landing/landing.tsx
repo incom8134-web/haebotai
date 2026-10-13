@@ -114,7 +114,7 @@ function Nav() {
             >
               <span className="quick-pulse absolute inset-0 rounded-xl" aria-hidden />
               <Wand2 size={16} className="relative" aria-hidden />
-              <span className="relative sm:hidden">{L({ ko: "홍보 바로 시작", en: "Quick start" })}</span>
+              <span className="relative sm:hidden">{L({ ko: "홍보 시작", en: "Start" })}</span>
               <span className="relative max-sm:hidden">{L({ ko: "가게 홍보 바로 시작하기", en: "Start shop marketing" })}</span>
             </Link>
             {/* Signed in: the quick start takes the old "Go to Studio" place; the hero still links to the Studio. */}
