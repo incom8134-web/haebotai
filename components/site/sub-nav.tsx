@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutGroup, motion } from "motion/react";
-import { Activity, BookOpenText, CircleGauge, CircleHelp, Crown, Gift, Headset, Keyboard, KeyRound, LifeBuoy, ReceiptText, ScrollText, ShieldCheck, Sparkle, UserRound } from "lucide-react";
+import { Activity, BookOpenText, CircleGauge, CircleHelp, Crown, Gift, Headset, Keyboard, KeyRound, LifeBuoy, ReceiptText, ScrollText, ShieldCheck, Sparkle, UserRound, LayoutDashboard, Users } from "lucide-react";
 import { useBi } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +23,8 @@ const ICONS = {
   keyboard: Keyboard,
   activity: Activity,
   gift: Gift,
+  "layout-dashboard": LayoutDashboard,
+  users: Users,
 };
 
 // Glass section navigation for multi-page areas (Help, Account). Each item
