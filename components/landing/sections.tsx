@@ -591,8 +591,8 @@ export function PersonasSection() {
           </p>
           <p className="mt-3 text-sm leading-relaxed break-keep text-fg-muted">
             {L({
-              ko: "메뉴 소개, 상세페이지, 사업 문서까지 노트북 하나로 정리해요. 10초짜리 영상이에요.",
-              en: "Menus, sales pages and business documents, sorted from one laptop. A 10-second video.",
+              ko: "메뉴 소개, 상세페이지, 사업 문서까지 노트북 하나로 정리해요. 8초짜리 영상이에요.",
+              en: "Menus, sales pages and business documents, sorted from one laptop. An 8-second video.",
             })}
           </p>
         </div>
