@@ -7,9 +7,13 @@ import { freeTierBlocked, freeTierDailyQuotaHit, isOverloaded, retryAfterSeconds
 // and Google turns free traffic away first when a model is busy.
 // freeTierAware() wraps one model call so a free key still finishes a run:
 // - a Pro text call refused as paid-only is re-sent on Flash;
-// - when one free Flash model has used up today's quota, or stays busy
-//   after waits of 3, 8 and 15 s, the call moves to the next free Flash
-//   model (FREE_TEXT_MODELS), and the key skips that model for a while;
+// - when one free Flash model has used up today's quota, or is still busy
+//   after a 3 s wait, the call moves to the next free Flash model
+//   (FREE_TEXT_MODELS), and the key skips that model for a while (other
+//   keys wait 3, 8 and 15 s on a busy model);
+// - a request a model rejects (400) is asked again once without the
+//   thinking level and the schema's count/range limits, which Flash
+//   models do not all accept;
 // - a short rate-limit wait Google asks for is honoured once;
 // - a Google Search call refused with a bare quota 429 (no model or
 //   quota named: the free search allowance) is re-sent without Search,
@@ -45,7 +49,22 @@ interface FreeTierOptions {
   sleep?: (ms: number) => Promise<void>;
 }
 
-type Params = { model: string; config?: { abortSignal?: AbortSignal; tools?: unknown[] } };
+type Params = { model: string; config?: { abortSignal?: AbortSignal; tools?: unknown[]; thinkingConfig?: unknown; responseJsonSchema?: unknown } };
+
+// Flash models answer 400 to some schemas Pro takes: count and range limits
+// (minItems, maxItems, minimum, maximum). Our parsers enforce those anyway.
+const LIMIT_KEYS = new Set(["minItems", "maxItems", "minimum", "maximum"]);
+const hasLimits = (schema: unknown): boolean => JSON.stringify(schema ?? null).match(/"(minItems|maxItems|minimum|maximum)"/) !== null;
+const relaxed = <P extends Params>(p: P): P => {
+  const config = { ...p.config };
+  delete config.thinkingConfig;
+  if (config.responseJsonSchema) config.responseJsonSchema = JSON.parse(JSON.stringify(config.responseJsonSchema), (k, v) => (LIMIT_KEYS.has(k) ? undefined : v));
+  return { ...p, config };
+};
+const badArgument = (err: unknown) => {
+  const message = err instanceof Error ? err.message : "";
+  return (err as { status?: number } | null)?.status === 400 || /"code"\s*:\s*400/.test(message);
+};
 
 const usesSearch = (p: Params) => !!p.config?.tools?.some((t) => !!t && typeof t === "object" && "googleSearch" in t);
 const withoutSearch = <P extends Params>(p: P): P => {
@@ -77,19 +96,26 @@ function pick(keyTag: string, model: string, now: number): string | null {
   return FREE_TEXT_MODELS.find(usable) ?? null;
 }
 
+/** Every free model is skipped for this key: a quota 429, so the member sees "usage limit reached" and a second key is tried. */
+function allUsedUp(): Error {
+  return Object.assign(new Error(JSON.stringify({ error: { code: 429, message: "Every free Gemini model is used up for today on this key.", status: "RESOURCE_EXHAUSTED" } })), { status: 429 });
+}
+
 export async function freeTierAware<P extends Params, R>(params: P, call: (p: P) => Promise<R>, opts: FreeTierOptions): Promise<R> {
   const now = opts.now ?? Date.now;
   const sleep = opts.sleep ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
   const aborted = () => !!params.config?.abortSignal?.aborted;
   let waited = false;
   let busyTries = 0;
+  let relax = false;
   let lastErr: unknown;
   for (;;) {
     const model = pick(opts.keyTag, params.model, now());
-    if (!model) throw lastErr; // every free model is used up or busy
+    if (!model) throw lastErr ?? allUsedUp(); // every free model is used up or busy
     const searchOff = (skipped.get(opts.keyTag)?.get(NO_SEARCH) ?? 0) > now();
     let p = model === params.model ? params : { ...params, model };
     if (searchOff && usesSearch(p)) p = withoutSearch(p);
+    if (relax) p = relaxed(p);
     try {
       return await call(p);
     } catch (err) {
@@ -103,12 +129,20 @@ export async function freeTierAware<P extends Params, R>(params: P, call: (p: P)
         busyTries = 0;
         continue;
       }
+      // A Flash model may not take the thinking level or the schema's limits.
+      if (badArgument(err) && !relax && (p.config?.thinkingConfig || hasLimits(p.config?.responseJsonSchema))) {
+        relax = true;
+        continue;
+      }
       if (bareQuota(err) && usesSearch(p) && skipped.has(opts.keyTag)) {
         skip(opts.keyTag, NO_SEARCH, now() + NO_SEARCH_MS);
         continue;
       }
       if (isOverloaded(err) && !aborted()) {
-        if (busyTries < BUSY_WAITS_MS.length) {
+        // A known free key has other free models: one short wait, then move on
+        // (the full waits would eat a step's time limit).
+        const known = skipped.has(opts.keyTag) && isText(model);
+        if (busyTries < (known ? 1 : BUSY_WAITS_MS.length)) {
           await sleep(BUSY_WAITS_MS[busyTries++]);
           continue;
         }

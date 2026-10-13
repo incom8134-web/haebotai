@@ -8,6 +8,8 @@ export const BUSINESS = {
   serviceName: "AI 해바",
   /** 상호 (법인명) */
   companyName: "지니에듀테크 주식회사",
+  /** 회사 홈페이지 (only http works: the https certificate is self-signed) */
+  website: "http://www.jcodeedu.com/",
   /** 대표자 */
   representative: "이성웅",
   representativeEn: "Lee Sung-woong",
