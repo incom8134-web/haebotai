@@ -224,10 +224,10 @@ function AuthPhoto() {
       <div className="relative aspect-[16/10] lg:aspect-[2/1]">
         <Image
           src="/images/auth-hero.webp"
-          alt={L({ ko: "햇살 드는 빵집에서 사장이 딸기 타르트 옆에 노트를 펴고 신메뉴를 구상하는 모습", en: "A bakery owner in a sunlit shop, planning a new menu beside a tray of strawberry tarts" })}
+          alt={L({ ko: "저녁 빵집에서 사장이 딸기 타르트 옆 노트북을 보며 신메뉴를 구상하는 모습", en: "A bakery owner in her shop at night, planning a new menu on a laptop beside a tray of strawberry tarts" })}
           fill
           sizes="(min-width: 1024px) 576px, 100vw"
-          className="object-cover object-[50%_30%]"
+          className="object-cover object-[50%_10%]"
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
       </div>
