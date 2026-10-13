@@ -11,11 +11,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MapPin, Store, UsersRound, type LucideIcon } from "lucide-react";
+import { BadgeCheck, MapPin, Store, UsersRound, type LucideIcon } from "lucide-react";
 import { TagList } from "@/components/tool-form";
 import { upsertBusinessProfile } from "@/lib/profile";
 import { useBi, useT } from "@/lib/i18n/context";
-import { IconTile, type Tone } from "@/components/site/tone";
+import { IconTile, PageHero, type Tone } from "@/components/site/tone";
 import type { DictKey } from "@/lib/i18n/dictionaries";
 import type { BusinessProfile } from "@/lib/tools/types";
 import { LogoField } from "@/components/brand/logo-field";
@@ -106,10 +106,7 @@ function BusinessProfileForm({ initial, logoUrl = null }: { initial: BusinessPro
 
   return (
     <div className="mx-auto max-w-3xl px-4 pt-6 pb-10 md:px-8 md:pt-10">
-      <h1 className="font-display text-[clamp(2rem,4vw,3rem)] leading-[1.05] font-bold tracking-[-0.02em] break-keep text-fg">
-        {t("profile_title")}
-      </h1>
-      <p className="mt-3 text-base leading-relaxed break-keep text-fg-muted">{t("profile_desc")}</p>
+      <PageHero icon={BadgeCheck} tone="brand" eyebrow={L({ ko: "한 번 적으면 모든 도구가 사용", en: "Fill once, every tool uses it" })} title={t("profile_title")} lead={t("profile_desc")} className="mb-2" />
 
       <div className="mt-6 flex flex-col gap-5">
         <Group icon={Store} tone="brand" title={L({ ko: "기본 정보", en: "Basics" })}>

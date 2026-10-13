@@ -333,7 +333,7 @@ function AppShell({ user, balance, plan, answeredTickets, children }: ShellProps
         {!OWN_KEY_ONLY && user && plan !== "student" && balance !== null && balance < LOW_CREDIT_THRESHOLD ? <LowCreditBanner balance={balance} /> : null}
       </header>
 
-      <main id="main" tabIndex={-1} className="pb-28 outline-none lg:pr-24 lg:pb-10">
+      <main id="main" tabIndex={-1} className="app-type pb-28 outline-none lg:pr-24 lg:pb-10">
         {children}
         {/* Phones have no side dock: theme and language sit at the foot of each page, not in the top bar. */}
         <div className="mx-auto mt-6 flex max-w-[1240px] items-center justify-center gap-3 px-4 lg:hidden">
