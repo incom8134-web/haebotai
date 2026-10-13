@@ -24,6 +24,7 @@ import { useBi, useLocale } from "@/lib/i18n/context";
 import { primaryButton, secondaryButton } from "@/components/site/page";
 import { cn } from "@/lib/utils";
 import { OWN_KEY_ONLY } from "@/lib/site/access";
+import { IconTile, TONE, toneFor, toolTone } from "@/components/site/tone";
 
 // The member's home. Everything here is real account state — no sample
 // numbers: what's running or just finished, the projects, the latest
@@ -237,9 +238,9 @@ function QuickCreate({
                   setSlug(st.slug);
                   setPicked(true);
                 }}
-                className="inline-flex items-center gap-1.5 rounded-full border border-hairline bg-surface/80 px-3 py-1.5 text-xs text-fg backdrop-blur transition-[transform,border-color] hover:-translate-y-0.5 hover:border-accent/50"
+                className={cn("inline-flex items-center gap-1.5 rounded-full border border-hairline bg-surface/80 py-1 pr-3 pl-1 text-xs font-semibold text-fg backdrop-blur transition-[transform,border-color] hover:-translate-y-0.5", TONE[t.category].hover)}
               >
-                <t.icon size={13} className="text-accent" aria-hidden /> {L(st.label)}
+                <IconTile icon={t.icon} tone={t.category} size="sm" className="size-6 rounded-full" /> {L(st.label)}
               </button>
             );
           })}
@@ -403,9 +404,7 @@ export function Dashboard({
                 {(() => {
                   const t = catalogTool(latest.toolId);
                   return t ? (
-                    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent-dim text-accent">
-                      <t.icon size={18} aria-hidden />
-                    </span>
+                    <IconTile icon={t.icon} tone={t.category} size="lg" />
                   ) : null;
                 })()}
                 <span className="min-w-0 flex-1">
@@ -487,12 +486,10 @@ export function Dashboard({
                 <li key={slug}>
                   <Link
                     href={`/tools/${slug}/run${latestProject ? `?project=${latestProject.id}` : ""}`}
-                    className="flex h-full flex-col rounded-2xl border border-hairline bg-bg p-3.5 hover:border-accent/40"
+                    className={cn("flex h-full flex-col rounded-2xl border border-hairline p-3.5 transition-[border-color,transform] duration-300 hover:-translate-y-0.5", TONE[t.category].wash, TONE[t.category].hover)}
                   >
-                    <span className="grid size-8 place-items-center rounded-lg bg-accent-dim text-accent">
-                      <t.icon size={15} aria-hidden />
-                    </span>
-                    <span className="mt-3 text-sm font-semibold break-keep text-fg">
+                    <IconTile icon={t.icon} tone={t.category} />
+                    <span className="mt-3 text-[15px] font-bold break-keep text-fg">
                       {L(t.name)}
                     </span>
                     <span className="mt-1 line-clamp-2 text-xs leading-relaxed break-keep text-fg-muted">
@@ -610,9 +607,10 @@ export function Dashboard({
                     href={`/library/${r.id}`}
                     className="flex items-center gap-3 py-2.5 hover:text-accent"
                   >
+                    <IconTile icon={catalogTool(r.toolId)?.icon ?? Sparkles} tone={toolTone(r.toolId)} size="sm" />
                     <span className="min-w-0 flex-1">
                       <span className="flex items-center gap-2">
-                        <span className="truncate text-sm text-fg">
+                        <span className="truncate text-sm font-semibold text-fg">
                           {runName(r, L)}
                         </span>
                         <StatusChip status={r.status} />
@@ -622,7 +620,7 @@ export function Dashboard({
                       </span>
                     </span>
                     {r.projectId && projectName.get(r.projectId) ? (
-                      <span className="max-w-[40%] shrink-0 truncate rounded bg-accent-dim px-1.5 py-0.5 text-[10px] text-accent">
+                      <span className={cn("max-w-[40%] shrink-0 truncate rounded-full px-2 py-0.5 text-[10px] font-semibold", TONE[toneFor(r.projectId)].chip)}>
                         {projectName.get(r.projectId)}
                       </span>
                     ) : null}
