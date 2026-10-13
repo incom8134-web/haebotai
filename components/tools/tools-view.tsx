@@ -10,6 +10,7 @@ import { useFavorites } from "@/lib/hooks/use-local-list";
 import { useBi, useLocale } from "@/lib/i18n/context";
 import type { CategoryId } from "@/lib/tools/types";
 import { Page } from "@/components/site/page";
+import { IconTile, TONE } from "@/components/site/tone";
 import { cn } from "@/lib/utils";
 
 // Tool discovery. Find a tool by what you want to do (search, verb,
@@ -66,24 +67,23 @@ function ToolCard({ tool, variant, index }: { tool: CatalogTool; variant: "path"
   const href = `/tools/${tool.slug}`;
   const title = (
     <Link href={href} className="after:absolute after:inset-0 after:rounded-[inherit] focus-visible:outline-none">
-      <span className="font-semibold break-keep">{L(tool.name)}</span>
+      <span className="text-[15px] font-bold break-keep">{L(tool.name)}</span>
     </Link>
   );
   const outputs = (n: number) => (
     <ul className="mt-3 flex flex-wrap gap-1.5" aria-label={L({ ko: "받게 될 결과", en: "What you get" })}>
       {tool.outputs.slice(0, n).map((o) => (
-        <li key={o.en} className="rounded-full bg-surface-2 px-2 py-0.5 text-2xs break-keep text-fg-muted">{L(o)}</li>
+        <li key={o.en} className={cn("rounded-full px-2 py-0.5 text-2xs font-medium break-keep", tone.chip)}>{L(o)}</li>
       ))}
     </ul>
   );
-  const base = "group relative rounded-[20px] border border-hairline bg-surface transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-[0_14px_34px_-22px_var(--studio-violet)] focus-within:ring-2 focus-within:ring-accent/40";
+  const tone = TONE[tool.category];
+  const base = cn("group relative rounded-[20px] border border-hairline bg-surface transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_34px_-22px_var(--studio-violet)] focus-within:ring-2 focus-within:ring-accent/40", tone.hover);
 
   if (variant === "row" || variant === "desk") {
     return (
       <li className={cn(base, "flex items-center gap-4 p-4")}>
-        <span className={cn("grid size-10 shrink-0 place-items-center rounded-xl", variant === "desk" ? "bg-ai-dim text-ai" : "bg-accent-dim text-accent")}>
-          <tool.icon size={19} aria-hidden />
-        </span>
+        <IconTile icon={tool.icon} tone={tool.category} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-2">{title}<span className="text-2xs text-fg-subtle">{tool.name.en}</span></div>
           <p className="mt-0.5 text-sm leading-relaxed break-keep text-fg-muted">{L(tool.promise)}</p>
@@ -97,9 +97,12 @@ function ToolCard({ tool, variant, index }: { tool: CatalogTool; variant: "path"
     <li className={cn(base, "flex flex-col p-5", variant === "board" && index < 2 && "md:col-span-3", variant === "board" && index >= 2 && "md:col-span-2")}>
       <div className="flex items-start justify-between gap-2">
         {variant === "path" ? (
-          <span className="grid size-9 place-items-center rounded-full bg-fg font-mono text-sm text-bg">{index + 1}</span>
+          <span className="flex items-center gap-2">
+            <span className={cn("grid size-7 place-items-center rounded-full font-mono text-xs font-bold text-white", tone.dot)}>{index + 1}</span>
+            <IconTile icon={tool.icon} tone={tool.category} size="md" />
+          </span>
         ) : (
-          <span className="grid size-10 place-items-center rounded-xl bg-accent-dim text-accent"><tool.icon size={19} aria-hidden /></span>
+          <IconTile icon={tool.icon} tone={tool.category} size="lg" />
         )}
         <FavButton tool={tool} />
       </div>
@@ -109,11 +112,14 @@ function ToolCard({ tool, variant, index }: { tool: CatalogTool; variant: "path"
       {outputs(variant === "board" && index < 2 ? 3 : 2)}
       <div className="mt-4 flex items-center justify-between">
         <Status tool={tool} />
-        <ArrowRight size={16} className="text-fg-subtle transition-transform group-hover:translate-x-0.5 group-hover:text-accent" aria-hidden />
+        <ArrowRight size={16} className={cn("transition-transform group-hover:translate-x-0.5", tone.text)} aria-hidden />
       </div>
     </li>
   );
 }
+
+/** The tool each goal card leads with, for its icon. */
+const GOAL_LEAD: Record<(typeof GOALS)[number]["id"], string> = { start: "idea-radar", brand: "brand-dna", sell: "sales-page", grow: "campaign-planner" };
 
 const VARIANT: Record<CategoryId, "path" | "board" | "strip" | "row" | "desk"> = {
   discover: "path",
@@ -132,8 +138,11 @@ function CategorySection({ category, tools }: { category: CategoryId; tools: Cat
     <section id={category} aria-labelledby={`cat-${category}`} className="scroll-mt-40">
       <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
         <div>
-          <p className="text-2xs font-medium tracking-wide text-accent uppercase">{L(VERBS[c.verb])} · {L({ ko: `${all.length}개 도구`, en: `${all.length} tools` })}</p>
-          <h2 id={`cat-${category}`} className="mt-1 font-display text-2xl font-bold tracking-[-0.01em] break-keep">{L(c.name)}</h2>
+          <p className={cn("text-2xs font-semibold tracking-wide uppercase", TONE[category].text)}>{L(VERBS[c.verb])} · {L({ ko: `${all.length}개 도구`, en: `${all.length} tools` })}</p>
+          <h2 id={`cat-${category}`} className="mt-1 flex items-center gap-2.5 font-display text-2xl font-bold tracking-[-0.01em] break-keep">
+            <span className={cn("size-3 shrink-0 rounded-full", TONE[category].dot)} aria-hidden />
+            {L(c.name)}
+          </h2>
           <p className="mt-1 text-sm break-keep text-fg-muted">{L(c.pitch)}</p>
         </div>
       </div>
@@ -222,7 +231,8 @@ function ToolsView({ initialCategory, recent }: { initialCategory: CategoryId | 
             {L({ ko: "모든 분야", en: "All areas" })}
           </button>
           {CATEGORY_ORDER.map((c) => (
-            <button key={c} type="button" onClick={() => setF({ ...f, category: f.category === c ? "all" : c })} aria-pressed={f.category === c} className={cn("rounded-lg px-2.5 py-1 whitespace-nowrap", f.category === c ? "bg-accent-dim font-medium text-accent" : "text-fg-muted hover:text-fg")}>
+            <button key={c} type="button" onClick={() => setF({ ...f, category: f.category === c ? "all" : c })} aria-pressed={f.category === c} className={cn("inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 font-medium whitespace-nowrap", f.category === c ? TONE[c].chip : "text-fg hover:bg-surface-2")}>
+              <span className={cn("size-2 rounded-full", TONE[c].dot)} aria-hidden />
               {L(CATEGORIES[c].name)}
             </button>
           ))}
@@ -256,8 +266,8 @@ function ToolsView({ initialCategory, recent }: { initialCategory: CategoryId | 
                   <h2 className="mb-2 flex items-center gap-1.5 text-sm font-semibold"><Star size={14} className="text-studio-warning" aria-hidden /> {L({ ko: "즐겨찾기", en: "Pinned" })}</h2>
                   <div className="flex flex-wrap gap-2">
                     {favTools.map((t) => (
-                      <Link key={t.slug} href={`/tools/${t.slug}`} className="inline-flex items-center gap-2 rounded-full border border-hairline bg-surface px-3 py-1.5 text-sm hover:border-accent/50">
-                        <t.icon size={14} className="text-accent" aria-hidden /> {L(t.name)}
+                      <Link key={t.slug} href={`/tools/${t.slug}`} className={cn("inline-flex items-center gap-2 rounded-full border border-hairline bg-surface py-1 pr-3.5 pl-1 text-sm font-semibold", TONE[t.category].hover)}>
+                        <IconTile icon={t.icon} tone={t.category} size="sm" className="size-7 rounded-full" /> {L(t.name)}
                       </Link>
                     ))}
                   </div>
@@ -268,8 +278,8 @@ function ToolsView({ initialCategory, recent }: { initialCategory: CategoryId | 
                   <h2 className="mb-2 flex items-center gap-1.5 text-sm font-semibold"><Clock size={14} className="text-fg-subtle" aria-hidden /> {L({ ko: "최근 사용", en: "Recently used" })}</h2>
                   <div className="flex flex-wrap gap-2">
                     {recentTools.map((t) => (
-                      <Link key={t.slug} href={`/tools/${t.slug}/run`} className="inline-flex items-center gap-2 rounded-full border border-hairline bg-surface px-3 py-1.5 text-sm hover:border-accent/50">
-                        <t.icon size={14} className="text-accent" aria-hidden /> {L(t.name)}
+                      <Link key={t.slug} href={`/tools/${t.slug}/run`} className={cn("inline-flex items-center gap-2 rounded-full border border-hairline bg-surface py-1 pr-3.5 pl-1 text-sm font-semibold", TONE[t.category].hover)}>
+                        <IconTile icon={t.icon} tone={t.category} size="sm" className="size-7 rounded-full" /> {L(t.name)}
                       </Link>
                     ))}
                   </div>
@@ -290,10 +300,13 @@ function ToolsView({ initialCategory, recent }: { initialCategory: CategoryId | 
                     setF({ ...f, category: g.category as CategoryId });
                     document.getElementById(g.category)?.scrollIntoView({ behavior: "smooth", block: "start" });
                   }}
-                  className="rounded-[20px] border border-hairline bg-surface p-4 text-left transition-colors hover:border-accent/50"
+                  className={cn("group flex items-start gap-3 rounded-[20px] border border-hairline p-4 text-left transition-[border-color,transform] duration-300 hover:-translate-y-0.5", TONE[g.category as CategoryId].wash, TONE[g.category as CategoryId].hover)}
                 >
-                  <span className="block font-semibold break-keep">{L(g.title)}</span>
-                  <span className="mt-1 block text-sm text-fg-muted">{L(g.body)}</span>
+                  <IconTile icon={(catalogTool(GOAL_LEAD[g.id]) ?? toolsIn(g.category as CategoryId)[0]).icon} tone={g.category as CategoryId} />
+                  <span className="min-w-0">
+                    <span className="block text-[15px] font-bold break-keep">{L(g.title)}</span>
+                    <span className="mt-1 block text-sm text-fg-muted">{L(g.body)}</span>
+                  </span>
                 </button>
               ))}
             </div>
@@ -305,17 +318,17 @@ function ToolsView({ initialCategory, recent }: { initialCategory: CategoryId | 
             <p className="mt-1 text-sm text-fg-muted">{L({ ko: "앞 도구의 결과가 다음 도구의 입력이 됩니다.", en: "Each tool's result becomes the next one's input." })}</p>
             <div className="-mx-4 mt-3 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 md:-mx-8 md:px-8">
               {WORKFLOWS.map((w) => (
-                <Link key={w.id} href={`/tools/${w.tools[0]}/run`} className="flex w-[290px] shrink-0 snap-start flex-col rounded-[20px] border border-hairline bg-surface p-5 transition-colors hover:border-accent/50">
-                  <p className="font-semibold break-keep">{L(w.title)}</p>
+                <Link key={w.id} href={`/tools/${w.tools[0]}/run`} className={cn("flex w-[290px] shrink-0 snap-start flex-col rounded-[20px] border border-hairline bg-surface p-5 transition-colors", TONE[catalogTool(w.tools[0])?.category ?? "research"].hover)}>
+                  <p className="text-[15px] font-bold break-keep">{L(w.title)}</p>
                   <p className="mt-1 line-clamp-3 text-sm break-keep text-fg-muted">{L(w.body)}</p>
                   <ol className="mt-4 space-y-1.5 text-xs">
                     {w.tools.map((s, i) => {
                       const t = catalogTool(s)!;
                       return (
                         <li key={s} className="flex items-center gap-2">
-                          <span className="grid size-5 place-items-center rounded-full bg-surface-2 font-mono text-[10px]">{i + 1}</span>
-                          <t.icon size={13} className="text-accent" aria-hidden />
-                          <span className="break-keep">{locale === "en" ? t.name.en : t.name.ko}</span>
+                          <span className={cn("grid size-5 place-items-center rounded-full font-mono text-[10px] font-bold text-white", TONE[t.category].dot)}>{i + 1}</span>
+                          <t.icon size={14} strokeWidth={2.1} className={TONE[t.category].text} aria-hidden />
+                          <span className="font-medium break-keep">{locale === "en" ? t.name.en : t.name.ko}</span>
                         </li>
                       );
                     })}
