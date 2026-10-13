@@ -72,19 +72,27 @@ function DockButton({ item, active, badge, onClick }: { item: Item; active: bool
       onClick={onClick}
       aria-current={active ? "page" : undefined}
       aria-label={L(item.label)}
-      className="group relative grid size-12 place-items-center rounded-2xl text-fg-muted outline-none transition-colors duration-300 hover:text-fg focus-visible:ring-2 focus-visible:ring-studio-cyan"
+      className="group relative flex w-14 flex-col items-center gap-0.5 rounded-2xl py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-studio-cyan"
     >
-      {active ? (
-        <motion.span
-          layoutId="dock-active"
-          className="absolute inset-0 rounded-2xl bg-[linear-gradient(135deg,color-mix(in_oklch,var(--studio-cyan)_30%,transparent),color-mix(in_oklch,var(--studio-violet)_30%,transparent))] shadow-[inset_0_1px_0_oklch(1_0_0/25%),0_8px_24px_-8px_var(--studio-violet)]"
-          transition={{ type: "spring", stiffness: 420, damping: 32 }}
-        />
-      ) : null}
-      <item.icon size={20} strokeWidth={1.8} className={cn("relative transition-transform duration-500 ease-[var(--spring)] group-hover:scale-110", active && "text-fg")} aria-hidden />
-      {badge ? <span className="absolute top-2.5 right-2.5 size-2 rounded-full bg-studio-cyan shadow-[0_0_10px_var(--studio-cyan)]" aria-hidden /> : null}
-      {/* Label slides out to the LEFT of the right-side dock. */}
-      <span className="glass-strong pointer-events-none absolute top-1/2 right-[calc(100%+12px)] translate-x-2 -translate-y-1/2 rounded-xl px-3 py-1.5 text-xs font-medium whitespace-nowrap text-fg opacity-0 transition-all duration-300 ease-[var(--ease-glide)] group-hover:translate-x-0 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:opacity-100">
+      {/* A tinted tile, so each page reads as a button; the page you are on is filled. */}
+      <span
+        className={cn(
+          "relative grid size-10 place-items-center rounded-2xl transition-[transform,background-color] duration-500 ease-[var(--spring)] group-hover:scale-110",
+          active ? "text-white" : "bg-studio-cyan/12 text-studio-cyan group-hover:bg-studio-cyan/25",
+        )}
+      >
+        {active ? (
+          <motion.span
+            layoutId="dock-active"
+            className="studio-gradient-bg absolute inset-0 rounded-2xl shadow-[inset_0_1px_0_oklch(1_0_0/30%),0_8px_24px_-8px_var(--studio-violet)]"
+            transition={{ type: "spring", stiffness: 420, damping: 32 }}
+          />
+        ) : null}
+        <item.icon size={20} strokeWidth={2.1} className="relative" aria-hidden />
+        {badge ? <span className="absolute top-1 right-1 size-2 rounded-full bg-studio-warning ring-2 ring-surface" aria-hidden /> : null}
+      </span>
+      {/* Short screens have no room for the labels: the tiles stay, the names drop. */}
+      <span className={cn("text-[10px] leading-tight whitespace-nowrap [@media(max-height:860px)]:hidden", active ? "font-bold text-accent" : "font-semibold text-fg")} aria-hidden>
         {L(item.label)}
       </span>
     </Link>
@@ -400,11 +408,11 @@ function AppShell({ user, balance, plan, answeredTickets, children }: ShellProps
               href={item.href}
               onClick={item.href === "/help" ? help.markSeen : undefined}
               aria-current={active ? "page" : undefined}
-              className="relative flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-2xl py-2 text-[10px] text-fg-muted"
+              className="relative flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-2xl py-2 text-[11px] font-semibold text-fg"
             >
-              {active ? <motion.span layoutId="tab-active" className="absolute inset-0 rounded-2xl bg-surface-2/70" transition={{ type: "spring", stiffness: 420, damping: 34 }} /> : null}
-              <item.icon size={19} className={cn("relative", active && "text-studio-cyan")} aria-hidden />
-              <span className={cn("relative", active && "text-fg")}>{L(item.label)}</span>
+              {active ? <motion.span layoutId="tab-active" className="absolute inset-0 rounded-2xl bg-studio-cyan/15" transition={{ type: "spring", stiffness: 420, damping: 34 }} /> : null}
+              <item.icon size={21} strokeWidth={2.1} className="relative text-studio-cyan" aria-hidden />
+              <span className={cn("relative", active && "font-bold text-accent")}>{L(item.label)}</span>
               {item.href === "/help" && help.unseen > 0 ? <span className="absolute top-1.5 right-[30%] size-1.5 rounded-full bg-studio-cyan" aria-hidden /> : null}
             </Link>
           );
