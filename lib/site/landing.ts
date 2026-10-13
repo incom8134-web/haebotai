@@ -69,6 +69,7 @@ export const FLOW: {
       "Run campaigns and content, and let customer feedback set the next move.",
     ),
     tools: ["campaign-planner", "hook-lab", "seo-composer", "content-transformer", "insight-miner"],
+    image: { src: "/images/stage-grow.webp", alt: b("저녁 카페에서 사장이 늘어나는 매출 그래프 옆에서 고객 반응을 휴대폰으로 확인하며 웃는 모습", "A café owner at dusk smiling at customer responses on her phone, beside a rising sales chart") },
   },
 ];
 
