@@ -6,7 +6,7 @@ import { useBi } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
 
 // The three landing-page videos (public/videos). Two are quiet background
-// scenes — a paper-and-light build-up. The hero plays once when it scrolls
+// scenes — a glass-and-light build-up. The hero plays once when it scrolls
 // into view and holds its last frame (a held frame costs no CPU); the
 // "how" scene loops while visible, using a `-loop` file that plays the
 // build forward then backward, so the loop has no visible cut. The third
@@ -107,7 +107,7 @@ export function SceneVideo({ name, className, priority = false, loop = false }: 
 export function StoryVideo({ className }: { className?: string }) {
   const L = useBi();
   const [playing, setPlaying] = useState(false);
-  const label = L({ ko: "빵집 사장님이 노트북으로 문서를 정리하는 하루", en: "A shop owner sorting out documents on a laptop" });
+  const label = L({ ko: "저녁 빵집에서 사장님이 노트북으로 홍보 글을 만드는 모습", en: "A bakery owner writing a promo post on a laptop after closing" });
   return (
     <div className={cn("relative aspect-video overflow-hidden rounded-[24px] border border-hairline bg-surface-2", className)}>
       {playing ? (
@@ -116,7 +116,7 @@ export function StoryVideo({ className }: { className?: string }) {
           <track kind="captions" src="/videos/story.ko.vtt" srcLang="ko" label="한국어" default />
         </video>
       ) : (
-        <button type="button" onClick={() => setPlaying(true)} className="group relative block size-full" aria-label={L({ ko: `영상 재생: ${label} (10초)`, en: `Play video: ${label} (10 s)` })}>
+        <button type="button" onClick={() => setPlaying(true)} className="group relative block size-full" aria-label={L({ ko: `영상 재생: ${label} (8초)`, en: `Play video: ${label} (8 s)` })}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/videos/story-poster.jpg" alt="" loading="lazy" decoding="async" className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.02]" />
           <span className="absolute inset-0 grid place-items-center bg-black/10 transition-colors group-hover:bg-black/20">
