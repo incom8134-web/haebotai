@@ -73,10 +73,10 @@ function Nav() {
               href={BUSINESS.website}
               target="_blank"
               rel="noopener noreferrer"
-              className={cn(secondaryButton, "mr-2 h-10 gap-1.5 px-4 text-sm font-bold whitespace-nowrap")}
+              className={cn(secondaryButton, "mr-2 h-10 gap-1.5 border-studio-cyan/55 bg-studio-cyan/15 px-4 text-sm font-bold whitespace-nowrap")}
             >
               <Building2 size={16} aria-hidden />
-              {L({ ko: "지니에듀테크 홈페이지", en: "Genie EduTech website" })}
+              {L({ ko: "지니에듀테크 홈페이지", en: "Jinie EduTech website" })}
               <ExternalLink size={13} className="text-fg-muted" aria-hidden />
             </a>
             {[
@@ -101,12 +101,12 @@ function Nav() {
               href={BUSINESS.website}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={L({ ko: "지니에듀테크 홈페이지 (새 창)", en: "Genie EduTech website (new tab)" })}
-              className={cn(secondaryButton, "h-10 gap-1 px-3 text-sm font-bold whitespace-nowrap xl:hidden")}
+              aria-label={L({ ko: "지니에듀테크 홈페이지 (새 창)", en: "Jinie EduTech website (new tab)" })}
+              className={cn(secondaryButton, "h-10 gap-1 border-studio-cyan/55 bg-studio-cyan/15 px-3 text-sm font-bold whitespace-nowrap xl:hidden")}
             >
               <Building2 size={15} aria-hidden />
               <span className="sm:hidden">{L({ ko: "회사", en: "Company" })}</span>
-              <span className="max-sm:hidden">{L({ ko: "지니에듀테크 홈페이지", en: "Genie EduTech website" })}</span>
+              <span className="max-sm:hidden">{L({ ko: "지니에듀테크 홈페이지", en: "Jinie EduTech website" })}</span>
             </a>
             <Link
               href="/quick"
