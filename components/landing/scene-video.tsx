@@ -6,10 +6,9 @@ import { useBi } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
 
 // The three landing-page videos (public/videos). Two are quiet background
-// scenes — a glass-and-light build-up. The hero plays once when it scrolls
-// into view and holds its last frame (a held frame costs no CPU); the
-// "how" scene loops while visible, using a `-loop` file that plays the
-// build forward then backward, so the loop has no visible cut. The third
+// scenes — a glass-and-light build-up. Both loop while visible, using a
+// `-loop` file that plays the build forward then backward, so the loop
+// has no visible cut, and pause when scrolled away. The third
 // is a short story you start yourself.
 //
 // Rules for all of them: the poster shows first (it is the page's image
@@ -111,7 +110,7 @@ export function StoryVideo({ className }: { className?: string }) {
   return (
     <div className={cn("relative aspect-video overflow-hidden rounded-[24px] border border-hairline bg-surface-2", className)}>
       {playing ? (
-        <video autoPlay controls playsInline preload="auto" poster="/videos/story-poster.jpg" aria-label={label} className="size-full object-cover">
+        <video autoPlay muted controls playsInline preload="auto" poster="/videos/story-poster.jpg" aria-label={label} className="size-full object-cover">
           <source src="/videos/story.mp4" type="video/mp4" />
           <track kind="captions" src="/videos/story.ko.vtt" srcLang="ko" label="한국어" default />
         </video>
