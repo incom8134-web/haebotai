@@ -37,3 +37,10 @@ export const LEGAL_NAV: SubNavItem[] = [
   { href: "/legal/cookies", label: { ko: "쿠키 정책", en: "Cookies" }, icon: "shield-check" },
   { href: "/legal/licenses", label: { ko: "라이선스", en: "Licenses" }, icon: "scroll-text" },
 ];
+
+/** /admin — staff only (ADMIN_EMAILS, lib/admin.ts). */
+export const ADMIN_NAV: SubNavItem[] = [
+  { href: "/admin", label: { ko: "운영 현황", en: "Overview" }, icon: "layout-dashboard", exact: true },
+  { href: "/admin/members", label: { ko: "회원", en: "Members" }, icon: "users" },
+  { href: "/admin/tickets", label: { ko: "고객 문의", en: "Support tickets" }, icon: "headset" },
+];

@@ -33,6 +33,7 @@ project order (0001 → 0012, currently).
 | `0010_api_key_broken_flag.sql` | Adds `broken` flag to a key slot the rotation classifier invalidated |
 | `0011_lock_down_credits_and_keys.sql` | **Security fix.** Revokes direct authenticated write access to `user_credits`, `generations`, `user_api_keys`; moves credit reserve/settle to `security definer` RPCs callable only by the service role; adds `user_api_key_status` view |
 | `0012_pro_payments.sql` | Pro checkout: `payments` order ledger (read-own, service-role writes) and `activate_pro` (service-role only) — marks a pending order done, extends Pro 30 days, adds 2,000 credits, in one transaction |
+| `0019_audit_log.sql` | `audit_log` for staff actions in `/admin` (service-role only). Optional: `/admin` works without it, it just records nothing |
 
 Storage buckets (`inputs`, `exports`, `logos`) and their RLS policies are
 created by `0001_init.sql` — no manual bucket setup needed.
@@ -88,6 +89,7 @@ broken pages.
 | `NEXT_PUBLIC_AUTH_PROVIDERS` | optional | `google,kakao` shows the Kakao button (Google is always on). Enable Kakao in Supabase first. Type **Config**, not Secret; inlined at build time, so redeploy. |
 | `GOOGLE_SITE_VERIFICATION` / `NAVER_SITE_VERIFICATION` | optional | The `content` value of the HTML-tag ownership check from Google Search Console / Naver Search Advisor. Rendered as a meta tag; redeploy after setting. |
 | `NEXT_PUBLIC_TOSS_CLIENT_KEY` / `TOSS_SECRET_KEY` | optional | Toss Payments 결제위젯 client key (`test_gck_…`/`live_gck_…`) and its secret key (`…_gsk_…`, **server-only**). Both set → the Pro checkout at `/account/membership/checkout` works; either missing → it shows "not set up". The client key is inlined at build time, so redeploy after changing it. |
+| `ADMIN_EMAILS` | optional | Comma-separated staff emails allowed into `/admin` (overview, members, support tickets). Unset → `/admin` is a 404 for everyone. Also lets those people use the team's own AI key. Redeploy after changing. |
 | `API_KEY_ENCRYPTION_SECRET` | optional | Enables BYOK (Claude / own-Gemini keys). Random 32+ byte value — `openssl rand -base64 32`. **Losing this after users have stored keys means every stored key is unrecoverable and must be re-entered.** Omitting it entirely disables BYOK; Claude tools then show no usable engine. |
 
 Anthropic keys are never platform-wide env vars — Claude is own-key-only by
