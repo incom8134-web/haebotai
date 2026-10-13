@@ -51,6 +51,11 @@ export async function generateMetadata(): Promise<Metadata> {
     description,
     openGraph: { type: "website", siteName: name, locale: locale === "en" ? "en_US" : "ko_KR", title: name, description },
     twitter: { card: "summary_large_image", title: name, description },
+    // The site has its own ko/en switch. Chrome's page translator rewrites
+    // text nodes behind React's back, and the next re-render then throws
+    // "NotFoundError: removeChild/insertBefore" (seen on tool results).
+    // This tag and translate="no" on <html> tell Chrome to leave the page alone.
+    other: { google: "notranslate" },
     verification: {
       ...(googleVerification ? { google: googleVerification } : {}),
       ...(naverVerification ? { other: { "naver-site-verification": naverVerification } } : {}),
@@ -63,6 +68,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang={locale}
+      translate="no"
       className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} h-full antialiased`}
       suppressHydrationWarning
     >
