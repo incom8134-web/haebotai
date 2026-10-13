@@ -92,7 +92,8 @@ test("busy: waits 3, 8 and 15 s; a free key then moves to another model, a paid 
     return p.model;
   };
   assert.equal(await freeTierAware({ model: "gemini-3.1-pro-preview" }, call, { keyTag: freeKey, sleep: noSleep }), "gemini-3.6-flash");
-  assert.deepEqual(seen.filter((m) => m === "gemini-3.8-flash").length, 4);
+  // A known free key waits once on a busy model, then moves on.
+  assert.deepEqual(seen.filter((m) => m === "gemini-3.8-flash").length, 2);
 });
 
 test("a short rate-limit wait is honoured once, a long one is not", async () => {
@@ -127,4 +128,52 @@ test("a free key whose Search allowance is used up answers without Search", asyn
   assert.deepEqual(seen, [{ model: "gemini-3.8-flash", search: false }]);
   // A paid key (never marked free) keeps Search and gets the error.
   await assert.rejects(freeTierAware({ model: "gemini-3.8-flash", config: { tools: [{ googleSearch: {} }] } }, async () => { throw bare; }, { keyTag: tag(), sleep: noSleep }), /exceeded/);
+});
+
+test("once every free model is used up, later calls fail with a quota error, never an empty one", async () => {
+  const opts = { keyTag: tag(), sleep: noSleep };
+  const call = async (p: { model: string }) => {
+    throw p.model.includes("pro") ? quota(0, p.model) : daily(p.model);
+  };
+  await assert.rejects(freeTierAware({ model: "gemini-3.1-pro-preview" }, call, opts));
+  let called = false;
+  const err = await freeTierAware({ model: "gemini-3.8-flash" }, async () => { called = true; return "x"; }, opts).catch((e: unknown) => e);
+  assert.equal(called, false);
+  assert.ok(err instanceof Error);
+  assert.equal((err as { status?: number }).status, 429);
+});
+
+test("a fallback model that rejects the thinking level is asked again without it", async () => {
+  const bad = Object.assign(new Error(JSON.stringify({ error: { code: 400, message: "Request contains an invalid argument.", status: "INVALID_ARGUMENT" } })), { status: 400 });
+  const seen: { model: string; thinking: boolean }[] = [];
+  const call = async (p: { model: string; config?: { thinkingConfig?: unknown } }) => {
+    seen.push({ model: p.model, thinking: !!p.config?.thinkingConfig });
+    if (p.model.includes("pro")) throw quota(0, p.model);
+    if (p.config?.thinkingConfig) throw bad;
+    return "ok";
+  };
+  assert.equal(await freeTierAware({ model: "gemini-3.1-pro-preview", config: { thinkingConfig: { thinkingLevel: "low" } } }, call, { keyTag: tag(), sleep: noSleep }), "ok");
+  assert.deepEqual(seen.at(-1), { model: "gemini-3.8-flash", thinking: false });
+  // A request that is bad either way still fails, after one relaxed retry.
+  let tries = 0;
+  await assert.rejects(freeTierAware({ model: "gemini-3.8-flash", config: { thinkingConfig: {} } }, async () => { tries++; throw bad; }, { keyTag: tag(), sleep: noSleep }), /invalid argument/);
+  assert.equal(tries, 2);
+  // Without thinking or limits there is nothing to relax: no retry.
+  tries = 0;
+  await assert.rejects(freeTierAware({ model: "gemini-3.8-flash" }, async () => { tries++; throw bad; }, { keyTag: tag(), sleep: noSleep }), /invalid argument/);
+  assert.equal(tries, 1);
+});
+
+test("a schema a Flash model rejects is retried without count and range limits", async () => {
+  const bad = Object.assign(new Error('{"error":{"code":400,"message":"Request contains an invalid argument."}}'), { status: 400 });
+  const schema = { type: "object", properties: { items: { type: "array", minItems: 3, maxItems: 40, items: { type: "integer", minimum: 1, maximum: 5 } } } };
+  const sent: unknown[] = [];
+  const call = async (p: { model: string; config?: { responseJsonSchema?: unknown } }) => {
+    sent.push(p.config?.responseJsonSchema);
+    if (JSON.stringify(p.config?.responseJsonSchema).includes("Items")) throw bad;
+    return "ok";
+  };
+  assert.equal(await freeTierAware({ model: "gemini-3.8-flash", config: { responseJsonSchema: schema } }, call, { keyTag: tag(), sleep: noSleep }), "ok");
+  assert.deepEqual(sent.at(-1), { type: "object", properties: { items: { type: "array", items: { type: "integer" } } } });
+  assert.deepEqual(schema.properties.items.maxItems, 40); // the caller's schema is untouched
 });

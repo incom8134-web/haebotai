@@ -3,7 +3,7 @@
 import { createContext, useContext } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
-import { ArrowRight, Check, Plus, Wand2 } from "lucide-react";
+import { ArrowRight, Building2, Check, ExternalLink, Plus, Wand2 } from "lucide-react";
 import { BusinessInfo } from "@/components/site/business-info";
 import { BUSINESS } from "@/lib/site/business";
 import { BrandLogo, BrandMark } from "@/components/brand-mark";
@@ -66,17 +66,19 @@ function Nav() {
             <BrandLogo height={24} className={cn("h-[19px] w-auto sm:h-6", L({ ko: "", en: "hidden min-[400px]:block" }))} />
           </Link>
           <nav
-            className="mx-auto hidden items-center gap-1 md:flex"
+            className="mx-auto hidden items-center gap-1 xl:flex"
             aria-label={L({ ko: "페이지 안내", en: "Page" })}
           >
-            <Link
-              href="/quick"
-              className="studio-gradient-bg relative mr-2 inline-flex h-10 items-center gap-1.5 rounded-xl px-4 text-sm font-bold whitespace-nowrap text-white shadow-[inset_0_1px_0_oklch(1_0_0/30%),0_10px_24px_-10px_var(--studio-violet)] transition-transform duration-500 ease-[var(--spring)] hover:-translate-y-0.5"
+            <a
+              href={BUSINESS.website}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(secondaryButton, "mr-2 h-10 gap-1.5 px-4 text-sm font-bold whitespace-nowrap")}
             >
-              <span className="quick-pulse absolute inset-0 rounded-xl" aria-hidden />
-              <Wand2 size={16} className="relative" aria-hidden />
-              <span className="relative">{L({ ko: "가게 홍보 바로 시작하기", en: "Start shop marketing" })}</span>
-            </Link>
+              <Building2 size={16} aria-hidden />
+              {L({ ko: "지니에듀테크 홈페이지", en: "Genie EduTech website" })}
+              <ExternalLink size={13} className="text-fg-muted" aria-hidden />
+            </a>
             {[
               ["#flow", { ko: "흐름", en: "Flow" }],
               ["#tools", { ko: "도구", en: "Tools" }],
@@ -93,30 +95,39 @@ function Nav() {
               </a>
             ))}
           </nav>
-          <div className="ml-auto flex items-center gap-2 md:ml-0">
-            {/* Phones have no room for the page links: the quick start keeps its place up here. */}
+          <div className="ml-auto flex items-center gap-2 xl:ml-0">
+            {/* Below xl there is no room for the page links: the company site keeps its own button up here. */}
+            <a
+              href={BUSINESS.website}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={L({ ko: "지니에듀테크 홈페이지 (새 창)", en: "Genie EduTech website (new tab)" })}
+              className={cn(secondaryButton, "h-10 gap-1 px-3 text-sm font-bold whitespace-nowrap xl:hidden")}
+            >
+              <Building2 size={15} aria-hidden />
+              <span className="sm:hidden">{L({ ko: "회사", en: "Company" })}</span>
+              <span className="max-sm:hidden">{L({ ko: "지니에듀테크 홈페이지", en: "Genie EduTech website" })}</span>
+            </a>
             <Link
               href="/quick"
-              className="studio-gradient-bg relative inline-flex h-10 items-center gap-1 rounded-xl px-3 text-sm font-bold whitespace-nowrap text-white shadow-[0_10px_24px_-10px_var(--studio-violet)] md:hidden"
+              className="studio-gradient-bg relative inline-flex h-10 items-center gap-1.5 rounded-xl px-3 text-sm font-bold whitespace-nowrap text-white shadow-[inset_0_1px_0_oklch(1_0_0/30%),0_10px_24px_-10px_var(--studio-violet)] transition-transform duration-500 ease-[var(--spring)] hover:-translate-y-0.5 xl:px-4"
             >
               <span className="quick-pulse absolute inset-0 rounded-xl" aria-hidden />
-              <Wand2 size={15} className="relative" aria-hidden />
-              <span className="relative">{L({ ko: "홍보 바로 시작", en: "Quick start" })}</span>
+              <Wand2 size={16} className="relative" aria-hidden />
+              <span className="relative sm:hidden">{L({ ko: "홍보 바로 시작", en: "Quick start" })}</span>
+              <span className="relative max-sm:hidden">{L({ ko: "가게 홍보 바로 시작하기", en: "Start shop marketing" })}</span>
             </Link>
-            {signedIn ? (
-              <Link href="/studio" className={cn(primaryButton, "h-10 whitespace-nowrap max-sm:px-3.5")}>
-                {L({ ko: "스튜디오로", en: "Go to Studio" })}
-              </Link>
-            ) : (
+            {/* Signed in: the quick start takes the old "Go to Studio" place; the hero still links to the Studio. */}
+            {!signedIn && (
               <>
                 <Link
                   href="/auth"
-                  className="hidden h-10 items-center rounded-xl px-3 text-sm font-medium text-fg sm:flex"
+                  className="hidden h-10 items-center rounded-xl px-3 text-sm font-medium whitespace-nowrap text-fg lg:flex"
                 >
                   {L({ ko: "로그인", en: "Sign in" })}
                 </Link>
-                {/* Outlined, so the quick start stays the one filled button up here. */}
-                <Link href="/auth" className={cn(secondaryButton, "h-10 whitespace-nowrap max-sm:px-3.5")}>
+                {/* Outlined, so the quick start stays the one filled button up here. Narrow screens keep it in the hero just below. */}
+                <Link href="/auth" className={cn(secondaryButton, "h-10 whitespace-nowrap max-md:hidden")}>
                   {L({ ko: "시작하기", en: "Get started" })}
                 </Link>
               </>
