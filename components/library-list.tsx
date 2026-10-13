@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FileQuestion, Inbox, Search, Star, Trash2 } from "lucide-react";
+import { FileQuestion, Inbox, Library as LibraryIcon, Search, Star, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getTool } from "@/lib/tools/registry";
@@ -11,7 +11,8 @@ import { useLocale, useT } from "@/lib/i18n/context";
 import type { DictKey } from "@/lib/i18n/dictionaries";
 import { formatDateTime } from "@/lib/format-date";
 import { cn } from "@/lib/utils";
-import { IconTile, TONE, toneFor, toolTone } from "@/components/site/tone";
+import { OWN_KEY_ONLY } from "@/lib/site/access";
+import { IconTile, PageHero, TONE, toneFor, toolTone } from "@/components/site/tone";
 
 interface LibraryRun {
   id: string;
@@ -48,7 +49,9 @@ function LibraryList({ runs: initial, projects = [], canPin = false }: { runs: L
   const toolOptions = useMemo(() => {
     const seen = new Map<string, string>();
     for (const r of all) if (r.toolId && !seen.has(r.toolId)) seen.set(r.toolId, en ? r.toolNameEn : r.toolNameKo);
-    return [...seen.entries()].sort((a, b) => a[1].localeCompare(b[1]));
+    // Plain code-point order (Hangul is already 가나다 order): localeCompare
+    // sorts differently on the server and in the browser, which broke hydration.
+    return [...seen.entries()].sort((a, b) => (a[1] < b[1] ? -1 : a[1] > b[1] ? 1 : 0));
   }, [all, en]);
   const q = query.trim().toLowerCase();
   const runs = all
@@ -82,11 +85,8 @@ function LibraryList({ runs: initial, projects = [], canPin = false }: { runs: L
   const control = "rounded-md border border-hairline bg-surface px-2 py-1 text-xs text-fg";
 
   return (
-    <div className="mx-auto max-w-3xl px-4 pt-6 pb-10 md:px-8 md:pt-10">
-      <h1 className="font-display text-[clamp(2rem,4vw,3rem)] leading-[1.05] font-bold tracking-[-0.02em] break-keep text-fg">
-        {t("library")}
-      </h1>
-      <p className="mt-3 text-base leading-relaxed break-keep text-fg-muted">{t("library_desc")}</p>
+    <div className="mx-auto max-w-4xl px-4 pt-6 pb-10 md:px-8 md:pt-10">
+      <PageHero icon={LibraryIcon} tone="operate" eyebrow={en ? "Everything you made" : "내가 만든 결과물"} title={t("library")} lead={t("library_desc")} className="mb-2" />
 
       {all.length ? (
         <div className="mt-5 flex flex-wrap items-center gap-2 text-xs text-fg-muted">
@@ -163,9 +163,11 @@ function LibraryList({ runs: initial, projects = [], canPin = false }: { runs: L
                 </div>
               </div>
               <div className="flex shrink-0 items-center gap-2">
-                <span className="font-mono text-2xs text-fg-subtle">
-                  {run.credits} {t("credits")}
-                </span>
+                {OWN_KEY_ONLY ? null : (
+                  <span className="font-mono text-2xs text-fg-subtle">
+                    {run.credits} {t("credits")}
+                  </span>
+                )}
                 <span
                   className={cn(
                     "rounded-full px-2.5 py-1 text-2xs font-semibold",

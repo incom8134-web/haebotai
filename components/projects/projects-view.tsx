@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { useBi, useLocale } from "@/lib/i18n/context";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { IconTile, TONE, toneFor } from "@/components/site/tone";
+import { IconTile, PageHero, TONE, toneFor } from "@/components/site/tone";
 import { cn } from "@/lib/utils";
 
 // The projects list and a create form. A project is a business or an
@@ -38,11 +38,15 @@ export function ProjectsView({ projects }: { projects: { id: string; name: strin
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 pt-6 pb-10 md:px-8 md:pt-10">
-      <h1 className="font-display text-[clamp(2rem,4vw,3rem)] leading-[1.05] font-bold tracking-[-0.02em] break-keep text-fg">{L({ ko: "프로젝트", en: "Projects" })}</h1>
-      <p className="mt-3 text-base leading-relaxed break-keep text-fg-muted">
-        {L({ ko: "사업이나 프로젝트마다 기억을 따로 둡니다. 프로젝트 안에서 도구를 실행하면 알고 있는 내용이 미리 채워지고, 결과에서 정해진 것(고객, 포지셔닝, 색, 가격…)이 다시 쌓여요.", en: "Each business or project keeps its own memory. Tools run inside a project start pre-filled with what it knows, and add what each result establishes — customer, positioning, colours, pricing…" })}
-      </p>
+    <div className="mx-auto max-w-4xl px-4 pt-6 pb-10 md:px-8 md:pt-10">
+      <PageHero
+        icon={FolderKanban}
+        tone="discover"
+        eyebrow={L({ ko: "사업별 기억", en: "Memory per business" })}
+        title={L({ ko: "프로젝트", en: "Projects" })}
+        lead={L({ ko: "사업이나 프로젝트마다 기억을 따로 둡니다. 프로젝트 안에서 도구를 실행하면 알고 있는 내용이 미리 채워지고, 결과에서 정해진 것(고객, 포지셔닝, 색, 가격…)이 다시 쌓여요.", en: "Each business or project keeps its own memory. Tools run inside a project start pre-filled with what it knows, and add what each result establishes — customer, positioning, colours, pricing…" })}
+        className="mb-2"
+      />
 
       <form onSubmit={create} className="mt-6 grid gap-2 rounded-2xl border border-hairline bg-surface p-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)_auto] sm:items-end">
         <label className="flex flex-col gap-1 text-xs text-fg-muted">

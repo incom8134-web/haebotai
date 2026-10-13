@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Clock, Hammer, Search, Star, X } from "lucide-react";
+import { ArrowRight, Clock, Hammer, LayoutGrid, Search, Star, X } from "lucide-react";
 import { CATEGORIES, CATEGORY_ORDER, VERBS, publicTools, toolsIn, catalogTool, type CatalogTool, type Verb } from "@/lib/tools/catalog";
 import { getTool } from "@/lib/tools/registry";
 import { WORKFLOWS, GOALS } from "@/lib/site/guides";
@@ -10,7 +10,7 @@ import { useFavorites } from "@/lib/hooks/use-local-list";
 import { useBi, useLocale } from "@/lib/i18n/context";
 import type { CategoryId } from "@/lib/tools/types";
 import { Page } from "@/components/site/page";
-import { IconTile, TONE } from "@/components/site/tone";
+import { IconTile, PageHero, TONE } from "@/components/site/tone";
 import { cn } from "@/lib/utils";
 
 // Tool discovery. Find a tool by what you want to do (search, verb,
@@ -183,18 +183,17 @@ function ToolsView({ initialCategory, recent }: { initialCategory: CategoryId | 
 
   return (
     <Page wide>
-      <header className="max-w-3xl">
-        <p className="text-sm font-medium text-accent">{L({ ko: "25개 도구 · 5개 분야", en: "25 tools · 5 areas" })}</p>
-        <h1 className="mt-2 font-display text-[clamp(2rem,4.2vw,3.1rem)] leading-[1.06] font-bold tracking-[-0.02em] break-keep">
-          {L({ ko: "오늘 무엇을 끝낼까요?", en: "What will you finish today?" })}
-        </h1>
-        <p className="mt-3 text-base leading-relaxed break-keep text-fg-muted">
-          {L({
-            ko: "아이디어에서 브랜드, 판매, 콘텐츠, 문서, 리서치까지. 각 도구는 결과물 하나를 끝까지 만들고, 그 결과를 다음 도구로 넘겨줍니다.",
-            en: "From idea to brand, sales, content, documents and research. Each tool finishes one real deliverable and hands it to the next.",
-          })}
-        </p>
-      </header>
+      <PageHero
+        icon={LayoutGrid}
+        tone="accent"
+        eyebrow={L({ ko: "25개 도구 · 5개 분야", en: "25 tools · 5 areas" })}
+        title={L({ ko: "오늘 무엇을 끝낼까요?", en: "What will you finish today?" })}
+        lead={L({
+          ko: "아이디어에서 브랜드, 판매, 콘텐츠, 문서, 리서치까지. 각 도구는 결과물 하나를 끝까지 만들고, 그 결과를 다음 도구로 넘겨줍니다.",
+          en: "From idea to brand, sales, content, documents and research. Each tool finishes one real deliverable and hands it to the next.",
+        })}
+        className="mb-0"
+      />
 
       {/* Find */}
       <div className="sticky top-[64px] z-20 -mx-4 mt-8 border-b border-hairline bg-bg/95 px-4 py-3 md:-mx-8 md:px-8">

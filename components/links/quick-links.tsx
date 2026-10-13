@@ -2,14 +2,13 @@
 
 import { toolSlug } from "@/lib/tools/catalog";
 import Link from "next/link";
-import { ArrowUpRight, BookOpenText, CircleGauge, CircleHelp, Crown, ExternalLink, FileQuestion, Globe, Headset, Keyboard, LayoutGrid, Library, Sparkle, Sparkles, Star, UserRound } from "lucide-react";
+import { ArrowUpRight, BookOpenText, CircleGauge, CircleHelp, Crown, ExternalLink, FileQuestion, Globe, Headset, Keyboard, LayoutGrid, Library, Sparkle, Sparkles, Star, UserRound, Zap } from "lucide-react";
 import { getTool } from "@/lib/tools/registry";
 import { WORKFLOWS } from "@/lib/site/guides";
 import { useFavorites } from "@/lib/hooks/use-local-list";
 import { useBi, useLocale } from "@/lib/i18n/context";
-import { PageHeader } from "@/components/site/page";
 import { OWN_KEY_ONLY } from "@/lib/site/access";
-import { IconTile, TONE, toneFor, toolTone, type Tone } from "@/components/site/tone";
+import { IconTile, PageHero, TONE, toneFor, toolTone, type Tone } from "@/components/site/tone";
 import { cn } from "@/lib/utils";
 
 // /links — one screen of shortcuts: pinned tools, latest results, every
@@ -47,7 +46,7 @@ function QuickLinks({ recent }: { recent: { id: string; toolId: string; createdA
 
   return (
     <div className="mx-auto max-w-[1240px] px-4 pt-6 pb-10 md:px-8 md:pt-10">
-      <PageHeader eyebrow={L({ ko: "바로가기", en: "Quick links" })} title={L({ ko: "자주 가는 곳, 한 화면에", en: "Everywhere you go, on one screen" })} />
+      <PageHero icon={Zap} tone="campaign" eyebrow={L({ ko: "바로가기", en: "Quick links" })} title={L({ ko: "자주 가는 곳, 한 화면에", en: "Everywhere you go, on one screen" })} lead={L({ ko: "고정한 도구, 최근 결과, 앱의 모든 페이지와 함께 쓰는 서비스를 여기서 바로 열어요.", en: "Pinned tools, latest results, every page in the app and the services you use alongside, one tap away." })} />
 
       <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
         <section className="glass rounded-[24px] p-6">
