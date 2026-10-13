@@ -18,6 +18,15 @@ import { cn } from "@/lib/utils";
 
 type SceneName = "hero" | "how";
 
+/**
+ * Bump when any file in public/videos changes. /videos is cached for a week
+ * (next.config.ts), so a replaced file under the same name would keep
+ * showing the old one to anyone who visited before; a new query string
+ * makes browsers fetch the new file at once.
+ */
+export const VIDEO_REV = "2026-10-13";
+const v = (path: string) => `${path}?v=${VIDEO_REV}`;
+
 const subscribeStill = (notify: () => void) => {
   const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
   mq.addEventListener("change", notify);
@@ -86,7 +95,7 @@ export function SceneVideo({ name, className, priority = false, loop = false }: 
       loop={loop}
       playsInline
       preload={armed ? "auto" : "none"}
-      poster={`${src}-poster.jpg`}
+      poster={v(`${src}-poster.jpg`)}
       aria-hidden
       tabIndex={-1}
       disablePictureInPicture
@@ -94,8 +103,8 @@ export function SceneVideo({ name, className, priority = false, loop = false }: 
     >
       {armed ? (
         <>
-          <source src={`${file}-sm.mp4`} media="(max-width: 767px)" type="video/mp4" />
-          <source src={`${file}.mp4`} type="video/mp4" />
+          <source src={v(`${file}-sm.mp4`)} media="(max-width: 767px)" type="video/mp4" />
+          <source src={v(`${file}.mp4`)} type="video/mp4" />
         </>
       ) : null}
     </video>
@@ -110,14 +119,14 @@ export function StoryVideo({ className }: { className?: string }) {
   return (
     <div className={cn("relative aspect-video overflow-hidden rounded-[24px] border border-hairline bg-surface-2", className)}>
       {playing ? (
-        <video autoPlay muted controls playsInline preload="auto" poster="/videos/story-poster.jpg" aria-label={label} className="size-full object-cover">
-          <source src="/videos/story.mp4" type="video/mp4" />
-          <track kind="captions" src="/videos/story.ko.vtt" srcLang="ko" label="한국어" default />
+        <video autoPlay muted controls playsInline preload="auto" poster={v("/videos/story-poster.jpg")} aria-label={label} className="size-full object-cover">
+          <source src={v("/videos/story.mp4")} type="video/mp4" />
+          <track kind="captions" src={v("/videos/story.ko.vtt")} srcLang="ko" label="한국어" default />
         </video>
       ) : (
         <button type="button" onClick={() => setPlaying(true)} className="group relative block size-full" aria-label={L({ ko: `영상 재생: ${label} (8초)`, en: `Play video: ${label} (8 s)` })}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/videos/story-poster.jpg" alt="" loading="lazy" decoding="async" className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.02]" />
+          <img src={v("/videos/story-poster.jpg")} alt="" loading="lazy" decoding="async" className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.02]" />
           <span className="absolute inset-0 grid place-items-center bg-black/10 transition-colors group-hover:bg-black/20">
             <span className="grid size-16 place-items-center rounded-full bg-white/90 text-accent-hover shadow-lg ring-1 ring-black/5 transition-transform group-hover:scale-105">
               <Play size={26} className="translate-x-0.5 fill-current" aria-hidden />

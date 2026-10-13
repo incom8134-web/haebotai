@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { MessageSquareText, Pause, Play, Sparkles, Wand2 } from "lucide-react";
 import { useBi } from "@/lib/i18n/context";
+import { VIDEO_REV } from "./scene-video";
 
 // Right after the hero: a 10-second concept film of the one idea the
 // product rests on — type what you want in a line, results come back as
@@ -83,7 +84,7 @@ export function ConceptFilm() {
           <video
             ref={ref}
             className="aspect-video w-full bg-black object-cover"
-            poster="/videos/concept-poster.jpg"
+            poster={`/videos/concept-poster.jpg?v=${VIDEO_REV}`}
             muted
             loop
             playsInline
@@ -92,8 +93,8 @@ export function ConceptFilm() {
             onPause={() => setPlaying(false)}
             aria-label={L({ ko: "한 줄 요청이 이미지·카피·일정 결과로 바뀌는 콘셉트 영상 (소리 없음)", en: "Concept film: a one-line request turning into images, copy and a schedule (no sound)" })}
           >
-            <source src="/videos/concept.webm" type="video/webm" />
-            <source src="/videos/concept.mp4" type="video/mp4" />
+            <source src={`/videos/concept.webm?v=${VIDEO_REV}`} type="video/webm" />
+            <source src={`/videos/concept.mp4?v=${VIDEO_REV}`} type="video/mp4" />
           </video>
           <button
             type="button"
