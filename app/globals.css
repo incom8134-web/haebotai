@@ -12,10 +12,10 @@
  */
 @theme {
   /* Surfaces */
-  --color-bg: #f6f8fb;
+  --color-bg: #edf1f8;
   --color-surface: #ffffff;
-  --color-surface-2: #edf1f7;
-  --color-hairline: rgba(15, 30, 60, 0.09);
+  --color-surface-2: #e7edf6;
+  --color-hairline: rgba(15, 30, 60, 0.1);
   --color-hairline-str: rgba(15, 30, 60, 0.16);
 
   /* Text — muted/subtle measured against bg, surface, and surface-2 to
@@ -227,7 +227,7 @@
   --glass-rim: transparent;
   --glass-edge: var(--color-hairline);
   --glass-sheen: transparent;
-  --glass-shadow: 0 1px 2px oklch(0.3 0.03 255 / 6%), 0 10px 28px -18px oklch(0.3 0.05 255 / 20%);
+  --glass-shadow: 0 1px 2px oklch(0.3 0.03 255 / 8%), 0 14px 32px -18px oklch(0.3 0.06 255 / 28%);
   --spring: cubic-bezier(0.22, 1.25, 0.36, 1);
   --ease-glide: cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -283,6 +283,28 @@
   background-image: linear-gradient(var(--studio-grid) 1px, transparent 1px), linear-gradient(90deg, var(--studio-grid) 1px, transparent 1px);
   background-size: 64px 64px;
   mask-image: radial-gradient(ellipse at 40% 20%, black, transparent 75%);
+}
+/* Soft colour behind the app pages, so white panels stand off the page. */
+.app-backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(48rem 30rem at 8% -6%, color-mix(in oklch, var(--studio-cyan) 16%, transparent), transparent 70%),
+    radial-gradient(40rem 28rem at 100% 12%, color-mix(in oklch, var(--cat-campaign) 12%, transparent), transparent 70%),
+    radial-gradient(44rem 30rem at 60% 110%, color-mix(in oklch, var(--cat-operate) 9%, transparent), transparent 70%);
+}
+
+/* Inside the signed-in app (AppShell's <main>), text runs one step larger
+   than the marketing pages: Tailwind's text-* utilities read these vars. */
+.app-type {
+  --text-2xs: 12px;
+  --text-xs: 13px;
+  --text-sm: 15px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 22px;
+  --text-2xl: 28px;
 }
 
 /* Smooth open/close for <details> accordions. */
