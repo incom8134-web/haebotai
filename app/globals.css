@@ -94,6 +94,13 @@
   --color-studio-violet: var(--studio-violet);
   --color-studio-success: var(--studio-success);
   --color-studio-warning: var(--studio-warning);
+  /* One hue per tool area (lib/tools/catalog.ts CATEGORIES), used for icon
+     tiles, chips and highlights so a tool reads the same on every page. */
+  --color-cat-discover: var(--cat-discover);
+  --color-cat-brand: var(--cat-brand);
+  --color-cat-campaign: var(--cat-campaign);
+  --color-cat-operate: var(--cat-operate);
+  --color-cat-research: var(--cat-research);
 
   --color-background: var(--color-bg);
   --color-foreground: var(--color-fg);
@@ -178,6 +185,12 @@
   --studio-success: oklch(0.55 0.13 160);
   --studio-warning: oklch(0.7 0.16 75);
   --studio-grid: oklch(0.3 0.04 255 / 4%);
+  /* Tool-area hues. Light values hold AA as text on the page background. */
+  --cat-discover: oklch(0.58 0.15 55);
+  --cat-brand: oklch(0.56 0.19 10);
+  --cat-campaign: oklch(0.52 0.2 295);
+  --cat-operate: oklch(0.52 0.1 175);
+  --cat-research: oklch(0.52 0.15 250);
 }
 .dark {
   --studio-cyan: #2a6ad0;
@@ -185,6 +198,11 @@
   --studio-success: oklch(0.79 0.17 160);
   --studio-warning: oklch(0.78 0.16 78);
   --studio-grid: oklch(1 0 0 / 2.5%);
+  --cat-discover: oklch(0.8 0.14 65);
+  --cat-brand: oklch(0.76 0.14 10);
+  --cat-campaign: oklch(0.76 0.14 295);
+  --cat-operate: oklch(0.8 0.11 175);
+  --cat-research: oklch(0.76 0.12 245);
 }
 
 .studio-gradient-bg { background-image: linear-gradient(135deg, var(--studio-cyan), var(--studio-violet)); }

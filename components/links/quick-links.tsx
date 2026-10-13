@@ -2,29 +2,31 @@
 
 import { toolSlug } from "@/lib/tools/catalog";
 import Link from "next/link";
-import { ArrowUpRight, BookOpenText, CircleGauge, CircleHelp, Crown, ExternalLink, Headset, Keyboard, LayoutGrid, Library, Sparkle, Sparkles, Star, UserRound } from "lucide-react";
+import { ArrowUpRight, BookOpenText, CircleGauge, CircleHelp, Crown, ExternalLink, FileQuestion, Globe, Headset, Keyboard, LayoutGrid, Library, Sparkle, Sparkles, Star, UserRound } from "lucide-react";
 import { getTool } from "@/lib/tools/registry";
 import { WORKFLOWS } from "@/lib/site/guides";
 import { useFavorites } from "@/lib/hooks/use-local-list";
 import { useBi, useLocale } from "@/lib/i18n/context";
 import { PageHeader } from "@/components/site/page";
 import { OWN_KEY_ONLY } from "@/lib/site/access";
+import { IconTile, TONE, toneFor, toolTone, type Tone } from "@/components/site/tone";
+import { cn } from "@/lib/utils";
 
 // /links — one screen of shortcuts: pinned tools, latest results, every
 // app page, flows, outside services small businesses use alongside
 // Haeba, and keyboard shortcuts.
 
 const PAGES = [
-  { href: "/studio", icon: Sparkles, label: { ko: "스튜디오", en: "Studio" } },
-  { href: "/tools", icon: LayoutGrid, label: { ko: "전체 도구", en: "All tools" } },
-  { href: "/library", icon: Library, label: { ko: "보관함", en: "Library" } },
-  { href: "/brand", icon: UserRound, label: { ko: "비즈니스 프로필", en: "Business Profile" } },
-  OWN_KEY_ONLY ? { href: "/account/api-key", icon: CircleGauge, label: { ko: "내 API 키", en: "My API key" } } : { href: "/account/credits", icon: CircleGauge, label: { ko: "크레딧·한도", en: "Credits & limits" } },
-  { href: "/account/membership", icon: Crown, label: { ko: "학생 멤버십", en: "Student membership" } },
-  { href: "/help/contact", icon: Headset, label: { ko: "고객센터", en: "Customer service" } },
-  { href: "/help/faq", icon: CircleHelp, label: { ko: "자주 묻는 질문", en: "FAQ" } },
-  { href: "/help/api-guide", icon: BookOpenText, label: { ko: "API 키 설명서", en: "API key manual" } },
-  { href: "/help/whats-new", icon: Sparkle, label: { ko: "새로운 점", en: "What's new" } },
+  { href: "/studio", tone: "accent" as Tone, icon: Sparkles, label: { ko: "스튜디오", en: "Studio" } },
+  { href: "/tools", tone: "campaign" as Tone, icon: LayoutGrid, label: { ko: "전체 도구", en: "All tools" } },
+  { href: "/library", tone: "operate" as Tone, icon: Library, label: { ko: "보관함", en: "Library" } },
+  { href: "/brand", tone: "brand" as Tone, icon: UserRound, label: { ko: "비즈니스 프로필", en: "Business Profile" } },
+  OWN_KEY_ONLY ? { href: "/account/api-key", tone: "discover" as Tone, icon: CircleGauge, label: { ko: "내 API 키", en: "My API key" } } : { href: "/account/credits", tone: "discover" as Tone, icon: CircleGauge, label: { ko: "크레딧·한도", en: "Credits & limits" } },
+  { href: "/account/membership", tone: "discover" as Tone, icon: Crown, label: { ko: "학생 멤버십", en: "Student membership" } },
+  { href: "/help/contact", tone: "research" as Tone, icon: Headset, label: { ko: "고객센터", en: "Customer service" } },
+  { href: "/help/faq", tone: "research" as Tone, icon: CircleHelp, label: { ko: "자주 묻는 질문", en: "FAQ" } },
+  { href: "/help/api-guide", tone: "operate" as Tone, icon: BookOpenText, label: { ko: "API 키 설명서", en: "API key manual" } },
+  { href: "/help/whats-new", tone: "campaign" as Tone, icon: Sparkle, label: { ko: "새로운 점", en: "What's new" } },
 ];
 
 const OUTSIDE = [
@@ -54,8 +56,8 @@ function QuickLinks({ recent }: { recent: { id: string; toolId: string; createdA
             <div className="mt-4 grid gap-2 sm:grid-cols-2">
               {pinned.map((t) => (
                 <Link key={t.id} href={`/tools/${toolSlug(t.id)}/run`} className="glass glass-hover flex items-center gap-3 rounded-2xl p-3">
-                  <span className="studio-gradient-bg grid size-9 shrink-0 place-items-center rounded-xl text-white"><t.icon size={16} aria-hidden /></span>
-                  <span className="min-w-0 truncate text-sm font-medium">{locale === "en" ? t.name_en : t.name_ko}</span>
+                  <IconTile icon={t.icon} tone={toolTone(t.id)} />
+                  <span className="min-w-0 truncate text-[15px] font-semibold">{locale === "en" ? t.name_en : t.name_ko}</span>
                 </Link>
               ))}
             </div>
@@ -67,8 +69,11 @@ function QuickLinks({ recent }: { recent: { id: string; toolId: string; createdA
             <ul className="mt-3 divide-y divide-hairline">
               {recent.map((r) => (
                 <li key={r.id}>
-                  <Link href={`/library/${r.id}`} className="flex items-center justify-between gap-3 py-2.5 text-sm hover:text-studio-cyan">
-                    <span className="truncate">{name(r.toolId)}</span>
+                  <Link href={`/library/${r.id}`} className="flex items-center justify-between gap-3 py-2 text-sm hover:text-studio-cyan">
+                    <span className="flex min-w-0 items-center gap-2.5">
+                      <IconTile icon={getTool(r.toolId)?.icon ?? FileQuestion} tone={toolTone(r.toolId)} size="sm" />
+                      <span className="truncate font-medium">{name(r.toolId)}</span>
+                    </span>
                     <span className="font-mono text-2xs text-fg-subtle">{fmt.format(new Date(r.createdAt))}</span>
                   </Link>
                 </li>
@@ -83,8 +88,8 @@ function QuickLinks({ recent }: { recent: { id: string; toolId: string; createdA
           <h2 className="text-lg font-semibold">{L({ ko: "앱 안의 모든 곳", en: "Every page in the app" })}</h2>
           <div className="mt-4 grid grid-cols-2 gap-2">
             {PAGES.map((p) => (
-              <Link key={p.href} href={p.href} className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm transition-colors hover:bg-surface-2/50">
-                <p.icon size={15} className="text-studio-cyan" aria-hidden /> {L(p.label)}
+              <Link key={p.href} href={p.href} className="flex items-center gap-2.5 rounded-xl px-2 py-2 text-sm font-semibold transition-colors hover:bg-surface-2/60">
+                <IconTile icon={p.icon} tone={p.tone} size="sm" /> {L(p.label)}
               </Link>
             ))}
           </div>
@@ -96,8 +101,15 @@ function QuickLinks({ recent }: { recent: { id: string; toolId: string; createdA
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {WORKFLOWS.map((w) => (
             <Link key={w.id} href={`/tools/${toolSlug(w.tools[0])}/run`} className="glass glass-hover rounded-[20px] p-4">
-              <p className="text-sm font-semibold">{L(w.title)}</p>
-              <p className="mt-1 text-2xs text-fg-muted">{w.tools.map(name).join(" → ")}</p>
+              <p className="text-[15px] font-bold">{L(w.title)}</p>
+              <p className="mt-2 flex flex-wrap items-center gap-1.5 text-2xs">
+                {w.tools.map((id, i) => (
+                  <span key={id} className="inline-flex items-center gap-1.5">
+                    {i ? <span className="text-fg-subtle" aria-hidden>→</span> : null}
+                    <span className={cn("rounded-full px-2 py-0.5 font-semibold", TONE[toolTone(id)].chip)}>{name(id)}</span>
+                  </span>
+                ))}
+              </p>
             </Link>
           ))}
         </div>
@@ -109,10 +121,13 @@ function QuickLinks({ recent }: { recent: { id: string; toolId: string; createdA
           <ul className="mt-3 divide-y divide-hairline">
             {OUTSIDE.map((o) => (
               <li key={o.href}>
-                <a href={o.href} target="_blank" rel="noreferrer" className="group flex items-center justify-between gap-3 py-3">
-                  <span>
-                    <span className="block text-sm font-medium">{L(o.label)}</span>
-                    <span className="block text-2xs text-fg-muted">{L(o.note)}</span>
+                <a href={o.href} target="_blank" rel="noreferrer" className="group flex items-center justify-between gap-3 py-2.5">
+                  <span className="flex items-center gap-3">
+                    <IconTile icon={Globe} tone={toneFor(o.href)} size="sm" />
+                    <span>
+                      <span className="block text-sm font-semibold">{L(o.label)}</span>
+                      <span className="block text-2xs text-fg-muted">{L(o.note)}</span>
+                    </span>
                   </span>
                   <ExternalLink size={14} className="text-fg-subtle transition-colors group-hover:text-studio-cyan" aria-hidden />
                 </a>

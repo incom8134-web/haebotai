@@ -3,11 +3,13 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { FolderKanban, Plus } from "lucide-react";
+import { ArrowRight, FolderKanban, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useBi, useLocale } from "@/lib/i18n/context";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { IconTile, TONE, toneFor } from "@/components/site/tone";
+import { cn } from "@/lib/utils";
 
 // The projects list and a create form. A project is a business or an
 // initiative: tools run inside it read what it knows and add to it.
@@ -59,21 +61,30 @@ export function ProjectsView({ projects }: { projects: { id: string; name: strin
       {projects.length === 0 ? (
         <EmptyState icon={FolderKanban} title={L({ ko: "아직 프로젝트가 없어요", en: "No projects yet" })} description={L({ ko: "위에서 첫 프로젝트를 만들어 보세요.", en: "Create your first one above." })} className="mt-6" />
       ) : (
-        <ul className="mt-6 grid gap-2 sm:grid-cols-2">
-          {projects.map((p) => (
-            <li key={p.id}>
-              <Link href={`/projects/${p.id}`} className="flex h-full flex-col rounded-2xl border border-hairline bg-surface p-4 transition-colors hover:border-hairline-str">
-                <span className="flex items-center gap-2">
-                  <FolderKanban className="size-4 text-accent" aria-hidden />
-                  <span className="truncate text-base font-semibold text-fg">{p.name}</span>
-                </span>
-                {p.description ? <span className="mt-1 line-clamp-2 text-xs text-fg-muted break-keep">{p.description}</span> : null}
-                <span className="mt-auto pt-3 text-2xs text-fg-subtle" suppressHydrationWarning>
-                  {L({ ko: `결과 ${p.runs}개`, en: `${p.runs} results` })} · {new Date(p.updated_at).toLocaleDateString(locale === "en" ? "en-US" : "ko-KR", { timeZone: "Asia/Seoul" })}
-                </span>
-              </Link>
-            </li>
-          ))}
+        <ul className="mt-6 grid gap-3 sm:grid-cols-2">
+          {projects.map((p) => {
+            const tone = toneFor(p.id);
+            return (
+              <li key={p.id}>
+                <Link href={`/projects/${p.id}`} className={cn("group flex h-full flex-col rounded-[20px] border border-hairline p-5 transition-[border-color,transform] duration-300 hover:-translate-y-0.5", TONE[tone].wash, TONE[tone].hover)}>
+                  <span className="flex items-start gap-3">
+                    <IconTile icon={FolderKanban} tone={tone} size="lg" />
+                    <span className="min-w-0">
+                      <span className="block truncate text-lg font-bold text-fg">{p.name}</span>
+                      {p.description ? <span className="mt-0.5 line-clamp-2 block text-sm text-fg-muted break-keep">{p.description}</span> : null}
+                    </span>
+                  </span>
+                  <span className="mt-auto flex items-center justify-between gap-2 pt-4 text-2xs" suppressHydrationWarning>
+                    <span className="flex items-center gap-2">
+                      <span className={cn("rounded-full px-2.5 py-1 font-semibold", TONE[tone].chip)}>{L({ ko: `결과 ${p.runs}개`, en: `${p.runs} results` })}</span>
+                      <span className="text-fg-subtle">{new Date(p.updated_at).toLocaleDateString(locale === "en" ? "en-US" : "ko-KR", { timeZone: "Asia/Seoul" })}</span>
+                    </span>
+                    <ArrowRight size={16} className={cn("transition-transform group-hover:translate-x-0.5", TONE[tone].text)} aria-hidden />
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>

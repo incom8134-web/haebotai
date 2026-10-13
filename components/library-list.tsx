@@ -5,13 +5,13 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FileQuestion, Inbox, Search, Star, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getTool } from "@/lib/tools/registry";
 import { useLocale, useT } from "@/lib/i18n/context";
 import type { DictKey } from "@/lib/i18n/dictionaries";
 import { formatDateTime } from "@/lib/format-date";
 import { cn } from "@/lib/utils";
+import { IconTile, TONE, toneFor, toolTone } from "@/components/site/tone";
 
 interface LibraryRun {
   id: string;
@@ -148,15 +148,13 @@ function LibraryList({ runs: initial, projects = [], canPin = false }: { runs: L
               className="flex min-w-0 flex-1 items-center justify-between gap-2 py-2 pl-3"
             >
               <div className="flex min-w-0 items-center gap-3">
-                <div className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg bg-accent-dim">
-                  <Icon className="size-4 text-accent" aria-hidden />
-                </div>
+                <IconTile icon={Icon} tone={toolTone(run.toolId)} />
                 <div className="min-w-0">
-                  <p className="truncate text-sm text-fg">
+                  <p className="truncate text-[15px] font-semibold text-fg">
                     {run.title || (locale === "en" ? run.toolNameEn : run.toolNameKo)}
-                    {run.title ? <span className="ml-1.5 text-2xs text-fg-subtle">{locale === "en" ? run.toolNameEn : run.toolNameKo}</span> : null}
+                    {run.title ? <span className="ml-1.5 text-2xs font-normal text-fg-subtle">{locale === "en" ? run.toolNameEn : run.toolNameKo}</span> : null}
                     {run.projectId && projectName.get(run.projectId) ? (
-                      <span className="ml-1.5 rounded bg-accent-dim px-1.5 py-0.5 text-[10px] text-accent">{projectName.get(run.projectId)}</span>
+                      <span className={cn("ml-1.5 rounded-full px-2 py-0.5 text-[10px] font-semibold", TONE[toneFor(run.projectId)].chip)}>{projectName.get(run.projectId)}</span>
                     ) : null}
                   </p>
                   <p className="font-mono text-2xs text-fg-subtle">
@@ -168,11 +166,14 @@ function LibraryList({ runs: initial, projects = [], canPin = false }: { runs: L
                 <span className="font-mono text-2xs text-fg-subtle">
                   {run.credits} {t("credits")}
                 </span>
-                <Badge
-                  variant={run.status === "error" ? "destructive" : "secondary"}
+                <span
+                  className={cn(
+                    "rounded-full px-2.5 py-1 text-2xs font-semibold",
+                    run.status === "done" ? "bg-studio-success/14 text-studio-success" : run.status === "error" ? "bg-danger/12 text-danger" : "bg-studio-warning/15 text-studio-warning",
+                  )}
                 >
                   {t(STATUS_KEY[run.status] ?? "status_pending")}
-                </Badge>
+                </span>
               </div>
             </Link>
               {canPin ? (
