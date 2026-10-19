@@ -48,8 +48,9 @@ export async function deleteAccountData(uid: string, admin: Admin = createAdminC
     const { error } = await admin.from(table).delete().eq("user_id", uid);
     if (error) throw new Error(`${table}: ${error.message}`);
   }
-  // Optional table (migration 0014) — its absence must not block deletion.
+  // Optional tables (migrations 0014, 0020) — their absence must not block deletion.
   await admin.from("referral_codes").delete().eq("user_id", uid);
+  await admin.from("member_notices").delete().eq("user_id", uid);
   const { error } = await admin.auth.admin.deleteUser(uid, true);
   if (error) throw new Error(`auth: ${error.message}`);
 }
