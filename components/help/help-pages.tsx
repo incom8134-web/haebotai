@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, BookOpenText, CircleGauge, CircleHelp, Copy, Check, Crown, ExternalLink, Headset, KeyRound, MonitorSmartphone, Search, ShieldCheck, Sparkle, TriangleAlert, Rocket } from "lucide-react";
+import { ArrowRight, BookOpenText, CircleGauge, CircleHelp, Copy, Check, Crown, Download, ExternalLink, FileText, Headset, KeyRound, MonitorSmartphone, PlayCircle, Search, ShieldCheck, Sparkle, TriangleAlert, Rocket } from "lucide-react";
 import { FAQ } from "@/lib/site/faq";
 import { PATCH_NOTES } from "@/lib/site/patch-notes";
-import { useBi } from "@/lib/i18n/context";
+import { useBi, useLocale } from "@/lib/i18n/context";
 import { PageHeader, primaryButton, secondaryButton } from "@/components/site/page";
 import { cn } from "@/lib/utils";
 import { OWN_KEY_ONLY } from "@/lib/site/access";
@@ -75,27 +75,69 @@ export function HelpHome() {
 }
 
 const STEPS = [
-  { title: { ko: "Google AI Studio 열기", en: "Open Google AI Studio" }, body: { ko: "Google 계정으로 로그인합니다. 처음이면 약관 동의 화면이 한 번 나와요.", en: "Sign in with a Google account. First time, you'll accept the terms once." } },
-  { title: { ko: "키 만들기", en: "Create a key" }, body: { ko: "왼쪽 메뉴 'Get API key' → 'Create API key'. 프로젝트를 물으면 기본 프로젝트를 고르면 됩니다.", en: "Left menu \"Get API key\" → \"Create API key\". If asked for a project, the default one is fine." } },
-  { title: { ko: "키 복사", en: "Copy the key" }, body: { ko: "'AQ.'로 시작하는 문자열이 키예요(예전에 만든 키는 'AIza'로 시작). 다른 사람에게 보여 주지 마세요.", en: "The key is a string starting with \"AQ.\" (older keys start with \"AIza\"). Don't share it." } },
-  { title: { ko: "해바에 등록", en: "Add it to Haeba" }, body: { ko: "계정 → 내 API 키에 붙여 넣고 '확인 후 저장'. Google에 실제로 확인한 뒤에만 저장돼요.", en: "Account → My API key, paste, \"Verify & save\". It's only saved after Google confirms it works." } },
-  { title: { ko: "한도 설정 (권장)", en: "Set a limit (recommended)" }, body: { ko: "요금은 내 Google 계정에 청구돼요. Google Cloud 결제 화면에서 예산 알림을 걸어 두세요.", en: "Usage bills to your Google account. Add a budget alert in Google Cloud billing." } },
+  { title: { ko: "Google AI Studio 열기", en: "Open Google AI Studio" }, body: { ko: "aistudio.google.com에 들어가 Google 계정으로 로그인해요. 처음이면 약관 동의 화면이 한 번 나와요.", en: "Go to aistudio.google.com and sign in with your Google account. The first time, you accept the terms once." } },
+  { title: { ko: "키 만들기", en: "Create a key" }, body: { ko: "왼쪽 메뉴 「API Keys」 → 오른쪽 위 「Create API key」. 이름을 적고(예: 해바) 「Create key」를 눌러요. 프로젝트는 「Default Gemini Project」 그대로 두면 돼요.", en: "Left menu \"API Keys\" → \"Create API key\" at the top right. Name it (e.g. Haeba) and click \"Create key\". Leave the project as \"Default Gemini Project\"." } },
+  { title: { ko: "키 복사", en: "Copy the key" }, body: { ko: "「Copy key」를 눌러 복사해요. 키는 AQ. 또는 AIza로 시작해요. 비밀번호처럼 다른 사람에게 보여 주지 마세요.", en: "Click \"Copy key\". Keys start with AQ. or AIza. Treat it like a password and don't share it." } },
+  { title: { ko: "해바에 붙여넣고 「적용」", en: "Paste it into Haeba and click \"apply\"" }, body: { ko: "오른쪽 메뉴 「API 키」(또는 계정 → 내 API 키)에서 Google Gemini 「1순위」 칸에 붙여넣고 「적용」을 눌러요. 「적용됨 · **** 끝 4자리」가 보이면 연결 완료예요.", en: "Open \"Key\" in the right-hand menu (or Account → My API key), paste into the Google Gemini \"1st priority\" box and click \"apply\". \"Applied · **** last 4\" means you're connected." } },
+  { title: { ko: "이미지 도구도 쓰려면 결제 켜기 (선택)", en: "Turn on billing for image tools (optional)" }, body: { ko: "무료 키로는 글·문서·리서치 도구를 쓸 수 있어요. 이미지·광고 사진·모델 컷은 AI Studio에서 키 옆 「Set up billing」으로 결제를 켜야 해요. 해바에서는 바꿀 것이 없어요.", en: "A free key runs the writing, document and research tools. Images, ad photos and model shots need billing: click \"Set up billing\" next to your key in AI Studio. Nothing changes in Haeba." } },
 ];
 
 const TROUBLE = [
-  { q: { ko: "'Google이 이 키를 거절했어요'가 나와요", en: "\"Google rejected this key\"" }, a: { ko: "키를 삭제했거나 복사할 때 앞뒤가 잘렸을 수 있어요. 새 키를 만들어 다시 붙여 넣으세요. 회사 계정이라면 관리자가 Gemini API를 막아 뒀을 수 있어요.", en: "The key may be deleted or cut off when copying. Create a new one and paste again. On a work account, an admin may have blocked the Gemini API." } },
-  { q: { ko: "'형식이 아니에요'가 나와요", en: "\"Not a valid format\"" }, a: { ko: "OpenAI(sk-…) 등 다른 서비스 키가 아니라 Google AI Studio 키('AQ.…' 또는 'AIza…')여야 해요. 키 전체를 빠짐없이 복사했는지 확인하세요.", en: "It must be a Google AI Studio key (\"AQ.…\" or \"AIza…\"), not another provider's (e.g. sk-…). Make sure you copied the whole key." } },
-  { q: { ko: "등록했는데 실행이 실패해요", en: "Runs fail after adding a key" }, a: { ko: "내 Google 계정의 사용 한도를 다 썼거나 결제에 문제가 있을 수 있어요. 계정 → 내 API 키에서 '확인'을 눌러 보고, 안 되면 Google AI Studio에서 한도와 결제를 확인하거나 다른 키를 추가하세요.", en: "Your Google usage limit may be used up, or its billing has a problem. Press \"Test\" in Account → My API key; if it fails, check limits and billing in Google AI Studio or add another key." } },
-  { q: { ko: "키를 바꾸고 싶어요", en: "I want to change keys" }, a: { ko: "새 키를 붙여 넣으면 기존 키를 덮어써요. 예전 키는 Google AI Studio에서 삭제하세요.", en: "Pasting a new key replaces the old one. Delete the old key in Google AI Studio." } },
+  { q: { ko: "「API 키 필요」가 나와요", en: "\"API key needed\"" }, a: { ko: "아직 키를 등록하지 않았어요. 위 영상과 순서대로 키를 만들어 오른쪽 메뉴 「API 키」에 등록하세요.", en: "No key is registered yet. Follow the video and steps above, then add the key under \"Key\" in the right-hand menu." } },
+  { q: { ko: "「AI 엔진 사용 한도를 초과했습니다」가 나와요", en: "\"The AI engine's usage limit was reached\"" }, a: { ko: "무료 키의 오늘 한도를 다 썼어요. 다음 날 오전 9시(한국 시간) 이후 다시 하거나, AI Studio에서 결제를 켜세요. 키를 2·3순위에 더 등록해 두면 자동으로 넘어가요.", en: "The free key's daily limit is used up. Try again after 9 a.m. KST the next day, or turn on billing in AI Studio. Keys added as 2nd and 3rd priority take over automatically." } },
+  { q: { ko: "「무료 Gemini 키로는 이미지를 만들 수 없습니다」가 나와요", en: "\"A free Gemini key can't make images\"" }, a: { ko: "이미지 도구는 결제를 켠 키에서만 돼요. AI Studio에서 키 옆 「Set up billing」으로 결제를 켜세요. 같은 키를 그대로 쓰면 돼요.", en: "Image tools need a key with billing on. Click \"Set up billing\" next to your key in AI Studio; keep using the same key." } },
+  { q: { ko: "「AI 엔진 요청이 많아…」가 나와요", en: "\"The AI engine is busy right now\"" }, a: { ko: "Google 쪽이 잠시 붐벼요. 몇 분 뒤 「같은 입력으로 다시」를 눌러 주세요.", en: "Google is briefly overloaded. Wait a few minutes, then press \"Run again\"." } },
+  { q: { ko: "「등록한 API 키가 거부되었습니다」·「제공사가 이 키를 거절했어요」가 나와요", en: "\"Your API key was refused\" / \"The provider rejected this key\"" }, a: { ko: "키가 지워졌거나, 복사할 때 잘렸거나, 결제가 멈췄을 수 있어요. 새 키를 만들어 다시 등록하고 Google 결제 상태를 확인하세요. 회사 계정이라면 관리자가 Gemini API를 막아 뒀을 수 있어요.", en: "The key may be deleted, cut off when copying, or its billing stopped. Create a new key, register it again and check your Google billing. On a work account, an admin may have blocked the Gemini API." } },
+  { q: { ko: "「키 형식이 올바르지 않아요」가 나와요", en: "\"That doesn't look like a valid key\"" }, a: { ko: "다른 서비스 키(예: sk-…)가 아니라 Google AI Studio 키(AQ.… 또는 AIza…)여야 해요. 키 전체를 빠짐없이 복사했는지 확인하세요.", en: "It must be a Google AI Studio key (AQ.… or AIza…), not another provider's (e.g. sk-…). Make sure you copied the whole key." } },
+  { q: { ko: "키를 바꾸고 싶어요", en: "I want to change keys" }, a: { ko: "내 API 키 화면에서 기존 키 옆 「삭제」를 누르고 새 키를 붙여넣어 「적용」하세요. 예전 키는 Google AI Studio에서도 지우세요.", en: "On My API key, press \"Delete\" next to the old key, paste the new one and click \"apply\". Delete the old key in Google AI Studio too." } },
 ];
 
 /** /help/api-guide — the full manual. */
 export function ApiGuide() {
   const L = useBi();
+  const { locale } = useLocale();
   const [copied, setCopied] = useState(false);
   return (
     <>
       <PageHeader title={L({ ko: "API 키 설명서", en: "API key manual" })} lead={L(OWN_KEY_ONLY ? { ko: "해바의 도구는 내 Google AI Studio 키로 실행돼요. 발급과 등록은 5분이면 끝나요.", en: "Haeba's tools run on your own Google AI Studio key. Getting and adding one takes about 5 minutes." } : { ko: "내 Google AI Studio 키로 해바를 쓰면 크레딧이 차감되지 않아요. 5분이면 끝나요.", en: "Run Haeba on your own Google AI Studio key and no credits are charged. Takes five minutes." })} />
+      {/* Watch first: the 16 s clip of getting and pasting a key, then the full manuals with screenshots. */}
+      <section id="video" className="mb-6 grid scroll-mt-24 grid-cols-1 gap-6 lg:grid-cols-[1.3fr_1fr]">
+        <div className="min-w-0">
+          <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold"><PlayCircle size={18} className="text-studio-cyan" aria-hidden /> {L({ ko: "영상으로 보기", en: "Watch how" })}</h2>
+          <video
+            controls
+            playsInline
+            preload="metadata"
+            poster="/videos/api-key-guide-poster.jpg"
+            aria-label={L({ ko: "Google AI Studio에서 키를 만들어 해바에 붙여넣는 영상 (16초, 한국어 음성)", en: "Video: creating a key in Google AI Studio and pasting it into Haeba (16 s, Korean voice)" })}
+            className="aspect-video w-full rounded-[24px] border border-hairline bg-surface-2 object-contain"
+          >
+            <source src="/videos/api-key-guide.mp4" type="video/mp4" />
+            <track kind="captions" src="/videos/api-key-guide.ko.vtt" srcLang="ko" label="한국어" default={locale === "ko"} />
+            <track kind="captions" src="/videos/api-key-guide.en.vtt" srcLang="en" label="English" default={locale === "en"} />
+          </video>
+          <p className="mt-2 text-xs text-fg-subtle">{L({ ko: "16초 · 한국어 음성 · 자막 한국어/영어", en: "16 s · Korean voice · captions in Korean and English" })}</p>
+        </div>
+        <div className="min-w-0">
+          <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold"><FileText size={18} className="text-studio-cyan" aria-hidden /> {L({ ko: "화면으로 따라 하는 설명서 (PDF)", en: "Illustrated manual (PDF)" })}</h2>
+          <p className="mb-3 text-sm leading-relaxed text-fg-muted">{L({ ko: "키 발급, 해바에 연결, 첫 결과 받기까지 화면 캡처로 하나하나 보여 줘요. 12쪽.", en: "Screenshots of every step: getting a key, connecting it to Haeba and getting your first result. 12 pages." })}</p>
+          <div className="space-y-2">
+            {[
+              { href: "/guides/ai-haeba-api-key-guide-ko.pdf", file: "AI해바_API키_연결가이드.pdf", title: "한국어 설명서", size: "3.2 MB" },
+              { href: "/guides/ai-haeba-api-key-guide-en.pdf", file: "AI_Haeba_API_Key_Setup_Guide.pdf", title: "English manual", size: "2.8 MB" },
+            ].map((d) => (
+              <a key={d.href} href={d.href} download={d.file} className="glass glass-hover group flex items-center gap-3 rounded-2xl p-4">
+                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-studio-cyan/15 text-studio-cyan"><FileText size={18} aria-hidden /></span>
+                <span className="min-w-0 flex-1">
+                  <span className="block font-semibold">{d.title}</span>
+                  <span className="block text-xs text-fg-subtle">PDF · {d.size}</span>
+                </span>
+                <Download size={16} className="text-fg-subtle transition-transform duration-500 ease-[var(--spring)] group-hover:translate-y-0.5" aria-hidden />
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.3fr_1fr]">
         <section className="glass min-w-0 rounded-[24px] p-6">
           <h2 className="text-lg font-semibold">{L({ ko: "순서대로 따라 하기", en: "Step by step" })}</h2>
@@ -132,10 +174,12 @@ export function ApiGuide() {
               <li>{L({ ko: "브라우저로 다시 보내지 않음, 실행할 때 서버에서만 사용", en: "Never sent back to the browser; used on the server only" })}</li>
             </ul>
           </section>
-          <section className="rounded-[24px] bg-studio-warning/10 p-6">
-            <p className="flex items-center gap-2 font-semibold text-fg"><TriangleAlert size={16} className="text-studio-warning" aria-hidden /> {L({ ko: "학생 멤버십이라면", en: "On Student membership?" })}</p>
-            <p className="mt-2 text-sm leading-relaxed text-fg-muted">{L({ ko: "이미 크레딧 제한이 없어요. 키를 등록하면 더 높은 모델 한도를 내 계정으로 쓰게 돼요.", en: "You already have no credit limit. A key lets you use higher model quotas on your own account." })}</p>
-          </section>
+          {OWN_KEY_ONLY ? null : (
+            <section className="rounded-[24px] bg-studio-warning/10 p-6">
+              <p className="flex items-center gap-2 font-semibold text-fg"><TriangleAlert size={16} className="text-studio-warning" aria-hidden /> {L({ ko: "학생 멤버십이라면", en: "On Student membership?" })}</p>
+              <p className="mt-2 text-sm leading-relaxed text-fg-muted">{L({ ko: "이미 크레딧 제한이 없어요. 키를 등록하면 더 높은 모델 한도를 내 계정으로 쓰게 돼요.", en: "You already have no credit limit. A key lets you use higher model quotas on your own account." })}</p>
+            </section>
+          )}
         </div>
       </div>
       <section className="mt-8">

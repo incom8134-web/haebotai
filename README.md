@@ -1,148 +1,134 @@
-# AI 해바 — AI Haeba Studio (formerly 해봇 AI)
+# AI 해바 (AI Haeba)
 
-Grounded AI marketing and business tools in one app. Eighteen tools share one
-Business Profile, one runner, and one sourcing standard: every number carries
-a source URL or a visible `추정` (estimate) badge.
+An AI work studio for small-business owners, in Korean and English. Twenty-five
+tools turn one line about your shop into finished work: blog posts, ads, sales
+pages, logos, proposals, plans and research. Every tool shares one Business
+Profile, one project memory and one Library, and each result can feed the next
+tool. Every number carries a source URL or a visible `추정` (estimate) badge.
 
-This repository merges two projects:
+Made by 지니에듀테크 주식회사 (Jinie EduTech Co., Ltd.) · [aihaeba.com](https://aihaeba.com)
 
-| Source | What it contributed |
-|---|---|
-| **groundwork** (`Hyeaokshin AI clone`) | The working product — Next.js 16 app, Supabase auth + RLS, credit ledger, Gemini runner, 15-tool registry, chaining, exports (docx / xlsx / ics), library, business profile, i18n (ko/en). |
-| **haebot-ai-studio** (Lovable prototype) | The Studio design — "One brief. A whole campaign." workspace, cyan→violet gradient system, glass panels, ambient glow, header with credit pill, campaign showcase imagery. |
+## How members get AI
 
-The prototype's TanStack Start / Lovable scaffolding was not carried over; its
-one real screen was rebuilt as the app's `/studio` route on top of the real
-tool registry, and its visual language lives in `app/globals.css` as a scoped
-`.studio-*` layer that works in both light and dark themes.
+Members run every tool on **their own API key**. AI 해바 doesn't sell or give
+credits; usage is billed to the member's own Google account.
+
+- **Google Gemini** (required): a free key from
+  [Google AI Studio](https://aistudio.google.com/apikey) runs the writing,
+  document and research tools. Image tools (product photos, ad images, model
+  shots) need a key with billing turned on. Nothing changes in the app when
+  billing is turned on.
+- **Anthropic Claude** (optional): runs the text tools that list Claude as an engine.
+- Up to three keys per provider, in priority order; when one hits its limit,
+  the next takes over. Keys are checked with the provider before saving,
+  stored encrypted (AES-256-GCM) and only the last four characters are shown.
+- A member without a key sees a prompt to add one before any tool can run,
+  with a link to the API key guide (`/help/api-guide`: a short video, step
+  list, troubleshooting and the illustrated PDF manuals in Korean and English).
+
+The switch is `OWN_KEY_ONLY` in `lib/site/access.ts`. Turning it off brings
+back the credit model (credits, membership plans, referral bonuses and the
+Toss Payments checkout), which is still in the code. The team's own key is for
+staff testing only (`ADMIN_EMAILS`, `PLATFORM_KEY_EMAILS`).
 
 ## What's where
 
 ```
-app/(app)/
-  layout.tsx, template.tsx   Shell data + page transition (blur-glide via motion)
-  studio/                    Home: one brief → any tool; pinned (★) tools first
-  tools/                     Flows strip, then all 18 tools by category (grant matcher: 준비 중)
-  tools/[toolId]/            Tool overview: sticky identity card + examples, path, sample, FAQ
-  tools/[toolId]/run/        Runner (?brief=, ?preset=, ?fromRun=)
-  library/, brand/           Results, Business Profile
-  help/                      Help home (instant FAQ search) · faq/ · contact/ (customer service,
-                             remote help) · api-guide/ (API key manual) · whats-new/
-  account/                   Overview + sign-out · credits/ (balance, monthly usage by tool, cost
-                             per tool, rate limits) · membership/ (plans, student application) · api-key/
-  links/                     Quick links: pinned tools, latest results, flows, outside services, shortcuts
+app/
+  page.tsx                   Landing page
+  (app)/
+    studio/                  Home: one brief → the right tool; pinned tools first
+    quick/                   Quick start: pick what to make, write one line, press Make
+    tools/                   All 25 tools in five areas, plus flows that chain tools
+    tools/[toolId]/          Tool overview; run/ is the runner (?brief=, ?preset=, ?fromRun=)
+    projects/, library/      Project memory; every result, with exports and "run again"
+    brand/                   Business Profile that grounds every run
+    links/                   Quick links: pinned tools, latest results, outside services
+    help/                    FAQ · contact (tickets, remote help) · api-guide · shortcuts · whats-new
+    account/                 Overview, api-key/ (My API key), account deletion
+    onboarding/, pricing/, use-cases/, status/, legal/
+  admin/                     Staff only (ADMIN_EMAILS; everyone else gets a 404): overview,
+                             members, tickets, funnel, errors, tools, announcements, settings
+  api/                       Runs (streaming), exports, projects, account, cron, payments
 components/
-  shell/app-shell.tsx        Right-side liquid-glass dock (bottom tab bar on phones),
-                             floating brand + ⌘K search, Help badge for replies/updates
-  site/page.tsx              Glass primitives: Page, PageHeader, Panel, Segmented (sliding thumb), buttons
-  tools/, help/, account/, studio/
+  shell/app-shell.tsx        Right-side dock (bottom tab bar on phones) and ⌘K search
+  tool-runner.tsx            The run screen: form, live progress, result, chaining
+  api-key-prompt.tsx         "Add your API key first" pop-up
+  landing/, studio/, quick/, tools/, help/, account/, admin/, site/
 lib/
-  tools/registry/            18 manifests (strategy, copy, presentation added from aimarketingstudio)
-  tools/content.json         Per-tool page content + presets (tested against manifests)
-  tools/experience-*.json    Per-tool run workspace: layout (split / steps / canvas), story header,
-                             numbered sections, control types, live stage (tested against manifests)
-  site/                      FAQ, patch notes, plans, flows
-  crypto/, api-keys.ts, membership.ts, support.ts, actions/
-supabase/migrations/         0001–0012 (see docs/DEPLOY.md for what each does)
+  tools/registry/            Tool manifests; tools/content.json and experience-*.json hold
+                             per-tool page content, presets and run-screen layout
+  ai/                        Gemini and Claude adapters, free-key handling, error messages
+  site/                      Access switch, FAQ, patch notes, plans, flows, quick start
+  crypto/, api-keys.ts, admin.ts, actions/
+public/
+  videos/                    Landing videos and the API key guide clip (with ko/en captions)
+  guides/                    API key setup manuals (PDF, Korean and English)
+supabase/migrations/         0001–0021 (see docs/DEPLOY.md for what each does)
 ```
+
+The 25 tools sit in five areas: Discover & Monetize, Brand · Web & Sales,
+Campaigns & Content, Documents & Operations, and Research & Intelligence.
 
 ## Design
 
-The Studio palette (cyan → violet over deep navy, dark by default) with a
-liquid-glass layer in `app/globals.css`: `.glass` / `.glass-strong`
-(saturated backdrop blur, rim light, inner highlight, specular sheen),
-`.glass-hover` (spring lift), a fixed `.app-backdrop` with drifting glows,
-and smooth `<details class="smooth">` accordions. Motion: page
-transitions, a spring-animated active pill in the dock and tab bar, a
-sliding thumb in segmented controls, layout-animated tool filtering. All of
-it respects `prefers-reduced-motion`.
-
-Navigation is deliberately not a left sidebar + top link bar: a floating
-dock on the right holds six destinations, everything else is reachable
-from ⌘K. Every service still has its own page — Help and Account each
-group theirs behind a glass sub-navigation, and every tool's run screen
-carries a guide rail (examples, tips, result preview, help links). Old URLs (`/support`, `/faq`,
-`/membership`, `/settings/api-keys`, …) redirect (see `next.config.ts`).
-
-## Combined sources
-
-| Source | Kept |
-|---|---|
-| groundwork | The working app: auth, credits, runner, registry, exports, library, profile |
-| haebot-ai-studio | Visual language and the Studio screen |
-| aimarketingstudio | Brand Strategy, Campaign Copy and Presentation tools (with their suggestion prompts as presets), and the strategy → copy → deck flow. Its sidebar layout, quick-links page and separate history page were not carried over (Library covers history; ⌘K covers quick links). |
-
-## Staff operations (no admin UI yet)
-
-Run with the service role in the Supabase SQL editor:
-
-```sql
--- answer a ticket (shows up in the user's bell + ticket history)
-update support_tickets set status = 'answered', reply = '…' where id = '…';
-
--- approve a student
-update student_verifications set status = 'approved' where id = '…';
-insert into memberships (user_id, plan, expires_at)
-values ('<user id>', 'student', now() + interval '1 year')
-on conflict (user_id) do update set plan = excluded.plan, expires_at = excluded.expires_at;
-```
-
-## How the Studio works
-
-1. Pick a category and a tool card (they come live from the registry, with
-   their credit and time estimates; coming-soon tools are left out).
-2. Write a brief. The Studio figures out which field of that tool the brief
-   belongs in (`lib/tools/brief.ts` — first required text field). Tools with
-   only structured inputs (brand model, homepage) open without a brief.
-3. **Generate** opens `/tools/<id>/run?brief=…` with the form pre-filled, and the
-   run goes through the normal pipeline: profile chips, credit reservation,
-   streaming, sources panel, export, chaining.
-4. The right panel shows your four latest runs (or an example showcase when
-   you have none) and the Business Profile fields grounding every run.
+The brand colour is the 지니에듀테크 gem blue. The palette (`--studio-*`)
+and a light "glass" layer live in `app/globals.css`, in light (default) and
+dark themes. Each tool area has its own colour across Tools, Studio, Library,
+Links, Projects and Brand. Navigation is a floating dock on the right with
+named, tinted buttons (a bottom tab bar on phones); everything else is
+reachable from ⌘K. Motion respects `prefers-reduced-motion`. Old URLs
+(`/support`, `/faq`, `/membership`, `/settings/api-keys`, …) redirect (see
+`next.config.ts`).
 
 ## Setup
 
 Requirements: Node 20.9+ (22 recommended), a Supabase project, a Google AI
-Studio key, and an Upstash Redis database. For staging/production, follow
-[`docs/DEPLOY.md`](docs/DEPLOY.md) (migrations, Google OAuth, env vars, and a
-post-deploy smoke test).
+Studio key (for staff testing) and an Upstash Redis database. For staging and
+production, follow [`docs/DEPLOY.md`](docs/DEPLOY.md): migrations, Google
+OAuth, environment variables and a post-deploy smoke test.
 
 ```bash
 npm install
-cp .env.example .env.local      # fill in the values; set API_KEY_ENCRYPTION_SECRET to enable BYOK
+cp .env.example .env.local      # fill in the values; API_KEY_ENCRYPTION_SECRET enables member keys
 npx supabase db push            # or run supabase/migrations/*.sql in order
 npm run dev                     # http://localhost:3000
 ```
 
+Enable the Google provider in Supabase Auth and add
+`<NEXT_PUBLIC_SITE_URL>/auth/callback` as a redirect URL. Kakao login is
+optional (`NEXT_PUBLIC_AUTH_PROVIDERS="google,kakao"`).
+
+Key environment variables (all listed with notes in `.env.example`):
+
+| Variable | Purpose |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase project |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server-only; bypasses row-level security |
+| `API_KEY_ENCRYPTION_SECRET` | Encrypts members' API keys; required for the own-key model |
+| `GOOGLE_GENAI_API_KEY` | The team's key, used only by staff accounts |
+| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Rate limits and spend guard |
+| `ADMIN_EMAILS` | Staff allowed into `/admin` |
+| `PLATFORM_KEY_EMAILS` | Extra accounts allowed to test on the team's key |
+| `NEXT_PUBLIC_SITE_URL` | Public URL, used for auth redirects and links |
+
 Useful scripts:
 
 ```bash
-npm test            # 112 unit tests (node:test) — runner, prompts, policy, exports, providers, credits, crypto
+npm test            # unit tests (node:test): runner, prompts, policy, exports, providers, keys, admin
 npm run typecheck   # next typegen + tsc
 npm run lint
 npm run build
 ```
 
-Enable the Google provider in Supabase Auth and add
-`<NEXT_PUBLIC_SITE_URL>/auth/callback` as a redirect URL.
-
 ## Notes
 
-- `AGENTS.md` / `CLAUDE.md` are kept from groundwork: this is Next.js 16
-  (`proxy.ts` replaces `middleware.ts`); read `node_modules/next/dist/docs/`
-  before changing framework-level code.
-- Engines: Gemini is the platform engine for every tool. Claude runs every
-  text tool with the user's own Anthropic key (`/account/api-key`); image
-  tools stay Gemini-only. OpenAI keys are not accepted (no tool runs on them).
-- The grant matcher (`grant`) is marked `comingSoon` until a real K-Startup /
-  기업마당 data source is wired in: it is listed with a 준비 중 badge, and
-  its run page and run route refuse it before any credits are reserved.
-- Pro is a one-time 30-day pass (₩19,900, +2,000 credits) bought through
-  the Toss Payments 결제위젯 at `/account/membership/checkout`; buying again
-  stacks 30 days. No auto-renewal (자동결제 needs a separate Toss
-  contract) and no in-app refunds yet — cancel in the Toss merchant admin.
-- Tool field labels and summaries are Korean-only for now; the app shell,
-  landing, Studio, library, and profile are fully bilingual.
-- The brand accent outside the Studio is still groundwork's forest green
-  (`--color-accent` in `globals.css`). Switching the whole app to the
-  Studio's cyan is a one-token change.
+- `AGENTS.md` / `CLAUDE.md`: this is Next.js 16 (`proxy.ts` replaces
+  `middleware.ts`). Read `node_modules/next/dist/docs/` before changing
+  framework-level code.
+- Runs need the Node runtime, not edge (native addons for image and document
+  export).
+- Grant matching (`grant`) is marked coming soon until a real K-Startup /
+  기업마당 data source is wired in; its run page and run route refuse it.
+- Staff work happens in `/admin`: answering support tickets, member lookups,
+  announcements and error review. Every staff action is written to `audit_log`.
