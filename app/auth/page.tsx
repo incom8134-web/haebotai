@@ -11,7 +11,7 @@ import { CATEGORIES, CATEGORY_ORDER, toolsIn } from "@/lib/tools/catalog";
 import { createClient } from "@/lib/supabase/client";
 import { useBi } from "@/lib/i18n/context";
 import { ThemeLangControls } from "@/components/shell/app-shell";
-import { AUTH_PROVIDERS, type AuthProvider } from "@/lib/auth-providers";
+import { AUTH_PROVIDERS, oauthScopes, type AuthProvider } from "@/lib/auth-providers";
 import { HOME_AFTER_SIGN_IN } from "@/lib/consent";
 import { OWN_KEY_ONLY } from "@/lib/site/access";
 
@@ -60,7 +60,7 @@ function AuthCard() {
     const supabase = createClient();
     const { error: err } = await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` },
+      options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`, scopes: oauthScopes(provider) },
     });
     if (err) {
       setLoading(null);
