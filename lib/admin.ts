@@ -2,10 +2,11 @@ import "server-only";
 import type { User } from "@supabase/supabase-js";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentUser } from "@/lib/supabase/user";
-import { applyMemberFilters, type MemberFacts, type MemberFilters } from "@/lib/admin-filters";
+import { applyMemberFilters, kstRange, type MemberFacts, type MemberFilters } from "@/lib/admin-filters";
 import { consentOf } from "@/lib/consent";
 import { formatKoreanPhone, profileNameOf } from "@/lib/member-name";
 import { displayName } from "@/lib/site/display-name";
+import type { KeyTier } from "@/lib/ai/key-tier";
 
 // Staff tools behind /admin. Access is an email allow-list (ADMIN_EMAILS,
 // comma-separated), not a role system — right for a small team. Unset
@@ -150,7 +151,7 @@ export interface AdminMemberDetail extends AdminMember {
   note: string;
   isStaff: boolean;
   consent: { version: string | null; marketing: boolean; agreedAt: string | null };
-  keyDetails: { provider: string; priority: number | null; last4: string | null; broken: boolean; updatedAt: string | null }[];
+  keyDetails: { provider: string; priority: number | null; last4: string | null; broken: boolean; updatedAt: string | null; tier: { value: KeyTier; checkedAt: string } | null }[];
   credits: number | null;
   plan: string | null;
   planExpiresAt: string | null;
@@ -180,6 +181,18 @@ export async function getMemberDetail(id: string): Promise<AdminMemberDetail | n
     admin.from("brands").select("name, industry, region").eq("user_id", id).maybeSingle(),
     admin.from("projects").select("id", { count: "exact", head: true }).eq("user_id", id),
   ]);
+  // Last free/paid check per key slot (lib/actions/admin.ts checkMemberKeyTier).
+  const tierRows = await admin
+    .from("audit_log")
+    .select("target_id, detail, created_at")
+    .eq("action", "check_key_tier")
+    .like("target_id", `${id}:%`)
+    .order("created_at", { ascending: false })
+    .limit(30);
+  const lastTier = new Map<string, { value: KeyTier; checkedAt: string }>();
+  for (const r of tierRows.data ?? []) {
+    if (!lastTier.has(r.target_id)) lastTier.set(r.target_id, { value: (r.detail as { tier?: KeyTier })?.tier ?? "unknown", checkedAt: r.created_at });
+  }
 
   const runRows = runs.data ?? [];
   const byTool = new Map<string, { runs: number; failed: number }>();
@@ -210,7 +223,12 @@ export async function getMemberDetail(id: string): Promise<AdminMemberDetail | n
     note: typeof u.app_metadata?.admin_note === "string" ? u.app_metadata.admin_note : "",
     isStaff: !!u.email && adminEmails().has(u.email.toLowerCase()),
     consent: { version: consent?.v ?? null, marketing: !!consent?.marketing, agreedAt: consent?.terms_at ?? null },
-    keyDetails: (keys.data ?? []).map((k) => ({ provider: k.provider, priority: k.priority ?? null, last4: k.last4 ?? null, broken: !!k.broken, updatedAt: k.updated_at ?? null })),
+    keyDetails: (keys.data ?? []).map((k) => {
+      // A check older than the key's last change was about a different key.
+      const t = k.provider === "google" ? lastTier.get(keyTierTarget(id, k.priority)) : undefined;
+      const fresh = t && (!k.updated_at || t.checkedAt >= k.updated_at) ? t : null;
+      return { provider: k.provider, priority: k.priority ?? null, last4: k.last4 ?? null, broken: !!k.broken, updatedAt: k.updated_at ?? null, tier: fresh };
+    }),
     credits: credits.data?.balance ?? null,
     plan: membership.data?.plan ?? null,
     planExpiresAt: membership.data?.expires_at ?? null,
@@ -221,6 +239,11 @@ export async function getMemberDetail(id: string): Promise<AdminMemberDetail | n
     payments: (payments.data ?? []).map((p) => ({ orderId: p.order_id, amount: p.amount, plan: p.plan ?? null, status: p.status, method: p.method ?? null, createdAt: p.created_at })),
     tickets: (tickets.data ?? []).map((t) => ({ id: t.id, kind: t.kind, subject: t.subject, status: t.status, createdAt: t.created_at })),
   };
+}
+
+/** audit_log target for a key slot's free/paid check. */
+export function keyTierTarget(userId: string, priority: number | null): string {
+  return `${userId}:google:${priority ?? 0}`;
 }
 
 /** True if this email is staff (ADMIN_EMAILS) — staff can't be suspended or deleted from /admin. */
@@ -240,10 +263,14 @@ export interface ToolUsageRow {
   lastRunAt: string | null;
 }
 
-/** Runs per tool in a period, most used first. */
-export async function getToolUsage(period: UsagePeriod): Promise<{ rows: ToolUsageRow[]; totalRuns: number; totalMembers: number }> {
+/** Runs per tool in a period — or between two Korea-time days (calendar filter) — most used first. */
+export async function getToolUsage(period: UsagePeriod, range?: { from: string; to: string }): Promise<{ rows: ToolUsageRow[]; totalRuns: number; totalMembers: number }> {
   let q = createAdminClient().from("generations").select("tool_id, user_id, status, created_at").order("created_at", { ascending: false }).limit(RUN_ROWS);
-  if (period) q = q.gte("created_at", new Date(Date.now() - period * DAY_MS).toISOString());
+  if (range && (range.from || range.to)) {
+    const { since, until } = kstRange(range.from, range.to);
+    if (since) q = q.gte("created_at", since);
+    if (until) q = q.lt("created_at", until);
+  } else if (period) q = q.gte("created_at", new Date(Date.now() - period * DAY_MS).toISOString());
   const { data } = await q;
   const by = new Map<string, { runs: number; failed: number; members: Set<string>; last: string | null }>();
   const everyone = new Set<string>();

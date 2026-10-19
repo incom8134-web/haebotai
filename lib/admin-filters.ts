@@ -16,6 +16,9 @@ export interface MemberFilters {
   activity: ActivityFilter;
   status: StatusFilter;
   sort: MemberSort;
+  /** Joined on or after / on or before these Korea-time days (YYYY-MM-DD), or "". */
+  from: string;
+  to: string;
   page: number;
 }
 
@@ -49,6 +52,8 @@ export function parseMemberFilters(sp: Record<string, string | string[] | undefi
     activity: pick(one("activity"), ["", "active7", "dormant30", "never"], ""),
     status: pick(one("status"), ["", "suspended", "no_name"], ""),
     sort: pick(one("sort"), ["new", "old", "runs", "recent", "name"], "new"),
+    from: parseDay(one("from")),
+    to: parseDay(one("to")),
     page: Number.isFinite(page) && page >= 1 ? Math.floor(page) : 1,
   };
 }
@@ -66,6 +71,24 @@ export function filtersToQuery(f: Partial<MemberFilters>): string {
 
 const DAY = 24 * 60 * 60 * 1000;
 
+/** A YYYY-MM-DD day from a date input, or "" if it isn't a real date. */
+export function parseDay(raw: unknown): string {
+  if (typeof raw !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(raw)) return "";
+  const d = new Date(`${raw}T00:00:00Z`);
+  return Number.isNaN(d.getTime()) || d.toISOString().slice(0, 10) !== raw ? "" : raw;
+}
+
+/** The Korea-time calendar day (YYYY-MM-DD) of an instant. */
+export function kstDayOf(iso: string): string {
+  return new Date(new Date(iso).getTime() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+}
+
+/** UTC instants bounding Korea-time days: [from 00:00 KST, to+1 00:00 KST). */
+export function kstRange(from: string, to: string): { since: string | null; until: string | null } {
+  const at = (day: string, plusDays = 0) => new Date(Date.parse(`${day}T00:00:00+09:00`) + plusDays * DAY).toISOString();
+  return { since: from ? at(from) : null, until: to ? at(to, 1) : null };
+}
+
 function matches(m: MemberFacts, f: MemberFilters, now: number): boolean {
   if (f.q) {
     const needle = f.q.toLowerCase();
@@ -81,6 +104,11 @@ function matches(m: MemberFacts, f: MemberFilters, now: number): boolean {
   if (f.activity === "never" && m.runs > 0) return false;
   if (f.status === "suspended" && !m.suspended) return false;
   if (f.status === "no_name" && m.name) return false;
+  if (f.from || f.to) {
+    const day = kstDayOf(m.createdAt);
+    if (f.from && day < f.from) return false;
+    if (f.to && day > f.to) return false;
+  }
   return true;
 }
 
