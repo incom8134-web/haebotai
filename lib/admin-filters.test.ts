@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { applyMemberFilters, filtersToQuery, initials, parseMemberFilters, type MemberFacts } from "./admin-filters.ts";
+import { applyMemberFilters, filtersToQuery, initials, kstDayOf, kstRange, parseDay, parseMemberFilters, type MemberFacts } from "./admin-filters.ts";
 
 const NOW = Date.parse("2026-10-19T00:00:00Z");
 const DAY = 24 * 60 * 60 * 1000;
@@ -17,7 +17,7 @@ const f = (sp: Record<string, string>) => parseMemberFilters(sp);
 const ids = (sp: Record<string, string>) => applyMemberFilters(members, f(sp), NOW).rows.map((m) => m.id);
 
 test("parseMemberFilters keeps known values and drops the rest", () => {
-  assert.deepEqual(f({ provider: "kakao", key: "yes", sort: "runs", page: "2" }), { q: "", provider: "kakao", key: "yes", activity: "", status: "", sort: "runs", page: 2 });
+  assert.deepEqual(f({ provider: "kakao", key: "yes", sort: "runs", page: "2" }), { q: "", provider: "kakao", key: "yes", activity: "", status: "", sort: "runs", from: "", to: "", page: 2 });
   const junk = f({ provider: "naver", key: "maybe", sort: "x", page: "-3" });
   assert.equal(junk.provider, "");
   assert.equal(junk.key, "");
@@ -65,4 +65,20 @@ test("initials", () => {
   assert.equal(initials("김민지", "m@x.com"), "김민");
   assert.equal(initials("Jun Park", "j@x.com"), "JP");
   assert.equal(initials(null, "hello@x.com"), "HE");
+});
+
+test("calendar filter: joined between two Korea-time days", () => {
+  assert.equal(parseDay("2026-10-05"), "2026-10-05");
+  assert.equal(parseDay("2026-02-30"), "");
+  assert.equal(parseDay("10/05/2026"), "");
+  // 23:30 UTC on the 4th is already the 5th in Korea.
+  assert.equal(kstDayOf("2026-10-04T23:30:00Z"), "2026-10-05");
+  assert.deepEqual(ids({ from: iso(6).slice(0, 10) }).sort(), ["u1", "u3"]);
+  assert.deepEqual(ids({ to: iso(15).slice(0, 10) }).sort(), ["u2", "u4"]);
+  assert.deepEqual(ids({ from: iso(25).slice(0, 10), to: iso(15).slice(0, 10) }), ["u4"]);
+});
+
+test("kstRange turns Korea days into UTC bounds", () => {
+  assert.deepEqual(kstRange("2026-10-05", "2026-10-06"), { since: "2026-10-04T15:00:00.000Z", until: "2026-10-06T15:00:00.000Z" });
+  assert.deepEqual(kstRange("", ""), { since: null, until: null });
 });

@@ -3,8 +3,9 @@
 import { useActionState, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Activity, AlertTriangle, ArrowLeft, ArrowRight, Ban, Copy, KeyRound, Play, Plus, RotateCcw, Save, Search, Trash2, UserPlus, Users, Wrench } from "lucide-react";
-import { createMember, deleteMember, replyToTicket, reopenTicket, setMemberSuspended, updateMember, type AdminActionState } from "@/lib/actions/admin";
+import { Activity, AlertTriangle, ArrowLeft, ArrowRight, Ban, CalendarDays, Copy, KeyRound, Play, Plus, RotateCcw, Save, Search, Trash2, UserPlus, Users, Wrench } from "lucide-react";
+import { checkMemberKeyTier, createMember, deleteMember, replyToTicket, reopenTicket, setMemberSuspended, updateMember, type AdminActionState } from "@/lib/actions/admin";
+import type { KeyTier } from "@/lib/ai/key-tier";
 import { useBi } from "@/lib/i18n/context";
 import { filtersToQuery, type MemberFilters } from "@/lib/admin-filters";
 import type { AdminMember, AdminMemberDetail, AdminOverview, AdminTicket, TicketStatus, ToolUsageRow, UsagePeriod } from "@/lib/admin";
@@ -79,6 +80,8 @@ const MSG: Record<string, Bi> = {
   note_length: { ko: "메모는 2000자까지예요.", en: "Notes are up to 2000 characters." },
   staff_protected: { ko: "관리자 계정은 여기서 정지·삭제할 수 없어요.", en: "Staff accounts can't be suspended or deleted here." },
   confirm_mismatch: { ko: "확인용 이메일이 일치하지 않아요.", en: "The confirmation email doesn't match." },
+  no_key: { ko: "이 순위에 등록된 키가 없어요.", en: "No key in that slot." },
+  tier_unknown: { ko: "Google이 응답하지 않아 확인하지 못했어요. 잠시 뒤 다시 눌러 주세요.", en: "Google didn't answer. Try again shortly." },
 };
 
 function ActionNote({ state }: { state: AdminActionState }) {
@@ -252,6 +255,22 @@ function Select({ name, value, label, options }: { name: keyof MemberFilters; va
   );
 }
 
+/** Calendar filter: two date pickers (Korea-time days, inclusive). */
+function DateRange({ from, to, label }: { from: string; to: string; label: string }) {
+  const L = useBi();
+  return (
+    <fieldset className="flex flex-wrap items-end gap-2">
+      <legend className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-fg-muted">
+        <CalendarDays className="size-3.5" aria-hidden />
+        {label}
+      </legend>
+      <input type="date" name="from" defaultValue={from} max={to || undefined} aria-label={L({ ko: `${label} 시작일`, en: `${label} from` })} className={cn(field, "w-[160px]")} />
+      <span className="pb-2.5 text-fg-subtle">~</span>
+      <input type="date" name="to" defaultValue={to} min={from || undefined} aria-label={L({ ko: `${label} 종료일`, en: `${label} to` })} className={cn(field, "w-[160px]")} />
+    </fieldset>
+  );
+}
+
 function CreateMemberForm() {
   const L = useBi();
   const [state, action, pending] = useActionState<AdminActionState, FormData>(createMember, null);
@@ -287,7 +306,7 @@ export function MemberList({ members, total, all, page, pages, filters, deleted 
   const router = useRouter();
   const [adding, setAdding] = useState(false);
   const link = (p: number) => `/admin/members${filtersToQuery({ ...filters, page: p })}`;
-  const filtered = !!(filters.q || filters.provider || filters.key || filters.activity || filters.status);
+  const filtered = !!(filters.q || filters.provider || filters.key || filters.activity || filters.status || filters.from || filters.to);
 
   return (
     <div>
@@ -311,7 +330,8 @@ export function MemberList({ members, total, all, page, pages, filters, deleted 
       ) : null}
 
       <Card className="mb-5" bodyClassName="p-4">
-        <form action="/admin/members" className="grid gap-3 md:grid-cols-[2fr_repeat(5,minmax(0,1fr))_auto] md:items-end">
+        <form action="/admin/members" className="flex flex-col gap-3">
+          <div className="grid gap-3 md:grid-cols-[2fr_repeat(5,minmax(0,1fr))] md:items-end">
           <label className="flex min-w-0 flex-col gap-1">
             <span className="text-xs font-semibold text-fg-muted">{L({ ko: "검색", en: "Search" })}</span>
             <span className="relative">
@@ -324,15 +344,19 @@ export function MemberList({ members, total, all, page, pages, filters, deleted 
           <Select name="activity" value={filters.activity} label={L({ ko: "활동", en: "Activity" })} options={[{ value: "", label: L({ ko: "전체", en: "All" }) }, { value: "active7", label: L({ ko: "7일 내 실행", en: "Ran in 7 days" }) }, { value: "dormant30", label: L({ ko: "30일 넘게 쉼", en: "Idle 30+ days" }) }, { value: "never", label: L({ ko: "실행 안 함", en: "Never ran" }) }]} />
           <Select name="status" value={filters.status} label={L({ ko: "상태", en: "Status" })} options={[{ value: "", label: L({ ko: "전체", en: "All" }) }, { value: "suspended", label: L({ ko: "이용 정지", en: "Suspended" }) }, { value: "no_name", label: L({ ko: "이름 미입력", en: "No name yet" }) }]} />
           <Select name="sort" value={filters.sort} label={L({ ko: "정렬", en: "Sort" })} options={[{ value: "new", label: L({ ko: "최근 가입", en: "Newest" }) }, { value: "old", label: L({ ko: "오래된 가입", en: "Oldest" }) }, { value: "recent", label: L({ ko: "최근 활동", en: "Recently active" }) }, { value: "runs", label: L({ ko: "실행 많은 순", en: "Most runs" }) }, { value: "name", label: L({ ko: "이름순", en: "Name" }) }]} />
-          <div className="flex gap-2">
-            <button type="submit" className={btnPrimary}>
-              {L({ ko: "적용", en: "Apply" })}
-            </button>
-            {filtered || filters.sort !== "new" ? (
-              <Link href="/admin/members" className={btnGhost}>
-                {L({ ko: "초기화", en: "Reset" })}
-              </Link>
-            ) : null}
+          </div>
+          <div className="flex flex-wrap items-end gap-3 border-t border-hairline pt-3">
+            <DateRange from={filters.from} to={filters.to} label={L({ ko: "가입일", en: "Joined" })} />
+            <div className="ml-auto flex gap-2">
+              <button type="submit" className={btnPrimary}>
+                {L({ ko: "적용", en: "Apply" })}
+              </button>
+              {filtered || filters.sort !== "new" ? (
+                <Link href="/admin/members" className={btnGhost}>
+                  {L({ ko: "초기화", en: "Reset" })}
+                </Link>
+              ) : null}
+            </div>
           </div>
         </form>
       </Card>
@@ -453,6 +477,56 @@ function CopyId({ value }: { value: string }) {
 
 const PAY_STATUS: Record<string, Bi> = { done: { ko: "결제 완료", en: "Paid" }, pending: { ko: "미완료", en: "Not finished" }, failed: { ko: "실패", en: "Failed" }, canceled: { ko: "취소", en: "Canceled" }, refunded: { ko: "환불", en: "Refunded" } };
 
+const TIER: Record<KeyTier, { label: Bi; tone: "green" | "amber" | "red" | "blue" | "gray" }> = {
+  paid: { label: { ko: "유료 키", en: "Paid key" }, tone: "green" },
+  free: { label: { ko: "무료 키", en: "Free key" }, tone: "amber" },
+  rate_limited: { label: { ko: "유료 · 한도 초과", en: "Paid · rate-limited" }, tone: "blue" },
+  invalid: { label: { ko: "키 거부됨", en: "Key refused" }, tone: "red" },
+  unknown: { label: { ko: "확인 실패", en: "Check failed" }, tone: "gray" },
+};
+
+function KeyRow({ memberId, k }: { memberId: string; k: AdminMemberDetail["keyDetails"][number] }) {
+  const L = useBi();
+  const [state, action, pending] = useActionState<AdminActionState, FormData>(checkMemberKeyTier, null);
+  // A fresh check in this session wins over the stored one.
+  const fresh = state?.message.startsWith("tier_") ? (state.message.slice(5) as KeyTier) : null;
+  const tier = fresh ?? k.tier?.value ?? null;
+  return (
+    <li className="flex flex-wrap items-center gap-3 py-3">
+      <span className="grid size-9 place-items-center rounded-xl bg-accent/10 text-accent">
+        <KeyRound className="size-4" aria-hidden />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-semibold">
+          {KEY_LABEL[k.provider] ?? k.provider} · {L({ ko: `${k.priority ?? "?"}순위`, en: `slot ${k.priority ?? "?"}` })}
+        </span>
+        <span className="block font-mono text-xs text-fg-muted">
+          •••• {k.last4 ?? "????"} · {fmtDate(k.updatedAt)}
+          {!fresh && k.tier ? <span className="font-sans"> · {L({ ko: `${fmtDate(k.tier.checkedAt)} 확인`, en: `checked ${fmtDate(k.tier.checkedAt)}` })}</span> : null}
+        </span>
+      </span>
+      <span className="flex items-center gap-2">
+        {k.broken ? <Pill tone="red">{L({ ko: "거부됨", en: "Refused" })}</Pill> : null}
+        {tier ? <Pill tone={TIER[tier].tone}>{L(TIER[tier].label)}</Pill> : k.provider === "google" ? <Pill tone="gray">{L({ ko: "등급 미확인", en: "Tier unchecked" })}</Pill> : null}
+        {k.provider === "google" && k.priority ? (
+          <form action={action}>
+            <input type="hidden" name="id" value={memberId} />
+            <input type="hidden" name="priority" value={k.priority} />
+            <button type="submit" disabled={pending} className={cn(btnGhost, "h-8 px-3 text-xs")}>
+              {pending ? L({ ko: "확인 중…", en: "Checking…" }) : L({ ko: "등급 확인", en: "Check tier" })}
+            </button>
+          </form>
+        ) : null}
+      </span>
+      {state && !fresh ? (
+        <span className="w-full">
+          <ActionNote state={state} />
+        </span>
+      ) : null}
+    </li>
+  );
+}
+
 export function MemberProfile({ m }: { m: AdminMemberDetail }) {
   const L = useBi();
   const toolLabel = useToolLabel();
@@ -528,24 +602,13 @@ export function MemberProfile({ m }: { m: AdminMemberDetail }) {
             items={m.toolUsage.slice(0, 8).map((t) => ({ key: t.toolId, label: toolLabel(t.toolId), value: t.runs, tone: toolTone(t.toolId), sub: t.failed ? L({ ko: `실패 ${t.failed}회`, en: `${t.failed} failed` }) : undefined }))}
           />
         </Card>
-        <Card title={L({ ko: "API 키", en: "API keys" })} lead={L({ ko: "키 값은 암호화되어 끝 4자리만 보여요", en: "Encrypted; only the last 4 characters show" })}>
+        <Card title={L({ ko: "API 키", en: "API keys" })} lead={L({ ko: "키 값은 암호화되어 끝 4자리만 보여요. ‘등급 확인’은 회원 키로 아주 짧은 요청 1번을 보내 무료·유료를 판별해요.", en: "Encrypted; only the last 4 characters show. 'Check tier' sends one tiny request on the member's key to tell free from paid." })}>
           {m.keyDetails.length === 0 ? (
             <p className="text-sm text-fg-muted">{L({ ko: "등록한 키가 없어요. 도구를 실행하려면 키가 필요해요.", en: "No key saved. A key is needed to run tools." })}</p>
           ) : (
             <ul className="divide-y divide-hairline">
               {m.keyDetails.map((k, i) => (
-                <li key={i} className="flex items-center gap-3 py-3">
-                  <span className="grid size-9 place-items-center rounded-xl bg-accent/10 text-accent">
-                    <KeyRound className="size-4" aria-hidden />
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-sm font-semibold">
-                      {KEY_LABEL[k.provider] ?? k.provider} · {L({ ko: `${k.priority ?? "?"}순위`, en: `slot ${k.priority ?? "?"}` })}
-                    </span>
-                    <span className="block font-mono text-xs text-fg-muted">•••• {k.last4 ?? "????"} · {fmtDate(k.updatedAt)}</span>
-                  </span>
-                  {k.broken ? <Pill tone="red">{L({ ko: "거부됨", en: "Refused" })}</Pill> : <Pill tone="green">{L({ ko: "사용 중", en: "In use" })}</Pill>}
-                </li>
+                <KeyRow key={i} memberId={m.id} k={k} />
               ))}
             </ul>
           )}
@@ -702,7 +765,7 @@ const PERIODS: { value: UsagePeriod; label: Bi }[] = [
   { value: 0, label: { ko: "전체", en: "All time" } },
 ];
 
-export function ToolUsageView({ rows, totalRuns, totalMembers, period }: { rows: ToolUsageRow[]; totalRuns: number; totalMembers: number; period: UsagePeriod }) {
+export function ToolUsageView({ rows, totalRuns, totalMembers, period, range }: { rows: ToolUsageRow[]; totalRuns: number; totalMembers: number; period: UsagePeriod | null; range: { from: string; to: string } }) {
   const L = useBi();
   const toolLabel = useToolLabel();
   const used = new Set(rows.map((r) => catalogTool(r.toolId)?.slug ?? r.toolId));
@@ -713,7 +776,11 @@ export function ToolUsageView({ rows, totalRuns, totalMembers, period }: { rows:
     <div>
       <AdminPageHeader
         title={L({ ko: "도구 사용 현황", en: "Tool usage" })}
-        lead={L({ ko: "어떤 도구를 가장 많이 쓰는지, 어디서 실패가 나는지 봐요.", en: "Which tools get used most, and where runs fail." })}
+        lead={
+          period === null
+            ? L({ ko: `${range.from || "처음"} ~ ${range.to || "오늘"} (한국 시간)`, en: `${range.from || "start"} – ${range.to || "today"} (Korea time)` })
+            : L({ ko: "어떤 도구를 가장 많이 쓰는지, 어디서 실패가 나는지 봐요.", en: "Which tools get used most, and where runs fail." })
+        }
         actions={
           <nav className="flex rounded-xl border border-hairline bg-surface p-1" aria-label={L({ ko: "기간", en: "Period" })}>
             {PERIODS.map((p) => (
@@ -724,6 +791,22 @@ export function ToolUsageView({ rows, totalRuns, totalMembers, period }: { rows:
           </nav>
         }
       />
+
+      <Card className="mb-5" bodyClassName="p-4">
+        <form action="/admin/tools" className="flex flex-wrap items-end gap-3">
+          <DateRange from={range.from} to={range.to} label={L({ ko: "기간 직접 선택", en: "Custom dates" })} />
+          <div className="flex gap-2">
+            <button type="submit" className={btnPrimary}>
+              {L({ ko: "적용", en: "Apply" })}
+            </button>
+            {period === null ? (
+              <Link href="/admin/tools" className={btnGhost}>
+                {L({ ko: "초기화", en: "Reset" })}
+              </Link>
+            ) : null}
+          </div>
+        </form>
+      </Card>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard label={L({ ko: "총 실행", en: "Runs" })} value={num(totalRuns)} icon={Play} tone="brand" />
