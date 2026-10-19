@@ -2,7 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getAdminUser, isStaffEmail, logAdminAction } from "@/lib/admin";
+import { getAdminUser, isStaffEmail, keyTierTarget, logAdminAction } from "@/lib/admin";
+import { checkGoogleKeyTier, getUserApiKeySlotFor, type ApiKeyPriority } from "@/lib/api-keys";
+import { PRO_TEXT_MODEL } from "@/lib/ai/gemini-studio";
 import { deleteAccountData } from "@/lib/account-delete";
 import { normalizeName } from "@/lib/member-name";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -148,4 +150,28 @@ export async function deleteMember(_prev: AdminActionState, formData: FormData):
   await logAdminAction(staff.id, "delete_member", "auth.users", id);
   revalidatePath("/admin", "layout");
   redirect("/admin/members?deleted=1");
+}
+
+// ── API key tier (free / paid) ─────────────────────────────────────────
+
+/**
+ * Checks whether a member's Gemini key is free-tier or paid
+ * (lib/ai/key-tier.ts). The key never leaves the server and isn't
+ * returned; only the verdict is, and it's kept in the audit log, which is
+ * where the profile card reads the last result from.
+ */
+export async function checkMemberKeyTier(_prev: AdminActionState, formData: FormData): Promise<AdminActionState> {
+  const staff = await getAdminUser();
+  if (!staff) return { ok: false, message: "not_admin" };
+  const id = String(formData.get("id") ?? "");
+  const priority = Number(formData.get("priority"));
+  if (!id || ![1, 2, 3].includes(priority)) return { ok: false, message: "missing_member" };
+
+  const key = await getUserApiKeySlotFor(id, "google", priority as ApiKeyPriority);
+  if (!key) return { ok: false, message: "no_key" };
+  const tier = await checkGoogleKeyTier(key, PRO_TEXT_MODEL);
+
+  await logAdminAction(staff.id, "check_key_tier", "user_api_keys", keyTierTarget(id, priority), { tier });
+  revalidatePath(`/admin/members/${id}`);
+  return { ok: tier !== "unknown", message: `tier_${tier}` };
 }
