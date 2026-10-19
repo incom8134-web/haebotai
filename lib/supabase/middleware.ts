@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { env } from "@/lib/env";
 import { HOME_AFTER_SIGN_IN, hasCurrentConsent, safeNext } from "@/lib/consent";
+import { hasProfileName } from "@/lib/member-name";
 import { apiIpLimiter, checkRateLimit } from "@/lib/rate-limit";
 
 // Public inside the shell: /tools and /tools/<id> (overviews) and /help.
@@ -17,6 +18,9 @@ function redirectKeepingSession(url: URL, from: NextResponse): NextResponse {
   for (const cookie of from.cookies.getAll()) redirect.cookies.set(cookie);
   return redirect;
 }
+
+/** Sign-up is finished: the required consents for this version, and a name (lib/member-name.ts). */
+const signUpDone = (appMetadata: unknown) => hasCurrentConsent(appMetadata) && hasProfileName(appMetadata);
 
 /** Where a signed-in member goes instead of /auth or a finished consent page (never back into /auth — that would loop). */
 function afterAuth(next: string | null): string {
@@ -78,21 +82,22 @@ export async function updateSession(request: NextRequest) {
     return redirectKeepingSession(new URL(afterAuth(request.nextUrl.searchParams.get("next")), request.url), response);
   }
 
-  // Consent already given (Back button, a bookmark): don't ask again.
-  if (path === "/auth/consent" && isAuthed && hasCurrentConsent(data.claims.app_metadata)) {
+  // Consent and name already given (Back button, a bookmark): don't ask again.
+  if (path === "/auth/consent" && isAuthed && signUpDone(data.claims.app_metadata)) {
     return redirectKeepingSession(new URL(afterAuth(request.nextUrl.searchParams.get("next")), request.url), response);
   }
 
-  // Signed in but hasn't given the required consents (or they changed):
-  // everything behind a login waits on /auth/consent (lib/consent.ts).
-  // The token can be up to an hour older than a consent just given, so a
-  // "no" from the token is double-checked with the auth server.
+  // Signed in but hasn't given the required consents (or they changed),
+  // or hasn't told us their name yet: everything behind a login waits on
+  // /auth/consent (lib/consent.ts, lib/member-name.ts). The token can be
+  // up to an hour older than a consent just given, so a "no" from the
+  // token is double-checked with the auth server.
   if (
     isProtected &&
     isAuthed &&
     path !== "/auth/consent" &&
-    !hasCurrentConsent(data.claims.app_metadata) &&
-    !hasCurrentConsent((await supabase.auth.getUser()).data.user?.app_metadata)
+    !signUpDone(data.claims.app_metadata) &&
+    !signUpDone((await supabase.auth.getUser()).data.user?.app_metadata)
   ) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth/consent";
