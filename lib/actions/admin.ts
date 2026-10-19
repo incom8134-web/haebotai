@@ -5,6 +5,9 @@ import { redirect } from "next/navigation";
 import { getAdminUser, isStaffEmail, keyTierTarget, logAdminAction } from "@/lib/admin";
 import { checkGoogleKeyTier, getUserApiKeySlotFor, type ApiKeyPriority } from "@/lib/api-keys";
 import { PRO_TEXT_MODEL } from "@/lib/ai/gemini-studio";
+import { NOTICE_TEMPLATES, safeLink } from "@/lib/admin-ops";
+import { clearAnnouncementCache, getSiteSettings, saveSetting, sendNotice } from "@/lib/admin-ops-server";
+import { publicTools } from "@/lib/tools/catalog";
 import { deleteAccountData } from "@/lib/account-delete";
 import { normalizeName } from "@/lib/member-name";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -174,4 +177,132 @@ export async function checkMemberKeyTier(_prev: AdminActionState, formData: Form
   await logAdminAction(staff.id, "check_key_tier", "user_api_keys", keyTierTarget(id, priority), { tier });
   revalidatePath("/admin/members", "layout");
   return { ok: tier !== "unknown", message: `tier_${tier}` };
+}
+
+// ── Notices to one member ──────────────────────────────────────────────
+
+const NOTICE_TITLE_MAX = 120;
+const NOTICE_BODY_MAX = 1000;
+
+/** Sends a notice (a template or custom text) that shows as a banner in the member's app until they close it. */
+export async function sendMemberNotice(_prev: AdminActionState, formData: FormData): Promise<AdminActionState> {
+  const staff = await getAdminUser();
+  if (!staff) return { ok: false, message: "not_admin" };
+  const id = String(formData.get("id") ?? "");
+  const templateId = String(formData.get("template") ?? "custom");
+  const tpl = NOTICE_TEMPLATES.find((t) => t.id === templateId) ?? NOTICE_TEMPLATES[NOTICE_TEMPLATES.length - 1];
+  const title = (String(formData.get("title") ?? "").trim() || tpl.title).slice(0, NOTICE_TITLE_MAX);
+  const body = (String(formData.get("body") ?? "").trim() || tpl.body).slice(0, NOTICE_BODY_MAX);
+  const link = safeLink(formData.get("link")) ?? tpl.link;
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return { ok: false, message: "missing_member" };
+  if (!title) return { ok: false, message: "notice_empty" };
+
+  try {
+    const noticeId = await sendNotice(id, { kind: tpl.id, title, body, link }, staff.id);
+    await logAdminAction(staff.id, "send_notice", "member_notices", noticeId, { member: id, kind: tpl.id });
+  } catch (err) {
+    console.error("notice send failed", err);
+    return { ok: false, message: "ops_not_ready" };
+  }
+  revalidatePath("/admin", "layout");
+  return { ok: true, message: "notice_sent" };
+}
+
+// ── Announcements and patch notes ──────────────────────────────────────
+
+const kstInputToIso = (raw: FormDataEntryValue | null): string | null => {
+  const s = String(raw ?? "").trim();
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(s)) return null;
+  const t = Date.parse(`${s}:00+09:00`);
+  return Number.isNaN(t) ? null : new Date(t).toISOString();
+};
+
+/** Create or update a banner or patch note (id present = update). */
+export async function saveAnnouncement(_prev: AdminActionState, formData: FormData): Promise<AdminActionState> {
+  const staff = await getAdminUser();
+  if (!staff) return { ok: false, message: "not_admin" };
+  const id = String(formData.get("id") ?? "");
+  const kind = formData.get("kind") === "patch" ? "patch" : "banner";
+  const level = (["info", "warning", "success"] as const).find((l) => l === formData.get("level")) ?? "info";
+  const row = {
+    kind,
+    level,
+    title_ko: String(formData.get("title_ko") ?? "").trim().slice(0, 160),
+    title_en: String(formData.get("title_en") ?? "").trim().slice(0, 160),
+    body_ko: String(formData.get("body_ko") ?? "").trim().slice(0, 3000),
+    body_en: String(formData.get("body_en") ?? "").trim().slice(0, 3000),
+    version: String(formData.get("version") ?? "").trim().slice(0, 20) || null,
+    link: safeLink(formData.get("link")),
+    published: formData.get("published") === "on",
+    starts_at: kstInputToIso(formData.get("starts_at")),
+    ends_at: kstInputToIso(formData.get("ends_at")),
+    updated_at: new Date().toISOString(),
+  };
+  if (!row.title_ko) return { ok: false, message: "announcement_title" };
+
+  const admin = createAdminClient();
+  const res = /^[0-9a-f-]{36}$/i.test(id)
+    ? await admin.from("announcements").update(row).eq("id", id).select("id").single()
+    : await admin.from("announcements").insert({ ...row, created_by: staff.id }).select("id").single();
+  if (res.error || !res.data) return { ok: false, message: "ops_not_ready" };
+
+  clearAnnouncementCache();
+  await logAdminAction(staff.id, id ? "update_announcement" : "create_announcement", "announcements", res.data.id, { kind, published: row.published });
+  revalidatePath("/", "layout");
+  return { ok: true, message: id ? "announcement_saved" : "announcement_created" };
+}
+
+/** Publish/unpublish or delete an announcement. */
+export async function changeAnnouncement(_prev: AdminActionState, formData: FormData): Promise<AdminActionState> {
+  const staff = await getAdminUser();
+  if (!staff) return { ok: false, message: "not_admin" };
+  const id = String(formData.get("id") ?? "");
+  const op = String(formData.get("op") ?? "");
+  if (!/^[0-9a-f-]{36}$/i.test(id) || !["publish", "unpublish", "delete"].includes(op)) return { ok: false, message: "save_failed" };
+  const admin = createAdminClient();
+  const { error } = op === "delete" ? await admin.from("announcements").delete().eq("id", id) : await admin.from("announcements").update({ published: op === "publish", updated_at: new Date().toISOString() }).eq("id", id);
+  if (error) return { ok: false, message: "ops_not_ready" };
+  clearAnnouncementCache();
+  await logAdminAction(staff.id, `${op}_announcement`, "announcements", id);
+  revalidatePath("/", "layout");
+  return { ok: true, message: `announcement_${op}` };
+}
+
+// ── Maintenance mode and paused tools ──────────────────────────────────
+
+export async function setMaintenance(_prev: AdminActionState, formData: FormData): Promise<AdminActionState> {
+  const staff = await getAdminUser();
+  if (!staff) return { ok: false, message: "not_admin" };
+  const on = formData.get("on") === "1";
+  const message = String(formData.get("message") ?? "").trim().slice(0, 300);
+  try {
+    await saveSetting("maintenance", { on, message }, staff.id);
+  } catch {
+    return { ok: false, message: "ops_not_ready" };
+  }
+  await logAdminAction(staff.id, on ? "maintenance_on" : "maintenance_off", "site_settings", "maintenance", { message });
+  revalidatePath("/", "layout");
+  return { ok: true, message: on ? "maintenance_on" : "maintenance_off" };
+}
+
+export async function setToolPaused(_prev: AdminActionState, formData: FormData): Promise<AdminActionState> {
+  const staff = await getAdminUser();
+  if (!staff) return { ok: false, message: "not_admin" };
+  const slug = String(formData.get("slug") ?? "");
+  const pause = formData.get("pause") === "1";
+  const message = String(formData.get("message") ?? "").trim().slice(0, 300);
+  if (!publicTools().some((t) => t.slug === slug)) return { ok: false, message: "save_failed" };
+
+  const current = (await getSiteSettings(true)).pausedTools;
+  const next = { ...current };
+  if (pause) next[slug] = { message, at: new Date().toISOString() };
+  else delete next[slug];
+  try {
+    await saveSetting("paused_tools", next, staff.id);
+  } catch {
+    return { ok: false, message: "ops_not_ready" };
+  }
+  await logAdminAction(staff.id, pause ? "pause_tool" : "resume_tool", "site_settings", slug, { message });
+  revalidatePath("/", "layout");
+  return { ok: true, message: pause ? "tool_paused" : "tool_resumed" };
 }

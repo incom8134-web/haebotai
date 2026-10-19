@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { hasCurrentConsent } from "@/lib/consent";
+import { runGate } from "@/lib/run-gate";
 import { getTool } from "@/lib/tools/registry";
 import { getOutputSchema } from "@/lib/tools/schemas";
 import { buildContext, buildSystemInstruction } from "@/lib/tools/generate-prompt";
@@ -54,6 +55,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     .eq("user_id", user.id)
     .maybeSingle();
   if (!run || run.status !== "done" || !run.tool_id) return Response.json({ error: "결과를 찾을 수 없습니다" }, { status: 404 });
+  const gated = await runGate(run.tool_id, user.email);
+  if (gated) return gated;
   const manifest = getTool(run.tool_id);
   // A document-agent result: the change is routed to the smallest edit (lib/agents/specs/doc-revise.ts).
   const document = parseDocument((run.output as Record<string, unknown> | null)?.document);
