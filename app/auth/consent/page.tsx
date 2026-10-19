@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronDown, LoaderCircle } from "lucide-react";
@@ -10,10 +10,15 @@ import { createClient } from "@/lib/supabase/client";
 import { useBi } from "@/lib/i18n/context";
 import { BUSINESS } from "@/lib/site/business";
 import { REFERRAL, normalizeReferralCode } from "@/lib/referral";
-import { HOME_AFTER_SIGN_IN } from "@/lib/consent";
+import { HOME_AFTER_SIGN_IN, hasCurrentConsent } from "@/lib/consent";
+import { NAME_MAX, normalizeName, profileNameOf, suggestedName } from "@/lib/member-name";
 import { OWN_KEY_ONLY } from "@/lib/site/access";
+import { KAKAO_PHONE } from "@/lib/auth-providers";
 
-// The consent step right after Google/Kakao sign-in (lib/consent.ts). Each item
+// The consent step right after Google/Kakao sign-in (lib/consent.ts), with
+// the member's name (required, lib/member-name.ts) — pre-filled with the
+// name Google or Kakao sent, so most people just confirm it. Members who
+// agreed before the name was required only see the name. Each item
 // is its own checkbox — nothing is pre-checked, required and optional are
 // labelled, and the collection and overseas-transfer notices the law
 // requires are shown here, not only behind a link. "Agree to all" is a
@@ -41,7 +46,8 @@ const ITEMS: Item[] = [
     detail: {
       head: [{ ko: "항목", en: "Items" }, { ko: "목적", en: "Purpose" }, { ko: "보유 기간", en: "Kept" }],
       rows: [
-        [{ ko: "구글·카카오 계정 이메일·이름·계정 식별자", en: "Google/Kakao email, name, account ID" }, { ko: "회원 식별, 로그인, 고객 응대", en: "Identify you, sign-in, support" }, { ko: "탈퇴 시까지", en: "Until you leave" }],
+        [{ ko: "구글·카카오 계정 이메일·이름·계정 식별자, 가입 때 적은 이름", en: "Google/Kakao email, name, account ID; the name you enter" }, { ko: "회원 식별, 로그인, 고객 응대", en: "Identify you, sign-in, support" }, { ko: "탈퇴 시까지", en: "Until you leave" }],
+        ...(KAKAO_PHONE ? [[{ ko: "카카오 휴대전화번호 (카카오에서 동의한 경우)", en: "Kakao phone number (if you agree on Kakao)" }, { ko: "본인 확인, 고객 응대", en: "Account checks, support" }, { ko: "탈퇴 시까지", en: "Until you leave" }]] : []),
         [{ ko: "도구 입력 내용·업로드 파일·결과물, 실행 기록", en: "Tool inputs, uploads, results, run history" }, { ko: "결과물 생성과 보관함 제공", en: "Generate and keep your results" }, { ko: "삭제 또는 탈퇴 시까지", en: "Until deleted or you leave" }],
         ...(OWN_KEY_ONLY ? [] : [[{ ko: "결제 기록(주문번호·금액·일시)", en: "Payment records (order, amount, date)" }, { ko: "결제·환불 처리", en: "Payments and refunds" }, { ko: "5년 (전자상거래법)", en: "5 years (e-commerce law)" }]]),
         [{ ko: "접속 IP·기기 정보·접속 일시", en: "IP, device, access time" }, { ko: "부정 이용 방지, 보안", en: "Abuse prevention, security" }, { ko: "3개월", en: "3 months" }],
@@ -120,6 +126,20 @@ function ConsentForm() {
   const [code, setCode] = useState("");
   const [codeNote, setCodeNote] = useState("");
   const [done, setDone] = useState(false);
+  const [name, setName] = useState("");
+  // "full": consents + name; "name": consent already given, only the name is missing.
+  const [mode, setMode] = useState<"loading" | "full" | "name">("loading");
+  useEffect(() => {
+    createClient()
+      .auth.getUser()
+      .then(({ data }) => {
+        const u = data.user;
+        setName(profileNameOf(u?.app_metadata) ?? suggestedName(u?.user_metadata));
+        setMode(hasCurrentConsent(u?.app_metadata) ? "name" : "full");
+      })
+      .catch(() => setMode("full"));
+  }, []);
+  const nameOk = normalizeName(name) !== null;
   const allRequired = ITEMS.filter((i) => i.required).every((i) => checked[i.key]);
   const all = ITEMS.every((i) => checked[i.key]);
 
@@ -130,6 +150,23 @@ function ConsentForm() {
       window.location.assign(next);
       return;
     }
+    if (!nameOk) {
+      setError(L({ ko: `이름을 1~${NAME_MAX}자로 적어 주세요.`, en: `Enter your name (1–${NAME_MAX} characters).` }));
+      return;
+    }
+    if (mode === "name") {
+      setBusy("save");
+      setError("");
+      const res = await fetch("/api/account/name", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name }) });
+      if (!res.ok) {
+        const b = (await res.json().catch(() => ({}))) as { error?: string };
+        setError(b.error ?? L({ ko: "저장하지 못했어요.", en: "Couldn't save." }));
+        setBusy("");
+        return;
+      }
+      window.location.assign(next);
+      return;
+    }
     const typed = code.trim() ? normalizeReferralCode(code) : null;
     if (code.trim() && !typed) {
       setError(L({ ko: "초대 코드는 영문·숫자 8자리예요. 없으면 비워 두세요.", en: "Invite codes are 8 letters and numbers. Leave it empty if you don't have one." }));
@@ -137,7 +174,7 @@ function ConsentForm() {
     }
     setBusy("save");
     setError("");
-    const res = await fetch("/api/account/consent", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...checked, ...(typed ? { referralCode: typed } : {}) }) });
+    const res = await fetch("/api/account/consent", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...checked, name, ...(typed ? { referralCode: typed } : {}) }) });
     const body = (await res.json().catch(() => ({}))) as { error?: string; referral?: string };
     if (!res.ok) {
       setError(body.error ?? L({ ko: "저장하지 못했어요.", en: "Couldn't save." }));
@@ -180,13 +217,47 @@ function ConsentForm() {
     <main id="main" className="mx-auto flex min-h-dvh w-full max-w-[560px] flex-col justify-center px-4 py-10">
       <div className="glass-strong rounded-[28px] p-6 sm:p-8">
         <BrandLogo height={26} />
-        <h1 className="mt-5 font-display text-2xl leading-tight font-bold break-keep">{L({ ko: "시작하기 전에 확인해 주세요", en: "Before you start" })}</h1>
+        <h1 className="mt-5 font-display text-2xl leading-tight font-bold break-keep">
+          {mode === "name" ? L({ ko: "이름을 알려 주세요", en: "What's your name?" }) : L({ ko: "시작하기 전에 확인해 주세요", en: "Before you start" })}
+        </h1>
         <p className="mt-2 text-sm leading-relaxed text-fg-muted break-keep">
-          {L({ ko: `${BUSINESS.serviceName}를 쓰려면 아래 필수 항목에 동의가 필요해요. 선택 항목은 동의하지 않아도 됩니다.`, en: "The required items below are needed to use the service. Optional items are up to you." })}
-          {" "}
-          {L({ ko: `${BUSINESS.serviceName}는 생성형 AI 기반 서비스로, 만든 결과물은 AI가 생성한 것이에요.`, en: "AI Haeba is a generative-AI service; everything it makes is AI-generated." })}
+          {mode === "name" ? (
+            L({ ko: "고객 응대와 계정 확인에 쓰는 이름이에요. 한 번만 적으면 돼요.", en: "We use it for support and to confirm your account. You only enter it once." })
+          ) : (
+            <>
+              {L({ ko: `${BUSINESS.serviceName}를 쓰려면 이름과 아래 필수 항목 동의가 필요해요. 선택 항목은 동의하지 않아도 됩니다.`, en: "To use the service we need your name and the required items below. Optional items are up to you." })}
+              {" "}
+              {L({ ko: `${BUSINESS.serviceName}는 생성형 AI 기반 서비스로, 만든 결과물은 AI가 생성한 것이에요.`, en: "AI Haeba is a generative-AI service; everything it makes is AI-generated." })}
+            </>
+          )}
         </p>
 
+        <div className="mt-6">
+          <label htmlFor="member-name" className="text-sm font-semibold">
+            <span className="text-fg">[{L({ ko: "필수", en: "Required" })}]</span> {L({ ko: "이름", en: "Name" })}
+          </label>
+          <input
+            id="member-name"
+            value={name}
+            onChange={(e) => {
+              setName(e.target.value);
+              setError("");
+            }}
+            required
+            aria-required="true"
+            aria-invalid={!!name && !nameOk}
+            maxLength={NAME_MAX + 10}
+            autoComplete="name"
+            placeholder={L({ ko: "예: 김민지", en: "e.g. Minji Kim" })}
+            disabled={mode === "loading"}
+            className="mt-2 h-12 w-full rounded-2xl border border-hairline bg-bg px-4 text-base outline-none focus:border-accent disabled:opacity-60"
+          />
+          <p className="mt-1.5 text-2xs text-fg-subtle break-keep">
+            {L({ ko: "실명이나 가게 담당자 이름을 적어 주세요. 다른 회원에게는 보이지 않아요.", en: "Your real name or the name of the person running the shop. Other members never see it." })}
+          </p>
+        </div>
+
+        {mode === "name" ? null : (
         <fieldset className="mt-6">
           <legend className="sr-only">{L({ ko: "동의 항목", en: "Consent items" })}</legend>
           <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-hairline bg-surface-2 px-4 py-3 text-sm font-semibold">
@@ -222,8 +293,9 @@ function ConsentForm() {
             ))}
           </ul>
         </fieldset>
+        )}
 
-        {OWN_KEY_ONLY ? null : (
+        {OWN_KEY_ONLY || mode === "name" ? null : (
         <details className="mt-4 rounded-2xl border border-hairline px-4 py-3 text-sm" open={!!code}>
           <summary className="cursor-pointer text-fg-muted">{L({ ko: "초대 코드가 있어요 (선택)", en: "I have an invite code (optional)" })}</summary>
           <input
@@ -257,19 +329,25 @@ function ConsentForm() {
           </p>
         ) : null}
 
-        <Button className="mt-6 w-full" size="lg" disabled={!allRequired || !!busy} onClick={submit}>
+        <Button className="mt-6 w-full" size="lg" disabled={mode === "loading" || !nameOk || (mode === "full" && !allRequired) || !!busy} onClick={submit}>
           {busy === "save" ? <LoaderCircle className="size-4 animate-spin" aria-hidden /> : null}
-          {done ? L({ ko: "계속하기", en: "Continue" }) : L({ ko: "동의하고 시작하기", en: "Agree and continue" })}
+          {done ? L({ ko: "계속하기", en: "Continue" }) : mode === "name" ? L({ ko: "저장하고 계속하기", en: "Save and continue" }) : L({ ko: "동의하고 시작하기", en: "Agree and continue" })}
         </Button>
-        {!allRequired ? <p className="mt-2 text-center text-xs text-fg-muted">{L({ ko: "필수 항목 4개에 모두 동의하면 시작할 수 있어요.", en: "Agree to the 4 required items to continue." })}</p> : null}
+        {mode === "full" && (!allRequired || !nameOk) ? (
+          <p className="mt-2 text-center text-xs text-fg-muted">
+            {!nameOk ? L({ ko: "이름을 적고 필수 항목 4개에 모두 동의하면 시작할 수 있어요.", en: "Enter your name and agree to the 4 required items to continue." }) : L({ ko: "필수 항목 4개에 모두 동의하면 시작할 수 있어요.", en: "Agree to the 4 required items to continue." })}
+          </p>
+        ) : null}
 
         <div className="mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-fg-muted">
           <button type="button" onClick={leave} disabled={!!busy} className="underline underline-offset-2 hover:text-fg">
-            {L({ ko: "동의하지 않고 나가기 (로그아웃)", en: "Don't agree — sign out" })}
+            {mode === "name" ? L({ ko: "나중에 하기 (로그아웃)", en: "Later — sign out" }) : L({ ko: "동의하지 않고 나가기 (로그아웃)", en: "Don't agree — sign out" })}
           </button>
-          <button type="button" onClick={under14} disabled={!!busy} className="underline underline-offset-2 hover:text-fg">
-            {L({ ko: "만 14세 미만이에요 (계정 삭제)", en: "I'm under 14 — delete the account" })}
-          </button>
+          {mode === "name" ? null : (
+            <button type="button" onClick={under14} disabled={!!busy} className="underline underline-offset-2 hover:text-fg">
+              {L({ ko: "만 14세 미만이에요 (계정 삭제)", en: "I'm under 14 — delete the account" })}
+            </button>
+          )}
         </div>
       </div>
     </main>
