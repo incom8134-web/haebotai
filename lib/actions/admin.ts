@@ -172,6 +172,6 @@ export async function checkMemberKeyTier(_prev: AdminActionState, formData: Form
   const tier = await checkGoogleKeyTier(key, PRO_TEXT_MODEL);
 
   await logAdminAction(staff.id, "check_key_tier", "user_api_keys", keyTierTarget(id, priority), { tier });
-  revalidatePath(`/admin/members/${id}`);
+  revalidatePath("/admin/members", "layout");
   return { ok: tier !== "unknown", message: `tier_${tier}` };
 }
