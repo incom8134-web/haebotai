@@ -23,7 +23,7 @@ credits; usage is billed to the member's own Google account.
   the next takes over. Keys are checked with the provider before saving,
   stored encrypted (AES-256-GCM) and only the last four characters are shown.
 - A member without a key sees a prompt to add one before any tool can run,
-  with a link to the API key guide (`/help/api-guide`: a short video, step
+  with a link to the API key guide (`/help/api-guide`: an 8-step video walkthrough, step
   list, troubleshooting and the illustrated PDF manuals in Korean and English).
 
 The switch is `OWN_KEY_ONLY` in `lib/site/access.ts`. Turning it off brings
@@ -62,7 +62,7 @@ lib/
   site/                      Access switch, FAQ, patch notes, plans, flows, quick start
   crypto/, api-keys.ts, admin.ts, actions/
 public/
-  videos/                    Landing videos and the API key guide clip (with ko/en captions)
+  videos/                    Landing videos and the API key walkthrough (with ko/en captions)
   guides/                    API key setup manuals (PDF, Korean and English)
 supabase/migrations/         0001–0021 (see docs/DEPLOY.md for what each does)
 ```
