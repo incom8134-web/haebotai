@@ -100,7 +100,7 @@ export function ApiGuide() {
   return (
     <>
       <PageHeader title={L({ ko: "API 키 설명서", en: "API key manual" })} lead={L(OWN_KEY_ONLY ? { ko: "해바의 도구는 내 Google AI Studio 키로 실행돼요. 발급과 등록은 5분이면 끝나요.", en: "Haeba's tools run on your own Google AI Studio key. Getting and adding one takes about 5 minutes." } : { ko: "내 Google AI Studio 키로 해바를 쓰면 크레딧이 차감되지 않아요. 5분이면 끝나요.", en: "Run Haeba on your own Google AI Studio key and no credits are charged. Takes five minutes." })} />
-      {/* Watch first: the 16 s clip of getting and pasting a key, then the full manuals with screenshots. */}
+      {/* Watch first: the 8-step walkthrough (search → create → copy → paste → applied), then the full manuals with screenshots. */}
       <section id="video" className="mb-6 grid scroll-mt-24 grid-cols-1 gap-6 lg:grid-cols-[1.3fr_1fr]">
         <div className="min-w-0">
           <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold"><PlayCircle size={18} className="text-studio-cyan" aria-hidden /> {L({ ko: "영상으로 보기", en: "Watch how" })}</h2>
@@ -108,23 +108,23 @@ export function ApiGuide() {
             controls
             playsInline
             preload="metadata"
-            poster="/videos/api-key-guide-poster.jpg"
-            aria-label={L({ ko: "Google AI Studio에서 키를 만들어 해바에 붙여넣는 영상 (16초, 한국어 음성)", en: "Video: creating a key in Google AI Studio and pasting it into Haeba (16 s, Korean voice)" })}
+            poster="/videos/api-key-walkthrough-poster.jpg"
+            aria-label={L({ ko: "Google AI Studio 검색부터 키 만들기, 복사, 해바에 붙여넣기까지 8단계 영상 (1분 19초, 한국어 음성)", en: "Video: 8 steps from searching for Google AI Studio to creating, copying and pasting the key into Haeba (1 min 19 s, Korean voice)" })}
             className="aspect-video w-full rounded-[24px] border border-hairline bg-surface-2 object-contain"
           >
-            <source src="/videos/api-key-guide.mp4" type="video/mp4" />
-            <track kind="captions" src="/videos/api-key-guide.ko.vtt" srcLang="ko" label="한국어" default={locale === "ko"} />
-            <track kind="captions" src="/videos/api-key-guide.en.vtt" srcLang="en" label="English" default={locale === "en"} />
+            <source src="/videos/api-key-walkthrough.mp4" type="video/mp4" />
+            <track kind="captions" src="/videos/api-key-walkthrough.ko.vtt" srcLang="ko" label="한국어" default={locale === "ko"} />
+            <track kind="captions" src="/videos/api-key-walkthrough.en.vtt" srcLang="en" label="English" default={locale === "en"} />
           </video>
-          <p className="mt-2 text-xs text-fg-subtle">{L({ ko: "16초 · 한국어 음성 · 자막 한국어/영어", en: "16 s · Korean voice · captions in Korean and English" })}</p>
+          <p className="mt-2 text-xs text-fg-subtle">{L({ ko: "8단계 · 1분 19초 · 한국어 음성 · 자막 한국어/영어", en: "8 steps · 1 min 19 s · Korean voice · captions in Korean and English" })}</p>
         </div>
         <div className="min-w-0">
           <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold"><FileText size={18} className="text-studio-cyan" aria-hidden /> {L({ ko: "화면으로 따라 하는 설명서 (PDF)", en: "Illustrated manual (PDF)" })}</h2>
           <p className="mb-3 text-sm leading-relaxed text-fg-muted">{L({ ko: "키 발급, 해바에 연결, 첫 결과 받기까지 화면 캡처로 하나하나 보여 줘요. 12쪽.", en: "Screenshots of every step: getting a key, connecting it to Haeba and getting your first result. 12 pages." })}</p>
           <div className="space-y-2">
             {[
-              { href: "/guides/ai-haeba-api-key-guide-ko.pdf", file: "AI해바_API키_연결가이드.pdf", title: "한국어 설명서", size: "3.2 MB" },
-              { href: "/guides/ai-haeba-api-key-guide-en.pdf", file: "AI_Haeba_API_Key_Setup_Guide.pdf", title: "English manual", size: "2.8 MB" },
+              { href: "/guides/ai-haeba-api-key-guide-ko.pdf", file: "AI해바_API키_연결가이드.pdf", title: "한국어 설명서", size: "3.0 MB" },
+              { href: "/guides/ai-haeba-api-key-guide-en.pdf", file: "AI_Haeba_API_Key_Setup_Guide.pdf", title: "English manual", size: "2.7 MB" },
             ].map((d) => (
               <a key={d.href} href={d.href} download={d.file} className="glass glass-hover group flex items-center gap-3 rounded-2xl p-4">
                 <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-studio-cyan/15 text-studio-cyan"><FileText size={18} aria-hidden /></span>
