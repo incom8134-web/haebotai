@@ -3,7 +3,7 @@
 import { useActionState, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AlertTriangle, ArrowRight, Check, CircleCheck, CircleGauge, Crown, GraduationCap, KeyRound, LogOut, Trash2 } from "lucide-react";
+import { AlertTriangle, ArrowRight, Check, CircleCheck, CircleGauge, Crown, ExternalLink, GraduationCap, KeyRound, LogOut, PlayCircle, Trash2 } from "lucide-react";
 import { PLANS } from "@/lib/site/plans";
 import { requestStudentVerification, type StudentRequestState } from "@/lib/actions/membership";
 import { deleteApiKey, saveApiKey, testApiKey, type ApiKeyActionState } from "@/lib/actions/api-keys";
@@ -426,6 +426,26 @@ function ApiKeyPanel({ apiKey }: { apiKey: ApiKeyStatus }) {
     <>
       <PageHeader title={L({ ko: "내 API 키", en: "My API key" })} lead={L({ ko: "도구는 직접 발급받은 내 API 키로 실행돼요. 제공사마다 키를 최대 3개까지 우선순위로 등록할 수 있고, 한도가 차면 다음 키로 자동 전환돼요.", en: "Tools run on API keys you get yourself. Register up to 3 priority-ordered keys per provider — when one hits its quota, the next takes over." })} />
       <section className="space-y-6">
+        {/* No Google key yet: how to get one comes first, not in small print at the bottom. */}
+        {apiKey.enabled && !apiKey.providers.google.some((k) => k.connected) ? (
+          <div className="rounded-[24px] border border-studio-cyan/40 bg-studio-cyan/10 p-5">
+            <p className="flex items-center gap-2 text-base font-bold break-keep text-fg">
+              <KeyRound size={18} className="shrink-0 text-studio-cyan" aria-hidden />
+              {L({ ko: "아직 키가 없나요? 무료로 5분이면 받아요", en: "No key yet? It's free and takes about 5 minutes" })}
+            </p>
+            <p className="mt-1.5 text-sm break-keep text-fg-muted">
+              {L({ ko: "Google AI Studio에서 키를 만들고 「Copy key」로 복사한 뒤, 아래 Google Gemini 「1순위」 칸에 붙여넣고 「적용」을 누르세요.", en: "Create a key in Google AI Studio, click \"Copy key\", then paste it into the Google Gemini \"1st priority\" box below and click \"apply\"." })}
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Link href="/help/api-guide#video" className={cn(primaryButton, "h-10 px-4")}>
+                <PlayCircle size={16} aria-hidden /> {L({ ko: "키 받는 방법 보기", en: "How to get a key" })}
+              </Link>
+              <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer" className={cn(secondaryButton, "h-10 px-4")}>
+                Google AI Studio <ExternalLink size={14} aria-hidden />
+              </a>
+            </div>
+          </div>
+        ) : null}
         {apiKey.enabled ? (
           <>
             <ProviderKeyCard provider="google" slots={apiKey.providers.google} />
