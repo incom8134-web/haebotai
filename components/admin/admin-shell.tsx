@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowLeft, BarChart3, Headset, LayoutDashboard, Menu, Search, Users, X } from "lucide-react";
+import { AlertTriangle, ArrowLeft, BarChart3, Filter, Headset, LayoutDashboard, Megaphone, Menu, Search, SlidersHorizontal, Users, X } from "lucide-react";
 import { BrandLogo } from "@/components/brand-mark";
 import { useBi } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
@@ -12,14 +12,29 @@ import { cn } from "@/lib/utils";
 // top bar with member search and who's signed in, and a light canvas. On
 // phones the sidebar slides in from the menu button.
 
-const NAV = [
-  { href: "/admin", icon: LayoutDashboard, label: { ko: "대시보드", en: "Dashboard" }, exact: true },
-  { href: "/admin/members", icon: Users, label: { ko: "회원 관리", en: "Members" } },
-  { href: "/admin/tools", icon: BarChart3, label: { ko: "도구 사용 현황", en: "Tool usage" } },
-  { href: "/admin/tickets", icon: Headset, label: { ko: "고객 문의", en: "Support" }, badge: "tickets" as const },
+type Badge = "tickets" | "alerts" | "ops";
+const NAV: { group: { ko: string; en: string }; items: { href: string; icon: typeof Users; label: { ko: string; en: string }; exact?: boolean; badge?: Badge }[] }[] = [
+  {
+    group: { ko: "현황", en: "Insights" },
+    items: [
+      { href: "/admin", icon: LayoutDashboard, label: { ko: "대시보드", en: "Dashboard" }, exact: true },
+      { href: "/admin/funnel", icon: Filter, label: { ko: "가입 퍼널", en: "Activation funnel" } },
+      { href: "/admin/tools", icon: BarChart3, label: { ko: "도구 사용 현황", en: "Tool usage" } },
+      { href: "/admin/errors", icon: AlertTriangle, label: { ko: "오류 분석", en: "Failures" }, badge: "alerts" },
+    ],
+  },
+  {
+    group: { ko: "운영", en: "Operations" },
+    items: [
+      { href: "/admin/members", icon: Users, label: { ko: "회원 관리", en: "Members" } },
+      { href: "/admin/tickets", icon: Headset, label: { ko: "고객 문의", en: "Support" }, badge: "tickets" },
+      { href: "/admin/announcements", icon: Megaphone, label: { ko: "공지·패치노트", en: "Announcements" } },
+      { href: "/admin/settings", icon: SlidersHorizontal, label: { ko: "운영 설정", en: "Operations" }, badge: "ops" },
+    ],
+  },
 ];
 
-export function AdminShell({ staff, openTickets, children }: { staff: { email: string; name: string | null }; openTickets: number; children: React.ReactNode }) {
+export function AdminShell({ staff, openTickets, alerts = 0, opsActive = false, children }: { staff: { email: string; name: string | null }; openTickets: number; alerts?: number; opsActive?: boolean; children: React.ReactNode }) {
   const L = useBi();
   const path = usePathname();
   const [open, setOpen] = useState(false);
@@ -33,27 +48,33 @@ export function AdminShell({ staff, openTickets, children }: { staff: { email: s
         </span>
         <span className="rounded-md bg-white/10 px-1.5 py-0.5 text-[11px] font-semibold tracking-wide text-white">ADMIN</span>
       </div>
-      <p className="px-5 pt-4 pb-2 text-[11px] font-semibold tracking-wider text-white/40 uppercase">{L({ ko: "운영", en: "Operations" })}</p>
-      <ul className="flex flex-col gap-1 px-3">
-        {NAV.map((item) => {
-          const on = active(item.href, item.exact);
-          const Icon = item.icon;
-          return (
-            <li key={item.href}>
-              <Link
-                href={item.href}
-                onClick={() => setOpen(false)}
-                aria-current={on ? "page" : undefined}
-                className={cn("flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium transition-colors", on ? "bg-[#3b6fe3] text-white shadow-[0_6px_20px_-8px_rgba(59,111,227,.8)]" : "hover:bg-white/[0.06] hover:text-white")}
-              >
-                <Icon className="size-[18px] shrink-0" aria-hidden />
-                <span className="flex-1">{L(item.label)}</span>
-                {item.badge === "tickets" && openTickets > 0 ? <span className="rounded-full bg-[#ef4444] px-2 py-0.5 text-[11px] font-bold text-white tabular-nums">{openTickets}</span> : null}
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
+      {NAV.map((g) => (
+        <div key={g.group.en}>
+          <p className="px-5 pt-4 pb-2 text-[11px] font-semibold tracking-wider text-white/40 uppercase">{L(g.group)}</p>
+          <ul className="flex flex-col gap-1 px-3">
+            {g.items.map((item) => {
+              const on = active(item.href, item.exact);
+              const Icon = item.icon;
+              const count = item.badge === "tickets" ? openTickets : item.badge === "alerts" ? alerts : 0;
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    onClick={() => setOpen(false)}
+                    aria-current={on ? "page" : undefined}
+                    className={cn("flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium transition-colors", on ? "bg-[#3b6fe3] text-white shadow-[0_6px_20px_-8px_rgba(59,111,227,.8)]" : "hover:bg-white/[0.06] hover:text-white")}
+                  >
+                    <Icon className="size-[18px] shrink-0" aria-hidden />
+                    <span className="flex-1">{L(item.label)}</span>
+                    {count > 0 ? <span className="rounded-full bg-[#ef4444] px-2 py-0.5 text-[11px] font-bold text-white tabular-nums">{count}</span> : null}
+                    {item.badge === "ops" && opsActive ? <span className="size-2.5 rounded-full bg-[#f59e0b]" aria-label={L({ ko: "점검 또는 중지된 도구 있음", en: "Maintenance or paused tools" })} /> : null}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ))}
       <div className="mt-auto border-t border-white/[0.07] p-3">
         <Link href="/studio" className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm hover:bg-white/[0.06] hover:text-white">
           <ArrowLeft className="size-4" aria-hidden />

@@ -3,7 +3,7 @@
 import { useActionState, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Activity, AlertTriangle, ArrowLeft, ArrowRight, Ban, CalendarDays, Copy, KeyRound, Play, Plus, RotateCcw, Save, Search, Trash2, UserPlus, Users, Wrench } from "lucide-react";
+import { Activity, AlertTriangle, ArrowLeft, ArrowRight, Ban, Copy, KeyRound, Play, Plus, RotateCcw, Save, Search, Trash2, UserPlus, Users, Wrench } from "lucide-react";
 import { checkMemberKeyTier, createMember, deleteMember, replyToTicket, reopenTicket, setMemberSuspended, updateMember, type AdminActionState } from "@/lib/actions/admin";
 import type { KeyTier } from "@/lib/ai/key-tier";
 import { useBi } from "@/lib/i18n/context";
@@ -13,8 +13,10 @@ import { catalogTool, publicTools } from "@/lib/tools/catalog";
 import { NAME_MAX } from "@/lib/member-name";
 import { TONE, toolTone } from "@/components/site/tone";
 import { AdminPageHeader } from "@/components/admin/admin-shell";
+import { QuickNotice } from "@/components/admin/ops-view";
 import { Avatar, BarList, Card, Pill, ProviderBadge, StatCard, TrendChart } from "@/components/admin/ui";
 import { cn } from "@/lib/utils";
+import { ActionNote, DateRange, btn, btnDanger, btnGhost, btnPrimary, field, fmtDate, fmtDateTime, num, pct } from "@/components/admin/kit";
 
 // /admin pages — staff only (gated in app/admin/layout.tsx). Data is
 // fetched server-side in each page.tsx; these render it. Layout after the
@@ -22,28 +24,7 @@ import { cn } from "@/lib/utils";
 
 type Bi = { ko: string; en: string };
 
-// Korea time, formatted by hand: Intl output differs between Node and
-// browsers ("AM" vs "오전"), which breaks hydration.
-const kst = (iso: string) => new Date(new Date(iso).getTime() + 9 * 60 * 60 * 1000);
-const pad = (n: number) => String(n).padStart(2, "0");
-const fmtDate = (iso: string | null) => {
-  if (!iso) return "—";
-  const d = kst(iso);
-  return `${d.getUTCFullYear()}.${pad(d.getUTCMonth() + 1)}.${pad(d.getUTCDate())}`;
-};
-const fmtDateTime = (iso: string | null) => {
-  if (!iso) return "—";
-  const d = kst(iso);
-  return `${String(d.getUTCFullYear()).slice(2)}.${pad(d.getUTCMonth() + 1)}.${pad(d.getUTCDate())} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
-};
-const num = (n: number) => n.toLocaleString("ko-KR");
-const pct = (a: number, b: number) => (b ? Math.round((a / b) * 100) : 0);
 
-const btn = "inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition-colors disabled:opacity-50";
-const btnPrimary = cn(btn, "bg-[#3b6fe3] text-white hover:bg-[#2f5fd0]");
-const btnGhost = cn(btn, "border border-hairline bg-surface text-fg hover:bg-surface-2");
-const btnDanger = cn(btn, "bg-danger text-white hover:opacity-90");
-const field = "h-10 w-full rounded-xl border border-hairline bg-surface px-3 text-sm outline-none focus:border-accent";
 
 const KEY_LABEL: Record<string, string> = { google: "Gemini", anthropic: "Claude", openai: "OpenAI" };
 
@@ -58,45 +39,9 @@ function useToolLabel() {
 
 const memberHref = (id: string) => `/admin/members/${id}`;
 
-// ── Messages from the server actions ──────────────────────────────────
-
-const MSG: Record<string, Bi> = {
-  replied: { ko: "답변을 보냈어요. 회원 화면에 바로 보여요.", en: "Reply sent. The member sees it right away." },
-  closed: { ko: "종료로 표시했어요.", en: "Marked closed." },
-  reopened: { ko: "다시 대기로 옮겼어요.", en: "Moved back to open." },
-  not_admin: { ko: "관리자 권한이 없어요.", en: "Not authorized." },
-  missing_ticket: { ko: "문의를 찾을 수 없어요.", en: "Ticket not found." },
-  reply_length: { ko: "답변은 1~4000자로 적어 주세요.", en: "Replies must be 1–4000 characters." },
-  bad_status: { ko: "잘못된 상태예요.", en: "Invalid status." },
-  save_failed: { ko: "저장하지 못했어요. 잠시 뒤 다시 시도해 주세요.", en: "Couldn't save. Try again shortly." },
-  member_created: { ko: "회원을 추가했어요. 같은 이메일로 구글·카카오 로그인하면 이 계정으로 들어와요.", en: "Member added. Signing in with Google or Kakao on the same email lands in this account." },
-  member_saved: { ko: "저장했어요.", en: "Saved." },
-  member_suspended: { ko: "이용을 정지했어요. 다시 로그인할 수 없어요.", en: "Suspended. They can't sign in." },
-  member_restored: { ko: "정지를 풀었어요.", en: "Restored." },
-  missing_member: { ko: "회원을 찾을 수 없어요.", en: "Member not found." },
-  bad_email: { ko: "이메일 주소를 확인해 주세요.", en: "Check the email address." },
-  bad_name: { ko: `이름을 1~${NAME_MAX}자로 적어 주세요.`, en: `Name must be 1–${NAME_MAX} characters.` },
-  email_taken: { ko: "이미 가입된 이메일이에요.", en: "That email already has an account." },
-  note_length: { ko: "메모는 2000자까지예요.", en: "Notes are up to 2000 characters." },
-  staff_protected: { ko: "관리자 계정은 여기서 정지·삭제할 수 없어요.", en: "Staff accounts can't be suspended or deleted here." },
-  confirm_mismatch: { ko: "확인용 이메일이 일치하지 않아요.", en: "The confirmation email doesn't match." },
-  no_key: { ko: "이 순위에 등록된 키가 없어요.", en: "No key in that slot." },
-  tier_unknown: { ko: "Google이 응답하지 않아 확인하지 못했어요. 잠시 뒤 다시 눌러 주세요.", en: "Google didn't answer. Try again shortly." },
-};
-
-function ActionNote({ state }: { state: AdminActionState }) {
-  const L = useBi();
-  if (!state) return null;
-  return (
-    <p role="status" className={cn("text-sm", state.ok ? "text-studio-success" : "text-danger")}>
-      {L(MSG[state.message] ?? { ko: state.message, en: state.message })}
-    </p>
-  );
-}
-
 // ── Dashboard ──────────────────────────────────────────────────────────
 
-export function AdminOverviewView({ overview: o }: { overview: AdminOverview }) {
+export function AdminOverviewView({ overview: o, alerts }: { overview: AdminOverview; alerts?: React.ReactNode }) {
   const L = useBi();
   const toolLabel = useToolLabel();
   const days = [...o.days].reverse(); // oldest → newest
@@ -121,6 +66,7 @@ export function AdminOverviewView({ overview: o }: { overview: AdminOverview }) 
         }
       />
 
+      {alerts}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label={L({ ko: "전체 회원", en: "Members" })} value={num(o.members)} icon={Users} tone="discover" note={L({ ko: `최근 7일 +${num(o.newMembers7d)}명`, en: `+${num(o.newMembers7d)} in 7 days` })} noteTone={o.newMembers7d ? "up" : "flat"} spark={days.map((d) => d.signups)} href="/admin/members" />
         <StatCard label={L({ ko: "7일 실행", en: "Runs, 7 days" })} value={num(o.runs7d)} icon={Play} tone="brand" note={L({ ko: `오늘 ${num(o.runsToday)}회 · 누적 ${num(o.runsAllTime)}회`, en: `${num(o.runsToday)} today · ${num(o.runsAllTime)} all time` })} spark={days.map((d) => d.runs)} href="/admin/tools" />
@@ -252,22 +198,6 @@ function Select({ name, value, label, options }: { name: keyof MemberFilters; va
         ))}
       </select>
     </label>
-  );
-}
-
-/** Calendar filter: two date pickers (Korea-time days, inclusive). */
-function DateRange({ from, to, label }: { from: string; to: string; label: string }) {
-  const L = useBi();
-  return (
-    <fieldset className="flex flex-wrap items-end gap-2">
-      <legend className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-fg-muted">
-        <CalendarDays className="size-3.5" aria-hidden />
-        {label}
-      </legend>
-      <input type="date" name="from" defaultValue={from} max={to || undefined} aria-label={L({ ko: `${label} 시작일`, en: `${label} from` })} className={cn(field, "w-[160px]")} />
-      <span className="pb-2.5 text-fg-subtle">~</span>
-      <input type="date" name="to" defaultValue={to} min={from || undefined} aria-label={L({ ko: `${label} 종료일`, en: `${label} to` })} className={cn(field, "w-[160px]")} />
-    </fieldset>
   );
 }
 
@@ -520,7 +450,13 @@ function KeyRow({ k }: { k: AdminMemberDetail["keyDetails"][number] }) {
 function KeyTierCell({ m }: { m: AdminMember }) {
   const L = useBi();
   const [state, action, pending] = useActionState<AdminActionState, FormData>(checkMemberKeyTier, null);
-  if (!m.keys.length) return <Pill tone="amber">{L({ ko: "키 없음", en: "No key" })}</Pill>;
+  if (!m.keys.length)
+    return (
+      <div className="flex flex-col items-start gap-1.5" onClick={(e) => e.stopPropagation()}>
+        <Pill tone="amber">{L({ ko: "키 없음", en: "No key" })}</Pill>
+        <QuickNotice memberId={m.id} template="no_key" label={{ ko: "등록 안내", en: "Nudge" }} />
+      </div>
+    );
   // A check just made on this page wins over the stored one.
   const fresh = state?.message.startsWith("tier_") ? (state.message.slice(5) as KeyTier) : null;
   const tier = fresh ?? m.geminiKey?.tier?.value ?? null;
@@ -545,6 +481,7 @@ function KeyTierCell({ m }: { m: AdminMember }) {
           {!fresh && m.geminiKey.tier ? <span className="text-[11px] text-fg-subtle">{fmtDate(m.geminiKey.tier.checkedAt)}</span> : null}
         </form>
       ) : null}
+      {tier === "invalid" || tier === "free" ? <QuickNotice memberId={m.id} template={tier === "invalid" ? "key_refused" : "free_tier"} /> : null}
       {state && !fresh ? (
         <span className="max-w-[220px] text-xs">
           <ActionNote state={state} />
@@ -554,7 +491,7 @@ function KeyTierCell({ m }: { m: AdminMember }) {
   );
 }
 
-export function MemberProfile({ m }: { m: AdminMemberDetail }) {
+export function MemberProfile({ m, notices }: { m: AdminMemberDetail; notices?: React.ReactNode }) {
   const L = useBi();
   const toolLabel = useToolLabel();
   const [edit, editAction, saving] = useActionState<AdminActionState, FormData>(updateMember, null);
@@ -725,6 +662,8 @@ export function MemberProfile({ m }: { m: AdminMemberDetail }) {
           )}
         </Card>
       </div>
+
+      {notices ? <div className="mt-5">{notices}</div> : null}
 
       {/* Manage: update, suspend, delete */}
       <div className="mt-5 grid gap-5 xl:grid-cols-[1.4fr_1fr]">
