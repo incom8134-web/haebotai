@@ -88,16 +88,22 @@ function kakaoIdOf(u: User): string | null {
 
 const isSuspended = (u: User) => !!u.banned_until && new Date(u.banned_until).getTime() > Date.now();
 
+export type TierCheck = { value: KeyTier; checkedAt: string };
+
 export interface AdminMember extends MemberFacts {
   provider: string;
+  /** The member's first Gemini key slot and its last free/paid check (members table). */
+  geminiKey: { priority: number; tier: TierCheck | null } | null;
 }
 
-function toMember(u: User, keys: string[], runs: { count: number; failed: number; last: string | null }): AdminMember {
+function toMember(u: User, keys: string[], runs: { count: number; failed: number; last: string | null }, geminiKey: AdminMember["geminiKey"] = null): AdminMember {
   const providers = providersOf(u);
   return {
+    geminiKey,
     id: u.id,
     email: u.email ?? "",
-    name: profileNameOf(u.app_metadata) ?? displayName(u.user_metadata),
+    name: profileNameOf(u.app_metadata),
+    providerName: displayName(u.user_metadata),
     providers,
     provider: providers[0] ?? "email",
     kakaoId: kakaoIdOf(u),
@@ -115,15 +121,19 @@ function toMember(u: User, keys: string[], runs: { count: number; failed: number
 /** Every member with their key and run counts — the rows the list filters. */
 async function allMembers(): Promise<AdminMember[]> {
   const admin = createAdminClient();
-  const [users, keyRows, runRows] = await Promise.all([
+  const [users, keyRows, runRows, tiers] = await Promise.all([
     listAllUsers(),
-    admin.from("user_api_keys").select("user_id, provider"),
+    admin.from("user_api_keys").select("user_id, provider, priority, updated_at").order("priority"),
     admin.from("generations").select("user_id, status, created_at").order("created_at", { ascending: false }).limit(RUN_ROWS),
+    lastTierChecks(),
   ]);
   const keys = new Map<string, Set<string>>();
+  const gemini = new Map<string, NonNullable<AdminMember["geminiKey"]>>();
   for (const r of keyRows.data ?? []) {
     if (!keys.has(r.user_id)) keys.set(r.user_id, new Set());
     keys.get(r.user_id)!.add(r.provider);
+    // Rows come in priority order: the first Gemini slot is the one runs use first.
+    if (r.provider === "google" && !gemini.has(r.user_id)) gemini.set(r.user_id, { priority: r.priority, tier: freshTier(tiers.get(keyTierTarget(r.user_id, r.priority)), r.updated_at) });
   }
   const runs = new Map<string, { count: number; failed: number; last: string | null }>();
   for (const r of runRows.data ?? []) {
@@ -133,7 +143,24 @@ async function allMembers(): Promise<AdminMember[]> {
     if (!cur.last) cur.last = r.created_at; // rows arrive newest first
     runs.set(r.user_id, cur);
   }
-  return users.map((u) => toMember(u, [...(keys.get(u.id) ?? [])].sort(), runs.get(u.id) ?? { count: 0, failed: 0, last: null }));
+  return users.map((u) => toMember(u, [...(keys.get(u.id) ?? [])].sort(), runs.get(u.id) ?? { count: 0, failed: 0, last: null }, gemini.get(u.id) ?? null));
+}
+
+/** Latest free/paid check per key slot (audit_log, lib/actions/admin.ts checkMemberKeyTier); pass a member id to read only theirs. */
+async function lastTierChecks(userId?: string): Promise<Map<string, TierCheck>> {
+  let q = createAdminClient().from("audit_log").select("target_id, detail, created_at").eq("action", "check_key_tier").order("created_at", { ascending: false }).limit(userId ? 30 : 5000);
+  if (userId) q = q.like("target_id", `${userId}:%`);
+  const { data } = await q;
+  const out = new Map<string, TierCheck>();
+  for (const r of data ?? []) {
+    if (!out.has(r.target_id)) out.set(r.target_id, { value: (r.detail as { tier?: KeyTier })?.tier ?? "unknown", checkedAt: r.created_at });
+  }
+  return out;
+}
+
+/** A check older than the key's last change was about a different key. */
+function freshTier(t: TierCheck | undefined, keyUpdatedAt: string | null): TierCheck | null {
+  return t && (!keyUpdatedAt || new Date(t.checkedAt).getTime() >= new Date(keyUpdatedAt).getTime()) ? t : null;
 }
 
 export async function listMembers(filters: MemberFilters): Promise<{ members: AdminMember[]; total: number; all: number; page: number; pages: number }> {
@@ -151,7 +178,7 @@ export interface AdminMemberDetail extends AdminMember {
   note: string;
   isStaff: boolean;
   consent: { version: string | null; marketing: boolean; agreedAt: string | null };
-  keyDetails: { provider: string; priority: number | null; last4: string | null; broken: boolean; updatedAt: string | null; tier: { value: KeyTier; checkedAt: string } | null }[];
+  keyDetails: { provider: string; priority: number | null; last4: string | null; broken: boolean; updatedAt: string | null; tier: TierCheck | null }[];
   credits: number | null;
   plan: string | null;
   planExpiresAt: string | null;
@@ -181,18 +208,7 @@ export async function getMemberDetail(id: string): Promise<AdminMemberDetail | n
     admin.from("brands").select("name, industry, region").eq("user_id", id).maybeSingle(),
     admin.from("projects").select("id", { count: "exact", head: true }).eq("user_id", id),
   ]);
-  // Last free/paid check per key slot (lib/actions/admin.ts checkMemberKeyTier).
-  const tierRows = await admin
-    .from("audit_log")
-    .select("target_id, detail, created_at")
-    .eq("action", "check_key_tier")
-    .like("target_id", `${id}:%`)
-    .order("created_at", { ascending: false })
-    .limit(30);
-  const lastTier = new Map<string, { value: KeyTier; checkedAt: string }>();
-  for (const r of tierRows.data ?? []) {
-    if (!lastTier.has(r.target_id)) lastTier.set(r.target_id, { value: (r.detail as { tier?: KeyTier })?.tier ?? "unknown", checkedAt: r.created_at });
-  }
+  const lastTier = await lastTierChecks(id);
 
   const runRows = runs.data ?? [];
   const byTool = new Map<string, { runs: number; failed: number }>();
@@ -224,10 +240,8 @@ export async function getMemberDetail(id: string): Promise<AdminMemberDetail | n
     isStaff: !!u.email && adminEmails().has(u.email.toLowerCase()),
     consent: { version: consent?.v ?? null, marketing: !!consent?.marketing, agreedAt: consent?.terms_at ?? null },
     keyDetails: (keys.data ?? []).map((k) => {
-      // A check older than the key's last change was about a different key.
-      const t = k.provider === "google" ? lastTier.get(keyTierTarget(id, k.priority)) : undefined;
-      const fresh = t && (!k.updated_at || t.checkedAt >= k.updated_at) ? t : null;
-      return { provider: k.provider, priority: k.priority ?? null, last4: k.last4 ?? null, broken: !!k.broken, updatedAt: k.updated_at ?? null, tier: fresh };
+      const tier = k.provider === "google" ? freshTier(lastTier.get(keyTierTarget(id, k.priority)), k.updated_at ?? null) : null;
+      return { provider: k.provider, priority: k.priority ?? null, last4: k.last4 ?? null, broken: !!k.broken, updatedAt: k.updated_at ?? null, tier };
     }),
     credits: credits.data?.balance ?? null,
     plan: membership.data?.plan ?? null,

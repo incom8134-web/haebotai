@@ -25,7 +25,10 @@ export interface MemberFilters {
 export interface MemberFacts {
   id: string;
   email: string;
+  /** The name the member typed on the sign-up step (lib/member-name.ts), or null. */
   name: string | null;
+  /** The name Google or Kakao sent — shown only where the member hasn't typed one. */
+  providerName?: string | null;
   providers: string[];
   kakaoId: string | null;
   phone: string | null;
@@ -92,7 +95,7 @@ export function kstRange(from: string, to: string): { since: string | null; unti
 function matches(m: MemberFacts, f: MemberFilters, now: number): boolean {
   if (f.q) {
     const needle = f.q.toLowerCase();
-    const hay = [m.email, m.name ?? "", m.kakaoId ?? "", m.phone ?? "", m.id].join(" ").toLowerCase();
+    const hay = [m.email, m.name ?? "", m.providerName ?? "", m.kakaoId ?? "", m.phone ?? "", m.id].join(" ").toLowerCase();
     if (!hay.includes(needle)) return false;
   }
   if (f.provider && !m.providers.includes(f.provider)) return false;
