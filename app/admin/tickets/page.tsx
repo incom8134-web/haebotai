@@ -1,7 +1,7 @@
 import { TicketQueue } from "@/components/admin/admin-view";
 import { listAllTickets, type TicketStatus } from "@/lib/admin";
 
-export const metadata = { title: "고객 문의 — AI 해바", robots: { index: false } };
+export const metadata = { title: "고객 문의 — AI 해바 관리자" };
 
 const STATUSES: TicketStatus[] = ["open", "answered", "closed"];
 
