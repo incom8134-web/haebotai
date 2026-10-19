@@ -371,7 +371,7 @@ export function MemberList({ members, total, all, page, pages, filters, deleted 
             <table className="w-full min-w-[980px] text-sm">
               <thead>
                 <tr className="border-b border-hairline text-left text-xs font-semibold tracking-wide text-fg-subtle uppercase">
-                  <th className="px-5 py-3">{L({ ko: "회원", en: "Member" })}</th>
+                  <th className="px-5 py-3">{L({ ko: "회원 (가입 때 입력한 이름)", en: "Member (name they entered)" })}</th>
                   <th className="px-3 py-3">{L({ ko: "로그인", en: "Sign-in" })}</th>
                   <th className="px-3 py-3">{L({ ko: "카카오 ID · 전화", en: "Kakao ID · phone" })}</th>
                   <th className="px-3 py-3">{L({ ko: "가입", en: "Joined" })}</th>
@@ -386,10 +386,15 @@ export function MemberList({ members, total, all, page, pages, filters, deleted 
                   <tr key={m.id} onClick={() => router.push(memberHref(m.id))} className="cursor-pointer border-b border-hairline/70 transition-colors last:border-0 hover:bg-surface-2/60">
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-3">
-                        <Avatar id={m.id} name={m.name} email={m.email} />
+                        <Avatar id={m.id} name={m.name ?? m.providerName ?? null} email={m.email} />
                         <div className="min-w-0">
-                          <Link href={memberHref(m.id)} onClick={(e) => e.stopPropagation()} className="block max-w-[220px] truncate font-semibold text-fg hover:underline">
-                            {m.name ?? <span className="font-normal text-fg-subtle">{L({ ko: "이름 미입력", en: "No name yet" })}</span>}
+                          <Link href={memberHref(m.id)} onClick={(e) => e.stopPropagation()} className="block max-w-[240px] truncate font-semibold text-fg hover:underline">
+                            {m.name ?? (
+                              <span className="font-normal text-fg-subtle">
+                                {m.providerName ?? L({ ko: "이름 미입력", en: "No name yet" })}
+                                {m.providerName ? <span className="ml-1.5 rounded bg-surface-2 px-1.5 py-0.5 text-[11px]">{L({ ko: `${m.provider === "kakao" ? "카카오" : "구글"} 이름 · 미입력`, en: `${m.provider === "kakao" ? "Kakao" : "Google"} name · not entered` })}</span> : null}
+                              </span>
+                            )}
                           </Link>
                           <span className="block max-w-[220px] truncate text-xs text-fg-muted">{m.email || "—"}</span>
                         </div>
@@ -408,7 +413,9 @@ export function MemberList({ members, total, all, page, pages, filters, deleted 
                     </td>
                     <td className="px-3 py-3 text-fg-muted tabular-nums">{fmtDate(m.createdAt)}</td>
                     <td className="px-3 py-3 text-fg-muted tabular-nums">{fmtDate(m.lastSignInAt)}</td>
-                    <td className="px-3 py-3">{m.keys.length ? <span className="flex flex-wrap gap-1">{m.keys.map((k) => <Pill key={k} tone="green">{KEY_LABEL[k] ?? k}</Pill>)}</span> : <Pill tone="amber">{L({ ko: "없음", en: "None" })}</Pill>}</td>
+                    <td className="px-3 py-3">
+                      <KeyTierCell m={m} />
+                    </td>
                     <td className="px-3 py-3 text-right tabular-nums">
                       <span className="font-semibold">{m.runs ? num(m.runs) : "·"}</span>
                       {m.failedRuns ? <span className="block text-xs text-danger">{L({ ko: `실패 ${m.failedRuns}`, en: `${m.failedRuns} failed` })}</span> : null}
@@ -485,12 +492,8 @@ const TIER: Record<KeyTier, { label: Bi; tone: "green" | "amber" | "red" | "blue
   unknown: { label: { ko: "확인 실패", en: "Check failed" }, tone: "gray" },
 };
 
-function KeyRow({ memberId, k }: { memberId: string; k: AdminMemberDetail["keyDetails"][number] }) {
+function KeyRow({ k }: { k: AdminMemberDetail["keyDetails"][number] }) {
   const L = useBi();
-  const [state, action, pending] = useActionState<AdminActionState, FormData>(checkMemberKeyTier, null);
-  // A fresh check in this session wins over the stored one.
-  const fresh = state?.message.startsWith("tier_") ? (state.message.slice(5) as KeyTier) : null;
-  const tier = fresh ?? k.tier?.value ?? null;
   return (
     <li className="flex flex-wrap items-center gap-3 py-3">
       <span className="grid size-9 place-items-center rounded-xl bg-accent/10 text-accent">
@@ -502,28 +505,52 @@ function KeyRow({ memberId, k }: { memberId: string; k: AdminMemberDetail["keyDe
         </span>
         <span className="block font-mono text-xs text-fg-muted">
           •••• {k.last4 ?? "????"} · {fmtDate(k.updatedAt)}
-          {!fresh && k.tier ? <span className="font-sans"> · {L({ ko: `${fmtDate(k.tier.checkedAt)} 확인`, en: `checked ${fmtDate(k.tier.checkedAt)}` })}</span> : null}
+          {k.tier ? <span className="font-sans"> · {L({ ko: `${fmtDate(k.tier.checkedAt)} 확인`, en: `checked ${fmtDate(k.tier.checkedAt)}` })}</span> : null}
         </span>
       </span>
       <span className="flex items-center gap-2">
         {k.broken ? <Pill tone="red">{L({ ko: "거부됨", en: "Refused" })}</Pill> : null}
-        {tier ? <Pill tone={TIER[tier].tone}>{L(TIER[tier].label)}</Pill> : k.provider === "google" ? <Pill tone="gray">{L({ ko: "등급 미확인", en: "Tier unchecked" })}</Pill> : null}
-        {k.provider === "google" && k.priority ? (
-          <form action={action}>
-            <input type="hidden" name="id" value={memberId} />
-            <input type="hidden" name="priority" value={k.priority} />
-            <button type="submit" disabled={pending} className={cn(btnGhost, "h-8 px-3 text-xs")}>
-              {pending ? L({ ko: "확인 중…", en: "Checking…" }) : L({ ko: "등급 확인", en: "Check tier" })}
-            </button>
-          </form>
-        ) : null}
+        {k.tier ? <Pill tone={TIER[k.tier.value].tone}>{L(TIER[k.tier.value].label)}</Pill> : k.provider === "google" ? <Pill tone="gray">{L({ ko: "등급 미확인", en: "Tier unchecked" })}</Pill> : null}
       </span>
+    </li>
+  );
+}
+
+/** Members table, API key column: keys, the Gemini key's free/paid badge, and the check button. */
+function KeyTierCell({ m }: { m: AdminMember }) {
+  const L = useBi();
+  const [state, action, pending] = useActionState<AdminActionState, FormData>(checkMemberKeyTier, null);
+  if (!m.keys.length) return <Pill tone="amber">{L({ ko: "키 없음", en: "No key" })}</Pill>;
+  // A check just made on this page wins over the stored one.
+  const fresh = state?.message.startsWith("tier_") ? (state.message.slice(5) as KeyTier) : null;
+  const tier = fresh ?? m.geminiKey?.tier?.value ?? null;
+  return (
+    // The row opens the profile on click; clicks in here stay here.
+    <div className="flex flex-col items-start gap-1.5" onClick={(e) => e.stopPropagation()}>
+      <span className="flex flex-wrap gap-1">
+        {m.keys.filter((k) => k !== "google").map((k) => (
+          <Pill key={k} tone="gray">
+            {KEY_LABEL[k] ?? k}
+          </Pill>
+        ))}
+        {m.geminiKey ? tier ? <Pill tone={TIER[tier].tone}>{`Gemini · ${L(TIER[tier].label)}`}</Pill> : <Pill tone="gray">{L({ ko: "Gemini · 미확인", en: "Gemini · unchecked" })}</Pill> : null}
+      </span>
+      {m.geminiKey ? (
+        <form action={action} className="flex items-center gap-2">
+          <input type="hidden" name="id" value={m.id} />
+          <input type="hidden" name="priority" value={m.geminiKey.priority} />
+          <button type="submit" disabled={pending} className="rounded-lg border border-hairline bg-surface px-2.5 py-1 text-xs font-semibold text-fg hover:bg-surface-2 disabled:opacity-50">
+            {pending ? L({ ko: "확인 중…", en: "Checking…" }) : L({ ko: "등급 확인", en: "Check tier" })}
+          </button>
+          {!fresh && m.geminiKey.tier ? <span className="text-[11px] text-fg-subtle">{fmtDate(m.geminiKey.tier.checkedAt)}</span> : null}
+        </form>
+      ) : null}
       {state && !fresh ? (
-        <span className="w-full">
+        <span className="max-w-[220px] text-xs">
           <ActionNote state={state} />
         </span>
       ) : null}
-    </li>
+    </div>
   );
 }
 
@@ -549,11 +576,11 @@ export function MemberProfile({ m }: { m: AdminMemberDetail }) {
         <div className="px-6 pb-6 md:px-8">
           <div className="flex flex-wrap items-end gap-5">
             <span className="-mt-14 rounded-[32px] bg-surface p-1.5 shadow-lg">
-              <Avatar id={m.id} name={m.name} email={m.email} size="xl" />
+              <Avatar id={m.id} name={m.name ?? m.providerName ?? null} email={m.email} size="xl" />
             </span>
             <div className="min-w-0 flex-1 pt-4 pb-1">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="font-display text-[30px] leading-tight font-bold text-fg">{m.name ?? <span className="text-fg-subtle">{L({ ko: "이름 미입력", en: "No name yet" })}</span>}</h1>
+                <h1 className="font-display text-[30px] leading-tight font-bold text-fg">{m.name ?? <span className="text-fg-subtle">{m.providerName ?? L({ ko: "이름 미입력", en: "No name yet" })}</span>}</h1>
                 {m.isStaff ? <Pill tone="blue">{L({ ko: "관리자", en: "Staff" })}</Pill> : null}
                 {m.suspended ? <Pill tone="red">{L({ ko: "이용 정지", en: "Suspended" })}</Pill> : <Pill tone="green">{L({ ko: "정상", en: "Active" })}</Pill>}
               </div>
@@ -567,6 +594,8 @@ export function MemberProfile({ m }: { m: AdminMemberDetail }) {
           </div>
 
           <dl className="mt-7 grid gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
+            <Fact label={L({ ko: "가입 때 입력한 이름", en: "Name they entered" })}>{m.name ?? <span className="text-sm text-studio-warning">{L({ ko: "아직 입력 안 함", en: "Not entered yet" })}</span>}</Fact>
+            <Fact label={L({ ko: `${m.provider === "kakao" ? "카카오" : "구글"} 계정 이름`, en: `${m.provider === "kakao" ? "Kakao" : "Google"} account name` })}>{m.providerName ?? "—"}</Fact>
             <Fact label={L({ ko: "카카오 회원번호", en: "Kakao ID" })} mono>
               {kakao?.providerId ?? m.kakaoId ?? "—"}
             </Fact>
@@ -602,13 +631,13 @@ export function MemberProfile({ m }: { m: AdminMemberDetail }) {
             items={m.toolUsage.slice(0, 8).map((t) => ({ key: t.toolId, label: toolLabel(t.toolId), value: t.runs, tone: toolTone(t.toolId), sub: t.failed ? L({ ko: `실패 ${t.failed}회`, en: `${t.failed} failed` }) : undefined }))}
           />
         </Card>
-        <Card title={L({ ko: "API 키", en: "API keys" })} lead={L({ ko: "키 값은 암호화되어 끝 4자리만 보여요. ‘등급 확인’은 회원 키로 아주 짧은 요청 1번을 보내 무료·유료를 판별해요.", en: "Encrypted; only the last 4 characters show. 'Check tier' sends one tiny request on the member's key to tell free from paid." })}>
+        <Card title={L({ ko: "API 키", en: "API keys" })} lead={L({ ko: "키 값은 암호화되어 끝 4자리만 보여요. 무료·유료 확인은 회원 목록의 ‘등급 확인’에서 해요.", en: "Encrypted; only the last 4 characters show. Check free/paid with 'Check tier' in the members list." })}>
           {m.keyDetails.length === 0 ? (
             <p className="text-sm text-fg-muted">{L({ ko: "등록한 키가 없어요. 도구를 실행하려면 키가 필요해요.", en: "No key saved. A key is needed to run tools." })}</p>
           ) : (
             <ul className="divide-y divide-hairline">
               {m.keyDetails.map((k, i) => (
-                <KeyRow key={i} memberId={m.id} k={k} />
+                <KeyRow key={i} k={k} />
               ))}
             </ul>
           )}
@@ -704,7 +733,7 @@ export function MemberProfile({ m }: { m: AdminMemberDetail }) {
             <input type="hidden" name="id" value={m.id} />
             <label className="flex flex-col gap-1">
               <span className="text-xs font-semibold text-fg-muted">{L({ ko: "이름", en: "Name" })}</span>
-              <input name="name" required maxLength={NAME_MAX} defaultValue={m.name ?? ""} className={field} />
+              <input name="name" required maxLength={NAME_MAX} defaultValue={m.name ?? m.providerName ?? ""} className={field} />
             </label>
             <label className="flex flex-col gap-1">
               <span className="text-xs font-semibold text-fg-muted">{L({ ko: "관리자 메모", en: "Staff note" })}</span>

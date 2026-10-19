@@ -82,3 +82,9 @@ test("kstRange turns Korea days into UTC bounds", () => {
   assert.deepEqual(kstRange("2026-10-05", "2026-10-06"), { since: "2026-10-04T15:00:00.000Z", until: "2026-10-06T15:00:00.000Z" });
   assert.deepEqual(kstRange("", ""), { since: null, until: null });
 });
+
+test("the Google/Kakao name is searchable but doesn't count as an entered name", () => {
+  const withProvider = [{ ...base, id: "u9", email: "g@x.com", name: null, providerName: "Google Name" }];
+  assert.deepEqual(applyMemberFilters(withProvider, f({ q: "google name" }), NOW).rows.map((m) => m.id), ["u9"]);
+  assert.deepEqual(applyMemberFilters(withProvider, f({ status: "no_name" }), NOW).rows.map((m) => m.id), ["u9"]);
+});
