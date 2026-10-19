@@ -22,6 +22,7 @@ import { useBi } from "@/lib/i18n/context";
 import { getTool } from "@/lib/tools/registry";
 import { QUICK_MAIN, QUICK_MORE, quickHref, type QuickId, type QuickTool } from "@/lib/site/quick";
 import { primaryButton } from "@/components/site/page";
+import { ApiKeyPrompt } from "@/components/api-key-prompt";
 import { cn } from "@/lib/utils";
 
 // 바로 만들기: one page, three steps an owner who has never used AI can
@@ -45,17 +46,23 @@ function minutes(tool: QuickTool) {
   return Math.max(1, Math.round(s / 60));
 }
 
-export function QuickStart({ signedIn }: { signedIn: boolean }) {
+export function QuickStart({ signedIn, needsKey = false }: { signedIn: boolean; needsKey?: boolean }) {
   const L = useBi();
   const router = useRouter();
   const reduce = useReducedMotion();
   const [pick, setPick] = useState<QuickTool>(QUICK_MAIN[0]);
   const [text, setText] = useState("");
   const [going, setGoing] = useState(false);
+  const [keyPrompt, setKeyPrompt] = useState(false);
   const ready = text.trim().length >= 4;
 
   const go = () => {
     if (!ready || going) return;
+    // Signed in without a key: say so here, before the tool page opens and can't run.
+    if (needsKey) {
+      setKeyPrompt(true);
+      return;
+    }
     setGoing(true);
     router.push(quickHref(pick, text));
   };
@@ -204,6 +211,14 @@ export function QuickStart({ signedIn }: { signedIn: boolean }) {
             ? L({ ko: "내 API 키로 실행되고, 결과는 보관함에 저장돼요.", en: "It runs on your API key and is saved to your Library." })
             : L({ ko: "누르면 Google 로그인 후 바로 이어서 만들어요.", en: "You'll sign in with Google, then it carries on." })}
         </p>
+        {needsKey ? (
+          <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-2xl border border-studio-cyan/40 bg-studio-cyan/10 px-4 py-3 text-sm font-medium break-keep text-fg">
+            <KeyRound size={15} className="shrink-0 text-studio-cyan" aria-hidden />
+            {L({ ko: "아직 API 키가 없어요. 만들기 전에 먼저 등록해 주세요.", en: "You don't have an API key yet. Add one before you make anything." })}
+            <Link href="/help/api-guide#video" className="font-semibold text-studio-cyan hover:underline">{L({ ko: "키 받는 방법 보기", en: "How to get a key" })}</Link>
+          </p>
+        ) : null}
+        <ApiKeyPrompt open={keyPrompt} onOpenChange={setKeyPrompt} next={quickHref(pick, text)} />
       </section>
 
       <div className="mt-14 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-hairline pt-6 text-sm">

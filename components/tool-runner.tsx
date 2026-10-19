@@ -4,7 +4,7 @@ import { toolSlug } from "@/lib/tools/catalog";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { notFound, usePathname, useRouter, useSearchParams } from "next/navigation";
-import { AlertTriangle, KeyRound, RotateCcw, SlidersHorizontal, SquarePen, X } from "lucide-react";
+import { AlertTriangle, KeyRound, PlayCircle, RotateCcw, SlidersHorizontal, SquarePen, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +28,7 @@ import { seedFromChain } from "@/lib/tools/chain";
 import { ProjectPicker } from "@/components/projects/project-picker";
 import { briefField, seedFromBrief } from "@/lib/tools/brief";
 import { RunGuide } from "@/components/tools/run-guide";
+import { ApiKeyPrompt } from "@/components/api-key-prompt";
 import { cn } from "@/lib/utils";
 import { ExField } from "@/components/tools/experience/controls";
 import { FreeRequest } from "@/components/tools/free-request";
@@ -289,6 +290,10 @@ function ToolRunner({
     const v = f ? values[f.id] : undefined;
     return typeof v === "string" ? v.trim() : "";
   })();
+  // A member without a key sees why before filling anything in: once per visit to the tool.
+  // Only on arrival; switching engines later shows the box and the Run prompt instead.
+  const [keyPrompt, setKeyPrompt] = useState(needsKey);
+
   useEffect(() => {
     if (!simple || autoStarted.current || needsKey || !quickLine) return;
     autoStarted.current = true;
@@ -336,6 +341,11 @@ function ToolRunner({
   // steps. The job runs on the server whether or not this page stays open.
   async function handleRun(opts?: { strategyOverride?: string }) {
     if (phase === "streaming" || phase === "understanding") return;
+    // No key: explain and point to the guide instead of a run that can only fail.
+    if (needsKey) {
+      setKeyPrompt(true);
+      return;
+    }
     setFinal(null);
     setErrorMsg(null);
     setShowCancel(false);
@@ -607,23 +617,25 @@ function ToolRunner({
         </h1>
         <p className="mt-3 text-base leading-relaxed [text-wrap:pretty] break-keep text-fg-muted">{exp ? exp.hero.story[locale] : manifest.summary}</p>
         {needsKey ? (
-          <div role="alert" className="mt-4 rounded-2xl border border-accent/40 bg-accent-dim px-4 py-3.5 text-sm break-keep text-fg">
-            <p className="flex items-center gap-2 font-semibold">
-              <KeyRound size={16} className="shrink-0 text-accent" aria-hidden />
-              {L({ ko: "이 도구는 내 API 키로 실행돼요", en: "This tool runs on your own API key" })}
+          <div role="alert" className="mt-5 rounded-[24px] border-2 border-studio-cyan/50 bg-studio-cyan/10 p-5 break-keep text-fg">
+            <p className="flex items-center gap-2.5 text-lg font-bold">
+              <span className="studio-gradient-bg grid size-9 shrink-0 place-items-center rounded-xl text-white" aria-hidden>
+                <KeyRound size={18} />
+              </span>
+              {L({ ko: "먼저 API 키를 등록해야 실행할 수 있어요", en: "Add your API key before you run this tool" })}
             </p>
-            <p className="mt-1.5 text-fg-muted">
+            <p className="mt-2 text-sm leading-relaxed text-fg-muted">
               {L({
-                ko: "Google AI Studio에서 키를 발급해 등록하면 바로 쓸 수 있어요. 5분이면 끝나고, 요금은 내 Google 계정에서 직접 관리해요.",
-                en: "Get a key from Google AI Studio and add it here — it takes about 5 minutes, and any usage is billed to your own Google account.",
+                ko: "해바의 도구는 내 Google API 키로 실행돼요. Google AI Studio에서 무료로 발급받아 등록하면 5분이면 끝나고, 요금은 내 Google 계정에서 직접 관리해요.",
+                en: "Haeba's tools run on your own Google API key. Get one free in Google AI Studio and add it here: about 5 minutes, and any usage is billed to your own Google account.",
               })}
             </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <Link href={`/account/api-key?next=${encodeURIComponent(here)}`} className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-accent px-3.5 text-sm font-semibold text-white hover:opacity-90">
-                {L({ ko: "API 키 등록하기", en: "Add my API key" })}
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Link href={`/account/api-key?next=${encodeURIComponent(here)}`} className="studio-gradient-bg inline-flex h-11 items-center gap-1.5 rounded-2xl px-5 text-sm font-semibold text-white shadow-[inset_0_1px_0_oklch(1_0_0/30%),0_10px_24px_-10px_var(--studio-violet)] hover:opacity-95">
+                <KeyRound size={15} aria-hidden /> {L({ ko: "API 키 등록하기", en: "Add my API key" })}
               </Link>
-              <Link href="/help/api-guide" className="inline-flex h-9 items-center rounded-xl border border-hairline bg-surface px-3.5 text-sm font-medium text-fg hover:border-accent">
-                {L({ ko: "발급 방법 보기", en: "How to get a key" })}
+              <Link href="/help/api-guide#video" className="inline-flex h-11 items-center gap-1.5 rounded-2xl border border-hairline bg-surface px-5 text-sm font-semibold text-fg hover:border-studio-cyan">
+                <PlayCircle size={15} className="text-studio-cyan" aria-hidden /> {L({ ko: "키 받는 방법 보기 (영상)", en: "How to get a key (video)" })}
               </Link>
             </div>
           </div>
@@ -799,7 +811,6 @@ function ToolRunner({
         <Button
           data-run-button
           onClick={() => handleRun()}
-          disabled={needsKey}
           loading={phase === "streaming" || phase === "understanding"}
           shortcut="⌘↵"
           className="studio-gradient-bg h-11 rounded-2xl px-5 text-white shadow-[inset_0_1px_0_oklch(1_0_0/30%),0_12px_32px_-12px_var(--studio-violet)] transition-transform duration-500 ease-[var(--spring)] hover:-translate-y-0.5"
@@ -812,7 +823,15 @@ function ToolRunner({
           </Button>
         ) : null}
       </div>
+      {needsKey ? (
+        <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm break-keep text-fg-muted">
+          <KeyRound size={14} className="shrink-0 text-studio-cyan" aria-hidden />
+          {L({ ko: "실행하려면 먼저 내 API 키를 등록해야 해요.", en: "Add your API key first to run this tool." })}
+          <Link href={`/account/api-key?next=${encodeURIComponent(here)}`} className="font-semibold text-studio-cyan hover:underline">{L({ ko: "등록하기", en: "Add it" })}</Link>
+        </p>
+      ) : null}
       {phase === "streaming" && cancelNote ? <p role="status" className="mt-2 text-xs text-fg-muted">{cancelNote}</p> : null}
+      <ApiKeyPrompt open={keyPrompt} onOpenChange={setKeyPrompt} next={here} />
 
       {phase === "understanding" ? (
         <p role="status" className="mt-4 text-sm text-fg-muted">
