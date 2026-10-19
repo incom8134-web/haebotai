@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { env } from "@/lib/env";
 import { open } from "@/lib/crypto/secret-box";
 import { getCurrentUser } from "@/lib/supabase/user";
+import { tierFromResponse, type KeyTier } from "@/lib/ai/key-tier";
 
 // Server-only reads for "bring your own API key". Never import from a
 // client component and never return the plaintext to the browser —
@@ -156,5 +157,49 @@ export async function verifyAnthropicKey(key: string): Promise<boolean> {
     return res.ok;
   } catch {
     return false;
+  }
+}
+
+/**
+ * One member's decrypted slot, for staff checks in /admin. The caller
+ * must have confirmed staff rights (getAdminUser) — the id is the member
+ * being looked at, not the caller.
+ */
+export async function getUserApiKeySlotFor(userId: string, provider: ApiKeyProvider, priority: ApiKeyPriority): Promise<string | null> {
+  const secret = env.API_KEY_ENCRYPTION_SECRET;
+  if (!secret) return null;
+  const { data } = await createAdminClient()
+    .from("user_api_keys")
+    .select("ciphertext")
+    .eq("user_id", userId)
+    .eq("provider", provider)
+    .eq("priority", priority)
+    .maybeSingle();
+  if (!data?.ciphertext) return null;
+  try {
+    return open(data.ciphertext, secret);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Free or paid Gemini key (lib/ai/key-tier.ts): one request to the Pro
+ * model the tools use (passed in, PRO_TEXT_MODEL), asking for a single
+ * output token. On a paid key Google bills the member a few
+ * tokens (well under one won); a free key is refused before any use.
+ */
+export async function checkGoogleKeyTier(key: string, proModel: string): Promise<KeyTier> {
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(proModel)}:generateContent`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+      body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: "OK" }] }], generationConfig: { maxOutputTokens: 1 } }),
+      cache: "no-store",
+      signal: AbortSignal.timeout(15000),
+    });
+    return tierFromResponse(res.status, await res.text().catch(() => ""));
+  } catch {
+    return "unknown";
   }
 }
