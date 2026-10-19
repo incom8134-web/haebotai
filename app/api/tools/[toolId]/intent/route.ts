@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { hasCurrentConsent } from "@/lib/consent";
+import { runGate } from "@/lib/run-gate";
 import { getTool } from "@/lib/tools/registry";
 import { buildInputSchema } from "@/lib/tools/runner";
 import { REFERENCE_LIMITS, referenceModesFor } from "@/lib/tools/reference";
@@ -31,6 +32,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   } = await supabase.auth.getUser();
   if (!user) return Response.json({ error: "로그인이 필요합니다" }, { status: 401 });
   if (!hasCurrentConsent(user.app_metadata)) return Response.json({ error: "서비스 이용 동의가 필요합니다", code: "consent_required" }, { status: 403 });
+  const gated = await runGate(toolId, user.email);
+  if (gated) return gated;
   const rate = await checkRateLimit(intentLimiter, user.id);
   if (!rate.ok) return Response.json({ error: "요청이 너무 잦습니다. 잠시 후 다시 시도해주세요." }, { status: 429 });
 

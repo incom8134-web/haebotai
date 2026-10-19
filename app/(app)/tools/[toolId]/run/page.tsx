@@ -15,6 +15,10 @@ import { canUsePlatformKey } from "@/lib/platform-access";
 import { getCurrentUser } from "@/lib/supabase/user";
 import { seedFromBrief } from "@/lib/tools/brief";
 import { quickSeed } from "@/lib/site/quick";
+import { runBlock } from "@/lib/admin-ops";
+import { getSiteSettings } from "@/lib/admin-ops-server";
+import { isStaffEmail } from "@/lib/admin";
+import { RunBlockedBanner } from "@/components/site/service-banner";
 
 // HAEBOT_A_TOOLS_SPEC.md §5.2 / Part 6 T4 — tool page anatomy: header,
 // profile chips, form (seeded from a chained run when ?fromRun is
@@ -94,7 +98,12 @@ export default async function ToolPage({
   const simple = quick === "1" && !chainedFrom && !initialValues;
   if (simple) initialValues = { ...quickSeed(tool.slug ?? requested), ...seedFromBrief(tool, brief) };
 
+  // Maintenance or this tool paused (/admin/settings): say so up front; the run API refuses too (lib/run-gate.ts).
+  const block = runBlock(await getSiteSettings(), tool.slug ?? requested, isStaffEmail(user?.email));
+
   return (
+    <>
+    {block.blocked ? <RunBlockedBanner reason={block.reason} message={block.message} /> : null}
     <ToolRunner
       simple={simple}
       pack={toolPack(toolId)}
@@ -114,5 +123,6 @@ export default async function ToolPage({
       isStudent={membership.plan === "student"}
       balance={balance}
     />
+    </>
   );
 }

@@ -148,10 +148,29 @@ function Ask({ signedIn, tickets, initialKind, toolId }: { signedIn: boolean; ti
   );
 }
 
-function WhatsNew() {
+/** A patch note written in /admin/announcements (newer than the code's history). */
+export interface PublishedNote {
+  id: string;
+  version: string | null;
+  date: string;
+  title: { ko: string; en: string };
+  body: { ko: string; en: string };
+}
+
+function WhatsNew({ published = [] }: { published?: PublishedNote[] }) {
   const L = useBi();
   return (
     <ol className="space-y-4">
+      {published.map((note) => (
+        <li key={note.id} className="glass rounded-[24px] p-6">
+          <p className="font-mono text-2xs text-fg-subtle">
+            {note.version ? `v${note.version} · ` : ""}
+            {note.date}
+          </p>
+          <h2 className="mt-1 text-lg font-semibold">{L(note.title)}</h2>
+          {L(note.body) ? <p className="mt-3 text-sm whitespace-pre-line text-fg-muted">{L(note.body)}</p> : null}
+        </li>
+      ))}
       {PATCH_NOTES.map((note) => (
         <li key={note.version} className="glass rounded-[24px] p-6">
           <p className="font-mono text-2xs text-fg-subtle">v{note.version} · {note.date}</p>

@@ -1,6 +1,7 @@
 import { after, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { hasCurrentConsent } from "@/lib/consent";
+import { runGate } from "@/lib/run-gate";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getTool } from "@/lib/tools/registry";
 import { buildInputSchema, inputErrorMessage } from "@/lib/tools/runner";
@@ -60,6 +61,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   if (!hasCurrentConsent(user.app_metadata)) {
     return Response.json({ error: "서비스 이용 동의가 필요합니다", code: "consent_required" }, { status: 403 });
   }
+  const gated = await runGate(toolId, user.email);
+  if (gated) return gated;
 
   const rate = await checkRateLimit(runLimiter, user.id);
   if (!rate.ok) {

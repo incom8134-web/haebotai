@@ -33,6 +33,8 @@ interface ShellProps {
   balance: number | null;
   plan: PlanId;
   answeredTickets: number;
+  /** Announcements and this member's notices, above the page (components/site/service-banner.tsx). */
+  notices?: React.ReactNode;
   children: React.ReactNode;
 }
 
@@ -224,7 +226,7 @@ function UserMenu({ email, plan, credits }: { email: string; plan: PlanId; credi
   );
 }
 
-function AppShell({ user, balance, plan, answeredTickets, children }: ShellProps) {
+function AppShell({ user, balance, plan, answeredTickets, notices, children }: ShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const L = useBi();
@@ -334,6 +336,7 @@ function AppShell({ user, balance, plan, answeredTickets, children }: ShellProps
       </header>
 
       <main id="main" tabIndex={-1} className="app-type pb-28 outline-none lg:pr-24 lg:pb-10">
+        {notices}
         {children}
         {/* Phones have no side dock: theme and language sit at the foot of each page, not in the top bar. */}
         <div className="mx-auto mt-6 flex max-w-[1240px] items-center justify-center gap-3 px-4 lg:hidden">
