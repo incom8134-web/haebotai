@@ -126,6 +126,7 @@ function BusinessProfileForm({ initial, logoUrl = null }: { initial: BusinessPro
 
         <Field label={t("profile_stage")}>
           <Select
+            items={STAGE_OPTIONS.map((o) => ({ value: o.value, label: t(o.labelKey) }))}
             value={profile.business_stage}
             onValueChange={(v) =>
               set("business_stage", v as BusinessProfile["business_stage"])

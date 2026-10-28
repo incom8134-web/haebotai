@@ -32,6 +32,7 @@ export function HelpHome() {
     { href: "/account/membership", icon: Crown, title: { ko: "학생 멤버십", en: "Student membership" }, body: { ko: "재학 인증으로 무제한", en: "Unlimited with enrollment" } },
     { href: "/legal/terms", icon: ShieldCheck, title: { ko: "약관·정책", en: "Terms & policies" }, body: { ko: "이용약관·개인정보·환불", en: "Terms, privacy, refunds" } },
     { href: "/help/whats-new", icon: Sparkle, title: { ko: "새로운 점", en: "What's new" }, body: { ko: `v${PATCH_NOTES[0].version} · ${PATCH_NOTES[0].date}`, en: `v${PATCH_NOTES[0].version} · ${PATCH_NOTES[0].date}` } },
+    { href: "/help/user-guide", icon: FileText, title: { ko: "도구 사용 설명서", en: "Tool user guide" }, body: { ko: "가입부터 인기 도구 6가지까지 (PDF)", en: "Sign-up to six popular tools (PDF)" } },
   ];
   return (
     <>
@@ -197,6 +198,95 @@ export function ApiGuide() {
           {L({ ko: "그래도 안 되면", en: "Still stuck?" })} <Link href="/help/contact?kind=remote" className={cn("text-studio-cyan hover:underline")}>{L({ ko: "원격 지원을 신청하세요", en: "request remote help" })}</Link>
         </p>
       </section>
+    </>
+  );
+}
+
+const GUIDE_FILES = [
+  { lang: "ko", href: "/guides/ai-haeba-user-guide-ko.pdf", file: "AI해바_도구_사용설명서.pdf", title: "한국어 설명서", size: "4.8 MB" },
+  { lang: "en", href: "/guides/ai-haeba-user-guide-en.pdf", file: "AI_Haeba_Tool_User_Guide.pdf", title: "English guide", size: "4.3 MB" },
+] as const;
+
+const GUIDE_CHAPTERS = [
+  { ko: "가입하기", en: "Sign up" },
+  { ko: "첫 안내 따라가기", en: "The first-time guide" },
+  { ko: "내 API 키 연결하기", en: "Connect your API key" },
+  { ko: "비즈니스 프로필 채우기", en: "Fill in your business profile" },
+  { ko: "화면 둘러보기", en: "Finding your way around" },
+  { ko: "바로 만들기로 첫 결과 만들기", en: "Your first result with Quick start" },
+  { ko: "결과 보고 내려받기", en: "View and download results" },
+  { ko: "보관함에서 다시 찾기", en: "Find it again in the Library" },
+  { ko: "인기 도구 6가지 따라 하기", en: "Six popular tools, step by step" },
+  { ko: "막혔을 때", en: "When you get stuck" },
+];
+
+const GUIDE_TOOLS = [
+  { ko: "브랜드 DNA 스튜디오", en: "Brand DNA Studio" },
+  { ko: "로고 디렉션 랩", en: "Logo Direction Lab" },
+  { ko: "광고 크리에이티브 팩토리", en: "Ad Creative Factory" },
+  { ko: "콘텐츠 변환기", en: "Content Transformer" },
+  { ko: "피치 비주얼 디렉터", en: "Pitch Visual Director" },
+  { ko: "웹 익스피리언스 빌더", en: "Web Experience Builder" },
+];
+
+/** /help/user-guide — the illustrated tool manual (PDF, Korean and English). */
+export function UserGuide() {
+  const L = useBi();
+  const { locale } = useLocale();
+  const mine = GUIDE_FILES.find((f) => f.lang === locale) ?? GUIDE_FILES[0];
+  return (
+    <>
+      <PageHeader
+        title={L({ ko: "도구 사용 설명서", en: "Tool user guide" })}
+        lead={L({ ko: "처음 쓰는 사장님을 위해, 가입부터 결과물 내려받기까지 실제 화면으로 하나씩 보여 드려요. 27쪽.", en: "For first-time owners: every step from sign-up to downloading your results, shown on real screens. 27 pages." })}
+      />
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1.15fr]">
+        <section className="min-w-0">
+          <div className="grid grid-cols-3 gap-3">
+            {["p01", "p15", "p17"].map((p) => (
+              <a key={p} href={mine.href} target="_blank" rel="noreferrer" className="glass glass-hover block overflow-hidden rounded-2xl p-1.5">
+                {/* eslint-disable-next-line @next/next/no-img-element -- small static page previews */}
+                <img src={`/guides/ai-haeba-user-guide-${mine.lang}-${p}.jpg`} alt="" width={480} height={679} loading="lazy" className="w-full rounded-xl" />
+              </a>
+            ))}
+          </div>
+          <a href={mine.href} target="_blank" rel="noreferrer" className={cn(primaryButton, "mt-5 h-12 w-full")}>
+            <BookOpenText size={16} aria-hidden /> {L({ ko: "설명서 열기", en: "Open the guide" })}
+          </a>
+          <div className="mt-3 space-y-2">
+            {GUIDE_FILES.map((d) => (
+              <a key={d.href} href={d.href} download={d.file} className="glass glass-hover group flex items-center gap-3 rounded-2xl p-4">
+                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-studio-cyan/15 text-studio-cyan"><FileText size={18} aria-hidden /></span>
+                <span className="min-w-0 flex-1">
+                  <span className="block font-semibold">{d.title}</span>
+                  <span className="block text-xs text-fg-subtle">PDF · {d.size}</span>
+                </span>
+                <Download size={16} className="text-fg-subtle transition-transform duration-500 ease-[var(--spring)] group-hover:translate-y-0.5" aria-hidden />
+              </a>
+            ))}
+          </div>
+        </section>
+        <section className="glass min-w-0 rounded-[24px] p-6">
+          <h2 className="text-lg font-semibold">{L({ ko: "이런 내용이 들어 있어요", en: "What's inside" })}</h2>
+          <ol className="mt-4 space-y-2.5">
+            {GUIDE_CHAPTERS.map((c, i) => (
+              <li key={c.en} className="flex items-baseline gap-3 text-sm">
+                <span className="w-5 shrink-0 font-mono text-xs text-studio-cyan">{i + 1}</span>
+                <span className="text-fg">{L(c)}</span>
+              </li>
+            ))}
+          </ol>
+          <div className="mt-5 flex flex-wrap gap-1.5">
+            {GUIDE_TOOLS.map((t) => (
+              <span key={t.en} className="rounded-full border border-hairline bg-surface px-3 py-1 text-xs text-fg-muted">{L(t)}</span>
+            ))}
+          </div>
+          <p className="mt-5 text-sm leading-relaxed text-fg-muted">
+            {L({ ko: "API 키를 받는 방법은 따로 정리해 뒀어요. ", en: "Getting an API key has its own guide: " })}
+            <Link href="/help/api-guide" className="text-studio-cyan hover:underline">{L({ ko: "API 키 설명서 보기", en: "API key manual" })}</Link>
+          </p>
+        </section>
+      </div>
     </>
   );
 }

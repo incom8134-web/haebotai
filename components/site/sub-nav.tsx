@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutGroup, motion } from "motion/react";
-import { Activity, BookOpenText, CircleGauge, CircleHelp, Crown, Gift, Headset, Keyboard, KeyRound, LifeBuoy, ReceiptText, ScrollText, ShieldCheck, Sparkle, UserRound } from "lucide-react";
+import { Activity, BookOpenText, CircleGauge, CircleHelp, Crown, FileText, Gift, Headset, Keyboard, KeyRound, LifeBuoy, ReceiptText, ScrollText, ShieldCheck, Sparkle, UserRound } from "lucide-react";
 import { useBi } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +12,7 @@ const ICONS = {
   "circle-help": CircleHelp,
   headset: Headset,
   "book-open-text": BookOpenText,
+  "file-text": FileText,
   sparkle: Sparkle,
   "user-round": UserRound,
   "circle-gauge": CircleGauge,

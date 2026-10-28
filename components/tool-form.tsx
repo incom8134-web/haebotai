@@ -170,6 +170,7 @@ function ToolForm({
             return (
               <Field key={f.id} label={f.label} required={f.required}>
                 <Select
+                  items={f.options}
                   value={(value as string) ?? ""}
                   onValueChange={(v) => onChange(f.id, v)}
                 >
