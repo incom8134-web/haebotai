@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "motion/react";
 import {
   ArrowRight,
+  BookOpenText,
   CalendarRange,
   ImagePlus,
   KeyRound,
@@ -21,7 +22,7 @@ import {
 import { useBi } from "@/lib/i18n/context";
 import { getTool } from "@/lib/tools/registry";
 import { QUICK_MAIN, QUICK_MORE, quickHref, type QuickId, type QuickTool } from "@/lib/site/quick";
-import { primaryButton } from "@/components/site/page";
+import { primaryButton, secondaryButton } from "@/components/site/page";
 import { ApiKeyPrompt } from "@/components/api-key-prompt";
 import { cn } from "@/lib/utils";
 
@@ -75,15 +76,20 @@ export function QuickStart({ signedIn, needsKey = false }: { signedIn: boolean; 
         initial={reduce ? false : { opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="max-w-2xl"
       >
-        <p className="inline-flex items-center gap-1.5 rounded-full border border-hairline bg-surface px-3 py-1 text-xs font-semibold text-accent">
-          <Sparkles size={13} aria-hidden /> {L({ ko: "바로 만들기", en: "Quick start" })}
-        </p>
-        <h1 className="mt-4 font-display text-[clamp(1.9rem,5vw,2.8rem)] leading-[1.1] font-bold tracking-[-0.02em] break-keep text-fg">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="inline-flex items-center gap-1.5 rounded-full border border-hairline bg-surface px-3 py-1 text-xs font-semibold text-accent">
+            <Sparkles size={13} aria-hidden /> {L({ ko: "바로 만들기", en: "Quick start" })}
+          </p>
+          {/* The illustrated manual, for owners who'd rather read first. */}
+          <Link href="/help/user-guide" className={cn(secondaryButton, "h-10 px-4")}>
+            <BookOpenText size={15} className="text-accent" aria-hidden /> {L({ ko: "사용 설명서 보기", en: "Read the user guide" })}
+          </Link>
+        </div>
+        <h1 className="mt-4 max-w-2xl font-display text-[clamp(1.9rem,5vw,2.8rem)] leading-[1.1] font-bold tracking-[-0.02em] break-keep text-fg">
           {L({ ko: "가게 홍보, 한 줄이면 시작돼요", en: "Shop marketing, started in one line" })}
         </h1>
-        <p className="mt-3 text-base leading-relaxed break-keep text-fg-muted">
+        <p className="mt-3 max-w-2xl text-base leading-relaxed break-keep text-fg-muted">
           {L({
             ko: "만들 것을 고르고, 가게 이야기를 적고, 만들기를 누르면 끝이에요. 어려운 설정은 저희가 대신 정해 둘게요.",
             en: "Pick what to make, write about your shop, press Make. We set the tricky options for you.",

@@ -11,6 +11,7 @@ export const HELP_NAV: SubNavItem[] = [
   { href: "/help", label: { ko: "도움말 홈", en: "Help home" }, icon: "life-buoy", exact: true },
   { href: "/help/faq", label: { ko: "자주 묻는 질문", en: "FAQ" }, icon: "circle-help" },
   { href: "/help/contact", label: { ko: "고객센터", en: "Customer service" }, icon: "headset" },
+  { href: "/help/user-guide", label: { ko: "사용 설명서", en: "User guide" }, icon: "file-text" },
   { href: "/help/api-guide", label: { ko: "API 키 설명서", en: "API key manual" }, icon: "book-open-text" },
   { href: "/help/whats-new", label: { ko: "새로운 점", en: "What's new" }, icon: "sparkle" },
   { href: "/help/shortcuts", label: { ko: "단축키", en: "Shortcuts" }, icon: "keyboard" },
