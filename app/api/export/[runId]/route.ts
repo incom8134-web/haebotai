@@ -4,6 +4,8 @@ import { buildBusinessPlanXlsx } from "@/lib/tools/export/xlsx";
 import { buildExportDoc } from "@/lib/tools/export/document";
 import { buildGenericDocx } from "@/lib/tools/export/generic-docx";
 import { buildMarkdown } from "@/lib/tools/export/markdown";
+import { composeDesign } from "@/lib/tools/export/designed/compose";
+import { parseOutputLanguage } from "@/lib/ai/output-language";
 import { getTool } from "@/lib/tools/registry";
 import { getBusinessProfile } from "@/lib/profile";
 import { orderLike } from "@/lib/tools/output-order";
@@ -84,6 +86,39 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     buffer = await buildBusinessPlanXlsx(run.output, run.input ?? {});
   } else {
     const profile = await getBusinessProfile();
+    // Tools with a designed layout (lib/tools/export/designed): each file
+    // laid out for its job. The presentation keeps its own deck writer.
+    const lang = parseOutputLanguage((run.input as Record<string, unknown> | null)?._output_lang);
+    const design =
+      format === "md" || (format === "pptx" && run.tool_id === "presentation")
+        ? null
+        : composeDesign({
+            toolId: run.tool_id,
+            output: orderLike(getOutputSchema(run.tool_id) ?? z.unknown(), run.output),
+            input: run.input,
+            lang,
+            brandName: exportBrandName(run.output, profile?.brand_name ?? null),
+            brandColors: profile?.brand_colors ?? [],
+            createdAt: run.created_at,
+            toolName: { ko: toolName, en: manifest?.name_en ?? toolName },
+          });
+    if (design) {
+      try {
+        buffer =
+          format === "pdf" ? await (await import("@/lib/tools/export/designed/pdf")).buildDesignedPdf(design)
+          : format === "pptx" ? await (await import("@/lib/tools/export/designed/pptx")).buildDesignedPptx(design)
+          : await (await import("@/lib/tools/export/designed/docx")).buildDesignedDocx(design);
+      } catch (err) {
+        console.error(`designed export ${format} failed`, err);
+        return fail(request, 500, `${format.toUpperCase()} 파일을 만들지 못했습니다`, {}, err instanceof Error ? err.message.slice(0, 300) : String(err));
+      }
+      return new Response(new Uint8Array(buffer), {
+        headers: {
+          "Content-Type": CONTENT_TYPES[format],
+          "Content-Disposition": `attachment; filename="haebot-${run.tool_id}-${date}.${format}"; filename*=UTF-8''${encodeURIComponent(filename)}`,
+        },
+      });
+    }
     const doc = buildExportDoc({
       toolName,
       toolId: run.tool_id,

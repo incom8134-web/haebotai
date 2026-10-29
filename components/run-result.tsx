@@ -61,21 +61,41 @@ const FORMATS: Record<ExportFormat, { label: string; hint: string; hintEn: strin
   pdf: { label: "PDF", hint: "인쇄·공유", hintEn: "Print & share", icon: FileText },
   docx: { label: "Word", hint: "편집용 문서", hintEn: "Editable doc", icon: FileType },
   pptx: { label: "PowerPoint", hint: "발표 슬라이드", hintEn: "Slides", icon: Presentation },
-  md: { label: "Markdown", hint: "노션·블로그", hintEn: "Notion & blogs", icon: FileCode },
+  md: { label: "Markdown", hint: "노션·개발자용 텍스트", hintEn: "Plain text for Notion & developers", icon: FileCode },
   xlsx: { label: "Excel", hint: "재무 계산표", hintEn: "Financials", icon: FileSpreadsheet },
 };
 
-const PRIMARY_FORMAT: Record<string, ExportFormat> = {
+// Never Markdown: most owners don't know what to do with a .md file, so
+// it is always offered last, for Notion and developers.
+const PRIMARY_FORMAT: Record<string, Exclude<ExportFormat, "md">> = {
   presentation: "pptx",
   proposal: "docx",
   "business-plan": "docx",
-  blog: "md",
+  blog: "docx",
 };
 
 function formatsFor(toolId: string): ExportFormat[] {
   const primary = PRIMARY_FORMAT[toolId] ?? "pdf";
-  const all: ExportFormat[] = ["pdf", "pptx", "docx", "md", ...(toolId === "business-plan" ? (["xlsx"] as const) : [])];
+  const all: ExportFormat[] = ["pdf", "pptx", "docx", ...(toolId === "business-plan" ? (["xlsx"] as const) : []), "md"];
   return [primary, ...all.filter((f) => f !== primary)];
+}
+
+// What each file actually is for this tool (lib/tools/export/designed/*):
+// each format is laid out for its job, so the buttons say what you get.
+const TOOL_HINTS: Record<string, Partial<Record<ExportFormat, [string, string]>>> = {
+  blog: { docx: ["블로그에 붙여넣는 완성 원고", "Paste-ready article"], pdf: ["사진이 들어간 완성 원고", "Finished article with photos"], pptx: ["카드뉴스 슬라이드", "Card-news slides"] },
+  "brand-dna": { pdf: ["브랜드 가이드북", "Brand guidebook"], pptx: ["브랜드 소개 슬라이드", "Brand intro slides"], docx: ["편집용 브랜드 가이드", "Editable brand guide"] },
+  logo: { pdf: ["로고 시안집", "Logo concept book"], pptx: ["시안 비교 발표 슬라이드", "Concept review slides"], docx: ["시안 설명서", "Concept notes"] },
+  copy: { pdf: ["광고 시안 보드", "Ad concept board"], pptx: ["광고 한 장씩 슬라이드", "One ad per slide"], docx: ["카피 원고", "Copy deck"] },
+  "content-transformer": { pdf: ["채널별 콘텐츠 팩", "Channel content pack"], pptx: ["카드뉴스·쇼츠 콘티", "Carousel & Shorts storyboard"], docx: ["붙여넣기용 채널별 원고", "Paste-ready copy per channel"] },
+  presentation: { pdf: ["인쇄용 발표 자료", "Print handout"], docx: ["발표 대본", "Speaker script"] },
+  homepage: { pdf: ["사이트 기획서", "Site plan"], pptx: ["사이트 소개 슬라이드", "Site walkthrough slides"], docx: ["사이트 원고", "Site copy"] },
+};
+
+function hintFor(toolId: string, f: ExportFormat, en: boolean): string {
+  const own = TOOL_HINTS[toolId]?.[f];
+  if (own) return en ? own[1] : own[0];
+  return en ? FORMATS[f].hintEn : FORMATS[f].hint;
 }
 
 interface ExtraDownload {
@@ -104,10 +124,7 @@ function extraDownloads(output: unknown, input?: Record<string, unknown>, en = f
       run: () => void downloadProject("homepage-project.zip", files),
     });
   }
-  if (typeof o.body_markdown === "string") {
-    const md = o.body_markdown;
-    extras.push({ key: "post", label: en ? "Post body" : "블로그 본문", hint: en ? "Body only, .md" : "본문만 .md", icon: FileCode, run: () => downloadText("blog-post.md", md, "text/markdown") });
-  }
+  // The blog's text is in the Word file (the main download); no second .md here.
   if (Array.isArray(o.weeks)) {
     const weeks = o.weeks as CalendarWeek[];
     const ics = typeof input?.start_date === "string" ? buildCalendarIcs(weeks, input.start_date) : null;
@@ -225,7 +242,7 @@ function DownloadPanel({
               <span className="text-2xs opacity-85">
                 {busy === primary
                   ? en ? "Preparing your file…" : "파일 만드는 중… 잠시만 기다려 주세요"
-                  : `${en ? "Recommended" : "추천"} · ${en ? FORMATS[primary].hintEn : FORMATS[primary].hint}`}
+                  : `${en ? "Recommended" : "추천"} · ${hintFor(toolId, primary, en)}`}
               </span>
             </span>
           </a>
@@ -236,7 +253,7 @@ function DownloadPanel({
             <span className="flex min-w-0 flex-col">
               <span className="text-sm font-medium text-fg">{FORMATS[f].label}</span>
               <span className="truncate text-2xs text-fg-subtle">
-                {busy === f ? (en ? "Preparing…" : "만드는 중…") : en ? FORMATS[f].hintEn : FORMATS[f].hint}
+                {busy === f ? (en ? "Preparing…" : "만드는 중…") : hintFor(toolId, f, en)}
               </span>
             </span>
           </a>
