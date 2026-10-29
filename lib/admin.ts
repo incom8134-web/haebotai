@@ -7,6 +7,8 @@ import { consentOf } from "@/lib/consent";
 import { formatKoreanPhone, profileNameOf } from "@/lib/member-name";
 import { displayName } from "@/lib/site/display-name";
 import type { KeyTier } from "@/lib/ai/key-tier";
+import { quoteOrderRefund } from "@/lib/payments/refund-server";
+import { REFUND_WINDOW_DAYS } from "@/lib/payments/refund";
 
 // Staff tools behind /admin. Access is an email allow-list (ADMIN_EMAILS,
 // comma-separated), not a role system — right for a small team. Unset
@@ -186,7 +188,7 @@ export interface AdminMemberDetail extends AdminMember {
   projects: number;
   toolUsage: { toolId: string; runs: number; failed: number }[];
   recentRuns: { id: string; toolId: string | null; title: string | null; status: string; createdAt: string; error: string | null; provider: string | null }[];
-  payments: { orderId: string; amount: number; plan: string | null; status: string; method: string | null; createdAt: string }[];
+  payments: { orderId: string; amount: number; plan: string | null; status: string; method: string | null; createdAt: string; refund: RefundPreview | null; refundedAmount: number | null; refundedAt: string | null }[];
   tickets: { id: string; kind: string; subject: string; status: string; createdAt: string }[];
 }
 
@@ -201,7 +203,7 @@ export async function getMemberDetail(id: string): Promise<AdminMemberDetail | n
     admin.from("generations").select("id, tool_id, title, status, created_at, error, provider").eq("user_id", id).order("created_at", { ascending: false }).limit(RUN_ROWS),
     admin.from("generations").select("id", { count: "exact", head: true }).eq("user_id", id),
     admin.from("generations").select("id", { count: "exact", head: true }).eq("user_id", id).eq("status", "error"),
-    admin.from("payments").select("order_id, amount, plan, status, method, created_at").eq("user_id", id).order("created_at", { ascending: false }).limit(50),
+    memberPayments(admin, id),
     admin.from("memberships").select("plan, expires_at").eq("user_id", id).maybeSingle(),
     admin.from("user_credits").select("balance").eq("user_id", id).maybeSingle(),
     admin.from("support_tickets").select("id, kind, subject, status, created_at").eq("user_id", id).order("created_at", { ascending: false }).limit(50),
@@ -209,6 +211,7 @@ export async function getMemberDetail(id: string): Promise<AdminMemberDetail | n
     admin.from("projects").select("id", { count: "exact", head: true }).eq("user_id", id),
   ]);
   const lastTier = await lastTierChecks(id);
+  const refunds = await refundPreviews(payments.data ?? []);
 
   const runRows = runs.data ?? [];
   const byTool = new Map<string, { runs: number; failed: number }>();
@@ -250,9 +253,52 @@ export async function getMemberDetail(id: string): Promise<AdminMemberDetail | n
     projects: projects.count ?? 0,
     toolUsage: [...byTool.entries()].map(([toolId, v]) => ({ toolId, ...v })).sort((a, b) => b.runs - a.runs),
     recentRuns: runRows.slice(0, 15).map((r) => ({ id: r.id, toolId: r.tool_id, title: r.title ?? null, status: r.status, createdAt: r.created_at, error: r.error ? String(r.error).slice(0, 200) : null, provider: r.provider ?? null })),
-    payments: (payments.data ?? []).map((p) => ({ orderId: p.order_id, amount: p.amount, plan: p.plan ?? null, status: p.status, method: p.method ?? null, createdAt: p.created_at })),
+    payments: (payments.data ?? []).map((p) => ({
+      orderId: p.order_id,
+      amount: p.amount,
+      plan: p.plan ?? null,
+      status: p.status,
+      method: p.method ?? null,
+      createdAt: p.created_at,
+      refund: refunds.get(p.order_id) ?? null,
+      refundedAmount: p.refunded_at ? (p.refund_amount ?? null) : null,
+      refundedAt: p.refunded_at ?? null,
+    })),
     tickets: (tickets.data ?? []).map((t) => ({ id: t.id, kind: t.kind, subject: t.subject, status: t.status, createdAt: t.created_at })),
   };
+}
+
+type PaymentRow = { order_id: string; amount: number; plan: string | null; status: string; method: string | null; created_at: string; approved_at: string | null; refund_amount?: number | null; refunded_at?: string | null };
+
+/** A member's payments; without the refund columns if migration 0023 isn't applied yet. */
+async function memberPayments(admin: ReturnType<typeof createAdminClient>, userId: string): Promise<{ data: PaymentRow[] | null }> {
+  const base = "order_id, amount, plan, status, method, created_at, approved_at";
+  const q = (cols: string) => admin.from("payments").select(cols).eq("user_id", userId).order("created_at", { ascending: false }).limit(50).returns<PaymentRow[]>();
+  const full = await q(`${base}, refund_amount, refunded_at`);
+  return full.error ? await q(base) : full;
+}
+
+/** What the Refund button on a done payment would refund now, or why it can't. */
+export type RefundPreview = { ok: true; amount: number; full: boolean; usedFromOrder: number; unusedCredits: number } | { ok: false; reason: "window_passed" | "fully_used" | "bad_input" | "unavailable" };
+
+/** Previews for done, unrefunded payments; ones past the window skip the reads. */
+async function refundPreviews(rows: { order_id: string; status: string; created_at: string; approved_at?: string | null; refunded_at?: string | null }[]): Promise<Map<string, RefundPreview>> {
+  const out = new Map<string, RefundPreview>();
+  await Promise.all(
+    rows
+      .filter((p) => p.status === "done" && !p.refunded_at)
+      .map(async (p) => {
+        if (Date.now() - Date.parse(p.approved_at ?? p.created_at) > REFUND_WINDOW_DAYS * DAY_MS) {
+          out.set(p.order_id, { ok: false, reason: "window_passed" });
+          return;
+        }
+        const q = await quoteOrderRefund(p.order_id).catch(() => null);
+        if (!q?.order) out.set(p.order_id, { ok: false, reason: "unavailable" });
+        else if (q.quote.ok) out.set(p.order_id, { ok: true, amount: q.quote.refundAmount, full: q.quote.full, usedFromOrder: q.quote.usedFromOrder, unusedCredits: q.quote.unusedCredits });
+        else out.set(p.order_id, { ok: false, reason: q.quote.reason });
+      }),
+  );
+  return out;
 }
 
 /** audit_log target for a key slot's free/paid check. */
