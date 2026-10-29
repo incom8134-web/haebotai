@@ -4,6 +4,18 @@ export type NoteKind = "new" | "improved" | "fixed";
 
 export const PATCH_NOTES: { version: string; date: string; title: Bilingual; items: { kind: NoteKind; text: Bilingual }[] }[] = [
   {
+    version: "3.0.0",
+    date: "2026-10-29",
+    title: { ko: "플러스·프로 플랜, 결과 언어 선택, 도구별 디자인 파일", en: "Plus and Pro plans, result language, designed files per tool" },
+    items: [
+      { kind: "new", text: { ko: "플러스(₩29,900/30일, 2,000 크레딧)와 프로(₩59,900/30일, 6,000 크레딧) 플랜이 생겼어요. 내 API 키를 등록하지 않아도 바로 실행해요", en: "New Plus (₩29,900 / 30 days, 2,000 credits) and Pro (₩59,900, 6,000 credits) plans. No API key to set up — just run" } },
+      { kind: "new", text: { ko: "이용 중에 크레딧이 모자라면 ₩5,900에 500 크레딧을 충전할 수 있어요", en: "Running low? Top up 500 credits for ₩5,900 while on a plan" } },
+      { kind: "new", text: { ko: "실행 전에 결과를 한국어로 받을지 영어로 받을지 고를 수 있어요", en: "Choose Korean or English results before you run" } },
+      { kind: "improved", text: { ko: "PDF·Word·PPT 파일이 도구마다 맞는 모양으로 디자인돼요. 블로그는 원고로, 브랜드는 가이드북으로, 리서치는 차트가 든 보고서로", en: "PDF, Word and PPT files are designed for each tool: a blog as a manuscript, a brand as a guidebook, research as a report with charts" } },
+      { kind: "improved", text: { ko: "도구별 크레딧을 실제 사용량에 맞게 다시 정했어요. 글 위주 도구는 20~45, 이미지를 만드는 도구는 120~430 크레딧이에요", en: "Per-tool credits now match real usage: 20–45 for text tools, 120–430 for tools that make images" } },
+    ],
+  },
+  {
     version: "2.13.0",
     date: "2026-10-07",
     title: { ko: "지니에듀테크의 파란색으로, 바로 만들기는 맨 앞에", en: "In 지니에듀테크 blue, with Quick start up front" },

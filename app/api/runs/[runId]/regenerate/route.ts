@@ -12,7 +12,8 @@ import { getClient, runWithApiKey } from "@/lib/ai/gemini";
 import { parseOutputLanguage, runWithOutputLanguage } from "@/lib/ai/output-language";
 import { getUserApiKeys } from "@/lib/api-keys";
 import { getMembership } from "@/lib/membership";
-import { resolveCost } from "@/lib/ai/resolve-provider";
+import { decideRunAccess } from "@/lib/run-access";
+import { MEMBER_API_KEYS, SAAS } from "@/lib/site/access";
 import { canUsePlatformKey } from "@/lib/platform-access";
 import { reserveCredits, releaseUnattachedReservation, settleGenerationCredits } from "@/lib/credits";
 import { runLimiter, checkRateLimit } from "@/lib/rate-limit";
@@ -70,18 +71,19 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return Response.json({ error: "이 부분은 따로 다시 만들 수 없어요" }, { status: 400 });
   }
 
-  const [keys, membership] = await Promise.all([getUserApiKeys("google", { excludeBroken: true }), getMembership()]);
-  // Own key only; the platform's key is the team's, for testing (lib/platform-access.ts).
+  const [keys, membership] = await Promise.all([MEMBER_API_KEYS ? getUserApiKeys("google", { excludeBroken: true }) : Promise.resolve([]), getMembership()]);
+  // Same rule as a run (lib/run-access.ts), at a quarter of the tool's credits.
   const team = canUsePlatformKey(user.email);
-  if (!keys.length && !team) return Response.json({ error: OWN_KEY_REQUIRED, code: "own_key_required" }, { status: 400 });
-  const cost = team ? 0 : resolveCost("google", keys.length > 0, membership.plan === "student", regenerateCost(manifest.estimatedCredits));
+  const access = decideRunAccess({ saas: SAAS, provider: "google", team, plan: membership.plan, estimatedCredits: regenerateCost(manifest.estimatedCredits), ownKeyError: !SAAS && !keys.length && !team ? OWN_KEY_REQUIRED : null, hasUsableKey: keys.length > 0 });
+  if (!access.ok) return Response.json({ error: access.error, code: access.code }, { status: access.status });
+  const cost = access.cost;
   const usesPlatformKey = keys.length === 0;
   const spend = await checkSpend(user.id, usesPlatformKey ? regenerateCost(manifest.estimatedCredits) : 0, usesPlatformKey);
   if (!spend.ok) return Response.json({ error: spend.message }, { status: 429 });
   const reservation = cost > 0 ? await reserveCredits(user.id, cost) : ({ ok: true } as const);
   if (!reservation.ok) {
     const insufficient = reservation.error.includes("insufficient_credits");
-    return Response.json({ error: insufficient ? "크레딧이 부족합니다" : "크레딧 확인 실패" }, { status: insufficient ? 402 : 500 });
+    return Response.json({ error: insufficient ? "크레딧이 부족해요 — 멤버십에서 크레딧을 충전할 수 있어요" : "크레딧 확인 실패", ...(insufficient ? { code: "insufficient_credits" } : {}) }, { status: insufficient ? 402 : 500 });
   }
 
   const output = run.output as Record<string, unknown>;
@@ -175,11 +177,15 @@ async function reviseDocumentRun(opts: {
   const free = route?.kind === "design" || (route?.kind === "visuals" && !route.moreDiagrams);
   if (route?.kind === "unknown") return Response.json({ error: "어느 섹션을 바꿀지 골라 주세요. (디자인만 바꾸기, 이미지·도표 조정은 그대로 적으면 돼요)" }, { status: 400 });
 
-  const [keys, membership] = await Promise.all([getUserApiKeys("google", { excludeBroken: true }), getMembership()]);
-  // A design-only change calls no model; everything else needs the member's own key (or the team's access).
+  const [keys, membership] = await Promise.all([MEMBER_API_KEYS ? getUserApiKeys("google", { excludeBroken: true }) : Promise.resolve([]), getMembership()]);
+  // A design-only change calls no model; everything else follows the run rule (lib/run-access.ts).
   const team = canUsePlatformKey(user.email);
-  if (route?.kind !== "design" && !keys.length && !team) return Response.json({ error: OWN_KEY_REQUIRED, code: "own_key_required" }, { status: 400 });
-  const cost = free || team ? 0 : resolveCost("google", keys.length > 0, membership.plan === "student", regenerateCost(manifest.estimatedCredits));
+  let cost = 0;
+  if (route?.kind !== "design") {
+    const access = decideRunAccess({ saas: SAAS, provider: "google", team, plan: membership.plan, estimatedCredits: free ? 0 : regenerateCost(manifest.estimatedCredits), ownKeyError: !SAAS && !keys.length && !team ? OWN_KEY_REQUIRED : null, hasUsableKey: keys.length > 0 });
+    if (!access.ok) return Response.json({ error: access.error, code: access.code }, { status: access.status });
+    cost = access.cost;
+  }
   if (!free) {
     const usesPlatformKey = keys.length === 0;
     const spend = await checkSpend(user.id, usesPlatformKey ? regenerateCost(manifest.estimatedCredits) : 0, usesPlatformKey);
@@ -188,7 +194,7 @@ async function reviseDocumentRun(opts: {
   const reservation = cost > 0 ? await reserveCredits(user.id, cost) : ({ ok: true } as const);
   if (!reservation.ok) {
     const insufficient = reservation.error.includes("insufficient_credits");
-    return Response.json({ error: insufficient ? "크레딧이 부족합니다" : "크레딧 확인 실패" }, { status: insufficient ? 402 : 500 });
+    return Response.json({ error: insufficient ? "크레딧이 부족해요 — 멤버십에서 크레딧을 충전할 수 있어요" : "크레딧 확인 실패", ...(insufficient ? { code: "insufficient_credits" } : {}) }, { status: insufficient ? 402 : 500 });
   }
   const output = run.output as Record<string, unknown>;
   const report = output.work_report as { contractText?: string } | undefined;

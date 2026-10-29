@@ -1,7 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getTossPaymentByOrderId, type TossPayment } from "./toss";
-import { isRetryable, planReconcile, PRO_ORDER, type LedgerOrder, type TossView } from "./pro";
+import { isRetryable, planReconcile, productFor, type LedgerOrder, type TossView } from "./pro";
 
 // Shared by the confirm route, the Toss webhook and the scheduled job.
 // Whatever triggered it, the order's state is always re-read from Toss
@@ -11,19 +11,25 @@ type Admin = ReturnType<typeof createAdminClient>;
 
 type ReconcileOutcome = "activated" | "activate_failed" | "closed" | "waiting" | "amount_mismatch" | "unknown_order" | "toss_error" | "noop";
 
-/** pending → done + Pro days + credits, in one transaction (activate_pro, migration 0012). */
+/** pending → done + the order's plan days + credits, in one transaction (activate_order, migration 0022). The grant comes from the order's stored plan, never from the caller. */
 export async function activateOrder(admin: Admin, orderId: string, payment: TossPayment): Promise<boolean> {
-  const { data, error } = await admin.rpc("activate_pro", {
+  const { data: row } = await admin.from("payments").select("plan").eq("order_id", orderId).maybeSingle();
+  const product = productFor(row?.plan);
+  if (!product) {
+    console.error("[payments] unknown plan on order", orderId, row?.plan);
+    return false;
+  }
+  const { data, error } = await admin.rpc("activate_order", {
     p_order_id: orderId,
     p_payment_key: payment.paymentKey,
     p_method: payment.method,
     p_approved_at: payment.approvedAt,
     p_raw: payment.raw,
-    p_days: PRO_ORDER.days,
-    p_credits: PRO_ORDER.credits,
+    p_days: product.days,
+    p_credits: product.credits,
   });
   if (error) {
-    console.error("[payments] activate_pro failed", orderId, error.message);
+    console.error("[payments] activate_order failed", orderId, error.message);
     return false;
   }
   return data === true;

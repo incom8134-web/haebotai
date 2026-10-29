@@ -30,7 +30,7 @@ with `lib/site/legal.ts` (the published documents).
 | — | Secrets | Service role / Gemini / Upstash / Toss / encryption keys absent from client bundles (checked on production) | — |
 | — | DDoS / bandwidth | Vercel platform DDoS protection; per-IP 120 req/min on `/api`; per-member rate limits; upload size/type limits on every bucket | `lib/supabase/middleware.ts`, `lib/rate-limit.ts`, migration 0014 |
 | — | Runaway AI spend | Kill switch, daily platform budget, per-member daily run cap, alerts at 50/80/100 %, one-retry maximum in provider calls, 285 s watchdog | `lib/spend-guard*.ts`, run route |
-| — | Loop charging | Pro is a one-time 30-day pass (no billing key); orders are server-priced, confirm is idempotent, checkout is rate-limited | `app/api/payments/pro/*` |
+| — | Loop charging | Plus/Pro are one-time 30-day passes and top-ups one-time purchases (no billing key); orders are server-priced, confirm is idempotent, checkout is rate-limited | `app/api/payments/*` |
 | — | Security headers | HSTS, nosniff, X-Frame-Options DENY, Referrer-Policy, Permissions-Policy | `next.config.ts` |
 
 ## Operator actions (can't be done from code)

@@ -10,8 +10,8 @@ const PENDING_MESSAGE = "결제 확인이 늦어지고 있어요. 결제가 완�
 
 // Step 2 of checkout: Toss redirected to the success page with
 // paymentKey/orderId/amount. Check them against the stored order, ask
-// Toss to approve, then activate Pro in one transaction (activate_pro in
-// supabase/migrations/0012 only acts on a still-pending order).
+// Toss to approve, then activate the order in one transaction (activate_order in
+// supabase/migrations/0022 only acts on a still-pending order).
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
   const {
@@ -71,11 +71,11 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: toss.message, code: toss.code }, { status: 400 });
   }
 
-  // 가상계좌: approved means "account issued", not "paid". Pro waits for the
+  // 가상계좌: approved means "account issued", not "paid". The plan waits for the
   // deposit, which the webhook / scheduled job pick up.
   if (toss.payment.status === "WAITING_FOR_DEPOSIT") {
     await admin.from("payments").update({ payment_key: toss.payment.paymentKey, raw: toss.payment.raw }).eq("order_id", orderId).eq("status", "pending");
-    return Response.json({ pending: true, error: "입금을 기다리고 있어요. 입금이 확인되면 자동으로 프로가 적용돼요." }, { status: 202 });
+    return Response.json({ pending: true, error: "입금을 기다리고 있어요. 입금이 확인되면 자동으로 적용돼요." }, { status: 202 });
   }
   if (toss.payment.status !== "DONE") return Response.json({ pending: true, error: PENDING_MESSAGE }, { status: 202 });
 
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     if (now?.status === "done") return Response.json({ ok: true });
     // Charged but not activated yet. The order stays pending, so the
     // webhook / scheduled job retry activation automatically.
-    return Response.json({ pending: true, error: `결제는 완료됐어요. 프로 적용을 자동으로 다시 시도하고 있어요. 한 시간 넘게 적용되지 않으면 주문번호 ${orderId}로 문의해주세요.` }, { status: 202 });
+    return Response.json({ pending: true, error: `결제는 완료됐어요. 적용을 자동으로 다시 시도하고 있어요. 한 시간 넘게 적용되지 않으면 주문번호 ${orderId}로 문의해주세요.` }, { status: 202 });
   }
 
   return Response.json({ ok: true });

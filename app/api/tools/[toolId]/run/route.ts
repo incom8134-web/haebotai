@@ -7,7 +7,9 @@ import { getTool } from "@/lib/tools/registry";
 import { buildInputSchema, inputErrorMessage } from "@/lib/tools/runner";
 import { buildReference, referenceForStorage } from "@/lib/tools/reference-server";
 import { checkToolPolicy } from "@/lib/tools/policy";
-import { ownKeyRequiredError, resolveCost, resolveRequestedProvider } from "@/lib/ai/resolve-provider";
+import { ownKeyRequiredError, resolveRequestedProvider } from "@/lib/ai/resolve-provider";
+import { decideRunAccess } from "@/lib/run-access";
+import { MEMBER_API_KEYS, SAAS } from "@/lib/site/access";
 import { canUsePlatformKey } from "@/lib/platform-access";
 import { getUserApiKeys } from "@/lib/api-keys";
 import { getMembership } from "@/lib/membership";
@@ -146,35 +148,37 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     project = data.id;
   }
 
-  // Own API key(s) → the user pays the provider directly; student plan
-  // (google only) → unlimited. Either way nothing is reserved, and the
-  // run records 0 credits. Multiple keys (priority 1-3) are tried in
-  // order inside runWithApiKey below, switching past any that hit a
-  // quota error. A slot the rotation classifier already flagged broken
-  // (401/403) is excluded here rather than retried every run — Claude
-  // is own-key only (product decision): no platform key, always
-  // 0 credits, never a silent Gemini fallback.
-  const [userApiKeys, membership] = await Promise.all([getUserApiKeys(provider, { excludeBroken: true }), getMembership()]);
+  // Own-key mode: a member's keys (priority 1-3) are tried in order inside
+  // runWithApiKey, switching past any that hit a quota error; slots
+  // already flagged broken (401/403) are excluded here.
+  // Own keys are only consulted when members may bring one (lib/site/access.ts);
+  // in SaaS mode every run uses the platform key and paid-plan credits.
+  const [userApiKeys, membership] = await Promise.all([MEMBER_API_KEYS ? getUserApiKeys(provider, { excludeBroken: true }) : Promise.resolve([]), getMembership()]);
   const hasUsableKey = userApiKeys.length > 0;
   // Only spend a second query distinguishing "never registered" from
   // "registered but all broken" when it's actually needed for the message.
-  // Members run on their own key only; the platform's key is the team's,
-  // for testing, and costs them nothing (lib/platform-access.ts).
+  // The team may always use the platform's key, free (lib/platform-access.ts).
   const team = canUsePlatformKey(user.email);
   let hasAnyKey = hasUsableKey;
-  if (!hasUsableKey) {
+  if (MEMBER_API_KEYS && !hasUsableKey) {
     hasAnyKey = (await getUserApiKeys(provider)).length > 0;
   }
-  const keyError = ownKeyRequiredError(provider, { hasAnyKey, hasUsableKey }, team);
-  if (keyError) {
-    return Response.json({ error: keyError, code: "own_key_required" }, { status: 400 });
+  const access = decideRunAccess({
+    saas: SAAS,
+    provider,
+    team,
+    plan: membership.plan,
+    estimatedCredits: manifest.estimatedCredits,
+    ownKeyError: SAAS ? null : ownKeyRequiredError(provider, { hasAnyKey, hasUsableKey }, team),
+    hasUsableKey,
+  });
+  if (!access.ok) {
+    return Response.json({ error: access.error, code: access.code }, { status: access.status });
   }
-  const cost = team ? 0 : resolveCost(provider, hasUsableKey, membership.plan === "student", manifest.estimatedCredits);
+  const cost = access.cost;
 
   // Platform-wide ceilings on top of credits (lib/spend-guard-core.ts):
   // kill switch, daily platform AI budget, per-member daily run cap.
-  // Student runs are free for the member but still spend our key, so they
-  // count toward the platform budget at the tool's credit estimate.
   const usesPlatformKey = provider === "google" && !hasUsableKey;
   const spend = await checkSpend(user.id, usesPlatformKey ? manifest.estimatedCredits : 0, usesPlatformKey);
   if (!spend.ok) {
@@ -185,7 +189,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   if (!reservation.ok) {
     const insufficient = reservation.error.includes("insufficient_credits");
     return Response.json(
-      { error: insufficient ? "크레딧이 부족합니다" : `크레딧 확인 실패: ${reservation.error}` },
+      { error: insufficient ? "크레딧이 부족해요 — 멤버십에서 크레딧을 충전할 수 있어요" : `크레딧 확인 실패: ${reservation.error}`, ...(insufficient ? { code: "insufficient_credits" } : {}) },
       { status: insufficient ? 402 : 500 },
     );
   }

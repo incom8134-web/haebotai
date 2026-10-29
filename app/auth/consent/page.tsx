@@ -12,7 +12,7 @@ import { BUSINESS } from "@/lib/site/business";
 import { REFERRAL, normalizeReferralCode } from "@/lib/referral";
 import { HOME_AFTER_SIGN_IN, hasCurrentConsent } from "@/lib/consent";
 import { NAME_MAX, normalizeName, profileNameOf, suggestedName } from "@/lib/member-name";
-import { OWN_KEY_ONLY } from "@/lib/site/access";
+import { OWN_KEY_ONLY, REFERRAL_CREDITS } from "@/lib/site/access";
 import { KAKAO_PHONE } from "@/lib/auth-providers";
 
 // The consent step right after Google/Kakao sign-in (lib/consent.ts), with
@@ -295,7 +295,7 @@ function ConsentForm() {
         </fieldset>
         )}
 
-        {OWN_KEY_ONLY || mode === "name" ? null : (
+        {OWN_KEY_ONLY || !REFERRAL_CREDITS || mode === "name" ? null : (
         <details className="mt-4 rounded-2xl border border-hairline px-4 py-3 text-sm" open={!!code}>
           <summary className="cursor-pointer text-fg-muted">{L({ ko: "초대 코드가 있어요 (선택)", en: "I have an invite code (optional)" })}</summary>
           <input

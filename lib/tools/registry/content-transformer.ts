@@ -47,6 +47,6 @@ export const contentTransformer: ToolManifest = {
   outputRenderer: "cards",
   grounding: { requireSources: false, webSearch: false, estimateBadge: false },
   model: "gemini-3.1-pro-preview",
-  estimatedCredits: 30,
+  estimatedCredits: 25,
   estimatedSeconds: 150,
 };

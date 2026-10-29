@@ -13,6 +13,9 @@ import { understand } from "@/lib/agents/calls";
 import { parseOutputLanguage, runWithOutputLanguage } from "@/lib/ai/output-language";
 import { isAgentic } from "@/lib/agents/specs";
 import { canUsePlatformKey } from "@/lib/platform-access";
+import { getMembership } from "@/lib/membership";
+import { isPaidPlan } from "@/lib/payments/pro";
+import { MEMBER_API_KEYS, SAAS } from "@/lib/site/access";
 import { intentLimiter, checkRateLimit } from "@/lib/rate-limit";
 
 // Before a run: read the request into an understanding (lib/agents/intent.ts)
@@ -56,9 +59,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const full = await getBusinessProfile();
   const profile = full && excluded.size ? (Object.fromEntries(Object.entries(full).filter(([k]) => !excluded.has(k))) as typeof full) : full;
 
-  const keys = await getUserApiKeys("google", { excludeBroken: true });
-  // No own key and not on the team: the run itself will ask for a key, so don't spend the platform's.
-  if (!keys.length && !canUsePlatformKey(user.email)) return Response.json({ intent: null, questions: [] });
+  const keys = MEMBER_API_KEYS ? await getUserApiKeys("google", { excludeBroken: true }) : [];
+  // Only someone who could run may spend the platform's key here (lib/run-access.ts); the run itself explains why not.
+  const team = canUsePlatformKey(user.email);
+  if (SAAS) {
+    if (!team && !isPaidPlan((await getMembership()).plan)) return Response.json({ intent: null, questions: [] });
+  } else if (!keys.length && !team) return Response.json({ intent: null, questions: [] });
   try {
     const r = await runWithOutputLanguage(parseOutputLanguage(body?.outputLang), () => runWithApiKey("google", user.id, keys, () => understand(manifest, values, profile, [], AbortSignal.timeout(25_000))));
     return Response.json({ intent: r.intent, questions: r.questions });

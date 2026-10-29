@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { ReferralPanel } from "@/components/account/referral-panel";
-import { OWN_KEY_ONLY } from "@/lib/site/access";
+import { OWN_KEY_ONLY, REFERRAL_CREDITS } from "@/lib/site/access";
 import { getReferralStatus } from "@/lib/referral-server";
 import { getCurrentUser } from "@/lib/supabase/user";
 import { titled } from "@/lib/site/meta";
@@ -8,8 +8,9 @@ import { titled } from "@/lib/site/meta";
 export const generateMetadata = titled("친구 초대", "Invite friends");
 
 export default async function ReferralPage() {
-  // Invites paid credits; members now bring their own key (lib/site/access.ts).
+  // Invites paid credits; none are granted now (lib/site/access.ts).
   if (OWN_KEY_ONLY) redirect("/account/api-key");
+  if (!REFERRAL_CREDITS) redirect("/account");
   const user = await getCurrentUser();
   const status = user ? await getReferralStatus(user.id) : null;
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
