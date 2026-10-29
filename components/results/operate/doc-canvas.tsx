@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-import { useBi } from "@/lib/i18n/context";
+import { useBi, useLocale } from "@/lib/i18n/context";
+import { localizeLabels } from "@/lib/tools/report/localize";
 import { buildReport } from "@/lib/tools/report";
 import { ReportView } from "@/components/results/report-view";
 
@@ -11,7 +12,8 @@ import { ReportView } from "@/components/results/report-view";
 
 export function DocCanvas({ output, input, toolId = "business-plan" }: { output: Record<string, unknown>; input?: Record<string, unknown>; toolId?: string }) {
   const L = useBi();
-  const report = useMemo(() => buildReport(toolId, output, input), [toolId, output, input]);
+  const { locale } = useLocale();
+  const report = useMemo(() => localizeLabels(buildReport(toolId, output, input), locale === "en" ? "en" : "ko"), [toolId, output, input, locale]);
   if (!report) return null;
   return (
     <div className="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-[13rem_minmax(0,1fr)]">

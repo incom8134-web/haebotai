@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-import { useBi } from "@/lib/i18n/context";
+import { useBi, useLocale } from "@/lib/i18n/context";
+import { localizeLabels } from "@/lib/tools/report/localize";
 import { buildReport } from "@/lib/tools/report";
 import { objs, str } from "@/lib/tools/report/util";
 import { ReportView } from "@/components/results/report-view";
@@ -26,7 +27,8 @@ export function CampaignBoard({ output, input }: { output: Record<string, unknow
   const phases = [...new Set(items.map((i) => i.phase).filter(Boolean))];
   const color = (p: string) => PHASE_COLORS[Math.max(0, phases.indexOf(p)) % PHASE_COLORS.length];
   // The timeline above replaces the report's own gantt of the same plan.
-  const report = useMemo(() => buildReport("strategy", { ...output, channel_plan: [] }, input), [output, input]);
+  const { locale } = useLocale();
+  const report = useMemo(() => localizeLabels(buildReport("strategy", { ...output, channel_plan: [] }, input), locale === "en" ? "en" : "ko"), [output, input, locale]);
 
   return (
     <div className="mt-3 flex flex-col gap-5">

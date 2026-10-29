@@ -24,6 +24,7 @@ import { getTool } from "@/lib/tools/registry";
 import { QUICK_MAIN, QUICK_MORE, quickHref, type QuickId, type QuickTool } from "@/lib/site/quick";
 import { primaryButton, secondaryButton } from "@/components/site/page";
 import { ApiKeyPrompt } from "@/components/api-key-prompt";
+import { OutputLanguagePicker } from "@/components/output-language-picker";
 import { cn } from "@/lib/utils";
 
 // 바로 만들기: one page, three steps an owner who has never used AI can
@@ -207,6 +208,7 @@ export function QuickStart({ signedIn, needsKey = false }: { signedIn: boolean; 
           <span className="grid size-7 place-items-center rounded-full bg-accent text-sm text-white">3</span>
           {L({ ko: "만들기를 누르세요", en: "Press Make" })}
         </h2>
+        <OutputLanguagePicker className="mt-4" />
         <button type="button" onClick={go} disabled={!ready || going} className={cn(primaryButton, "mt-4 h-14 w-full text-base sm:w-auto sm:px-10")}>
           {going ? L({ ko: "여는 중…", en: "Opening…" }) : L({ ko: `${L(pick.title)} 만들기`, en: `Make ${L(pick.title).toLowerCase()}` })}
           <ArrowRight size={18} aria-hidden />

@@ -24,6 +24,7 @@ import { renderLogoLockup, type LogoTracking, type LogoWeight } from "@/lib/tool
 import type { AiAdapter, AiStreamEvent, GenerationResult, ImageStorageContext, TokenUsage } from "./types";
 import { outputSchemaFor } from "@/lib/tools/schemas";
 import { labelAiImage } from "./ai-label";
+import { applyToGeminiParams } from "./output-language";
 
 // Moved from lib/tools/generate.ts verbatim (rotation, search grounding,
 // image generation) — this is the Gemini half of the provider-neutral
@@ -75,8 +76,9 @@ function withFreeTierFallback(ai: GoogleGenAI): GoogleGenAI {
   const models = ai.models;
   const generate = models.generateContent.bind(models);
   const stream = models.generateContentStream.bind(models);
-  models.generateContent = (params) => freeTierAware(params, generate, { keyTag: currentKeyTag() });
-  models.generateContentStream = (params) => freeTierAware(params, stream, { keyTag: currentKeyTag() });
+  // The run's result language (lib/ai/output-language.ts) applies to every call too.
+  models.generateContent = (params) => freeTierAware(applyToGeminiParams(params), generate, { keyTag: currentKeyTag() });
+  models.generateContentStream = (params) => freeTierAware(applyToGeminiParams(params), stream, { keyTag: currentKeyTag() });
   return ai;
 }
 

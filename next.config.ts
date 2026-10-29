@@ -34,7 +34,7 @@ const nextConfig: NextConfig = {
   // Pretendard fonts (sangsepage render + PDF export), pdfkit's built-in
   // font metrics, and the homepage site kit's source (lib/site-kit).
   outputFileTracingIncludes: {
-    "/api/export/\\[runId\\]": ["./node_modules/pretendard/dist/public/static/Pretendard-{Regular,Bold}.otf", "./node_modules/pdfkit/js/data/**/*"],
+    "/api/export/\\[runId\\]": ["./node_modules/pretendard/dist/public/static/Pretendard-{Regular,Bold,ExtraBold}.otf", "./node_modules/pdfkit/js/data/**/*"],
     // Document runs render their PDF to check the page count (lib/agents/specs/document.ts).
     "/api/tools/\\[toolId\\]/run": ["./node_modules/pretendard/dist/public/static/Pretendard-{Regular,Bold,ExtraBold,Black}.otf", "./lib/site-kit/kit.ts", "./node_modules/pdfkit/js/data/**/*"],
     "/api/runs/\\[runId\\]/continue": ["./node_modules/pretendard/dist/public/static/Pretendard-{Regular,Bold,ExtraBold,Black}.otf", "./lib/site-kit/kit.ts", "./node_modules/pdfkit/js/data/**/*"],
