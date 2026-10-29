@@ -41,6 +41,7 @@ import { CitationsProvider } from "@/components/results/cited";
 import { TOOL_VIEWS } from "@/components/results/tool-views";
 import { buildReport } from "@/lib/tools/report";
 import { useBi, useLocale, useT } from "@/lib/i18n/context";
+import { localizeLabels } from "@/lib/tools/report/localize";
 import type { Source } from "@/lib/tools/registry/shared";
 import type { ToolManifest } from "@/lib/tools/types";
 import { PROVIDER_LABEL, type ProviderId } from "@/lib/ai/types";
@@ -90,6 +91,9 @@ const TOOL_HINTS: Record<string, Partial<Record<ExportFormat, [string, string]>>
   "content-transformer": { pdf: ["채널별 콘텐츠 팩", "Channel content pack"], pptx: ["카드뉴스·쇼츠 콘티", "Carousel & Shorts storyboard"], docx: ["붙여넣기용 채널별 원고", "Paste-ready copy per channel"] },
   presentation: { pdf: ["인쇄용 발표 자료", "Print handout"], docx: ["발표 대본", "Speaker script"] },
   homepage: { pdf: ["사이트 기획서", "Site plan"], pptx: ["사이트 소개 슬라이드", "Site walkthrough slides"], docx: ["사이트 원고", "Site copy"] },
+  image: { pdf: ["사진 촬영본 (컷별 크게)", "Photo set, one per page"], pptx: ["사진 소개 슬라이드", "Photo slides"], docx: ["사진 정리 문서", "Photo sheet"] },
+  "brand-model": { pdf: ["모델 룩북", "Model lookbook"], pptx: ["룩북 슬라이드", "Lookbook slides"], docx: ["룩북 정리 문서", "Lookbook sheet"] },
+  sangsepage: { pdf: ["상세페이지 시안 + 원고", "Page proof + copy"], docx: ["디자이너에게 넘길 원고", "Copy for your designer"], pptx: ["구역별 기획 슬라이드", "Section-by-section slides"] },
 };
 
 function hintFor(toolId: string, f: ExportFormat, en: boolean): string {
@@ -299,12 +303,13 @@ function OutputPreview({ output, toolId, input, runId, sources }: { output: unkn
 
 function OutputBody({ output, toolId, input, runId }: { output: unknown; toolId?: string; input?: Record<string, unknown>; runId?: string }) {
   const L = useBi();
+  const { locale: reportLocale } = useLocale();
   const o = output as Record<string, unknown>;
 
   const view = toolId && o && typeof o === "object" ? TOOL_VIEWS[toolId] : undefined;
   if (view?.match(o)) return <view.View output={o} input={input} runId={runId} />;
 
-  const report = toolId ? buildReport(toolId, o, input) : null;
+  const report = toolId ? localizeLabels(buildReport(toolId, o, input), reportLocale === "en" ? "en" : "ko") : null;
   if (report) {
     return (
       <>

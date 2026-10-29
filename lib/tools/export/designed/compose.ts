@@ -1,4 +1,7 @@
 import { excerpt, hex, parseMarkdown, plain, tr, type Block, type Card, type Design, type Lang, type Section, type Slide, type Theme } from "./model.ts";
+import { buildReport } from "../../report/index.ts";
+import { localizeLabels } from "../../report/localize.ts";
+import type { Report, ReportBlock } from "../../report/types.ts";
 
 // One composer per tool: the run's output laid out as the thing it is.
 // Labels follow the run's result language (input._output_lang).
@@ -390,6 +393,145 @@ function composeHomepage(ctx: ComposeContext): Design {
   return { lang: ctx.lang, theme, eyebrow: t("홈페이지 기획서", "Website plan"), title: name, subtitle: s(design.big_idea) || s(design.concept) || undefined, meta: meta(ctx), sections, docSections, slides, footer: `${name} · ${t("홈페이지", "Website")}` };
 }
 
+
+// ── Photo shoot: a photo set ───────────────────────────────────────────
+
+const PRESET: Record<string, [string, string]> = { studio: ["제품 스튜디오컷", "Studio product shot"], packaging: ["패키징", "Packaging"], "3d_render": ["3D 렌더", "3D render"], landing_ui: ["랜딩 UI", "Landing UI"], ad_banner: ["광고 배너", "Ad banner"], background: ["배경", "Background"] };
+
+function photoSet(ctx: ComposeContext, photos: { url: string; name: string; purpose: string }[], kind: { eyebrow: string; title: string; subtitle: string; footer: string }, extra: Section[], tips: string[]): Design {
+  const t = tr(ctx.lang);
+  const theme = themeFrom(ctx.brandColors ?? [], { ...DEFAULT, accent: "#C2410C", accent2: "#2F5BEA", dark: "#14161A" });
+  const sections: Section[] = [
+    { title: t("한눈에 보기", "At a glance"), kicker: kind.eyebrow, blocks: [{ t: "cards", cols: 2, items: photos.map((p, i) => ({ kicker: `${String(i + 1).padStart(2, "0")}`, title: p.name, image: p.url, body: p.purpose || undefined })) }] },
+    ...photos.map((p, i): Section => ({ title: p.name, kicker: `${t("컷", "Shot")} ${i + 1} / ${photos.length}`, newPage: true, blocks: [{ t: "image", url: p.url, tall: true }, ...(p.purpose ? [{ t: "p", text: p.purpose } as Block] : [])] })),
+    ...extra,
+    { title: t("이렇게 쓰세요", "How to use them"), kicker: t("활용 팁", "Tips"), blocks: [{ t: "bullets", style: "check", items: tips }] },
+  ];
+  const slides: Slide[] = [
+    { kind: "cover", title: kind.title, subtitle: kind.subtitle, kicker: kind.eyebrow, image: photos[0]?.url },
+    { kind: "block", kicker: kind.eyebrow, title: t("한눈에 보기", "At a glance"), block: { t: "cards", cols: Math.min(4, Math.max(1, photos.length)) as 1 | 2 | 3 | 4, items: photos.map((p, i) => ({ kicker: `${i + 1}`, title: p.name, image: p.url })) } },
+    ...photos.map((p, i): Slide => ({ kind: "image", kicker: `${t("컷", "Shot")} ${i + 1}`, title: p.name, image: p.url, text: p.purpose || undefined })),
+    { kind: "end", title: kind.title, text: tips[0] },
+  ];
+  return { lang: ctx.lang, theme, eyebrow: kind.eyebrow, title: kind.title, subtitle: kind.subtitle, coverImage: photos[0]?.url, meta: meta(ctx), sections, slides, footer: kind.footer };
+}
+
+function composeImage(ctx: ComposeContext): Design {
+  const t = tr(ctx.lang);
+  const o = obj(ctx.output);
+  const preset = PRESET[s(ctx.input?.preset)];
+  const photos = objs(o.images).flatMap((x, i) => (url(x.url) ? [{ url: url(x.url)!, name: s(x.name) || `${t("컷", "Shot")} ${i + 1}`, purpose: s(x.purpose) }] : []));
+  const title = s(ctx.input?.description) ? excerpt(s(ctx.input?.description), 60) : t("제품 사진", "Product photos");
+  return photoSet(ctx, photos, { eyebrow: t("제품 사진 촬영본", "Product photo set"), title, subtitle: [preset ? t(preset[0], preset[1]) : "", s(ctx.input?.ratio)].filter(Boolean).join(" · "), footer: `${ctx.brandName ?? title} · ${t("제품 사진", "Product photos")}` }, [], [
+    t("1번 컷은 상세페이지·스마트스토어 대표 이미지로 쓰기 좋아요.", "Use shot 1 as the main product image."),
+    t("인스타 피드는 4:5, 스토리·릴스는 9:16 비율로 다시 만들면 잘리지 않아요.", "For Instagram, regenerate at 4:5 (feed) or 9:16 (stories) so nothing is cropped."),
+    t("AI로 만든 사진은 광고에 쓸 때 'AI 생성 이미지'라고 밝혀 주세요.", "Label AI-made photos as AI-generated when you use them in ads."),
+  ]);
+}
+
+const MODEL: Record<string, [string, string]> = { f20: ["여성 20대", "Woman, 20s"], f30: ["여성 30대", "Woman, 30s"], m20: ["남성 20대", "Man, 20s"], m30: ["남성 30대", "Man, 30s"], any: ["성별 무관", "Any"] };
+const MOOD: Record<string, [string, string]> = { minimal: ["미니멀", "Minimal"], casual: ["캐주얼", "Casual"], luxury: ["럭셔리", "Luxury"], natural: ["내추럴", "Natural"] };
+const SET: Record<string, [string, string]> = { studio: ["스튜디오", "Studio"], outdoor: ["야외", "Outdoor"], cafe: ["카페", "Café"], store: ["매장", "Store"] };
+
+function composeModel(ctx: ComposeContext): Design {
+  const t = tr(ctx.lang);
+  const o = obj(ctx.output);
+  const pick = (m: Record<string, [string, string]>, k: string) => (m[k] ? t(m[k][0], m[k][1]) : "");
+  const look = [pick(MODEL, s(ctx.input?.model_profile)), pick(MOOD, s(ctx.input?.mood)), pick(SET, s(ctx.input?.setting))].filter(Boolean).join(" · ");
+  const shots = objs(o.shots).flatMap((x, i) => (url(x.url) ? [{ url: url(x.url)!, name: `${t("룩", "Look")} ${i + 1}`, purpose: look }] : []));
+  return photoSet(ctx, shots, { eyebrow: t("모델 룩북", "Model lookbook"), title: ctx.brandName ? `${ctx.brandName} ${t("룩북", "Lookbook")}` : t("모델 룩북", "Model lookbook"), subtitle: look, footer: `${ctx.brandName ?? ""} ${t("룩북", "Lookbook")}`.trim() }, [{ title: t("AI 생성 이미지 표시", "AI-generated image notice"), kicker: t("꼭 지켜 주세요", "Required"), blocks: [{ t: "callout", tone: "warn", label: s(o.disclosure) || t("AI 생성 이미지", "AI-generated image"), text: t("이 사진의 모델은 실제 사람이 아닌 AI로 만든 인물이에요. 광고·상세페이지에 쓸 때는 'AI 생성 이미지'라고 함께 표시해 주세요.", "The model in these photos is AI-generated, not a real person. Say so ('AI-generated image') wherever you use them in ads or product pages.") }] }], [
+    t("룩 1~2는 상세페이지 첫 화면, 나머지는 착용·사용 컷으로 쓰기 좋아요.", "Looks 1–2 suit the top of a product page; the rest work as in-use shots."),
+    t("같은 모델로 더 찍고 싶다면 결과 화면의 [같은 조건으로 다시 만들기]를 쓰세요.", "For more shots of the same model, use [Run again with the same inputs]."),
+    t("제품 색이 실제와 다르면 제품 사진을 더 밝은 곳에서 다시 올려 주세요.", "If colors look off, upload a product photo taken in brighter light."),
+  ]);
+}
+
+// ── Sales page: a page proof and its copy ──────────────────────────────
+
+function composeSalesPage(ctx: ComposeContext): Design {
+  const t = tr(ctx.lang);
+  const o = obj(ctx.output);
+  const name = s(ctx.input?.product_name) || ctx.brandName || t("상세페이지", "Product page");
+  const renders = arr(o.rendered_images).map((x) => url(x)).filter((u): u is string => Boolean(u));
+  const secs = objs(o.sections).sort((a, b) => Number(a.order ?? 0) - Number(b.order ?? 0));
+  const faq = objs(o.faq).map((x) => ({ q: s(x.q), a: s(x.a) })).filter((x) => x.q);
+  const theme = themeFrom(ctx.brandColors ?? [], { ...DEFAULT, accent: "#E2553D", accent2: "#16A37F" });
+  const copyBlocks = (sec: O): Block[] => [{ t: "p", text: s(sec.body) }, ...(s(sec.image_instruction) ? [{ t: "callout", tone: "neutral", label: t("이미지 자리", "Image"), text: s(sec.image_instruction) } as Block] : [])];
+  const sections: Section[] = [
+    { title: t("이 페이지가 푸는 고민", "The doubts this page answers"), kicker: t("기획", "Plan"), blocks: [...(strs(o.pain_points).length ? [{ t: "bullets", items: strs(o.pain_points) } as Block] : []), ...(strs(o.usps).length ? [{ t: "h3", text: t("핵심 강점 3가지", "Three key strengths") } as Block, { t: "cards", cols: 3, items: strs(o.usps).map((u, i) => ({ kicker: `0${i + 1}`, title: u })) } as Block] : [])] },
+    ...(renders.length ? [{ title: t("완성된 상세페이지", "The finished page"), kicker: t("시안", "Proof"), newPage: true, blocks: renders.map((u): Block => ({ t: "image", url: u, tall: true })) }] : []),
+    { title: t("구역별 원고", "Copy by section"), kicker: t("원고", "Copy"), newPage: true, blocks: secs.flatMap((sec, i): Block[] => [{ t: "h3", text: `${String(i + 1).padStart(2, "0")} · ${s(sec.headline)}` }, ...copyBlocks(sec)]) },
+    ...(faq.length ? [{ title: t("자주 묻는 질문", "FAQ"), kicker: "FAQ", blocks: [{ t: "kv", items: faq.map((f) => ({ label: f.q, value: f.a })) } as Block] }] : []),
+    ...(s(o.shipping_template) ? [{ title: t("배송·교환 안내", "Shipping & returns"), kicker: t("템플릿", "Template"), blocks: [{ t: "p", text: s(o.shipping_template) } as Block] }] : []),
+  ];
+  const slides: Slide[] = [
+    { kind: "cover", title: name, subtitle: strs(o.usps).join(" · "), kicker: t("상세페이지 기획", "Product page plan"), image: renders[0] },
+    ...(strs(o.pain_points).length ? [{ kind: "block", kicker: t("손님의 고민", "Customer doubts"), title: t("구매를 망설이는 이유", "Why buyers hesitate"), block: { t: "bullets", items: strs(o.pain_points) } } as Slide] : []),
+    ...(strs(o.usps).length ? [{ kind: "block", kicker: t("핵심 강점", "Strengths"), title: t("이래서 사요", "Why they buy"), block: { t: "cards", cols: 3, items: strs(o.usps).map((u, i) => ({ kicker: `0${i + 1}`, title: u })) } } as Slide] : []),
+    ...secs.map((sec, i): Slide => ({ kind: "block", kicker: `${String(i + 1).padStart(2, "0")} · ${s(sec.type)}`, title: s(sec.headline), block: { t: "p", text: s(sec.body) }, note: s(sec.image_instruction) || undefined })),
+    ...(faq.length ? [{ kind: "block", kicker: "FAQ", title: t("자주 묻는 질문", "FAQ"), block: { t: "kv", items: faq.slice(0, 6).map((f) => ({ label: f.q, value: f.a })) } } as Slide] : []),
+    { kind: "end", title: name },
+  ];
+  const docSections: Section[] = [{ title: t("구역별 원고", "Copy by section"), intro: t("상세페이지에 들어갈 글을 순서대로 모았어요. 디자이너에게 그대로 전달하면 돼요.", "All the page copy in order — hand it straight to a designer."), blocks: secs.flatMap((sec, i): Block[] => [{ t: "h2", text: `${i + 1}. ${s(sec.headline)}` }, ...copyBlocks(sec)]) }, ...sections.filter((x) => x.kicker === "FAQ" || x.title === t("배송·교환 안내", "Shipping & returns"))];
+  return { lang: ctx.lang, theme, eyebrow: t("상세페이지 시안", "Product page proof"), title: name, subtitle: strs(o.usps).join(" · ") || undefined, coverImage: renders[0], meta: meta(ctx), sections, docSections, slides, footer: `${name} · ${t("상세페이지", "Product page")}` };
+}
+
+// ── Data tools: their report, laid out by the designed writers ─────────
+
+function reportBlock(b: ReportBlock, palette: string[], lang: Lang): Block[] {
+  const t = tr(lang);
+  switch (b.type) {
+    case "kpis":
+      return [{ t: "kpis", items: b.items.map((k) => ({ label: k.label, value: k.value, note: k.note })) }];
+    case "chart":
+      return [{ t: "chart", chart: b.chart, palette, title: b.title, caption: b.caption, estimated: b.estimated ? t("추정", "Estimate") : undefined }];
+    case "table":
+      return [...(b.title ? [{ t: "h3", text: b.title } as Block] : []), { t: "table", header: b.header, rows: b.rows }, ...(b.caption ? [{ t: "p", text: b.caption } as Block] : [])];
+    case "text":
+      return [...(b.title ? [{ t: "h3", text: b.title } as Block] : []), { t: "p", text: b.text }];
+    case "callout":
+      return [{ t: "callout", label: b.label, text: b.text, tone: b.tone === "warn" ? "warn" : "accent" }];
+    case "bullets":
+      return [...(b.title ? [{ t: "h3", text: b.title } as Block] : []), { t: "bullets", items: b.items, style: b.style }];
+    case "cards":
+      return [...(b.title ? [{ t: "h3", text: b.title } as Block] : []), { t: "cards", cols: b.columns ?? (b.items.length >= 3 ? 3 : 2), items: b.items.map((c) => ({ kicker: c.kicker, title: c.title, tag: c.badge, body: [...(c.facts ?? []).map((f) => `${f.label}: ${f.value}`), ...(c.lines ?? [])].join("\n") || undefined, footer: c.meter ? `${c.meter.label} ${Math.round(c.meter.value * 100)}%` : c.badge })) }];
+    case "quad":
+      return [...(b.title ? [{ t: "h3", text: b.title } as Block] : []), { t: "cards", cols: 2, items: b.cells.map((c) => ({ title: c.title, body: c.items.map((x) => `• ${x}`).join("\n") })) }];
+    case "image":
+      return [{ t: "image", url: b.url, caption: b.caption }];
+    case "sources":
+      return [];
+  }
+}
+
+function composeReport(ctx: ComposeContext, report: Report): Design {
+  const t = tr(ctx.lang);
+  const r = localizeLabels(report, ctx.lang);
+  const palette = r.palette.length ? r.palette : [DEFAULT.accent];
+  const theme = themeFrom(palette, DEFAULT);
+  const sources = r.sections.flatMap((sec) => sec.blocks.flatMap((b) => (b.type === "sources" ? b.items : []))).map((x) => x.title || x.url).filter(Boolean);
+  const sections: Section[] = [
+    ...(r.hero.kpis?.length || r.hero.subtitle ? [{ title: t("핵심 요약", "Summary"), kicker: r.hero.eyebrow, blocks: [...(r.hero.subtitle ? [{ t: "lead", text: r.hero.subtitle } as Block] : []), ...(r.hero.kpis?.length ? [{ t: "kpis", items: r.hero.kpis.map((k) => ({ label: k.label, value: k.value, note: k.note })) } as Block] : [])] }] : []),
+    ...r.sections.filter((sec) => sec.blocks.some((b) => b.type !== "sources")).map((sec): Section => ({ title: sec.title, kicker: sec.kicker, intro: sec.lead && sec.lead !== r.hero.subtitle ? sec.lead : undefined, blocks: sec.blocks.flatMap((b) => reportBlock(b, palette, ctx.lang)) })),
+    ...(sources.length ? [{ title: t("출처", "Sources"), kicker: t("근거", "Evidence"), blocks: [{ t: "bullets", items: [...new Set(sources)].slice(0, 30), style: "num" } as Block] }] : []),
+  ];
+  // Slides: the summary, then each section's opener and its blocks one by one.
+  const slides: Slide[] = [{ kind: "cover", title: r.hero.title, subtitle: r.hero.subtitle, kicker: r.hero.eyebrow }];
+  if (r.hero.kpis?.length) slides.push({ kind: "block", kicker: r.hero.eyebrow, title: t("핵심 숫자", "Key numbers"), block: { t: "kpis", items: r.hero.kpis.slice(0, 3).map((k) => ({ label: k.label, value: k.value, note: k.note })) } });
+  for (const sec of r.sections) {
+    const blocks = sec.blocks.flatMap((b) => reportBlock(b, palette, ctx.lang)).filter((b) => b.t !== "h3");
+    if (!blocks.length) continue;
+    blocks.slice(0, 4).forEach((b, i) => {
+      const titled = sec.blocks.find((x) => "title" in x && x.title && reportBlock(x, palette, ctx.lang).some((y) => y === b));
+      const block: Block = b.t === "table" ? { ...b, rows: b.rows.slice(0, 9) } : b.t === "cards" ? { ...b, items: b.items.slice(0, 6) } : b;
+      slides.push({ kind: "block", kicker: sec.kicker || (i === 0 ? r.hero.eyebrow : undefined), title: i === 0 ? sec.title : (titled && "title" in titled && titled.title) || sec.title, block });
+    });
+  }
+  slides.push({ kind: "end", title: r.hero.title });
+  const name = ctx.toolName[ctx.lang];
+  return { lang: ctx.lang, theme, eyebrow: r.hero.eyebrow || name, title: r.hero.title, subtitle: r.hero.subtitle, meta: meta(ctx), sections, slides, footer: `${ctx.brandName ? `${ctx.brandName} · ` : ""}${name}` };
+}
+
 const COMPOSERS: Record<string, (ctx: ComposeContext) => Design> = {
   blog: composeBlog,
   "brand-dna": composeBrandDna,
@@ -398,15 +540,22 @@ const COMPOSERS: Record<string, (ctx: ComposeContext) => Design> = {
   "content-transformer": composeTransformer,
   presentation: composePresentation,
   homepage: composeHomepage,
+  image: composeImage,
+  "brand-model": composeModel,
+  sangsepage: composeSalesPage,
 };
 
+/** Tools with a layout of their own (data tools get theirs from their report). */
 export function hasDesign(toolId: string): boolean {
   return toolId in COMPOSERS;
 }
 
 /** The designed layout for this tool's result, or null when the tool still uses the generic export. */
 export function composeDesign(ctx: ComposeContext): Design | null {
+  if (!ctx.output || typeof ctx.output !== "object") return null;
   const fn = COMPOSERS[ctx.toolId];
-  if (!fn || !ctx.output || typeof ctx.output !== "object") return null;
-  return fn(ctx);
+  if (fn) return fn(ctx);
+  // Data tools: their report, in the designed layout.
+  const report = buildReport(ctx.toolId, ctx.output, ctx.input ?? {});
+  return report ? composeReport(ctx, report) : null;
 }

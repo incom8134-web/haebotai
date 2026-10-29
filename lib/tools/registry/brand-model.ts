@@ -19,7 +19,8 @@ export const brandModel: ToolManifest = {
   summary: "제품을 보여줄 일관된 AI 모델 컷을 생성합니다.",
   icon: UserRound,
   inputs: [
-    { kind: "image", id: "product_photo", label: "제품 사진", maxFiles: 1 },
+    // Required: the model holds this product; without it the run can only fail.
+    { kind: "image", id: "product_photo", label: "제품 사진", maxFiles: 1, required: true },
     {
       kind: "select",
       id: "model_profile",

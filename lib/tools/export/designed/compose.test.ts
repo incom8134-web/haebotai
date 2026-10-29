@@ -8,9 +8,9 @@ const ctx = (toolId: string, output: unknown, lang: "ko" | "en" = "ko", input: R
 const texts = (d: Design) => JSON.stringify(d);
 
 test("only the designed tools get a design", () => {
-  for (const id of ["blog", "brand-dna", "logo", "copy", "content-transformer", "presentation", "homepage"]) assert.ok(hasDesign(id), id);
-  assert.equal(composeDesign(ctx("market-desk", { a: 1 })), null);
+  for (const id of ["blog", "brand-dna", "logo", "copy", "content-transformer", "presentation", "homepage", "image", "brand-model", "sangsepage"]) assert.ok(hasDesign(id), id);
   assert.equal(composeDesign(ctx("blog", null)), null);
+  assert.equal(composeDesign(ctx("no-such-tool", { a: 1 })), null);
 });
 
 test("a blog becomes an article with its photos, a paste-ready manuscript and card-news slides", () => {
@@ -68,4 +68,20 @@ test("markdown helpers", () => {
   assert.equal(lines[1].k === "p" && lines[1].text, "para one line two");
   assert.equal(excerpt("짧은 글.", 50), "짧은 글.");
   assert.ok(excerpt("문장 하나입니다. 문장 둘입니다. 문장 셋입니다.", 20).endsWith("."));
+});
+
+test("photo tools become a photo set; the lookbook carries the AI notice", () => {
+  const set = composeDesign(ctx("image", { images: [1, 2, 3, 4].map((i) => ({ name: `Cut ${i}`, purpose: "p", asset_id: "a", url: IMG, seed: "s" })), refined_prompt: "", negative_prompt: "" }, "ko", { description: "밤 몽블랑", preset: "studio", ratio: "4:5" }))!;
+  assert.equal(set.coverImage, IMG);
+  assert.equal(set.sections.filter((s) => s.blocks.some((b) => b.t === "image")).length, 4);
+  const look = composeDesign(ctx("brand-model", { shots: [{ asset_id: "a", url: IMG }], model_seed: "s", disclosure: "AI 생성 이미지" }, "en", { model_profile: "f30", mood: "natural", setting: "cafe" }))!;
+  assert.ok(JSON.stringify(look).includes("AI-generated"));
+  assert.equal(look.subtitle, "Woman, 30s · Natural · Café");
+});
+
+test("a data tool's report is laid out with its charts, in English when asked", () => {
+  const d = composeDesign(ctx("trend", { summary: "s", recommended: "Dessert box", ideas: [{ name: "Dessert box", one_liner: "x", scores: { market_size: 7, growth: 6, margin: 5, personal_fit: 8, entry_barrier: 3, competition: 4, execution_difficulty: 3, capital_need: 2 }, composite: 7, demand_trend: [{ period: "2025", index: 40 }, { period: "2026", index: 70 }], target_customer: "t", entry_cost_krw: 5000000, price_gap: { band: "b", evidence: "e" }, differentiation_angles: [], verdict: "go", risks: [] }], signals: [] }, "en"))!;
+  assert.ok(d.sections.some((s) => s.blocks.some((b) => b.t === "chart")));
+  assert.ok(d.slides.length > 3);
+  assert.ok((JSON.stringify(d.sections.map((s) => s.title)).match(/[가-힣]+/g) ?? []).length === 0, "section titles are English");
 });

@@ -1,6 +1,7 @@
 import "server-only";
 import PptxGenJS from "pptxgenjs";
 import { fetchAll, imageSize, type FetchedImage } from "../images.ts";
+import { chartPng } from "../chart-png.ts";
 import { designImages, plain, type Block, type Card, type Design, type Slide } from "./model.ts";
 
 // The designed deck: its own slide story (design.slides) — a blog as card
@@ -102,7 +103,8 @@ export async function buildDesignedPptx(d: Design): Promise<Buffer> {
       let yy = cy + 0.18;
       const img = c.image ? images.get(c.image) : undefined;
       if (img) {
-        const ih = Math.min(ch * 0.62, cw * 0.62);
+        // Photos keep a portrait-friendly box in narrow columns.
+        const ih = Math.min(ch * 0.72, cols >= 4 ? cw * 1.25 : cw * 0.62);
         cover(s, img, cx + 0.12, cy + 0.12, cw - 0.24, ih);
         yy = cy + 0.12 + ih + 0.12;
       } else {
@@ -298,6 +300,15 @@ export async function buildDesignedPptx(d: Design): Promise<Buffer> {
           s.addText(k.label, { x: cx + 0.3, y: y + 1.45, w: cw - 0.6, h: 0.45, fontFace: FONT, fontSize: 15, bold: true, color: INK });
           if (k.note) s.addText(k.note, { x: cx + 0.3, y: y + 1.9, w: cw - 0.6, h: 0.5, fontFace: FONT, fontSize: 11, color: MUTED });
         });
+        break;
+      }
+      case "chart": {
+        const png = chartPng(b.chart, b.palette, 900);
+        if (!png) break;
+        const capH = b.caption ? 0.45 : 0;
+        const k = Math.min(w / png.width, (h - capH) / png.height);
+        s.addImage({ data: `data:image/png;base64,${png.data.toString("base64")}`, x: x + (w - png.width * k) / 2, y, w: png.width * k, h: png.height * k });
+        if (b.caption) s.addText(`${b.caption}${b.estimated ? `  ·  ${b.estimated}` : ""}`, { x, y: y + h - capH, w, h: capH, fontFace: FONT, fontSize: 12, color: MUTED, align: "center" });
         break;
       }
       case "carousel":

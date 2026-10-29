@@ -1,6 +1,7 @@
 import "server-only";
 import { AlignmentType, BorderStyle, Document, Footer, HeadingLevel, ImageRun, Packer, PageBreak, PageNumber, Paragraph, ShadingType, Table, TableCell, TableRow, TextRun, VerticalAlign, WidthType } from "docx";
 import { fetchAll, fit, imageSize } from "../images.ts";
+import { chartPng } from "../chart-png.ts";
 import { designImages, inlineRuns, parseMarkdown, type Block, type Design, type Section } from "./model.ts";
 
 // The designed Word file: the same content as the PDF, laid out with
@@ -132,6 +133,16 @@ export async function buildDesignedDocx(d: Design): Promise<Buffer> {
         return [grid(b.items.map((it) => [cell([new Paragraph({ children: [run(it.label, { bold: true, color: A })] })], { width: 25 }), cell(para(it.value, { after: 0 }), { width: 75 })]), true), space(240)];
       case "meters":
         return [grid(b.items.map((it) => [cell([new Paragraph({ children: [run(it.label, { bold: true })] })], { width: 30 }), cell([new Paragraph({ children: [run("■".repeat(Math.round(it.value)), { color: A }), run("■".repeat(10 - Math.round(it.value)), { color: "E4E7EC" }), run(`  ${it.value}/10`, { bold: true, color: A })] })], { width: 70 })])), space(240)];
+      case "chart": {
+        const png = chartPng(b.chart, b.palette);
+        if (!png) return [];
+        const size = fit({ width: png.width, height: png.height }, 600, 360);
+        return [
+          ...(b.title ? [new Paragraph({ spacing: { before: 160, after: 60 }, children: [run(b.title, { bold: true }), ...(b.estimated ? [run(`  ${b.estimated}`, { color: "C2410C", size: 18 })] : [])] })] : []),
+          new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 }, children: [new ImageRun({ type: "png", data: png.data, transformation: size })] }),
+          ...(b.caption ? [new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 200 }, children: [run(b.caption, { color: "8A9099", size: 17 })] })] : [space(200)]),
+        ];
+      }
       case "kpis":
         return [grid([b.items.map((k) => cell([new Paragraph({ children: [run(k.value, { bold: true, size: 40, color: A })] }), new Paragraph({ children: [run(k.label, { bold: true })] }), ...(k.note ? [new Paragraph({ children: [run(k.note, { color: "8A9099", size: 17 })] })] : [])], { fill: tint(d.theme.accent, 0.9) }))]), space(240)];
     }
