@@ -92,17 +92,31 @@ export async function buildDesignedPdf(design: Design): Promise<Buffer> {
   const richH = (text: string, width: number, size: number, gap = 4) => textH(inlineRuns(text).map((r) => r.text).join(""), "b", size, width, gap);
 
   // Photos fill their box; a very wide or tall image (a logo lockup) is fitted whole on white instead of cropped.
+  // Each picture is embedded once, however many pages draw it.
+  // pdfkit's openImage() is missing from its type definitions; pdf.image() takes what it returns.
+  const opener = pdf as unknown as { openImage(src: Buffer): unknown };
+  const opened = new Map<Buffer, unknown>();
+  const embed = (img: FetchedImage): Buffer => {
+    let ref = opened.get(img.data);
+    if (!ref) {
+      ref = opener.openImage(img.data);
+      opened.set(img.data, ref);
+    }
+    return ref as Buffer;
+  };
   const photo = (img: FetchedImage, x: number, y: number, w: number, h: number, radius = 10) => {
     const size = imageSize(img);
     const ratio = size.width / size.height;
-    const whole = ratio > 1.9 || ratio < 0.55;
+    // Wide lockups are fitted whole; a very tall page render is shown from its top.
+    const whole = ratio > 1.9;
+    const fromTop = ratio < 0.55;
     if (whole) pdf.roundedRect(x, y, w, h, radius).fill("#FFFFFF");
     const scale = whole ? Math.min(w / size.width, h / size.height) * 0.92 : Math.max(w / size.width, h / size.height);
     const iw = size.width * scale;
     const ih = size.height * scale;
     pdf.save();
     pdf.roundedRect(x, y, w, h, radius).clip();
-    pdf.image(img.data, x - (iw - w) / 2, y - (ih - h) / 2, { width: iw, height: ih });
+    pdf.image(embed(img), x - (iw - w) / 2, fromTop ? y : y - (ih - h) / 2, { width: iw, height: ih });
     pdf.restore();
   };
 
@@ -330,6 +344,19 @@ export async function buildDesignedPdf(design: Design): Promise<Buffer> {
       if (c.footer) h += textH(c.footer, "r", 8.5, cw - 28, 2) + 6;
       return h + 10;
     };
+    // A card longer than a page reads as a heading and its text instead.
+    if (items.some((c) => cardH(c) > BOTTOM - M - 30)) {
+      for (const c of items) {
+        ensure(80);
+        if (c.kicker) pdf.font("b").fontSize(8.5).fillColor(A).text(c.kicker, M, pdf.y, { width: W });
+        pdf.font("h").fontSize(12.5).fillColor(INK).text(c.title, M, pdf.y, { width: W, lineGap: 3 });
+        pdf.moveDown(0.3);
+        if (c.body) paragraph(c.body, 10);
+        if (c.footer) paragraph(c.footer, 9, MUTED);
+        pdf.moveDown(0.6);
+      }
+      return;
+    }
     for (let r = 0; r < items.length; r += cols) {
       const row = items.slice(r, r + cols);
       const h = Math.max(...row.map(cardH));
@@ -491,9 +518,38 @@ export async function buildDesignedPdf(design: Design): Promise<Buffer> {
     pdf.y = y + 84;
   };
 
+  /** A very tall image (a whole product page) printed full width, continuing across pages. */
+  const strip = (img: FetchedImage) => {
+    const size = imageSize(img);
+    const w = Math.min(W, 420);
+    const x = M + (W - w) / 2;
+    const total = (size.height * w) / size.width;
+    let shown = 0;
+    while (shown < total - 1) {
+      const room = BOTTOM - pdf.y;
+      if (room < 120) {
+        newPage();
+        continue;
+      }
+      const h = Math.min(room, total - shown);
+      pdf.save();
+      pdf.rect(x, pdf.y, w, h).clip();
+      pdf.image(embed(img), x, pdf.y - shown, { width: w, height: total });
+      pdf.restore();
+      pdf.rect(x, pdf.y, w, h).lineWidth(0.5).strokeColor(LINE).stroke();
+      shown += h;
+      pdf.y += h;
+      if (shown < total - 1) newPage();
+    }
+    pdf.x = M;
+    pdf.moveDown(0.8);
+  };
+
   const image = (u: string, caption?: string, tall?: boolean) => {
     const img = images.get(u);
     if (!img) return;
+    const dims = imageSize(img);
+    if (dims.width / dims.height < 0.4) return strip(img);
     const size = fit(imageSize(img), W, tall ? 420 : 300);
     ensure(size.height + (caption ? 22 : 8));
     const x = M + (W - size.width) / 2;
