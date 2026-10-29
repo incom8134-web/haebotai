@@ -34,6 +34,7 @@ project order (0001 → 0012, currently).
 | `0011_lock_down_credits_and_keys.sql` | **Security fix.** Revokes direct authenticated write access to `user_credits`, `generations`, `user_api_keys`; moves credit reserve/settle to `security definer` RPCs callable only by the service role; adds `user_api_key_status` view |
 | `0012_pro_payments.sql` | Pro checkout: `payments` order ledger (read-own, service-role writes) and `activate_pro` (service-role only) — marks a pending order done, extends Pro 30 days, adds 2,000 credits, in one transaction |
 | `0019_audit_log.sql` | `audit_log` for staff actions in `/admin` (service-role only). Optional: `/admin` works without it, it just records nothing |
+| `0022_saas_plans.sql` | Paid plans: `memberships.plan` allows `plus`; `payments.plan` allows `plus`/`pro`/`topup`; `activate_order` (service-role only) finishes any order by its stored plan — Plus/Pro extend 30 days (stacking; buying Plus never lowers a running Pro), a top-up only adds credits |
 
 Storage buckets (`inputs`, `exports`, `logos`) and their RLS policies are
 created by `0001_init.sql` — no manual bucket setup needed.
@@ -89,7 +90,7 @@ broken pages.
 | `NEXT_PUBLIC_AUTH_PROVIDERS` | optional | `google,kakao` shows the Kakao button (Google is always on). Enable Kakao in Supabase first. Type **Config**, not Secret; inlined at build time, so redeploy. |
 | `NEXT_PUBLIC_KAKAO_PHONE` | optional | `1` asks Kakao for the phone number at sign-in and shows it in /admin. Needs a business-verified Kakao app with the **phone_number** consent item (Kakao Developers → 카카오 로그인 → 동의항목). Collecting it is a new privacy item: the privacy policy text switches on with it, and bump `CONSENT_VERSION` (lib/consent.ts) in the same deploy. Config, build time. |
 | `GOOGLE_SITE_VERIFICATION` / `NAVER_SITE_VERIFICATION` | optional | The `content` value of the HTML-tag ownership check from Google Search Console / Naver Search Advisor. Rendered as a meta tag; redeploy after setting. |
-| `NEXT_PUBLIC_TOSS_CLIENT_KEY` / `TOSS_SECRET_KEY` | optional | Toss Payments 결제위젯 client key (`test_gck_…`/`live_gck_…`) and its secret key (`…_gsk_…`, **server-only**). Both set → the Pro checkout at `/account/membership/checkout` works; either missing → it shows "not set up". The client key is inlined at build time, so redeploy after changing it. |
+| `NEXT_PUBLIC_TOSS_CLIENT_KEY` / `TOSS_SECRET_KEY` | optional | Toss Payments 결제위젯 client key (`test_gck_…`/`live_gck_…`) and its secret key (`…_gsk_…`, **server-only**). Both set → checkout at `/account/membership/checkout?product=plus|pro|topup` works; either missing → it shows "not set up". The client key is inlined at build time, so redeploy after changing it. |
 | `ADMIN_EMAILS` | optional | Comma-separated staff emails allowed into `/admin` (overview, members, support tickets). Unset → `/admin` is a 404 for everyone. Also lets those people use the team's own AI key. Redeploy after changing. |
 | `API_KEY_ENCRYPTION_SECRET` | optional | Enables BYOK (Claude / own-Gemini keys). Random 32+ byte value — `openssl rand -base64 32`. **Losing this after users have stored keys means every stored key is unrecoverable and must be re-entered.** Omitting it entirely disables BYOK; Claude tools then show no usable engine. |
 

@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { Dashboard, type DashboardRun } from "@/components/studio/dashboard";
 import { getBalance } from "@/lib/credits";
 import { getApiKeyStatus } from "@/lib/api-keys";
+import { getMembership } from "@/lib/membership";
+import { isPaidPlan } from "@/lib/payments/pro";
 import { canUsePlatformKey } from "@/lib/platform-access";
 import { listProjects } from "@/lib/projects/server";
 import { displayName } from "@/lib/site/display-name";
@@ -151,6 +153,7 @@ export default async function StudioPage() {
         runs30: monthRuns.length,
         keyConnected: keyStatus.providers.google.some((s) => s.connected && !s.broken),
         team: canUsePlatformKey(user?.email),
+        paid: isPaidPlan((await getMembership()).plan),
       }}
     />
   );

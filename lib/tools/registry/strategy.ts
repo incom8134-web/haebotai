@@ -23,6 +23,6 @@ export const strategy: ToolManifest = {
   outputRenderer: "document",
   grounding: { requireSources: true, webSearch: true, estimateBadge: true },
   model: "gemini-3.1-pro-preview",
-  estimatedCredits: 65,
+  estimatedCredits: 170,
   estimatedSeconds: 290,
 };

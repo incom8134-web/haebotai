@@ -1,20 +1,54 @@
-// Pro plan purchase — one-time 30-day pass via Toss Payments (결제위젯).
-// No auto-renewal: 자동결제(빌링) needs a separate Toss contract, so a
-// purchase adds 30 days (stacking on a running Pro period) and 2,000
-// credits. Prices here are the source of truth — the confirm route
-// checks Toss's redirect against the server-recorded order, never the
-// client's numbers.
+// Plan purchases via Toss Payments (결제위젯): Plus and Pro are 30-day
+// passes, a top-up adds credits to a running plan. No auto-renewal yet:
+// 자동결제(빌링) needs a separate Toss contract (see docs/billing.md).
+// Prices here are the source of truth — the order route records the
+// amount server-side and the confirm route checks Toss's redirect
+// against that row, never the client's numbers.
+//
+// 1 credit ≈ ₩5 of AI cost (tool prices in lib/tools/registry). Each
+// payment grants at most this much AI cost (prices include 10% VAT):
+//   Plus  ₩29,900 → 2,000 credits ≈ ₩10,000
+//   Pro   ₩59,900 → 6,000 credits ≈ ₩30,000
+//   Top-up ₩5,900 →   500 credits ≈ ₩2,500
 
-export const PRO_ORDER = {
-  amount: 19_900,
-  days: 30,
-  credits: 2_000,
-  orderName: "AI 해바 프로 30일",
-} as const;
+export type ProductId = "plus" | "pro" | "topup";
+
+export interface Product {
+  id: ProductId;
+  amount: number;
+  /** Days of membership added (0 for a top-up). */
+  days: number;
+  credits: number;
+  orderName: string;
+}
+
+export const PRODUCTS: Record<ProductId, Product> = {
+  plus: { id: "plus", amount: 29_900, days: 30, credits: 2_000, orderName: "AI 해바 플러스 30일" },
+  pro: { id: "pro", amount: 59_900, days: 30, credits: 6_000, orderName: "AI 해바 프로 30일" },
+  topup: { id: "topup", amount: 5_900, days: 0, credits: 500, orderName: "AI 해바 크레딧 500" },
+};
+
+/** Kept for code that still names the Pro pass. */
+export const PRO_ORDER = PRODUCTS.pro;
+
+export function productFor(id: unknown): Product | null {
+  return typeof id === "string" && id in PRODUCTS ? PRODUCTS[id as ProductId] : null;
+}
+
+/** Plans that can run tools. */
+export function isPaidPlan(plan: string | null | undefined): plan is "plus" | "pro" {
+  return plan === "plus" || plan === "pro";
+}
+
+/** Who may buy what: a top-up only on a running Plus or Pro. */
+export function canBuy(product: ProductId, currentPlan: string): { ok: true } | { ok: false; reason: "plan_required" } {
+  if (product === "topup" && !isPaidPlan(currentPlan)) return { ok: false, reason: "plan_required" };
+  return { ok: true };
+}
 
 /** Toss orderId: 6–64 chars of [A-Za-z0-9_-]. */
-export function newOrderId(randomUUID: () => string = () => crypto.randomUUID()): string {
-  return `pro_${randomUUID().replace(/-/g, "")}`;
+export function newOrderId(product: ProductId = "pro", randomUUID: () => string = () => crypto.randomUUID()): string {
+  return `${product}_${randomUUID().replace(/-/g, "")}`;
 }
 
 interface PendingOrder {
@@ -46,7 +80,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
  * Brings our ledger in line with Toss. Retries orders still pending and
  * orders we marked failed only because the confirm call never got an
  * answer (Toss may have approved it anyway). Only a DONE payment at the
- * stored amount ever grants Pro — WAITING_FOR_DEPOSIT (가상계좌) waits.
+ * stored amount ever grants anything — WAITING_FOR_DEPOSIT (가상계좌) waits.
  */
 export function isRetryable(order: Pick<LedgerOrder, "status" | "failReason">): boolean {
   return order.status === "pending" || (order.status === "failed" && (order.failReason ?? "").startsWith("NETWORK_ERROR"));

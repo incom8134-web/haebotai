@@ -57,6 +57,12 @@ export interface ToolManifest {
   };
 
   model: "gemini-3.8-flash" | "gemini-3.1-pro-preview" | "gemini-3.1-flash-image" | "gemini-3-pro-image";
+  /**
+   * What one run costs the member, fixed and shown before running. 1 credit
+   * ≈ ₩5 of AI cost (lib/payments/pro.ts), set from measured runs: text
+   * tokens at Flash prices × 1.6 (planning on the Pro model, thinking,
+   * search) plus ₩188 per Pro image, rounded up to a multiple of 5.
+   */
   estimatedCredits: number;
   estimatedSeconds: number;
 

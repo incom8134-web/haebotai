@@ -4,7 +4,7 @@ import { OWN_KEY_ONLY } from "@/lib/site/access";
 import { titled } from "@/lib/site/meta";
 
 export const generateMetadata = titled("요금", "Pricing", {
-  description: OWN_KEY_ONLY ? "25개 도구를 내 API 키로 실행해요. AI 요금은 내 Google·Anthropic 계정으로 직접 청구돼요." : "모든 플랜에서 25개 도구를 모두 쓰고, 다른 건 크레딧뿐이에요. 도구별 예상 크레딧과 환불 기준.",
+  description: OWN_KEY_ONLY ? "25개 도구를 내 API 키로 실행해요. AI 요금은 내 Google·Anthropic 계정으로 직접 청구돼요." : "무료로 둘러보고 플러스(₩29,900)·프로(₩59,900)로 25개 도구를 실행해요. 도구별 크레딧과 환불 기준.",
 });
 
 export default async function PricingPage() {

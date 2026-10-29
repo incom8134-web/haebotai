@@ -2,6 +2,7 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type { PlanId } from "@/lib/site/plans";
 import { getCurrentUser } from "@/lib/supabase/user";
+import { STUDENT_PLAN } from "@/lib/site/access";
 
 export interface Membership {
   plan: PlanId;
@@ -56,7 +57,9 @@ export async function getMembership(): Promise<Membership> {
   ]);
 
   const expired = row?.expires_at ? new Date(row.expires_at).getTime() < Date.now() : false;
-  const plan = (row && !expired ? row.plan : "free") as PlanId;
-  const daysLeft = row?.expires_at && !expired ? Math.ceil((new Date(row.expires_at).getTime() - Date.now()) / 86_400_000) : null;
+  // A student row counts as free while the student plan is off (lib/site/access.ts).
+  const active = row && !expired && (row.plan !== "student" || STUDENT_PLAN);
+  const plan = (active ? row.plan : "free") as PlanId;
+  const daysLeft = active && row?.expires_at ? Math.ceil((new Date(row.expires_at).getTime() - Date.now()) / 86_400_000) : null;
   return { plan, expiresAt: row?.expires_at ?? null, daysLeft, studentRequest: (request?.status as Membership["studentRequest"]) ?? null };
 }

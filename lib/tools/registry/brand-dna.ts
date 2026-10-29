@@ -53,6 +53,6 @@ export const brandDna: ToolManifest = {
   outputRenderer: "cards",
   grounding: { requireSources: false, webSearch: false, estimateBadge: false },
   model: "gemini-3.1-pro-preview",
-  estimatedCredits: 35,
+  estimatedCredits: 30,
   estimatedSeconds: 170,
 };

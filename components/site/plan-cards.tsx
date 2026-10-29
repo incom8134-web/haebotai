@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Check, GraduationCap } from "lucide-react";
+import { Check } from "lucide-react";
 import { PLANS } from "@/lib/site/plans";
+import { PRODUCTS } from "@/lib/payments/pro";
 import { CATEGORIES, CATEGORY_ORDER, publicTools } from "@/lib/tools/catalog";
 import { getTool } from "@/lib/tools/registry";
 import { useBi } from "@/lib/i18n/context";
@@ -18,14 +19,12 @@ export function PlanCards({ signedIn }: { signedIn: boolean }) {
     <div className="grid gap-4 md:grid-cols-3">
       {PLANS.map((p) => (
         <article key={p.id} className={cn("relative flex flex-col rounded-[24px] border bg-surface p-6", p.highlight ? "border-accent/50" : "border-hairline")}>
-          {p.id === "student" ? (
-            <span className="absolute -top-3 left-6 flex items-center gap-1.5 rounded-full bg-ai px-3 py-1 text-2xs font-semibold text-white dark:text-[#04211f]">
-              <GraduationCap size={12} aria-hidden /> {L({ ko: "학생 무제한", en: "Unlimited for students" })}
-            </span>
+          {p.highlight ? (
+            <span className="absolute -top-3 left-6 rounded-full bg-accent px-3 py-1 text-2xs font-semibold text-white">{L({ ko: "추천", en: "Recommended" })}</span>
           ) : null}
           <p className="font-semibold text-fg">{L(p.name)}</p>
           <p className="mt-3 font-display text-4xl font-bold tracking-[-0.02em] whitespace-nowrap text-fg">
-            {/* "₩19,900/30일": the period reads as a suffix, so it never wraps the amount. */}
+            {/* "₩29,900/30일": the period reads as a suffix, so it never wraps the amount. */}
             {L(p.price).split("/")[0]}
             {L(p.price).includes("/") ? <span className="ml-1 text-base font-medium tracking-normal text-fg-muted">/ {L(p.price).split("/").slice(1).join("/").trim()}</span> : null}
           </p>
@@ -39,16 +38,10 @@ export function PlanCards({ signedIn }: { signedIn: boolean }) {
             ))}
           </ul>
           <Link
-            href={!signedIn ? "/auth" : p.id === "pro" ? "/account/membership/checkout" : p.id === "student" ? "/account/membership" : "/studio"}
+            href={p.id === "free" ? (signedIn ? "/tools" : "/auth") : signedIn ? `/account/membership/checkout?product=${p.id}` : `/auth?next=${encodeURIComponent(`/account/membership/checkout?product=${p.id}`)}`}
             className={cn(p.id === "free" ? secondaryButton : primaryButton, "mt-7")}
           >
-            {p.id === "student"
-              ? signedIn
-                ? L({ ko: "학생 인증하기", en: "Verify as a student" })
-                : L({ ko: "가입 후 인증하기", en: "Sign up, then verify" })
-              : p.id === "pro" && signedIn
-                ? L({ ko: "프로 시작하기", en: "Get Pro" })
-                : L({ ko: "시작하기", en: "Get started" })}
+            {p.id === "free" ? L({ ko: "둘러보기", en: "Browse the tools" }) : L({ ko: `${p.name.ko} 시작하기`, en: `Get ${p.name.en}` })}
           </Link>
         </article>
       ))}
@@ -108,7 +101,7 @@ export function PriceTable() {
 }
 
 /** A few real per-tool prices and the full range, for the landing page. */
-export function CreditPreview({ signupCredits = 500 }: { signupCredits?: number }) {
+export function CreditPreview({ planCredits = PRODUCTS.plus.credits }: { planCredits?: number }) {
   const L = useBi();
   const prices = toolPrices().sort((a, b) => a.credits - b.credits);
   if (!prices.length) return null;
@@ -121,7 +114,7 @@ export function CreditPreview({ signupCredits = 500 }: { signupCredits?: number 
       <p className="text-sm font-semibold text-fg">
         {L({ ko: `도구 1회 실행 ${min}~${max} 크레딧`, en: `${min}–${max} credits per tool run` })}
         <span className="ml-2 text-xs font-normal text-fg-muted">
-          {L({ ko: `가입 크레딧 ${signupCredits}이면 가장 가벼운 도구로 ${Math.floor(signupCredits / Math.max(1, min))}번`, en: `${signupCredits} sign-up credits = ${Math.floor(signupCredits / Math.max(1, min))} runs of the lightest tool` })}
+          {L({ ko: `플러스 ${planCredits.toLocaleString()} 크레딧이면 가장 가벼운 도구로 ${Math.floor(planCredits / Math.max(1, min))}번`, en: `Plus's ${planCredits.toLocaleString()} credits = ${Math.floor(planCredits / Math.max(1, min))} runs of the lightest tool` })}
         </span>
       </p>
       <ul className="mt-3 flex flex-wrap gap-2">

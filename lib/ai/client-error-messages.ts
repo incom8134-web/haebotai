@@ -8,6 +8,8 @@
 // to yet) falls back to showing the original Korean in both locales
 // rather than hiding the error.
 
+import { MEMBER_API_KEYS } from "../site/access.ts";
+
 interface MappedError {
   ko: string;
   en: string;
@@ -58,8 +60,8 @@ const PATTERNS: { test: (msg: string) => boolean; map: (msg: string) => MappedEr
   {
     test: (m) => m.includes("출처 없이 사실 주장을 생성할 수 없습니다"),
     map: () => ({
-      ko: "이 도구는 웹 검색 출처가 꼭 필요한데, 이번에는 검색 결과를 받지 못했어요. 잠시 후 다시 시도해 주세요. 무료 키는 하루 검색 한도가 있어서, 자주 막히면 내일 다시 하거나 결제를 켠 키를 쓰세요.",
-      en: "This tool needs web sources, and no search results came back this time. Please try again shortly. Free keys have a daily search limit; if it keeps happening, try tomorrow or use a key with billing turned on.",
+      ko: MEMBER_API_KEYS ? "이 도구는 웹 검색 출처가 꼭 필요한데, 이번에는 검색 결과를 받지 못했어요. 잠시 후 다시 시도해 주세요. 무료 키는 하루 검색 한도가 있어서, 자주 막히면 내일 다시 하거나 결제를 켠 키를 쓰세요." : "이 도구는 웹 검색 출처가 꼭 필요한데, 이번에는 검색 결과를 받지 못했어요. 크레딧은 돌려드렸으니 잠시 후 다시 시도해 주세요.",
+      en: MEMBER_API_KEYS ? "This tool needs web sources, and no search results came back this time. Please try again shortly. Free keys have a daily search limit; if it keeps happening, try tomorrow or use a key with billing turned on." : "This tool needs web sources, and no search results came back this time. Your credits were returned — please try again shortly.",
       link: "/account/api-key",
       linkLabel: { ko: "내 API 키 확인", en: "Check my API key" },
     }),
@@ -118,8 +120,21 @@ const PATTERNS: { test: (msg: string) => boolean; map: (msg: string) => MappedEr
     }),
   },
   {
-    test: (m) => m.includes("크레딧이 부족합니다"),
-    map: () => ({ ko: "크레딧이 부족합니다.", en: "Not enough credits.", link: "/account/membership", linkLabel: { ko: "크레딧 충전하기", en: "Top up credits" } }),
+    test: (m) => m.includes("크레딧이 부족"),
+    map: () => ({ ko: "크레딧이 부족해요.", en: "Not enough credits.", link: "/account/membership", linkLabel: { ko: "크레딧 충전하기", en: "Top up credits" } }),
+  },
+  {
+    test: (m) => m.includes("플러스 플랜부터"),
+    map: () => ({
+      ko: "도구 실행은 플러스 플랜부터 할 수 있어요.",
+      en: "Running tools starts with the Plus plan.",
+      link: "/account/membership",
+      linkLabel: { ko: "플랜 고르기", en: "Choose a plan" },
+    }),
+  },
+  {
+    test: (m) => m.includes("Gemini 엔진만 제공"),
+    map: () => ({ ko: "지금은 Gemini 엔진만 제공해요.", en: "Only the Gemini engine is offered right now." }),
   },
   {
     test: (m) => m.includes("요청이 너무 잦습니다"),
@@ -144,7 +159,17 @@ const PATTERNS: { test: (msg: string) => boolean; map: (msg: string) => MappedEr
 
 export function mapRunError(message: string): MappedError {
   for (const { test, map } of PATTERNS) {
-    if (test(message)) return map(message);
+    if (test(message)) {
+      const mapped = map(message);
+      // No own-key screen to send members to while keys are off (lib/site/access.ts).
+      if (!MEMBER_API_KEYS && mapped.link === "/account/api-key") {
+        const { link: _link, linkLabel: _label, ...rest } = mapped;
+        void _link;
+        void _label;
+        return rest;
+      }
+      return mapped;
+    }
   }
   return { ko: message, en: message };
 }

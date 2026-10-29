@@ -4,7 +4,7 @@ import { useActionState, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AlertTriangle, ArrowRight, Check, CircleCheck, CircleGauge, Crown, ExternalLink, GraduationCap, KeyRound, LogOut, Trash2 } from "lucide-react";
-import { PLANS } from "@/lib/site/plans";
+import { PLANS, planName } from "@/lib/site/plans";
 import { requestStudentVerification, type StudentRequestState } from "@/lib/actions/membership";
 import { deleteApiKey, saveApiKey, testApiKey, type ApiKeyActionState } from "@/lib/actions/api-keys";
 import { useBi } from "@/lib/i18n/context";
@@ -16,7 +16,10 @@ import { listTools } from "@/lib/tools/registry";
 import { PageHeader, inputClass, primaryButton, secondaryButton, textareaClass } from "@/components/site/page";
 import { cn } from "@/lib/utils";
 import type { ConsentState } from "@/lib/consent";
-import { OWN_KEY_ONLY } from "@/lib/site/access";
+import { MEMBER_API_KEYS, OWN_KEY_ONLY, STUDENT_PLAN } from "@/lib/site/access";
+import { isPaidPlan, PRODUCTS } from "@/lib/payments/pro";
+
+const won = (n: number) => `₩${n.toLocaleString("ko-KR")}`;
 
 // Which tools currently run on a given provider, read live from the
 // capability map so this list can never drift out of sync with reality.
@@ -73,14 +76,15 @@ function providerDescription(provider: ApiKeyProvider): { ko: string; en: string
 
 function AccountOverview({ email, balance, membership, apiKey, brandName, signOut, consent }: { email: string; balance: number | null; membership: Membership; apiKey: ApiKeyStatus; brandName: string | null; signOut: () => void; consent: ConsentState | null }) {
   const L = useBi();
-  const plan = PLANS.find((p) => p.id === membership.plan)!;
+  const plan = { name: planName(membership.plan) };
   const allDoors = [
-    { href: "/account/credits", icon: CircleGauge, title: { ko: "크레딧·한도", en: "Credits & limits" }, value: membership.plan === "student" ? L({ ko: "제한 없음", en: "Unlimited" }) : L({ ko: `${(balance ?? 0).toLocaleString()} 남음`, en: `${(balance ?? 0).toLocaleString()} left` }) },
-    { href: "/account/membership", icon: Crown, title: { ko: "학생 멤버십", en: "Student membership" }, value: membership.plan === "student" ? L({ ko: "사용 중", en: "Active" }) : membership.studentRequest === "pending" ? L({ ko: "검토 중", en: "Under review" }) : L({ ko: "신청 가능", en: "Available" }) },
+    { href: "/account/credits", icon: CircleGauge, title: { ko: "크레딧·한도", en: "Credits & limits" }, value: STUDENT_PLAN && membership.plan === "student" ? L({ ko: "제한 없음", en: "Unlimited" }) : L({ ko: `${(balance ?? 0).toLocaleString()} 남음`, en: `${(balance ?? 0).toLocaleString()} left` }) },
+    { href: "/account/membership", icon: Crown, title: { ko: "멤버십", en: "Membership" }, value: isPaidPlan(membership.plan) ? L({ ko: `${plan.name.ko} · ${membership.daysLeft ?? 0}일 남음`, en: `${plan.name.en} · ${membership.daysLeft ?? 0} days left` }) : L({ ko: "플랜 고르기", en: "Choose a plan" }) },
     { href: "/account/api-key", icon: KeyRound, title: { ko: "내 API 키", en: "My API key" }, value: apiKey.connected ? L(OWN_KEY_ONLY ? { ko: "연결됨", en: "Connected" } : { ko: "연결됨 · 크레딧 미차감", en: "Connected · no credits" }) : L(OWN_KEY_ONLY ? { ko: "등록 필요", en: "Needed" } : { ko: "없음", en: "None" }) },
   ];
   // No credits or plans while members bring their own key (lib/site/access.ts): the key is the one door that matters.
-  const doors = OWN_KEY_ONLY ? allDoors.filter((d) => d.href === "/account/api-key") : allDoors;
+  // SaaS mode hides members' own keys (lib/site/access.ts).
+  const doors = OWN_KEY_ONLY ? allDoors.filter((d) => d.href === "/account/api-key") : MEMBER_API_KEYS ? allDoors : allDoors.filter((d) => d.href !== "/account/api-key");
   return (
     <>
       <h1 className="sr-only">{L({ ko: "내 계정", en: "My account" })}</h1>
@@ -96,7 +100,7 @@ function AccountOverview({ email, balance, membership, apiKey, brandName, signOu
         </div>
         {OWN_KEY_ONLY ? null : (
           <div className="text-right">
-            <p className="font-mono text-2xl">{membership.plan === "student" ? "∞" : (balance ?? 0).toLocaleString()}</p>
+            <p className="font-mono text-2xl">{STUDENT_PLAN && membership.plan === "student" ? "∞" : (balance ?? 0).toLocaleString()}</p>
             <p className="text-2xs text-fg-subtle">{L({ ko: "크레딧", en: "credits" })}</p>
           </div>
         )}
@@ -116,13 +120,13 @@ function AccountOverview({ email, balance, membership, apiKey, brandName, signOu
       </div>
       {OWN_KEY_ONLY ? null : <p className="mt-6 text-sm text-fg-muted">{L(plan.name)} · {brandName ?? L({ ko: "프로필 없음", en: "No profile" })}</p>}
 
-      {!OWN_KEY_ONLY && membership.plan === "pro" && membership.daysLeft !== null && membership.daysLeft <= 7 ? (
-        <section className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-[24px] border border-hairline bg-surface-2 p-5" aria-labelledby="pro-ending">
+      {!OWN_KEY_ONLY && isPaidPlan(membership.plan) && membership.daysLeft !== null && membership.daysLeft <= 7 ? (
+        <section className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-[24px] border border-hairline bg-surface-2 p-5" aria-labelledby="plan-ending">
           <div className="min-w-0">
-            <h2 id="pro-ending" className="font-semibold">{L({ ko: `프로가 ${membership.daysLeft}일 뒤 끝나요`, en: `Pro ends in ${membership.daysLeft} days` })}</h2>
-            <p className="mt-1 text-sm break-keep text-fg-muted">{L({ ko: "자동 결제는 없어요. 계속 쓰려면 직접 연장해 주세요 — 남은 기간에 30일이 더해집니다.", en: "There's no automatic renewal. Extend it yourself to keep Pro — 30 days are added to what's left." })}</p>
+            <h2 id="plan-ending" className="font-semibold">{L({ ko: `${plan.name.ko}가 ${membership.daysLeft}일 뒤 끝나요`, en: `${plan.name.en} ends in ${membership.daysLeft} days` })}</h2>
+            <p className="mt-1 text-sm break-keep text-fg-muted">{L({ ko: "자동 결제는 없어요. 계속 쓰려면 직접 연장해 주세요 — 남은 기간에 30일이 더해져요.", en: "There's no automatic renewal. Extend it yourself to keep going — 30 days are added to what's left." })}</p>
           </div>
-          <Link href="/account/membership/checkout" className={cn(primaryButton, "h-10")}>{L({ ko: "30일 연장하기", en: "Extend 30 days" })}</Link>
+          <Link href={`/account/membership/checkout?product=${membership.plan}`} className={cn(primaryButton, "h-10")}>{L({ ko: "30일 연장하기", en: "Extend 30 days" })}</Link>
         </section>
       ) : null}
 
@@ -207,8 +211,8 @@ function DeleteAccountPanel({ balance }: { balance: number | null }) {
         </h2>
         <div className="mt-3 space-y-4 text-sm">
           <ul className="list-disc space-y-1 pl-5 break-keep text-fg-muted">
-            <li>{L({ ko: "보관함의 모든 결과물과 파일, 비즈니스 프로필, 등록한 API 키가 바로 삭제됩니다.", en: "All results and files, your business profile and saved API keys are deleted right away." })}</li>
-            {OWN_KEY_ONLY ? null : <li>{L({ ko: `남은 크레딧${balance ? ` ${balance.toLocaleString()}` : ""}은 사라지며 환불되지 않습니다. 결제 후 7일이 지나지 않은 Pro 결제는 탈퇴 전에 고객센터로 환불을 먼저 요청해 주세요.`, en: "Remaining credits are lost and not refunded. For a Pro payment made in the last 7 days, ask customer service for a refund before deleting." })}</li>}
+            <li>{L(MEMBER_API_KEYS ? { ko: "보관함의 모든 결과물과 파일, 비즈니스 프로필, 등록한 API 키가 바로 삭제됩니다.", en: "All results and files, your business profile and saved API keys are deleted right away." } : { ko: "보관함의 모든 결과물과 파일, 비즈니스 프로필이 바로 삭제됩니다.", en: "All results and files and your business profile are deleted right away." })}</li>
+            {OWN_KEY_ONLY ? null : <li>{L({ ko: `남은 크레딧${balance ? ` ${balance.toLocaleString()}` : ""}은 사라지며 환불되지 않습니다. 결제 후 7일이 지나지 않은 플랜·충전 결제는 탈퇴 전에 고객센터로 환불을 먼저 요청해 주세요.`, en: "Remaining credits are lost and not refunded. For a plan or top-up paid in the last 7 days, ask customer service for a refund before deleting." })}</li>}
             <li>{L(OWN_KEY_ONLY ? { ko: "계약 기록(5년)과 문의·분쟁 처리 기록(3년)은 전자상거래법에 따라 분리 보관한 뒤 파기합니다.", en: "Contract records (5 years) and complaint records (3 years) are kept separately as the e-commerce law requires, then destroyed." } : { ko: "결제·계약 기록(5년)과 문의·분쟁 처리 기록(3년)은 전자상거래법에 따라 분리 보관한 뒤 파기합니다.", en: "Payment and contract records (5 years) and complaint records (3 years) are kept separately as the e-commerce law requires, then destroyed." })}</li>
             <li>{L({ ko: "같은 이메일로 다시 가입할 수 있지만, 새 계정으로 시작합니다.", en: "You can sign up again with the same email, as a new account." })}</li>
           </ul>
@@ -242,28 +246,31 @@ function MembershipPanel({ membership, payments }: { membership: Membership; pay
   const request = studentState?.ok ? "pending" : membership.studentRequest;
   return (
     <>
-      <PageHeader title={L({ ko: "학생 멤버십", en: "Student membership" })} lead={L({ ko: "모든 플랜에서 모든 도구를 똑같이 써요. 다른 건 크레딧뿐이에요. 학생은 인증하면 무제한이에요.", en: "Every plan gets every tool; only credits differ. Verified students get unlimited use." })} />
+      <PageHeader
+        title={L({ ko: "멤버십", en: "Membership" })}
+        lead={L({ ko: "무료로 둘러보고, 플러스나 프로로 모든 도구를 실행해요. 30일 이용권이라 자동 결제는 없고, 남은 기간에 이어서 연장돼요.", en: "Browse free; run every tool on Plus or Pro. Each is a 30-day pass with no auto-renewal, and buying again extends what's left." })}
+      />
       {/* Plan */}
       <section>
         <div className="grid gap-3 md:grid-cols-3">
           {PLANS.map((p) => {
-            const current = p.id === membership.plan;
+            const current = p.id === membership.plan || (p.id === "free" && !isPaidPlan(membership.plan));
             return (
-              <div key={p.id} className={cn("glass rounded-[24px] p-5", current && "ring-1 ring-studio-cyan/50")}>
+              <div key={p.id} className={cn("glass flex flex-col rounded-[24px] p-5", current && "ring-1 ring-studio-cyan/50")}>
                 <div className="flex items-center justify-between">
                   <p className="font-semibold">{L(p.name)}</p>
                   {current ? <span className="rounded-full bg-studio-cyan/15 px-2.5 py-0.5 text-2xs font-semibold text-studio-cyan">{L({ ko: "지금", en: "Current" })}</span> : null}
                 </div>
                 <p className="mt-2 font-display text-2xl font-bold">{L(p.price)}</p>
                 <p className="mt-1 text-sm text-fg-muted">{L(p.credits)}</p>
-                <ul className="mt-3 space-y-1.5 text-sm text-fg-muted">
-                  {p.features.slice(0, 3).map((f) => <li key={f.en} className="flex gap-2"><Check size={14} className="mt-0.5 shrink-0 text-studio-success" aria-hidden /> {L(f)}</li>)}
+                <ul className="mt-3 flex-1 space-y-1.5 text-sm text-fg-muted">
+                  {p.features.slice(0, 3).map((f) => <li key={f.en} className="flex gap-2 break-keep"><Check size={14} className="mt-0.5 shrink-0 text-studio-success" aria-hidden /> {L(f)}</li>)}
                 </ul>
-                {p.id === "pro" && membership.plan !== "student" ? (
+                {p.id !== "free" ? (
                   <>
                     {current && membership.daysLeft ? <p className="mt-3 text-sm text-fg-muted">{L({ ko: `${membership.daysLeft}일 남음`, en: `${membership.daysLeft} days left` })}</p> : null}
-                    <Link href="/account/membership/checkout" className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-studio-cyan">
-                      {current ? L({ ko: "30일 연장하기", en: "Extend 30 days" }) : L({ ko: "프로 시작하기", en: "Get Pro" })} <ArrowRight size={13} aria-hidden />
+                    <Link href={`/account/membership/checkout?product=${p.id}`} className={cn(current || !isPaidPlan(membership.plan) ? primaryButton : secondaryButton, "mt-4 h-10")}>
+                      {current ? L({ ko: "30일 연장하기", en: "Extend 30 days" }) : L({ ko: `${p.name.ko} 시작하기`, en: `Get ${p.name.en}` })} <ArrowRight size={13} aria-hidden />
                     </Link>
                   </>
                 ) : null}
@@ -272,6 +279,17 @@ function MembershipPanel({ membership, payments }: { membership: Membership; pay
           })}
         </div>
 
+        {isPaidPlan(membership.plan) ? (
+          <div className="glass mt-4 flex flex-wrap items-center justify-between gap-3 rounded-[24px] p-5">
+            <div className="min-w-0">
+              <p className="font-semibold">{L({ ko: `크레딧 ${PRODUCTS.topup.credits} 충전 · ${won(PRODUCTS.topup.amount)}`, en: `Top up ${PRODUCTS.topup.credits} credits · ${won(PRODUCTS.topup.amount)}` })}</p>
+              <p className="mt-1 text-sm break-keep text-fg-muted">{L({ ko: "이용 기간 중 크레딧이 모자라면 충전하세요. 충전한 크레딧은 유효기간이 없어요.", en: "Running low during your plan? Top up — top-up credits never expire." })}</p>
+            </div>
+            <Link href="/account/membership/checkout?product=topup" className={cn(primaryButton, "h-10")}>{L({ ko: "충전하기", en: "Top up" })}</Link>
+          </div>
+        ) : null}
+
+        {STUDENT_PLAN ? (
         <div className="glass mt-4 grid gap-6 rounded-[24px] p-6 md:grid-cols-[1fr_1.2fr]">
           <div>
             <p className="flex items-center gap-2 font-semibold"><GraduationCap size={18} className="text-studio-cyan" aria-hidden /> {L({ ko: "학생은 재학 인증 후 무제한", en: "Students: unlimited after verification" })}</p>
@@ -292,6 +310,7 @@ function MembershipPanel({ membership, payments }: { membership: Membership; pay
             </form>
           )}
         </div>
+        ) : null}
       </section>
 
       {payments.length > 0 ? <PaymentHistory payments={payments} /> : null}

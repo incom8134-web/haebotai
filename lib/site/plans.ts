@@ -1,46 +1,58 @@
 import type { Bilingual } from "@/lib/tools/content";
+import { PRODUCTS } from "@/lib/payments/pro";
 
-export type PlanId = "free" | "pro" | "student";
+// "student" stays a valid stored value (old rows); the app treats it as
+// free while the student plan is off (lib/site/access.ts).
+export type PlanId = "free" | "plus" | "pro" | "student";
 
-export const PLANS: { id: PlanId; name: Bilingual; price: Bilingual; note: Bilingual; credits: Bilingual; features: Bilingual[]; highlight?: boolean }[] = [
+const won = (n: number) => `₩${n.toLocaleString("ko-KR")}`;
+const credits = (n: number): Bilingual => ({ ko: `30일마다 ${n.toLocaleString()} 크레딧`, en: `${n.toLocaleString()} credits every 30 days` });
+
+/** The plans on sale, in display order (lib/payments/pro.ts holds prices and credits). */
+export const PLANS: { id: Exclude<PlanId, "student">; name: Bilingual; price: Bilingual; note: Bilingual; credits: Bilingual; features: Bilingual[]; highlight?: boolean }[] = [
   {
     id: "free",
-    name: { ko: "기본", en: "Basic" },
+    name: { ko: "무료", en: "Free" },
     price: { ko: "₩0", en: "₩0" },
-    note: { ko: "가입 즉시", en: "On sign-up" },
-    credits: { ko: "500 크레딧 (1회)", en: "500 credits (one-time)" },
+    note: { ko: "둘러보기", en: "Browse" },
+    credits: { ko: "크레딧 없음", en: "No credits" },
     features: [
-      { ko: "모든 도구 사용", en: "Every tool" },
-      { ko: "비즈니스 프로필·보관함", en: "Business Profile and Library" },
-      { ko: "모든 형식 내보내기 (PDF·Word·PPT·Markdown 등)", en: "Every export format (PDF, Word, PPT, Markdown…)" },
-      { ko: "내 API 키를 등록하면 크레딧 미차감", en: "No credits charged with your own API key" },
-      { ko: "출처 패널과 추정 배지", en: "Sources panel and estimate badges" },
+      { ko: "25개 도구와 예시 결과 둘러보기", en: "Browse all 25 tools and sample results" },
+      { ko: "비즈니스 프로필·프로젝트 만들기", en: "Set up your Business Profile and projects" },
+      { ko: "공유받은 결과 보기", en: "Open results shared with you" },
+      { ko: "도구 실행은 플러스부터", en: "Running tools starts with Plus" },
     ],
   },
   {
-    id: "pro",
-    name: { ko: "프로", en: "Pro" },
-    price: { ko: "₩19,900/30일", en: "₩19,900 / 30 days" },
-    note: { ko: "자동 결제 없음", en: "No auto-renewal" },
-    credits: { ko: "결제마다 2,000 크레딧", en: "2,000 credits per purchase" },
+    id: "plus",
+    name: { ko: "플러스", en: "Plus" },
+    price: { ko: `${won(PRODUCTS.plus.amount)}/30일`, en: `${won(PRODUCTS.plus.amount)} / 30 days` },
+    note: { ko: "부가세 포함 · 자동 결제 없음", en: "VAT incl. · no auto-renewal" },
+    credits: credits(PRODUCTS.plus.credits),
     features: [
-      { ko: "기본 플랜의 모든 기능", en: "Everything in Basic" },
-      { ko: "결제마다 크레딧 2,000 추가 · 유효기간 없음", en: "2,000 more credits per purchase · they never expire" },
-      { ko: "자동 결제 없음 — 필요할 때만 30일 연장", en: "No auto-renewal — extend 30 days only when you want" },
-      { ko: "결제 후 7일 안에 쓰지 않았다면 전액 환불", en: "Full refund within 7 days if unused" },
+      { ko: "25개 도구 모두 실행", en: "Run all 25 tools" },
+      { ko: `${PRODUCTS.plus.credits.toLocaleString()} 크레딧 (예: 블로그 글 5편 + 리포트 20개)`, en: `${PRODUCTS.plus.credits.toLocaleString()} credits (e.g. 5 blog posts + 20 reports)` },
+      { ko: "PDF·Word·PPT 디자인 결과 파일", en: "Designed PDF, Word and PPT downloads" },
+      { ko: `모자라면 ${PRODUCTS.topup.credits} 크레딧 ${won(PRODUCTS.topup.amount)} 충전`, en: `Top up ${PRODUCTS.topup.credits} credits for ${won(PRODUCTS.topup.amount)}` },
     ],
     highlight: true,
   },
   {
-    id: "student",
-    name: { ko: "학생", en: "Student" },
-    price: { ko: "₩0", en: "₩0" },
-    note: { ko: "재학 인증 시 1년", en: "One year, with verification" },
-    credits: { ko: "크레딧 제한 없음", en: "Unlimited credits" },
+    id: "pro",
+    name: { ko: "프로", en: "Pro" },
+    price: { ko: `${won(PRODUCTS.pro.amount)}/30일`, en: `${won(PRODUCTS.pro.amount)} / 30 days` },
+    note: { ko: "부가세 포함 · 자동 결제 없음", en: "VAT incl. · no auto-renewal" },
+    credits: credits(PRODUCTS.pro.credits),
     features: [
-      { ko: "프로 플랜의 모든 기능", en: "Everything in Pro" },
-      { ko: "학교 이메일 또는 재학증명서로 인증", en: "Verify with a school email or certificate" },
-      { ko: "매년 재인증으로 연장", en: "Renew yearly by re-verifying" },
+      { ko: "플러스의 모든 기능", en: "Everything in Plus" },
+      { ko: `${PRODUCTS.pro.credits.toLocaleString()} 크레딧 — 플러스의 3배`, en: `${PRODUCTS.pro.credits.toLocaleString()} credits — 3× Plus` },
+      { ko: "홈페이지·로고·광고 사진처럼 이미지가 많은 작업에", en: "Made for image-heavy work: sites, logos, ad photos" },
+      { ko: `모자라면 ${PRODUCTS.topup.credits} 크레딧 ${won(PRODUCTS.topup.amount)} 충전`, en: `Top up ${PRODUCTS.topup.credits} credits for ${won(PRODUCTS.topup.amount)}` },
     ],
   },
 ];
+
+/** Display name of any stored plan (a student row shows as Free). */
+export function planName(id: PlanId): Bilingual {
+  return (PLANS.find((p) => p.id === id) ?? PLANS[0]).name;
+}

@@ -2,12 +2,12 @@
 
 import { toolSlug } from "@/lib/tools/catalog";
 import Link from "next/link";
-import { ArrowUpRight, BookOpenText, CircleGauge, CircleHelp, Crown, ExternalLink, FileQuestion, Globe, Headset, Keyboard, LayoutGrid, Library, Sparkle, Sparkles, Star, UserRound, Zap } from "lucide-react";
+import { ArrowUpRight, CircleGauge, CircleHelp, Crown, ExternalLink, FileQuestion, Globe, Headset, Keyboard, LayoutGrid, Library, Sparkle, Sparkles, Star, UserRound, Zap } from "lucide-react";
 import { getTool } from "@/lib/tools/registry";
 import { WORKFLOWS } from "@/lib/site/guides";
 import { useFavorites } from "@/lib/hooks/use-local-list";
 import { useBi, useLocale } from "@/lib/i18n/context";
-import { OWN_KEY_ONLY } from "@/lib/site/access";
+import { MEMBER_API_KEYS, OWN_KEY_ONLY } from "@/lib/site/access";
 import { IconTile, PageHero, TONE, toneFor, toolTone, type Tone } from "@/components/site/tone";
 import { cn } from "@/lib/utils";
 
@@ -21,15 +21,14 @@ const PAGES = [
   { href: "/library", tone: "operate" as Tone, icon: Library, label: { ko: "보관함", en: "Library" } },
   { href: "/brand", tone: "brand" as Tone, icon: UserRound, label: { ko: "비즈니스 프로필", en: "Business Profile" } },
   OWN_KEY_ONLY ? { href: "/account/api-key", tone: "discover" as Tone, icon: CircleGauge, label: { ko: "내 API 키", en: "My API key" } } : { href: "/account/credits", tone: "discover" as Tone, icon: CircleGauge, label: { ko: "크레딧·한도", en: "Credits & limits" } },
-  { href: "/account/membership", tone: "discover" as Tone, icon: Crown, label: { ko: "학생 멤버십", en: "Student membership" } },
+  { href: "/account/membership", tone: "discover" as Tone, icon: Crown, label: { ko: "멤버십", en: "Membership" } },
   { href: "/help/contact", tone: "research" as Tone, icon: Headset, label: { ko: "고객센터", en: "Customer service" } },
   { href: "/help/faq", tone: "research" as Tone, icon: CircleHelp, label: { ko: "자주 묻는 질문", en: "FAQ" } },
-  { href: "/help/api-guide", tone: "operate" as Tone, icon: BookOpenText, label: { ko: "API 키 설명서", en: "API key manual" } },
   { href: "/help/whats-new", tone: "campaign" as Tone, icon: Sparkle, label: { ko: "새로운 점", en: "What's new" } },
 ];
 
 const OUTSIDE = [
-  { href: "https://aistudio.google.com/apikey", label: { ko: "Google AI Studio", en: "Google AI Studio" }, note: { ko: "내 API 키 발급", en: "Get your API key" } },
+  ...(MEMBER_API_KEYS ? [{ href: "https://aistudio.google.com/apikey", label: { ko: "Google AI Studio", en: "Google AI Studio" }, note: { ko: "내 API 키 발급", en: "Get your API key" } }] : []),
   { href: "https://new.smartplace.naver.com", label: { ko: "네이버 스마트플레이스", en: "Naver Smart Place" }, note: { ko: "플레이스 최적화 결과 반영", en: "Apply Place Optimization results" } },
   { href: "https://blog.naver.com", label: { ko: "네이버 블로그", en: "Naver Blog" }, note: { ko: "블로그 원고 발행", en: "Publish blog drafts" } },
   { href: "https://sell.smartstore.naver.com", label: { ko: "스마트스토어 센터", en: "Smartstore Center" }, note: { ko: "상세페이지 업로드", en: "Upload detail pages" } },

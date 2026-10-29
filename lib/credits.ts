@@ -24,7 +24,7 @@ export async function getBalance(): Promise<number | null> {
   if (!user) return null;
 
   const { data } = await supabase.from("user_credits").select("balance").eq("user_id", user.id).maybeSingle();
-  return data?.balance ?? 500;
+  return data?.balance ?? 0;
 }
 
 export async function reserveCredits(userId: string, amount: number) {
