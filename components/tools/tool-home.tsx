@@ -95,7 +95,7 @@ function ToolHome({ toolId, pack }: { toolId: string; pack: ToolPack }) {
             ) : (
               <div>
                 <p className="font-mono text-lg">{tool.estimatedCredits}</p>
-                <p className="text-2xs text-fg-subtle">{L({ ko: "예상 크레딧", en: "est. credits" })}</p>
+                <p className="text-2xs text-fg-subtle">{L({ ko: "크레딧", en: "credits" })}</p>
               </div>
             )}
             <div>

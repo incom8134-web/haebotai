@@ -427,10 +427,12 @@ export function OnboardingFlow({ name }: { name: string | null }) {
                 </Link>
               </>
             ) : (
-              L({
-                ko: "가입 크레딧 500이면 위 세 도구를 모두 써 볼 수 있어요.",
-                en: "Your 500 sign-up credits cover all three.",
-              })
+              <>
+                {L({ ko: "도구 실행은 플러스(₩29,900/30일, 2,000 크레딧)부터예요. ", en: "Running tools starts with Plus (₩29,900 / 30 days, 2,000 credits). " })}
+                <Link href="/pricing" className="font-medium text-accent hover:underline">
+                  {L({ ko: "요금 보기", en: "See pricing" })}
+                </Link>
+              </>
             )}
           </p>
         </section>

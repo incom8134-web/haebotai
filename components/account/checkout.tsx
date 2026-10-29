@@ -7,17 +7,29 @@ import { AlertTriangle, ArrowLeft, CircleCheck, Crown, Hourglass } from "lucide-
 import { loadTossPayments, type TossPaymentsWidgets } from "@tosspayments/tosspayments-sdk";
 import { useBi } from "@/lib/i18n/context";
 import type { Membership } from "@/lib/membership";
-import { PRO_ORDER } from "@/lib/payments/pro";
+import { canBuy, PRODUCTS, type Product, type ProductId } from "@/lib/payments/pro";
 import { PageHeader, primaryButton, secondaryButton } from "@/components/site/page";
 import { cn } from "@/lib/utils";
 
-// Pro checkout with the Toss Payments 결제위젯 (redirect flow):
-// render widget → POST /api/payments/pro/order (server records the
+// Plus / Pro / top-up checkout with the Toss Payments 결제위젯 (redirect flow):
+// render widget → POST /api/payments/order (server records the
 // order + amount) → widgets.requestPayment redirects to Toss → back to
 // /checkout/success, which asks the server to confirm.
 
 const CLIENT_KEY = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY;
 const won = (n: number) => `₩${n.toLocaleString("ko-KR")}`;
+
+const NAME: Record<ProductId, { ko: string; en: string }> = {
+  plus: { ko: "플러스", en: "Plus" },
+  pro: { ko: "프로", en: "Pro" },
+  topup: { ko: "크레딧 500 충전", en: "500-credit top-up" },
+};
+
+/** The product an order id was made for (newOrderId prefixes it). */
+function productOfOrder(orderId: string): Product | null {
+  const id = orderId.split("_")[0];
+  return id in PRODUCTS ? PRODUCTS[id as ProductId] : null;
+}
 
 function BackLink() {
   const L = useBi();
@@ -28,13 +40,14 @@ function BackLink() {
   );
 }
 
-function CheckoutView({ customerKey, membership }: { customerKey: string; membership: Membership }) {
+function CheckoutView({ customerKey, membership, product }: { customerKey: string; membership: Membership; product: Product }) {
   const L = useBi();
   const widgetsRef = useRef<TossPaymentsWidgets | null>(null);
   const [ready, setReady] = useState(false);
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const blocked = !CLIENT_KEY || membership.plan === "student";
+  const allowed = canBuy(product.id, membership.plan).ok;
+  const blocked = !CLIENT_KEY || !allowed;
 
   // Back from Toss's page (bfcache restore): the button would stay stuck on "opening…".
   useEffect(() => {
@@ -52,7 +65,7 @@ function CheckoutView({ customerKey, membership }: { customerKey: string; member
       try {
         const toss = await loadTossPayments(CLIENT_KEY!);
         const widgets = toss.widgets({ customerKey });
-        await widgets.setAmount({ currency: "KRW", value: PRO_ORDER.amount });
+        await widgets.setAmount({ currency: "KRW", value: product.amount });
         await Promise.all([
           widgets.renderPaymentMethods({ selector: "#payment-method", variantKey: "DEFAULT" }),
           widgets.renderAgreement({ selector: "#agreement", variantKey: "AGREEMENT" }),
@@ -67,7 +80,7 @@ function CheckoutView({ customerKey, membership }: { customerKey: string; member
     return () => {
       cancelled = true;
     };
-  }, [blocked, customerKey]);
+  }, [blocked, customerKey, product.amount]);
 
   async function pay() {
     const widgets = widgetsRef.current;
@@ -75,7 +88,7 @@ function CheckoutView({ customerKey, membership }: { customerKey: string; member
     setPaying(true);
     setError(null);
     try {
-      const res = await fetch("/api/payments/pro/order", { method: "POST" });
+      const res = await fetch("/api/payments/order", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ product: product.id }) });
       const order = (await res.json().catch(() => ({}))) as { error?: string; orderId?: string; orderName?: string; customerEmail?: string | null };
       if (!res.ok || !order.orderId || !order.orderName) throw new Error(order.error ?? "주문을 만들지 못했습니다. 잠시 후 다시 시도해 주세요.");
       await widgets.requestPayment({
@@ -97,20 +110,29 @@ function CheckoutView({ customerKey, membership }: { customerKey: string; member
     <>
       <BackLink />
       <PageHeader
-        title={L({ ko: "프로 시작하기", en: "Get Pro" })}
-        lead={L({
-          ko: `${won(PRO_ORDER.amount)}로 ${PRO_ORDER.days}일 동안 프로를 쓰고 ${PRO_ORDER.credits.toLocaleString()} 크레딧을 받아요. 자동 결제는 없어요.`,
-          en: `${won(PRO_ORDER.amount)} for ${PRO_ORDER.days} days of Pro and ${PRO_ORDER.credits.toLocaleString()} credits. No automatic renewal.`,
-        })}
+        title={product.id === "topup" ? L({ ko: "크레딧 충전", en: "Top up credits" }) : L({ ko: `${NAME[product.id].ko} 시작하기`, en: `Get ${NAME[product.id].en}` })}
+        lead={L(
+          product.id === "topup"
+            ? { ko: `${won(product.amount)}로 ${product.credits.toLocaleString()} 크레딧을 더해요. 충전한 크레딧은 유효기간이 없어요.`, en: `${won(product.amount)} adds ${product.credits.toLocaleString()} credits. Top-up credits never expire.` }
+            : {
+                ko: `${won(product.amount)}로 ${product.days}일 동안 ${NAME[product.id].ko}를 쓰고 ${product.credits.toLocaleString()} 크레딧을 받아요. 자동 결제는 없어요.`,
+                en: `${won(product.amount)} for ${product.days} days of ${NAME[product.id].en} and ${product.credits.toLocaleString()} credits. No automatic renewal.`,
+              },
+        )}
       />
 
       <div className="grid gap-4 lg:grid-cols-[1fr_320px] lg:items-start">
         <section className="overflow-hidden rounded-[24px] bg-white p-2 text-black">
           {blocked ? (
             <p className="p-6 text-sm text-neutral-600">
-              {membership.plan === "student"
-                ? L({ ko: "학생 멤버십은 이미 크레딧 제한이 없어요.", en: "Your Student membership already has unlimited credits." })
-                : L({ ko: "결제가 아직 준비되지 않았어요.", en: "Checkout isn't set up yet." })}
+              {!allowed ? (
+                <>
+                  {L({ ko: "크레딧 충전은 플러스·프로 이용 중에만 할 수 있어요.", en: "Top-ups are for active Plus or Pro members." })}{" "}
+                  <Link href="/account/membership" className="underline underline-offset-2">{L({ ko: "플랜 고르기", en: "Choose a plan" })}</Link>
+                </>
+              ) : (
+                L({ ko: "결제가 아직 준비되지 않았어요.", en: "Checkout isn't set up yet." })
+              )}
             </p>
           ) : (
             <>
@@ -123,15 +145,15 @@ function CheckoutView({ customerKey, membership }: { customerKey: string; member
 
         <aside className="glass rounded-[24px] p-5 lg:sticky lg:top-24">
           <p className="flex items-center gap-2 font-semibold">
-            <Crown size={17} className="text-studio-warning" aria-hidden /> {L({ ko: "AI 해바 프로", en: "AI Haeba Pro" })}
+            <Crown size={17} className="text-studio-warning" aria-hidden /> {L({ ko: `AI 해바 ${NAME[product.id].ko}`, en: `AI Haeba ${NAME[product.id].en}` })}
           </p>
           <dl className="mt-4 space-y-2 text-sm">
-            <div className="flex justify-between"><dt className="text-fg-muted">{L({ ko: "기간", en: "Period" })}</dt><dd>{L({ ko: `${PRO_ORDER.days}일`, en: `${PRO_ORDER.days} days` })}</dd></div>
-            <div className="flex justify-between"><dt className="text-fg-muted">{L({ ko: "크레딧", en: "Credits" })}</dt><dd>+{PRO_ORDER.credits.toLocaleString()}</dd></div>
-            {membership.plan === "pro" && membership.daysLeft ? (
-              <div className="flex justify-between"><dt className="text-fg-muted">{L({ ko: "남은 기간", en: "Remaining" })}</dt><dd>{L({ ko: `${membership.daysLeft}일 + ${PRO_ORDER.days}일`, en: `${membership.daysLeft} + ${PRO_ORDER.days} days` })}</dd></div>
+            {product.days ? <div className="flex justify-between"><dt className="text-fg-muted">{L({ ko: "기간", en: "Period" })}</dt><dd>{L({ ko: `${product.days}일`, en: `${product.days} days` })}</dd></div> : null}
+            <div className="flex justify-between"><dt className="text-fg-muted">{L({ ko: "크레딧", en: "Credits" })}</dt><dd>+{product.credits.toLocaleString()}</dd></div>
+            {product.days && (membership.plan === "plus" || membership.plan === "pro") && membership.daysLeft ? (
+              <div className="flex justify-between"><dt className="text-fg-muted">{L({ ko: "남은 기간", en: "Remaining" })}</dt><dd>{L({ ko: `${membership.daysLeft}일 + ${product.days}일`, en: `${membership.daysLeft} + ${product.days} days` })}</dd></div>
             ) : null}
-            <div className="flex justify-between border-t border-hairline pt-2 font-semibold"><dt>{L({ ko: "결제 금액", en: "Total" })}</dt><dd>{won(PRO_ORDER.amount)}</dd></div>
+            <div className="flex justify-between border-t border-hairline pt-2 font-semibold"><dt>{L({ ko: "결제 금액 (부가세 포함)", en: "Total (VAT incl.)" })}</dt><dd>{won(product.amount)}</dd></div>
           </dl>
           {error ? <p role="alert" className="mt-4 rounded-xl bg-danger/10 p-3 text-sm text-danger">{error}</p> : null}
           <p className="mt-4 rounded-xl bg-surface-2/60 p-3 text-2xs leading-relaxed break-keep text-fg-muted">
@@ -141,7 +163,7 @@ function CheckoutView({ customerKey, membership }: { customerKey: string; member
             <Link href="/legal/terms" className="underline underline-offset-2 hover:text-fg">{L({ ko: "이용약관", en: "Terms" })}</Link>
           </p>
           <button type="button" onClick={pay} disabled={!ready || paying || blocked} className={cn(primaryButton, "mt-4 w-full")}>
-            {paying ? L({ ko: "결제창 여는 중…", en: "Opening…" }) : L({ ko: `${won(PRO_ORDER.amount)} 결제하기`, en: `Pay ${won(PRO_ORDER.amount)}` })}
+            {paying ? L({ ko: "결제창 여는 중…", en: "Opening…" }) : L({ ko: `${won(product.amount)} 결제하기`, en: `Pay ${won(product.amount)}` })}
           </button>
           <p className="mt-3 text-2xs leading-relaxed text-fg-subtle">
             {L({ ko: "결제는 토스페이먼츠가 처리해요. 카드 정보는 AI 해바에 저장되지 않아요.", en: "Payments are processed by Toss Payments. Card details never reach AI Haeba." })}
@@ -157,6 +179,7 @@ function CheckoutSuccess({ paymentKey, orderId, amount }: { paymentKey: string; 
   const router = useRouter();
   const [state, setState] = useState<{ status: "confirming" } | { status: "done" } | { status: "pending"; message: string } | { status: "error"; message: string }>({ status: "confirming" });
   const sent = useRef(false);
+  const bought = productOfOrder(orderId);
 
   useEffect(() => {
     // Strict-mode double effects must not confirm twice (the server is
@@ -164,7 +187,7 @@ function CheckoutSuccess({ paymentKey, orderId, amount }: { paymentKey: string; 
     if (sent.current) return;
     sent.current = true;
     (async () => {
-      const res = await fetch("/api/payments/pro/confirm", {
+      const res = await fetch("/api/payments/confirm", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ paymentKey, orderId, amount: Number(amount) }),
@@ -189,10 +212,16 @@ function CheckoutSuccess({ paymentKey, orderId, amount }: { paymentKey: string; 
         ) : state.status === "done" ? (
           <>
             <CircleCheck size={40} className="mx-auto text-studio-success" aria-hidden />
-            <h1 className="mt-4 font-display text-2xl font-bold">{L({ ko: "프로가 시작됐어요", en: "You're on Pro" })}</h1>
-            <p className="mt-2 text-sm text-fg-muted">
-              {L({ ko: `${PRO_ORDER.days}일 이용권과 ${PRO_ORDER.credits.toLocaleString()} 크레딧이 적용됐어요.`, en: `${PRO_ORDER.days} days of Pro and ${PRO_ORDER.credits.toLocaleString()} credits were added.` })}
-            </p>
+            <h1 className="mt-4 font-display text-2xl font-bold">
+              {!bought || bought.id === "topup" ? L({ ko: "결제가 완료됐어요", en: "Payment complete" }) : L({ ko: `${NAME[bought.id].ko}가 시작됐어요`, en: `You're on ${NAME[bought.id].en}` })}
+            </h1>
+            {bought ? (
+              <p className="mt-2 text-sm text-fg-muted">
+                {bought.id === "topup"
+                  ? L({ ko: `${bought.credits.toLocaleString()} 크레딧이 더해졌어요.`, en: `${bought.credits.toLocaleString()} credits were added.` })
+                  : L({ ko: `${bought.days}일 이용권과 ${bought.credits.toLocaleString()} 크레딧이 적용됐어요.`, en: `${bought.days} days of ${NAME[bought.id].en} and ${bought.credits.toLocaleString()} credits were added.` })}
+              </p>
+            ) : null}
             <div className="mt-6 flex justify-center gap-2">
               <Link href="/studio" className={primaryButton}>{L({ ko: "스튜디오로", en: "Go to Studio" })}</Link>
               <Link href="/account/credits" className={secondaryButton}>{L({ ko: "크레딧 보기", en: "View credits" })}</Link>
@@ -215,7 +244,7 @@ function CheckoutSuccess({ paymentKey, orderId, amount }: { paymentKey: string; 
             <h1 className="mt-4 font-display text-2xl font-bold">{L({ ko: "결제를 완료하지 못했어요", en: "Payment not completed" })}</h1>
             <p className="mt-2 text-sm text-fg-muted">{state.message}</p>
             <div className="mt-6 flex justify-center gap-2">
-              <Link href="/account/membership/checkout" className={primaryButton}>{L({ ko: "다시 시도", en: "Try again" })}</Link>
+              <Link href="/account/membership" className={primaryButton}>{L({ ko: "다시 시도", en: "Try again" })}</Link>
               <Link href="/help/contact?kind=billing" className={secondaryButton}>{L({ ko: "문의하기", en: "Contact us" })}</Link>
             </div>
           </>
@@ -240,7 +269,7 @@ function CheckoutFail({ code, message }: { code: string | null; message: string 
           {userCancelled ? L({ ko: "결제되지 않았어요. 언제든 다시 시작할 수 있어요.", en: "You weren't charged. You can start again anytime." }) : (message ?? L({ ko: "알 수 없는 오류", en: "Unknown error" }))}
         </p>
         <div className="mt-6 flex justify-center gap-2">
-          <Link href="/account/membership/checkout" className={primaryButton}>{L({ ko: "다시 시도", en: "Try again" })}</Link>
+          <Link href="/account/membership" className={primaryButton}>{L({ ko: "다시 시도", en: "Try again" })}</Link>
           <Link href="/account/membership" className={secondaryButton}>{L({ ko: "멤버십으로", en: "Back to membership" })}</Link>
         </div>
       </section>

@@ -5,7 +5,8 @@ import { checkConfirm, newOrderId, planReconcile, PRO_ORDER } from "./pro.ts";
 test("order ids fit Toss's 6-64 [A-Za-z0-9_-] rule", () => {
   const id = newOrderId();
   assert.match(id, /^[A-Za-z0-9_-]{6,64}$/);
-  assert.equal(newOrderId(() => "a-b-c"), "pro_abc");
+  assert.equal(newOrderId("pro", () => "a-b-c"), "pro_abc");
+  assert.equal(newOrderId("topup", () => "x-y"), "topup_xy");
 });
 
 test("confirm accepts only a pending order at its stored amount", () => {

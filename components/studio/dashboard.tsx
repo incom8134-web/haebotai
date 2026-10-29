@@ -290,7 +290,7 @@ export function Dashboard({
   runs: DashboardRun[];
   recommended: string[];
   lastTool: string | null;
-  usage: { balance: number | null; used30: number; runs30: number; keyConnected?: boolean; team?: boolean };
+  usage: { balance: number | null; used30: number; runs30: number; keyConnected?: boolean; team?: boolean; paid?: boolean };
 }) {
   const L = useBi();
   const { locale } = useLocale();
@@ -313,7 +313,8 @@ export function Dashboard({
         .filter((t): t is NonNullable<typeof t> => !!t && !!t.engine && !t.hidden)
         .sort((a, b) => rank(a.slug) - rank(b.slug))
     : [];
-  const low = !OWN_KEY_ONLY && usage.balance !== null && usage.balance < 100;
+  // Only members who spend credits can run low (Free has none to spend).
+  const low = !OWN_KEY_ONLY && !!usage.paid && usage.balance !== null && usage.balance < 200;
 
   return (
     <div className="mx-auto max-w-[1180px] px-4 pt-6 pb-12 md:px-8 md:pt-8">
@@ -364,8 +365,9 @@ export function Dashboard({
                     <Coins size={13} className="text-accent" aria-hidden /> {L({ ko: "남은 크레딧", en: "Credits left" })}
                   </p>
                   <p className="mt-1 font-display text-4xl font-bold text-fg">{usage.balance === null ? "—" : <CountUp value={usage.balance} />}</p>
+                  {!usage.paid && !usage.team ? <p className="mt-1 text-xs break-keep text-fg-muted">{L({ ko: "무료 플랜은 둘러보기만 해요. 실행은 플러스부터예요.", en: "Free is for browsing. Running starts with Plus." })}</p> : null}
                   <Link href="/account/membership" className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-accent hover:underline">
-                    {L({ ko: "충전·플랜", en: "Plans" })} <ArrowRight size={12} aria-hidden />
+                    {usage.paid ? L({ ko: "충전·멤버십", en: "Top up · Membership" }) : L({ ko: "플랜 고르기", en: "Choose a plan" })} <ArrowRight size={12} aria-hidden />
                   </Link>
                 </div>
               )}
@@ -512,8 +514,8 @@ export function Dashboard({
 
       {low ? (
         <p className="mt-3 rounded-2xl border border-danger/30 bg-danger/5 px-4 py-2.5 text-xs break-keep text-danger">
-          {L({ ko: "크레딧이 얼마 남지 않았어요. 내 API 키를 등록하면 크레딧 없이 쓸 수 있어요.", en: "Running low. With your own API key, runs cost no credits." })}{" "}
-          <Link href="/account/api-key" className="font-semibold underline">{L({ ko: "API 키 연결", en: "Connect a key" })}</Link>
+          {L({ ko: "크레딧이 얼마 남지 않았어요.", en: "Running low on credits." })}{" "}
+          <Link href="/account/membership/checkout?product=topup" className="font-semibold underline">{L({ ko: "500 크레딧 충전", en: "Top up 500 credits" })}</Link>
         </p>
       ) : null}
 

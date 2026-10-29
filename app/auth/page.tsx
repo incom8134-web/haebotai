@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { motion } from "motion/react";
-import { ArrowLeft, ArrowRight, Check, GraduationCap, Sparkles, Wand2, KeyRound, LoaderCircle, LockKeyhole, RotateCcw } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Sparkles, Wand2, KeyRound, LoaderCircle, LockKeyhole, RotateCcw } from "lucide-react";
 import { CATEGORIES, CATEGORY_ORDER, toolsIn } from "@/lib/tools/catalog";
 import { createClient } from "@/lib/supabase/client";
 import { useBi } from "@/lib/i18n/context";
@@ -18,8 +18,8 @@ import { OWN_KEY_ONLY } from "@/lib/site/access";
 // Sign-in (docs/redesign-plan.md §5). Google, plus Kakao when it's switched
 // on (lib/auth-providers.ts) — email sign-up was closed on purpose. Next to the one button: what you can build (from the
 // catalog), a word for returning members, and what happens to your
-// account data. Honest terms — 500 credits on sign-up, no card, students
-// unlimited after verification (lib/site/plans.ts).
+// account data. Honest terms — signing up is free and browses everything;
+// running tools needs Plus or Pro (lib/site/plans.ts).
 
 // Set by onboarding; read only after hydration so the server render and
 // the first client render match. No project names on this signed-out
@@ -152,10 +152,9 @@ function AuthCard() {
               { icon: RotateCcw, text: { ko: "요금은 내 Google 계정에서 직접 확인하고 관리", en: "Any usage is billed to, and managed in, your own Google account" } },
             ]
           : [
-              { icon: Check, text: { ko: "가입하면 500 크레딧, 카드 등록 없음", en: "500 credits on sign-up, no card needed" } },
-              { icon: GraduationCap, text: { ko: "학생은 재학 인증 후 무제한", en: "Students: unlimited after verification" } },
-              { icon: KeyRound, text: { ko: "내 API 키를 넣으면 크레딧 없이 실행", en: "Bring your own API key and runs use no credits" } },
-              { icon: RotateCcw, text: { ko: "실패하거나 취소한 실행은 자동 환불", en: "Failed or cancelled runs are refunded" } },
+              { icon: Check, text: { ko: "가입은 무료, 카드 등록 없이 25개 도구 둘러보기", en: "Free to sign up — browse all 25 tools, no card needed" } },
+              { icon: KeyRound, text: { ko: "실행은 플러스(₩29,900/30일)부터, 자동 결제 없음", en: "Running starts with Plus (₩29,900 / 30 days), no auto-renewal" } },
+              { icon: RotateCcw, text: { ko: "실패하거나 취소한 실행은 크레딧 자동 환불", en: "Failed or cancelled runs are refunded in credits" } },
             ]
         ).map((item) => (
           <li key={item.text.en} className="flex items-start gap-2.5 break-keep text-fg-muted">

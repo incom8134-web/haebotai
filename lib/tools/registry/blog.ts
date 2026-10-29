@@ -53,6 +53,6 @@ export const blog: ToolManifest = {
   outputRenderer: "document",
   grounding: { requireSources: true, webSearch: true, estimateBadge: true },
   model: "gemini-3.1-pro-preview",
-  estimatedCredits: 52,
+  estimatedCredits: 200,
   estimatedSeconds: 250,
 };

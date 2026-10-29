@@ -24,12 +24,11 @@ export function HelpHome() {
   const doors = [
     { href: "/help/faq", icon: CircleHelp, title: { ko: "자주 묻는 질문", en: "FAQ" }, body: { ko: `${FAQ.length}개 질문을 주제별로`, en: `${FAQ.length} answers by topic` } },
     { href: "/help/contact", icon: Headset, title: { ko: "고객센터", en: "Customer service" }, body: { ko: "1:1 문의와 원격 지원", en: "Tickets and remote help" } },
-    { href: "/help/api-guide", icon: BookOpenText, title: { ko: "API 키 설명서", en: "API key manual" }, body: { ko: "발급부터 문제 해결까지", en: "From getting a key to fixing errors" } },
     { href: "/onboarding", icon: Rocket, title: { ko: "처음 시작하기", en: "Getting started" }, body: { ko: "목표 → 프로젝트 → 첫 도구, 세 화면", en: "Goal → project → first tool, three screens" } },
     OWN_KEY_ONLY
       ? { href: "/pricing", icon: CircleGauge, title: { ko: "요금", en: "Pricing" }, body: { ko: "AI는 내 API 키로 실행", en: "The AI runs on your own key" } }
-      : { href: "/pricing", icon: CircleGauge, title: { ko: "요금·크레딧", en: "Pricing & credits" }, body: { ko: "플랜과 도구별 예상 크레딧", en: "Plans and credits per tool" } },
-    { href: "/account/membership", icon: Crown, title: { ko: "학생 멤버십", en: "Student membership" }, body: { ko: "재학 인증으로 무제한", en: "Unlimited with enrollment" } },
+      : { href: "/pricing", icon: CircleGauge, title: { ko: "요금·크레딧", en: "Pricing & credits" }, body: { ko: "플랜과 도구별 크레딧", en: "Plans and credits per tool" } },
+    { href: "/account/membership", icon: Crown, title: { ko: "멤버십", en: "Membership" }, body: { ko: "플러스·프로 결제와 크레딧 충전", en: "Get Plus or Pro, top up credits" } },
     { href: "/legal/terms", icon: ShieldCheck, title: { ko: "약관·정책", en: "Terms & policies" }, body: { ko: "이용약관·개인정보·환불", en: "Terms, privacy, refunds" } },
     { href: "/help/whats-new", icon: Sparkle, title: { ko: "새로운 점", en: "What's new" }, body: { ko: `v${PATCH_NOTES[0].version} · ${PATCH_NOTES[0].date}`, en: `v${PATCH_NOTES[0].version} · ${PATCH_NOTES[0].date}` } },
     { href: "/help/user-guide", icon: FileText, title: { ko: "도구 사용 설명서", en: "Tool user guide" }, body: { ko: "가입부터 인기 도구 6가지까지 (PDF)", en: "Sign-up to six popular tools (PDF)" } },
@@ -210,7 +209,7 @@ const GUIDE_FILES = [
 const GUIDE_CHAPTERS = [
   { ko: "가입하기", en: "Sign up" },
   { ko: "첫 안내 따라가기", en: "The first-time guide" },
-  { ko: "내 API 키 연결하기", en: "Connect your API key" },
+  { ko: "플랜 고르기", en: "Choose a plan" },
   { ko: "비즈니스 프로필 채우기", en: "Fill in your business profile" },
   { ko: "화면 둘러보기", en: "Finding your way around" },
   { ko: "바로 만들기로 첫 결과 만들기", en: "Your first result with Quick start" },
@@ -281,10 +280,6 @@ export function UserGuide() {
               <span key={t.en} className="rounded-full border border-hairline bg-surface px-3 py-1 text-xs text-fg-muted">{L(t)}</span>
             ))}
           </div>
-          <p className="mt-5 text-sm leading-relaxed text-fg-muted">
-            {L({ ko: "API 키를 받는 방법은 따로 정리해 뒀어요. ", en: "Getting an API key has its own guide: " })}
-            <Link href="/help/api-guide" className="text-studio-cyan hover:underline">{L({ ko: "API 키 설명서 보기", en: "API key manual" })}</Link>
-          </p>
         </section>
       </div>
     </>

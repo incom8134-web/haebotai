@@ -20,8 +20,9 @@ interface SpendLimits {
 }
 
 const DEFAULT_LIMITS: SpendLimits = {
-  // ≈ 830 homepage runs or 5,000 short runs a day before new platform
-  // runs pause. Calibrate against your Google Cloud billing.
+  // 1 credit ≈ ₩5 of AI cost, so ≈ ₩750,000 a day (≈ 350 homepage or
+  // 3,750 report runs) before new platform runs pause. Calibrate against
+  // your Google Cloud billing.
   platformDailyCredits: 150_000,
   userDailyRuns: 60,
 };
@@ -62,6 +63,6 @@ export function decide(opts: { killswitch: boolean; platform: boolean; cost: num
 
 export const SPEND_MESSAGES: Record<"killswitch" | "platform_budget" | "user_daily_runs", string> = {
   killswitch: "지금은 AI 생성을 잠시 멈췄어요. 곧 다시 열게요. 크레딧은 차감되지 않았어요.",
-  platform_budget: "오늘 이용량이 많아 AI 생성을 잠시 멈췄어요. 내일 다시 이용할 수 있어요(내 API 키가 있으면 지금도 가능). 크레딧은 차감되지 않았어요.",
+  platform_budget: "오늘 이용량이 많아 AI 생성을 잠시 멈췄어요. 내일 다시 이용할 수 있어요. 크레딧은 차감되지 않았어요.",
   user_daily_runs: "하루 실행 한도에 도달했어요. 내일 다시 이용할 수 있어요. 크레딧은 차감되지 않았어요.",
 };
