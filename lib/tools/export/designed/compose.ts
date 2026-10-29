@@ -478,6 +478,14 @@ function composeSalesPage(ctx: ComposeContext): Design {
 
 // ── Data tools: their report, laid out by the designed writers ─────────
 
+/** Columns that suit the cards: long cards get the full width. */
+function cardCols(b: Extract<ReportBlock, { type: "cards" }>): 1 | 2 | 3 {
+  const longest = Math.max(0, ...b.items.map((c) => [...(c.facts ?? []).map((f) => `${f.label}${f.value}`), ...(c.lines ?? [])].join("").length));
+  const want = b.columns ?? (b.items.length >= 3 ? 3 : 2);
+  const fit = longest > 600 ? 1 : longest > 260 ? Math.min(want, 2) : want;
+  return Math.max(1, Math.min(fit, b.items.length)) as 1 | 2 | 3;
+}
+
 function reportBlock(b: ReportBlock, palette: string[], lang: Lang): Block[] {
   const t = tr(lang);
   switch (b.type) {
@@ -494,7 +502,7 @@ function reportBlock(b: ReportBlock, palette: string[], lang: Lang): Block[] {
     case "bullets":
       return [...(b.title ? [{ t: "h3", text: b.title } as Block] : []), { t: "bullets", items: b.items, style: b.style }];
     case "cards":
-      return [...(b.title ? [{ t: "h3", text: b.title } as Block] : []), { t: "cards", cols: b.columns ?? (b.items.length >= 3 ? 3 : 2), items: b.items.map((c) => ({ kicker: c.kicker, title: c.title, tag: c.badge, body: [...(c.facts ?? []).map((f) => `${f.label}: ${f.value}`), ...(c.lines ?? [])].join("\n") || undefined, footer: c.meter ? `${c.meter.label} ${Math.round(c.meter.value * 100)}%` : c.badge })) }];
+      return [...(b.title ? [{ t: "h3", text: b.title } as Block] : []), { t: "cards", cols: cardCols(b), items: b.items.map((c) => ({ kicker: c.kicker, title: c.title, tag: c.badge, body: [...(c.facts ?? []).map((f) => `${f.label}: ${f.value}`), ...(c.lines ?? [])].join("\n") || undefined, footer: c.meter ? `${c.meter.label} ${Math.round(c.meter.value * 100)}%` : c.badge })) }];
     case "quad":
       return [...(b.title ? [{ t: "h3", text: b.title } as Block] : []), { t: "cards", cols: 2, items: b.cells.map((c) => ({ title: c.title, body: c.items.map((x) => `• ${x}`).join("\n") })) }];
     case "image":
