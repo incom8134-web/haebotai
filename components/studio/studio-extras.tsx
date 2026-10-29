@@ -11,7 +11,7 @@ import type { CategoryId } from "@/lib/tools/types";
 import { PATCH_NOTES } from "@/lib/site/patch-notes";
 import { REFERRAL } from "@/lib/referral";
 import { cn } from "@/lib/utils";
-import { OWN_KEY_ONLY } from "@/lib/site/access";
+import { MEMBER_API_KEYS, OWN_KEY_ONLY, REFERRAL_CREDITS, STUDENT_PLAN } from "@/lib/site/access";
 
 // The Studio's richer home: an animated hero around the one-input
 // composer, the five areas with their tools, ready-made workflows, a
@@ -112,14 +112,23 @@ export function PromoStrip() {
       href: "/account/referral",
       cta: { ko: "초대 링크 받기", en: "Get my link" },
     },
-    {
-      icon: GraduationCap,
-      tone: "from-studio-violet/15 to-studio-cyan/10",
-      kicker: { ko: "학생 멤버십", en: "Students" },
-      title: { ko: "재학 인증하면 모든 도구를 크레딧 제한 없이", en: "Verify once, use every tool without credit limits" },
-      href: "/account/membership",
-      cta: { ko: "인증하기", en: "Verify" },
-    },
+    STUDENT_PLAN
+      ? {
+          icon: GraduationCap,
+          tone: "from-studio-violet/15 to-studio-cyan/10",
+          kicker: { ko: "학생 멤버십", en: "Students" },
+          title: { ko: "재학 인증하면 모든 도구를 크레딧 제한 없이", en: "Verify once, use every tool without credit limits" },
+          href: "/account/membership",
+          cta: { ko: "인증하기", en: "Verify" },
+        }
+      : {
+          icon: GraduationCap,
+          tone: "from-studio-violet/15 to-studio-cyan/10",
+          kicker: { ko: "멤버십", en: "Membership" },
+          title: { ko: "플러스 ₩29,900로 25개 도구를 30일 동안, 2,000 크레딧", en: "Plus: all 25 tools for 30 days, 2,000 credits, ₩29,900" },
+          href: "/account/membership",
+          cta: { ko: "플랜 보기", en: "See plans" },
+        },
     {
       icon: KeyRound,
       tone: "from-accent/10 to-studio-cyan/15",
@@ -131,8 +140,10 @@ export function PromoStrip() {
       cta: { ko: "연결하기", en: "Connect" },
     },
   ];
-  // Invites and the student plan granted credits; gone while members bring their own key.
-  const promos = OWN_KEY_ONLY ? allPromos.filter((p) => p.href !== "/account/referral" && p.href !== "/account/membership") : allPromos;
+  // Own-key mode: no invites or plans. SaaS: no own keys, and invites only while they pay credits (lib/site/access.ts).
+  const promos = OWN_KEY_ONLY
+    ? allPromos.filter((p) => p.href !== "/account/referral" && p.href !== "/account/membership")
+    : allPromos.filter((p) => (MEMBER_API_KEYS || p.href !== "/account/api-key") && (REFERRAL_CREDITS || p.href !== "/account/referral"));
   const [i, setI] = useState(0);
   const [paused, setPaused] = useState(false);
   useEffect(() => {

@@ -12,8 +12,9 @@ import { useTheme } from "next-themes";
 import { CommandPalette, type CommandPaletteGroup } from "@/components/command-palette";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { signOut } from "@/lib/actions/auth";
-import { PLANS } from "@/lib/site/plans";
-import { OWN_KEY_ONLY } from "@/lib/site/access";
+import { planName } from "@/lib/site/plans";
+import { isPaidPlan } from "@/lib/payments/pro";
+import { OWN_KEY_ONLY, STUDENT_PLAN } from "@/lib/site/access";
 import { getTool, listTools } from "@/lib/tools/registry";
 import { CATEGORY_LABELS } from "@/lib/tools/registry/categories";
 import { PATCH_NOTES } from "@/lib/site/patch-notes";
@@ -156,11 +157,11 @@ function ThemeLangControls({ vertical }: { vertical?: boolean }) {
 }
 
 // About two typical runs (most tools cost 35–50 credits).
-const LOW_CREDIT_THRESHOLD = 100;
+const LOW_CREDIT_THRESHOLD = 200;
 
 // Dismissal remembers the balance it was dismissed at, so the banner comes
 // back only after more credits are spent.
-function LowCreditBanner({ balance }: { balance: number }) {
+function LowCreditBanner({ balance, paid }: { balance: number; paid: boolean }) {
   const L = useBi();
   const [dismissedAt, setDismissedAt] = useLocalValue("haebot-low-credit-dismissed");
   if (dismissedAt !== null && balance >= Number(dismissedAt)) return null;
@@ -172,9 +173,9 @@ function LowCreditBanner({ balance }: { balance: number }) {
         {empty
           ? L({ ko: "크레딧을 모두 썼어요.", en: "You're out of credits." })
           : L({ ko: `크레딧이 ${balance.toLocaleString()} 남았어요.`, en: `Only ${balance.toLocaleString()} credits left.` })}{" "}
-        <span className="text-fg-muted">{L({ ko: "Pro로 충전하거나, 내 API 키를 연결하면 계속 쓸 수 있어요.", en: "Top up with Pro or connect your own API key to keep going." })}</span>
+        <span className="text-fg-muted">{L({ ko: "크레딧을 충전하면 계속 쓸 수 있어요.", en: "Top up credits to keep going." })}</span>
       </p>
-      <Link href="/account/membership" className="shrink-0 font-medium text-studio-cyan hover:underline">
+      <Link href={paid ? "/account/membership/checkout?product=topup" : "/account/membership"} className="shrink-0 font-medium text-studio-cyan hover:underline">
         {L({ ko: "충전하기", en: "Top up" })}
       </Link>
       <button type="button" onClick={() => setDismissedAt(String(balance))} aria-label={L({ ko: "닫기", en: "Dismiss" })} className="grid size-7 shrink-0 place-items-center rounded-lg text-fg-muted hover:bg-surface-2/60 hover:text-fg">
@@ -188,7 +189,7 @@ function UserMenu({ email, plan, credits }: { email: string; plan: PlanId; credi
   const L = useBi();
   const router = useRouter();
   const [signingOut, startSignOut] = useTransition();
-  const planName = PLANS.find((p) => p.id === plan)?.name;
+  const planLabel = planName(plan);
   const links = [
     { href: "/account", icon: CircleUserRound, label: { ko: "내 계정", en: "My account" } },
     OWN_KEY_ONLY
@@ -208,7 +209,7 @@ function UserMenu({ email, plan, credits }: { email: string; plan: PlanId; credi
         <div className="px-2.5 py-2">
           <p className="truncate text-sm font-medium text-fg">{email}</p>
           <p className="mt-0.5 text-2xs text-fg-muted">
-            {OWN_KEY_ONLY ? L({ ko: "내 API 키로 사용", en: "Runs on your own API key" }) : <>{planName ? L(planName) : null} · {credits} {L({ ko: "크레딧", en: "credits" })}</>}
+            {OWN_KEY_ONLY ? L({ ko: "내 API 키로 사용", en: "Runs on your own API key" }) : <>{L(planLabel)} · {credits} {L({ ko: "크레딧", en: "credits" })}</>}
           </p>
         </div>
         <DropdownMenuSeparator />
@@ -287,7 +288,7 @@ function AppShell({ user, balance, plan, answeredTickets, notices, children }: S
     ];
   }, [locale, router, recent]);
 
-  const credits = plan === "student" ? "∞" : balance !== null ? balance.toLocaleString() : "—";
+  const credits = STUDENT_PLAN && plan === "student" ? "∞" : balance !== null ? balance.toLocaleString() : "—";
 
   return (
     <div className="relative min-h-dvh">
@@ -332,7 +333,8 @@ function AppShell({ user, balance, plan, answeredTickets, notices, children }: S
             </Link>
           )}
         </div>
-        {!OWN_KEY_ONLY && user && plan !== "student" && balance !== null && balance < LOW_CREDIT_THRESHOLD ? <LowCreditBanner balance={balance} /> : null}
+        {/* Only for members who spend credits: Free accounts have none to run low on. */}
+        {!OWN_KEY_ONLY && user && isPaidPlan(plan) && balance !== null && balance < LOW_CREDIT_THRESHOLD ? <LowCreditBanner balance={balance} paid /> : null}
       </header>
 
       <main id="main" tabIndex={-1} className="app-type pb-28 outline-none lg:pr-24 lg:pb-10">

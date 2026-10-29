@@ -71,7 +71,7 @@ export const grant: ToolManifest = {
   outputRenderer: "table",
   grounding: { requireSources: true, webSearch: true, estimateBadge: false },
   model: "gemini-3.8-flash",
-  estimatedCredits: 35,
+  estimatedCredits: 40,
   estimatedSeconds: 30,
   // No K-Startup / bizinfo integration yet — see the note at the top.
   comingSoon: true,

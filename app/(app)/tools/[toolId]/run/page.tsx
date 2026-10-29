@@ -6,6 +6,8 @@ import { DEFAULT_TOOL_CAPABILITY, getToolCapability } from "@/lib/ai/capabilitie
 import { getBusinessProfile } from "@/lib/profile";
 import { getApiKeyStatus } from "@/lib/api-keys";
 import { getMembership } from "@/lib/membership";
+import { isPaidPlan } from "@/lib/payments/pro";
+import { MEMBER_API_KEYS, STUDENT_PLAN } from "@/lib/site/access";
 import { getBalance } from "@/lib/credits";
 import { listProjects } from "@/lib/projects/server";
 import { createClient } from "@/lib/supabase/server";
@@ -65,7 +67,8 @@ export default async function ToolPage({
   // offer an engine the run route would just reject (product decision:
   // no silent fallback, so don't dangle an option that can't work).
   const capability = getToolCapability(toolId) ?? DEFAULT_TOOL_CAPABILITY;
-  const usable = (p: ProviderId) => keyStatus.providers[p].some((s) => s.connected && !s.broken);
+  // Own keys only count while members may add them (lib/site/access.ts); SaaS runs Gemini on the platform key.
+  const usable = (p: ProviderId) => MEMBER_API_KEYS && keyStatus.providers[p].some((s) => s.connected && !s.broken);
   const availableProviders = capability.providers.filter((p) => p === "google" || usable(p));
   const hasOwnKey = Object.fromEntries([...new Set<ProviderId>(["google", ...capability.providers])].map((p) => [p, usable(p)])) as Partial<Record<ProviderId, boolean>>;
 
@@ -117,10 +120,11 @@ export default async function ToolPage({
       initialPreset={chainedFrom || preset === undefined ? undefined : Number(preset)}
       availableProviders={availableProviders}
       supportedProviders={capability.providers}
-      defaultProvider={capability.default}
+      defaultProvider={availableProviders.includes(capability.default) ? capability.default : "google"}
       hasOwnKey={hasOwnKey}
       team={canUsePlatformKey(user?.email)}
-      isStudent={membership.plan === "student"}
+      isStudent={STUDENT_PLAN && membership.plan === "student"}
+      paid={isPaidPlan(membership.plan)}
       balance={balance}
     />
     </>

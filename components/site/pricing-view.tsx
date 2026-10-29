@@ -1,26 +1,30 @@
 "use client";
 
 import Link from "next/link";
-import { KeyRound, ReceiptText, RotateCcw, Undo2, Wand2 } from "lucide-react";
+import { Coins, ReceiptText, RotateCcw, Undo2, Wand2 } from "lucide-react";
 import { catalogTool } from "@/lib/tools/catalog";
 import { FAQ } from "@/lib/site/faq";
 import { useBi } from "@/lib/i18n/context";
 import { PlanCards, PriceTable, toolPrices } from "@/components/site/plan-cards";
 import { OWN_KEY_ONLY } from "@/lib/site/access";
 import { OwnKeyPricing } from "@/components/site/own-key-pricing";
+import { PRODUCTS } from "@/lib/payments/pro";
 
-// Public pricing: the plans, how credits are actually charged, what the
-// sign-up credits cover (computed from the real estimates), the price of
+const won = (n: number) => `₩${n.toLocaleString("ko-KR")}`;
+
+// Public pricing: the plans, how credits are charged, what a month of
+// Plus covers (computed from the real per-tool credits), the price of
 // every tool, and the credit questions.
 
-// A plausible first month, in order; the list shows as many as 500 covers.
-const STARTER = ["idea-radar", "offer-architect", "brand-dna", "sales-page", "hook-lab", "campaign-planner", "market-desk", "competitor-lens", "persona-mapper", "content-transformer", "sop-builder", "meeting-action"];
+// A plausible first month, in order; the list shows as many as Plus covers.
+const STARTER = ["brand-dna", "seo-composer", "seo-composer", "logo-lab", "web-builder", "idea-radar", "market-desk", "persona-mapper", "campaign-planner", "content-transformer", "hook-lab", "sop-builder", "offer-architect", "competitor-lens", "meeting-action"];
 
 export function PricingView({ signedIn }: { signedIn: boolean }) {
   const L = useBi();
   const prices = new Map(toolPrices().map((p) => [p.tool.slug, p.credits]));
-  // Greedy: as many starter tools as 500 credits cover, in order.
-  let left = 500;
+  // Greedy: as many starter tools as a month of Plus covers, in order.
+  const allowance = PRODUCTS.plus.credits;
+  let left = allowance;
   const covered: { slug: string; credits: number }[] = [];
   for (const slug of STARTER) {
     const c = prices.get(slug);
@@ -32,9 +36,9 @@ export function PricingView({ signedIn }: { signedIn: boolean }) {
   const credits = FAQ.filter((f) => f.category === "credits" || f.category === "api");
   const rules = [
     { icon: ReceiptText, title: { ko: "실행 전에 보여 드려요", en: "Shown before you run" }, body: { ko: "도구 화면의 실행 버튼 위에 이번 실행에 드는 크레딧과 남는 크레딧이 나와요.", en: "Above the run button: what this run costs and what you'll have left." } },
-    { icon: Undo2, title: { ko: "실패·취소는 자동 환불", en: "Failures and cancels refunded" }, body: { ko: "예상 크레딧을 잡아 두고, 끝나면 실제 사용량으로 정산해요. 실패하거나 취소하면 돌려드려요.", en: "We hold the estimate and settle to actual use. Failed or cancelled runs are refunded." } },
+    { icon: Undo2, title: { ko: "실패·취소는 자동 환불", en: "Failures and cancels refunded" }, body: { ko: "실행할 때 크레딧을 잡아 두고, 끝나면 차감해요. 실패하거나 취소하면 돌려드려요.", en: "Credits are held when a run starts and charged when it finishes. Failed or cancelled runs are refunded." } },
     { icon: Wand2, title: { ko: "일부만 다시 만들기는 4분의 1", en: "Redoing one part costs a quarter" }, body: { ko: "결과의 한 부분만 고치면 그 도구 크레딧의 25%(최소 5)만 들어요.", en: "Rewriting one section costs 25% of the tool's credits (at least 5)." } },
-    { icon: KeyRound, title: { ko: "내 API 키면 0 크레딧", en: "Your own API key: 0 credits" }, body: { ko: "Google AI Studio 키를 등록하면 크레딧이 차감되지 않아요. 요금은 내 Google 계정 한도로.", en: "Add a Google AI Studio key and runs cost no credits; usage goes to your Google quota." } },
+    { icon: Coins, title: { ko: `모자라면 ${won(PRODUCTS.topup.amount)} 충전`, en: `Top up for ${won(PRODUCTS.topup.amount)}` }, body: { ko: `플러스·프로 이용 중에 ${PRODUCTS.topup.credits} 크레딧을 더할 수 있어요. 충전한 크레딧은 유효기간이 없어요.`, en: `On Plus or Pro, add ${PRODUCTS.topup.credits} credits anytime. Top-up credits never expire.` } },
   ];
   if (OWN_KEY_ONLY) {
     const keyFaq = FAQ.filter((f) => f.category === "api");
@@ -69,7 +73,7 @@ export function PricingView({ signedIn }: { signedIn: boolean }) {
     <div className="mx-auto max-w-[1100px] px-4 pt-6 pb-14 md:px-8 md:pt-10">
       <header className="max-w-2xl">
         <h1 className="font-display text-[clamp(2rem,4vw,3rem)] leading-[1.05] font-bold tracking-[-0.02em] break-keep text-fg">{L({ ko: "요금", en: "Pricing" })}</h1>
-        <p className="mt-3 text-base leading-relaxed break-keep text-fg-muted">{L({ ko: "모든 플랜에서 25개 도구를 모두 써요. 다른 건 크레딧뿐이고, 자동 결제는 없어요.", en: "All 25 tools on every plan. Only credits differ, and nothing renews automatically." })}</p>
+        <p className="mt-3 text-base leading-relaxed break-keep text-fg-muted">{L({ ko: "무료로 둘러보고, 플러스나 프로로 25개 도구를 모두 실행해요. 30일 이용권이라 자동 결제는 없어요. 가격은 부가세 포함이에요.", en: "Browse free, then run all 25 tools on Plus or Pro. Each is a 30-day pass with no auto-renewal. Prices include VAT." })}</p>
       </header>
 
       <div className="mt-8">
@@ -90,13 +94,13 @@ export function PricingView({ signedIn }: { signedIn: boolean }) {
       </section>
 
       <section className="mt-12 rounded-[24px] border border-accent/40 bg-accent-dim p-5 md:p-6" aria-labelledby="starter">
-        <h2 id="starter" className="text-lg font-semibold text-fg">{L({ ko: "가입 크레딧 500이면", en: "What 500 sign-up credits cover" })}</h2>
-        <p className="mt-1 text-sm break-keep text-fg-muted">{L({ ko: "아이디어부터 운영 문서까지, 예상 크레딧 기준으로 이만큼 실행할 수 있어요.", en: "By the estimates, this much — from an idea to an operating document." })}</p>
+        <h2 id="starter" className="text-lg font-semibold text-fg">{L({ ko: `플러스 한 달 ${allowance.toLocaleString()} 크레딧이면`, en: `What a month of Plus (${allowance.toLocaleString()} credits) covers` })}</h2>
+        <p className="mt-1 text-sm break-keep text-fg-muted">{L({ ko: "브랜드부터 블로그, 로고, 홈페이지, 운영 문서까지, 도구별 크레딧 기준으로 이만큼 실행할 수 있어요.", en: "From your brand to blog posts, a logo, a website and operating documents — this much, by each tool's credits." })}</p>
         <ol className="mt-4 flex flex-wrap items-center gap-2">
           {covered.map((c, i) => {
             const t = catalogTool(c.slug)!;
             return (
-              <li key={c.slug} className="flex items-center gap-2">
+              <li key={`${c.slug}-${i}`} className="flex items-center gap-2">
                 {i ? <span className="text-fg-subtle" aria-hidden>+</span> : null}
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-hairline bg-surface px-3 py-1.5 text-sm text-fg">
                   <t.icon size={13} className="text-accent" aria-hidden /> {L(t.name)} <span className="font-mono text-2xs text-fg-subtle">{c.credits}</span>
@@ -104,13 +108,13 @@ export function PricingView({ signedIn }: { signedIn: boolean }) {
               </li>
             );
           })}
-          <li className="ml-1 font-mono text-sm text-fg">= {500 - left}{L({ ko: " 크레딧", en: " credits" })}</li>
+          <li className="ml-1 font-mono text-sm text-fg">= {(allowance - left).toLocaleString()}{L({ ko: " 크레딧", en: " credits" })}</li>
         </ol>
-        <p className="mt-3 text-2xs text-fg-subtle">{L({ ko: "실제 사용량은 입력 길이와 검토 횟수에 따라 조금 달라질 수 있어요. 남은 크레딧은 없어지지 않아요.", en: "Actual use varies a little with input length and review rounds. Unused credits never expire." })}</p>
+        <p className="mt-3 text-2xs text-fg-subtle">{L({ ko: "남은 크레딧은 없어지지 않고, 다음에 플랜을 이용할 때 이어서 써요.", en: "Unused credits don't disappear; they carry over to your next plan period." })}</p>
       </section>
 
       <section className="mt-12" aria-labelledby="per-tool">
-        <h2 id="per-tool" className="text-lg font-semibold text-fg">{L({ ko: "도구별 예상 크레딧", en: "Estimated credits per tool" })}</h2>
+        <h2 id="per-tool" className="text-lg font-semibold text-fg">{L({ ko: "도구별 크레딧", en: "Credits per tool" })}</h2>
         <div className="mt-4">
           <PriceTable />
         </div>

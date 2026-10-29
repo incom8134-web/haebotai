@@ -209,8 +209,8 @@ function Hero() {
                 { ko: "내 Gemini API 키로 실행", en: "Runs on your own Gemini key" },
               ]
             : [
-                { ko: "가입하면 500 크레딧", en: "500 credits on sign-up" },
-                { ko: "카드 등록 없음", en: "No card needed" },
+                { ko: "무료로 둘러보기", en: "Browse free" },
+                { ko: "플러스 ₩29,900/30일", en: "Plus ₩29,900 / 30 days" },
                 { ko: "실패한 실행은 자동 환불", en: "Failed runs refunded" },
               ]
           ).map((t) => (
@@ -259,12 +259,12 @@ function Pricing() {
           <SectionHead
             kicker={L({ ko: "요금", en: "Pricing" })}
             title={L({
-              ko: "모든 플랜에 모든 도구. 다른 건 크레딧뿐",
-              en: "Every tool on every plan. Only credits differ",
+              ko: "무료로 둘러보고, 플러스부터 실행",
+              en: "Browse free. Run from Plus",
             })}
             body={L({
-              ko: "실행 전에 크레딧이 얼마나 드는지 보여 드려요. 실패하거나 취소한 실행은 자동 환불되고, 내 API 키를 넣으면 크레딧이 들지 않아요.",
-              en: "You see the credit cost before every run. Failed or cancelled runs are refunded automatically, and with your own API key runs cost no credits.",
+              ko: "플러스와 프로 모두 25개 도구를 실행해요. 다른 건 한 달 크레딧이에요. 실행 전에 크레딧이 얼마나 드는지 보여 드리고, 실패하거나 취소한 실행은 자동 환불돼요.",
+              en: "Plus and Pro both run all 25 tools; only the monthly credits differ. You see the credit cost before every run, and failed or cancelled runs are refunded automatically.",
             })}
           />
           <div className="mt-10">
@@ -385,7 +385,6 @@ function Footer() {
             ["/use-cases", { ko: "활용 사례", en: "Use cases" }],
             ["/help", { ko: "도움말", en: "Help" }],
             ["/help/faq", { ko: "자주 묻는 질문", en: "FAQ" }],
-            ["/help/api-guide", { ko: "API 키 설명서", en: "API key manual" }],
             ["/help/whats-new", { ko: "새로운 점", en: "What's new" }],
             ["/status", { ko: "서비스 상태", en: "Status" }],
             signedIn

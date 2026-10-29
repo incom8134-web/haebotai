@@ -24,6 +24,8 @@ import { getTool } from "@/lib/tools/registry";
 import { QUICK_MAIN, QUICK_MORE, quickHref, type QuickId, type QuickTool } from "@/lib/site/quick";
 import { primaryButton, secondaryButton } from "@/components/site/page";
 import { ApiKeyPrompt } from "@/components/api-key-prompt";
+import { PlanPrompt } from "@/components/plan-prompt";
+import { MEMBER_API_KEYS } from "@/lib/site/access";
 import { OutputLanguagePicker } from "@/components/output-language-picker";
 import { cn } from "@/lib/utils";
 
@@ -48,7 +50,7 @@ function minutes(tool: QuickTool) {
   return Math.max(1, Math.round(s / 60));
 }
 
-export function QuickStart({ signedIn, needsKey = false }: { signedIn: boolean; needsKey?: boolean }) {
+export function QuickStart({ signedIn, needsKey = false, needsPlan = false }: { signedIn: boolean; needsKey?: boolean; needsPlan?: boolean }) {
   const L = useBi();
   const router = useRouter();
   const reduce = useReducedMotion();
@@ -56,6 +58,7 @@ export function QuickStart({ signedIn, needsKey = false }: { signedIn: boolean; 
   const [text, setText] = useState("");
   const [going, setGoing] = useState(false);
   const [keyPrompt, setKeyPrompt] = useState(false);
+  const [planPrompt, setPlanPrompt] = useState(false);
   const ready = text.trim().length >= 4;
 
   const go = () => {
@@ -63,6 +66,11 @@ export function QuickStart({ signedIn, needsKey = false }: { signedIn: boolean; 
     // Signed in without a key: say so here, before the tool page opens and can't run.
     if (needsKey) {
       setKeyPrompt(true);
+      return;
+    }
+    // Signed in on Free: running needs a plan (lib/run-access.ts).
+    if (needsPlan) {
+      setPlanPrompt(true);
       return;
     }
     setGoing(true);
@@ -216,7 +224,9 @@ export function QuickStart({ signedIn, needsKey = false }: { signedIn: boolean; 
         <p className="mt-3 text-sm leading-relaxed break-keep text-fg-muted">
           {L({ ko: `약 ${minutes(pick)}분 걸려요. `, en: `Takes about ${minutes(pick)} min. ` })}
           {signedIn
-            ? L({ ko: "내 API 키로 실행되고, 결과는 보관함에 저장돼요.", en: "It runs on your API key and is saved to your Library." })
+            ? MEMBER_API_KEYS
+              ? L({ ko: "내 API 키로 실행되고, 결과는 보관함에 저장돼요.", en: "It runs on your API key and is saved to your Library." })
+              : L({ ko: "플랜 크레딧으로 실행되고, 결과는 보관함에 저장돼요.", en: "It runs on your plan's credits and is saved to your Library." })
             : L({ ko: "누르면 Google 로그인 후 바로 이어서 만들어요.", en: "You'll sign in with Google, then it carries on." })}
         </p>
         {needsKey ? (
@@ -227,6 +237,7 @@ export function QuickStart({ signedIn, needsKey = false }: { signedIn: boolean; 
           </p>
         ) : null}
         <ApiKeyPrompt open={keyPrompt} onOpenChange={setKeyPrompt} next={quickHref(pick, text)} />
+        <PlanPrompt open={planPrompt} onOpenChange={setPlanPrompt} />
       </section>
 
       <div className="mt-14 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-hairline pt-6 text-sm">
