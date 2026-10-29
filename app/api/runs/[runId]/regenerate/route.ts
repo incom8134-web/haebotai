@@ -9,6 +9,7 @@ import { getOutputSchema } from "@/lib/tools/schemas";
 import { buildContext, buildSystemInstruction } from "@/lib/tools/generate-prompt";
 import { zodToJsonSchema } from "@/lib/ai/schema";
 import { getClient, runWithApiKey } from "@/lib/ai/gemini";
+import { parseOutputLanguage, runWithOutputLanguage } from "@/lib/ai/output-language";
 import { getUserApiKeys } from "@/lib/api-keys";
 import { getMembership } from "@/lib/membership";
 import { resolveCost } from "@/lib/ai/resolve-provider";
@@ -121,7 +122,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
   let result: Awaited<ReturnType<typeof call>>;
   try {
-    result = keys.length ? await runWithApiKey(keys, call) : await call();
+    result = await runWithOutputLanguage(parseOutputLanguage((run.input as Record<string, unknown> | null)?._output_lang), () => (keys.length ? runWithApiKey(keys, call) : call()));
   } catch (err) {
     if (cost > 0) await releaseUnattachedReservation(user.id, cost);
     console.warn("regenerate failed", (err as Error).message);
@@ -195,7 +196,7 @@ async function reviseDocumentRun(opts: {
   const go = () => reviseDocument({ doc: document, instruction, target: section, contractText: report?.contractText ?? "", requestText: buildContext(manifest, input, null), signal: AbortSignal.timeout(280_000) });
   let result: Awaited<ReturnType<typeof go>>;
   try {
-    result = keys.length ? await runWithApiKey(keys, go) : await go();
+    result = await runWithOutputLanguage(parseOutputLanguage((run.input as Record<string, unknown> | null)?._output_lang), () => (keys.length ? runWithApiKey(keys, go) : go()));
   } catch (err) {
     console.warn("document revise failed", (err as Error).message);
     result = { ok: false, status: 502, error: cost > 0 ? "다시 만들지 못했어요. 크레딧은 돌려드렸어요." : "다시 만들지 못했어요. 잠시 후 다시 시도해 주세요." };

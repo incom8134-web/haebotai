@@ -143,6 +143,8 @@ export interface AgentRunState {
   startedAt: string;
   heartbeatAt: string;
   creditsReserved: number;
+  /** The language the result is written in, chosen before the run (lib/ai/output-language.ts). Absent on older runs → Korean. */
+  lang?: "ko" | "en";
 }
 
 export interface StageContext {

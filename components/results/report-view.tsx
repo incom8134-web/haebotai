@@ -4,7 +4,8 @@ import { useMemo, type CSSProperties } from "react";
 import { renderChart, WEB_THEME, type ChartSpec } from "@/lib/tools/report/charts";
 import type { Report, ReportBlock, ReportCard, Tone } from "@/lib/tools/report/types";
 import { cn } from "@/lib/utils";
-import { useBi } from "@/lib/i18n/context";
+import { useBi, useLocale } from "@/lib/i18n/context";
+import { localizeLabels } from "@/lib/tools/report/localize";
 import { Cited } from "@/components/results/cited";
 
 // The data tools' result page (business plan, trend, 90-day plan, money
@@ -290,7 +291,10 @@ function widths(blocks: ReportBlock[]): boolean[] {
   return full;
 }
 
-export function ReportView({ report }: { report: Report }) {
+export function ReportView({ report: raw }: { report: Report }) {
+  // The builders label in Korean; on the English site the labels follow (lib/tools/report/localize.ts).
+  const { locale } = useLocale();
+  const report = useMemo(() => localizeLabels(raw, locale === "en" ? "en" : "ko"), [raw, locale]);
   const accent = report.palette[0];
   const style = { "--rp": accent, "--rp-soft": `color-mix(in srgb, ${accent} 10%, transparent)` } as CSSProperties;
   let n = 0;

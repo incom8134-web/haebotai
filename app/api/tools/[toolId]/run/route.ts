@@ -18,6 +18,7 @@ import { checkSpend } from "@/lib/spend-guard";
 import { runAgent } from "@/lib/agents/runner";
 import { agentFor } from "@/lib/agents/specs";
 import { parseAgentRequest } from "@/lib/agents/request";
+import { parseOutputLanguage } from "@/lib/ai/output-language";
 import type { AgentRunState } from "@/lib/agents/types";
 
 // generations writes (insert/update) go through the service-role client
@@ -117,7 +118,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   if (!reference.ok) {
     return Response.json({ error: reference.error }, { status: 400 });
   }
-  const storedInput = reference.bundle ? { ...parsedInput.data, _reference: referenceForStorage(reference.bundle) } : parsedInput.data;
+  // The language the result is written in, chosen on the run page (한국어 / English).
+  const outputLang = parseOutputLanguage((body as { outputLang?: unknown } | null)?.outputLang);
+  const storedInput = { ...parsedInput.data, ...(reference.bundle ? { _reference: referenceForStorage(reference.bundle) } : {}), _output_lang: outputLang };
 
   const policy = checkToolPolicy(manifest.id, parsedInput.data);
   if (!policy.ok) {
@@ -221,6 +224,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     startedAt: now,
     heartbeatAt: now,
     creditsReserved: cost,
+    lang: outputLang,
   };
 
   const { data: run, error: insertError } = await admin

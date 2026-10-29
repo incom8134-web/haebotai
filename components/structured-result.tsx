@@ -1,6 +1,7 @@
 "use client";
 
-import { useBi } from "@/lib/i18n/context";
+import { useBi, useLocale } from "@/lib/i18n/context";
+import { labelEn } from "@/lib/tools/report/localize";
 import type { Source } from "@/lib/tools/registry/shared";
 import { asCompactPair, formatPrimitive, humanize, isSourceArray, titleKeyOf } from "@/lib/tools/output-labels";
 
@@ -74,9 +75,10 @@ function StructuredField({
   value: unknown;
   insideCard: boolean;
 }) {
+  const { locale } = useLocale();
   if (value === null || value === undefined || value === "") return null;
   if (Array.isArray(value) && value.length === 0) return null;
-  const label = humanize(fieldKey);
+  const label = locale === "en" ? labelEn(humanize(fieldKey)) : humanize(fieldKey);
 
   if (typeof value === "string" && /^https?:\/\/\S+\.(png|jpe?g|webp)(\?|$)/i.test(value)) {
     return (

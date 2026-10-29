@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useBi } from "@/lib/i18n/context";
+import { useBi, useLocale } from "@/lib/i18n/context";
+import { localizeLabels } from "@/lib/tools/report/localize";
 import { cn } from "@/lib/utils";
 import { buildReport } from "@/lib/tools/report";
 import { objs, str } from "@/lib/tools/report/util";
@@ -22,7 +23,8 @@ export function TrendRadar({ output, input }: { output: Record<string, unknown>;
   const L = useBi();
   const signals = objs(output.signals).map((s) => ({ signal: str(s.signal), direction: str(s.direction), evidence: str(s.evidence), origin: str(s.origin), impact: Math.max(1, Math.min(5, Number(s.impact) || 1)), horizon: str(s.horizon) || "soon" }));
   const [active, setActive] = useState<number | null>(null);
-  const report = useMemo(() => buildReport("trend", output, input), [output, input]);
+  const { locale } = useLocale();
+  const report = useMemo(() => localizeLabels(buildReport("trend", output, input), locale === "en" ? "en" : "ko"), [output, input, locale]);
   const R = 140;
 
   return (
