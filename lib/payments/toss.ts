@@ -76,3 +76,16 @@ export function confirmTossPayment(params: { paymentKey: string; orderId: string
 export function getTossPaymentByOrderId(orderId: string): Promise<TossResult> {
   return call(`https://api.tosspayments.com/v1/payments/orders/${encodeURIComponent(orderId)}`, { method: "GET" }, { orderId });
 }
+
+/**
+ * 결제 취소 (전액 or 부분): POST /v1/payments/{paymentKey}/cancel. The
+ * Idempotency-Key is fixed per order, so a double click or a retry can't
+ * refund twice at Toss.
+ */
+export function cancelTossPayment(params: { paymentKey: string; orderId: string; cancelAmount: number; cancelReason: string }): Promise<TossResult> {
+  return call(
+    `https://api.tosspayments.com/v1/payments/${encodeURIComponent(params.paymentKey)}/cancel`,
+    { method: "POST", headers: { "Idempotency-Key": `refund_${params.orderId}` }, body: JSON.stringify({ cancelAmount: params.cancelAmount, cancelReason: params.cancelReason }) },
+    { paymentKey: params.paymentKey, orderId: params.orderId },
+  );
+}

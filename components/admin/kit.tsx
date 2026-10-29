@@ -69,6 +69,16 @@ export const MSG: Record<string, Bi> = {
   tool_paused: { ko: "도구를 중지했어요.", en: "Tool paused." },
   tool_resumed: { ko: "도구를 다시 열었어요.", en: "Tool reopened." },
   no_key: { ko: "이 순위에 등록된 키가 없어요.", en: "No key in that slot." },
+  refunded: { ko: "환불했어요. 크레딧과 늘어난 기간도 회수했어요.", en: "Refunded. Its credits and added days were taken back." },
+  refund_changed: { ko: "그 사이 회원이 크레딧을 써서 환불 금액이 바뀌었어요. 새 금액을 확인하고 다시 눌러 주세요.", en: "The member used credits since, so the amount changed. Check the new amount and try again." },
+  refund_window_passed: { ko: "결제 후 7일이 지나 환불할 수 없어요.", en: "More than 7 days since payment; not refundable." },
+  refund_fully_used: { ko: "이 결제의 크레딧을 모두 써서 환불할 금액이 없어요.", en: "All of this payment's credits are used; nothing to refund." },
+  refund_bad_input: { ko: "결제 정보가 올바르지 않아 금액을 계산하지 못했어요.", en: "Couldn't work out the amount from this payment's data." },
+  refund_unknown_order: { ko: "결제를 찾을 수 없어요. 데이터베이스 마이그레이션 0023이 적용됐는지 확인해 주세요.", en: "Payment not found. Check that database migration 0023 is applied." },
+  refund_not_refundable: { ko: "결제 완료 상태인 결제만 환불할 수 있어요.", en: "Only completed payments can be refunded." },
+  refund_no_payment_key: { ko: "토스 결제키가 없어 취소할 수 없어요. 토스 대시보드에서 처리해 주세요.", en: "No Toss payment key; cancel it in the Toss dashboard." },
+  refund_toss_failed: { ko: "토스에서 취소하지 못했어요. 아무것도 바뀌지 않았어요. 감사 로그에서 사유를 확인해 주세요.", en: "Toss refused the cancel; nothing changed. See the audit log for the reason." },
+  refund_ledger_failed: { ko: "토스 환불은 됐지만 크레딧·기간 회수에 실패했어요. 다시 누르면 회수만 다시 시도해요(중복 환불 없음).", en: "Toss refunded, but taking back credits and days failed. Pressing again retries only that (no double refund)." },
   tier_unknown: { ko: "Google이 응답하지 않아 확인하지 못했어요. 잠시 뒤 다시 눌러 주세요.", en: "Google didn't answer. Try again shortly." },
 };
 

@@ -11,6 +11,9 @@ import { publicTools } from "@/lib/tools/catalog";
 import { deleteAccountData } from "@/lib/account-delete";
 import { normalizeName } from "@/lib/member-name";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { cancelTossPayment } from "@/lib/payments/toss";
+import { quoteOrderRefund } from "@/lib/payments/refund-server";
+import { runRefund } from "@/lib/payments/refund";
 
 // Staff actions for /admin. Each one re-checks getAdminUser() itself: the
 // pages are gated, but a server action is a reachable endpoint on its own.
@@ -305,4 +308,36 @@ export async function setToolPaused(_prev: AdminActionState, formData: FormData)
   await logAdminAction(staff.id, pause ? "pause_tool" : "resume_tool", "site_settings", slug, { message });
   revalidatePath("/", "layout");
   return { ok: true, message: pause ? "tool_paused" : "tool_resumed" };
+}
+
+// ── Refunds ────────────────────────────────────────────────────────────
+
+/**
+ * Refunds a done payment under the refund policy (lib/payments/refund.ts):
+ * cancels it at Toss for the quoted amount, then marks it canceled and
+ * takes back its credits and days in one transaction (refund_order,
+ * migration 0023), and writes the audit log. `expected` is the amount the
+ * staff member saw on the button; if usage changed it since, nothing is
+ * refunded and the page shows the new amount.
+ */
+export async function refundPayment(_prev: AdminActionState, formData: FormData): Promise<AdminActionState> {
+  const result = await runRefund(
+    {
+      getStaff: getAdminUser,
+      quote: (orderId) => quoteOrderRefund(orderId),
+      cancelAtToss: async (p) => {
+        const res = await cancelTossPayment(p);
+        return res.ok ? { ok: true, raw: res.payment.raw } : { ok: false, code: res.code, message: res.message };
+      },
+      applyRefund: async (p) => {
+        const { data, error } = await createAdminClient().rpc("refund_order", { p_order_id: p.orderId, p_refund_amount: p.refundAmount, p_credits: p.credits, p_days: p.days, p_raw: p.raw });
+        if (error) console.error("[payments] refund_order failed", p.orderId, error.message);
+        return !error && data === true;
+      },
+      log: logAdminAction,
+    },
+    { orderId: String(formData.get("orderId") ?? ""), expectedAmount: Number(formData.get("expected")), reason: String(formData.get("reason") ?? "") },
+  );
+  if (result.message !== "not_admin") revalidatePath("/admin/members", "layout");
+  return { ok: result.ok, message: result.message };
 }

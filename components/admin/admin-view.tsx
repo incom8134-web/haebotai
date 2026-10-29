@@ -4,11 +4,11 @@ import { useActionState, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Activity, AlertTriangle, ArrowLeft, ArrowRight, Ban, Copy, KeyRound, Play, Plus, RotateCcw, Save, Search, Trash2, UserPlus, Users, Wrench } from "lucide-react";
-import { checkMemberKeyTier, createMember, deleteMember, replyToTicket, reopenTicket, setMemberSuspended, updateMember, type AdminActionState } from "@/lib/actions/admin";
+import { checkMemberKeyTier, createMember, deleteMember, refundPayment, replyToTicket, reopenTicket, setMemberSuspended, updateMember, type AdminActionState } from "@/lib/actions/admin";
 import type { KeyTier } from "@/lib/ai/key-tier";
 import { useBi } from "@/lib/i18n/context";
 import { filtersToQuery, type MemberFilters } from "@/lib/admin-filters";
-import type { AdminMember, AdminMemberDetail, AdminOverview, AdminTicket, TicketStatus, ToolUsageRow, UsagePeriod } from "@/lib/admin";
+import type { AdminMember, AdminMemberDetail, AdminOverview, AdminTicket, RefundPreview, TicketStatus, ToolUsageRow, UsagePeriod } from "@/lib/admin";
 import { catalogTool, publicTools } from "@/lib/tools/catalog";
 import { NAME_MAX } from "@/lib/member-name";
 import { TONE, toolTone } from "@/components/site/tone";
@@ -491,6 +491,52 @@ function KeyTierCell({ m }: { m: AdminMember }) {
   );
 }
 
+const REFUND_BLOCKED: Record<Exclude<RefundPreview, { ok: true }>["reason"], Bi> = {
+  window_passed: { ko: "7일 경과 · 환불 불가", en: "Past 7 days · not refundable" },
+  fully_used: { ko: "크레딧 모두 사용 · 환불 불가", en: "All credits used · not refundable" },
+  bad_input: { ko: "금액 계산 불가", en: "Can't compute amount" },
+  unavailable: { ko: "환불 정보를 읽지 못했어요", en: "Couldn't read refund data" },
+};
+
+/** Refund on a done payment: shows the amount the policy allows, asks once more, then refunds. */
+function RefundControl({ orderId, paid, preview }: { orderId: string; paid: number; preview: RefundPreview }) {
+  const L = useBi();
+  const [state, action, pending] = useActionState<AdminActionState, FormData>(refundPayment, null);
+  const [open, setOpen] = useState(false);
+  if (!preview.ok) return <p className="mt-1.5 text-xs text-fg-subtle">{L(REFUND_BLOCKED[preview.reason])}</p>;
+  if (state?.ok) return <div className="mt-2 text-xs"><ActionNote state={state} /></div>;
+  const summary = preview.full
+    ? L({ ko: `전액 ${num(preview.amount)}원 (크레딧 미사용)`, en: `Full ₩${num(preview.amount)} (no credits used)` })
+    : L({ ko: `${num(preview.amount)}원 / ${num(paid)}원 (이 결제 크레딧 ${num(preview.usedFromOrder)} 사용)`, en: `₩${num(preview.amount)} of ₩${num(paid)} (${num(preview.usedFromOrder)} of its credits used)` });
+  return (
+    <div className="mt-2">
+      {!open ? (
+        <button type="button" onClick={() => setOpen(true)} className="rounded-lg border border-hairline bg-surface px-2.5 py-1 text-xs font-semibold text-fg hover:bg-surface-2">
+          {L({ ko: "환불", en: "Refund" })} · {summary}
+        </button>
+      ) : (
+        <form action={action} className="flex flex-col gap-2 rounded-xl border border-hairline bg-surface-2/50 p-3">
+          <input type="hidden" name="orderId" value={orderId} />
+          <input type="hidden" name="expected" value={preview.amount} />
+          <p className="text-xs break-keep text-fg-muted">
+            {L({ ko: `토스에서 ${num(preview.amount)}원을 취소하고, 이 결제의 남은 크레딧(${num(preview.unusedCredits)})과 늘어난 기간을 회수해요. 되돌릴 수 없어요.`, en: `Cancels ₩${num(preview.amount)} at Toss and takes back this payment's ${num(preview.unusedCredits)} unused credits and added days. This can't be undone.` })}
+          </p>
+          <input name="reason" maxLength={200} placeholder={L({ ko: "취소 사유 (비우면 '고객 요청 환불')", en: "Cancel reason (default: customer request)" })} className={cn(field, "h-9 text-xs")} />
+          <span className="flex gap-2">
+            <button type="submit" disabled={pending} className={cn(btnDanger, "h-9 text-xs")}>
+              {pending ? L({ ko: "환불 중…", en: "Refunding…" }) : L({ ko: `${num(preview.amount)}원 환불`, en: `Refund ₩${num(preview.amount)}` })}
+            </button>
+            <button type="button" disabled={pending} onClick={() => setOpen(false)} className={cn(btnGhost, "h-9 text-xs")}>
+              {L({ ko: "취소", en: "Cancel" })}
+            </button>
+          </span>
+          {state ? <div className="text-xs"><ActionNote state={state} /></div> : null}
+        </form>
+      )}
+    </div>
+  );
+}
+
 export function MemberProfile({ m, notices }: { m: AdminMemberDetail; notices?: React.ReactNode }) {
   const L = useBi();
   const toolLabel = useToolLabel();
@@ -627,14 +673,23 @@ export function MemberProfile({ m, notices }: { m: AdminMemberDetail; notices?: 
           ) : (
             <ul className="divide-y divide-hairline">
               {m.payments.map((p) => (
-                <li key={p.orderId} className="flex items-center gap-3 px-5 py-3 text-sm">
-                  <span className="min-w-0 flex-1">
-                    <span className="block font-semibold">{num(p.amount)}원 {p.plan ? <span className="font-normal text-fg-muted">· {p.plan}</span> : null}</span>
-                    <span className="block font-mono text-xs text-fg-subtle">
-                      {p.orderId} · {fmtDateTime(p.createdAt)}
+                <li key={p.orderId} className="px-5 py-3 text-sm">
+                  <div className="flex items-center gap-3">
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-semibold">{num(p.amount)}원 {p.plan ? <span className="font-normal text-fg-muted">· {p.plan}</span> : null}</span>
+                      <span className="block font-mono text-xs text-fg-subtle">
+                        {p.orderId} · {fmtDateTime(p.createdAt)}
+                      </span>
+                      {p.refundedAmount != null ? (
+                        <span className="block text-xs text-fg-muted">
+                          {L({ ko: `${num(p.refundedAmount)}원 환불`, en: `₩${num(p.refundedAmount)} refunded` })}
+                          {p.refundedAt ? ` · ${fmtDateTime(p.refundedAt)}` : ""}
+                        </span>
+                      ) : null}
                     </span>
-                  </span>
-                  <Pill tone={p.status === "done" ? "green" : p.status === "pending" ? "gray" : "red"}>{L(PAY_STATUS[p.status] ?? { ko: p.status, en: p.status })}</Pill>
+                    <Pill tone={p.status === "done" ? "green" : p.status === "pending" ? "gray" : "red"}>{L(p.refundedAmount != null ? PAY_STATUS.refunded : (PAY_STATUS[p.status] ?? { ko: p.status, en: p.status }))}</Pill>
+                  </div>
+                  {p.status === "done" && p.refund ? <RefundControl orderId={p.orderId} paid={p.amount} preview={p.refund} /> : null}
                 </li>
               ))}
             </ul>
