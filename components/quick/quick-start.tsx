@@ -221,7 +221,7 @@ export function QuickStart({ signedIn, needsKey = false }: { signedIn: boolean; 
           <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-2xl border border-studio-cyan/40 bg-studio-cyan/10 px-4 py-3 text-sm font-medium break-keep text-fg">
             <KeyRound size={15} className="shrink-0 text-studio-cyan" aria-hidden />
             {L({ ko: "아직 API 키가 없어요. 만들기 전에 먼저 등록해 주세요.", en: "You don't have an API key yet. Add one before you make anything." })}
-            <Link href="/help/api-guide#video" className="font-semibold text-studio-cyan hover:underline">{L({ ko: "키 받는 방법 보기", en: "How to get a key" })}</Link>
+            <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer" className="font-semibold text-studio-cyan hover:underline">{L({ ko: "Google AI Studio에서 키 받기", en: "Get a key at Google AI Studio" })}</a>
           </p>
         ) : null}
         <ApiKeyPrompt open={keyPrompt} onOpenChange={setKeyPrompt} next={quickHref(pick, text)} />

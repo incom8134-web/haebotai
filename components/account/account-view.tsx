@@ -3,7 +3,7 @@
 import { useActionState, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AlertTriangle, ArrowRight, Check, CircleCheck, CircleGauge, Crown, ExternalLink, GraduationCap, KeyRound, LogOut, PlayCircle, Trash2 } from "lucide-react";
+import { AlertTriangle, ArrowRight, Check, CircleCheck, CircleGauge, Crown, ExternalLink, GraduationCap, KeyRound, LogOut, Trash2 } from "lucide-react";
 import { PLANS } from "@/lib/site/plans";
 import { requestStudentVerification, type StudentRequestState } from "@/lib/actions/membership";
 import { deleteApiKey, saveApiKey, testApiKey, type ApiKeyActionState } from "@/lib/actions/api-keys";
@@ -437,10 +437,7 @@ function ApiKeyPanel({ apiKey }: { apiKey: ApiKeyStatus }) {
               {L({ ko: "Google AI Studio에서 키를 만들고 「Copy key」로 복사한 뒤, 아래 Google Gemini 「1순위」 칸에 붙여넣고 「적용」을 누르세요.", en: "Create a key in Google AI Studio, click \"Copy key\", then paste it into the Google Gemini \"1st priority\" box below and click \"apply\"." })}
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
-              <Link href="/help/api-guide#video" className={cn(primaryButton, "h-10 px-4")}>
-                <PlayCircle size={16} aria-hidden /> {L({ ko: "키 받는 방법 보기", en: "How to get a key" })}
-              </Link>
-              <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer" className={cn(secondaryButton, "h-10 px-4")}>
+              <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer" className={cn(primaryButton, "h-10 px-4")}>
                 Google AI Studio <ExternalLink size={14} aria-hidden />
               </a>
             </div>
@@ -454,9 +451,6 @@ function ApiKeyPanel({ apiKey }: { apiKey: ApiKeyStatus }) {
         ) : (
           <p className="rounded-xl bg-studio-warning/10 p-3 text-sm text-fg-muted">{L(KEY_MSG.server_disabled)}</p>
         )}
-        <p className="text-sm text-fg-muted">
-          {L({ ko: "처음이라면", en: "First time?" })} <Link href="/help/api-guide" className="text-studio-cyan underline underline-offset-2">{L({ ko: "API 키 설명서", en: "Read the API key manual" })}</Link>{L({ ko: "를 보세요 — 발급, 보안, 문제 해결까지 담겨 있어요.", en: " — getting a key, security and troubleshooting." })}
-        </p>
       </section>
     </>
   );

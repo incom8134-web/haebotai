@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { KeyRound, PlayCircle } from "lucide-react";
+import { ExternalLink, KeyRound } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { primaryButton, secondaryButton } from "@/components/site/page";
 import { useBi } from "@/lib/i18n/context";
@@ -43,9 +43,9 @@ export function ApiKeyPrompt({ open, onOpenChange, next }: { open: boolean; onOp
           ))}
         </ol>
         <div className="mt-6 flex flex-col gap-2 sm:flex-row">
-          <Link href="/help/api-guide#video" className={cn(secondaryButton, "h-11 flex-1 font-semibold")}>
-            <PlayCircle size={16} aria-hidden /> {L({ ko: "키 받는 방법 보기", en: "How to get a key" })}
-          </Link>
+          <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer" className={cn(secondaryButton, "h-11 flex-1 font-semibold")}>
+            Google AI Studio <ExternalLink size={15} aria-hidden />
+          </a>
           <Link href={`/account/api-key?next=${encodeURIComponent(next)}`} className={cn(primaryButton, "h-11 flex-1")}>
             <KeyRound size={16} aria-hidden /> {L({ ko: "API 키 등록하기", en: "Add my key" })}
           </Link>

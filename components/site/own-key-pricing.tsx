@@ -53,9 +53,6 @@ export function OwnKeyPricing({ signedIn }: { signedIn: boolean }) {
         <Link href={signedIn ? "/account/api-key" : "/auth"} className={cn(primaryButton, "h-11 px-5")}>
           {signedIn ? L({ ko: "API 키 등록하기", en: "Add my API key" }) : L({ ko: "시작하기", en: "Get started" })}
         </Link>
-        <Link href="/help/api-guide" className={cn(secondaryButton, "h-11 px-5")}>
-          {L({ ko: "키 발급 방법", en: "How to get a key" })}
-        </Link>
         <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer" className={cn(secondaryButton, "h-11 px-5")}>
           Google AI Studio <ExternalLink size={14} aria-hidden />
         </a>

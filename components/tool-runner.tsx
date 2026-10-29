@@ -4,7 +4,7 @@ import { toolSlug } from "@/lib/tools/catalog";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { notFound, usePathname, useRouter, useSearchParams } from "next/navigation";
-import { AlertTriangle, KeyRound, PlayCircle, RotateCcw, SlidersHorizontal, SquarePen, X } from "lucide-react";
+import { AlertTriangle, KeyRound, RotateCcw, SlidersHorizontal, SquarePen, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -633,9 +633,6 @@ function ToolRunner({
             <div className="mt-4 flex flex-wrap gap-2">
               <Link href={`/account/api-key?next=${encodeURIComponent(here)}`} className="studio-gradient-bg inline-flex h-11 items-center gap-1.5 rounded-2xl px-5 text-sm font-semibold text-white shadow-[inset_0_1px_0_oklch(1_0_0/30%),0_10px_24px_-10px_var(--studio-violet)] hover:opacity-95">
                 <KeyRound size={15} aria-hidden /> {L({ ko: "API 키 등록하기", en: "Add my API key" })}
-              </Link>
-              <Link href="/help/api-guide#video" className="inline-flex h-11 items-center gap-1.5 rounded-2xl border border-hairline bg-surface px-5 text-sm font-semibold text-fg hover:border-studio-cyan">
-                <PlayCircle size={15} className="text-studio-cyan" aria-hidden /> {L({ ko: "키 받는 방법 보기 (영상)", en: "How to get a key (video)" })}
               </Link>
             </div>
           </div>
