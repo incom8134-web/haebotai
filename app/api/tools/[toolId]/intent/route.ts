@@ -10,6 +10,7 @@ import { getUserApiKeys } from "@/lib/api-keys";
 import { resolveRequestedProvider } from "@/lib/ai/resolve-provider";
 import { runWithApiKey } from "@/lib/tools/generate";
 import { understand } from "@/lib/agents/calls";
+import { parseOutputLanguage, runWithOutputLanguage } from "@/lib/ai/output-language";
 import { isAgentic } from "@/lib/agents/specs";
 import { canUsePlatformKey } from "@/lib/platform-access";
 import { intentLimiter, checkRateLimit } from "@/lib/rate-limit";
@@ -37,7 +38,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const rate = await checkRateLimit(intentLimiter, user.id);
   if (!rate.ok) return Response.json({ error: "요청이 너무 잦습니다. 잠시 후 다시 시도해주세요." }, { status: 429 });
 
-  const body = (await request.json().catch(() => null)) as { values?: unknown; provider?: unknown; excludeProfile?: unknown; reference?: { mode?: unknown; text?: unknown; files?: unknown } } | null;
+  const body = (await request.json().catch(() => null)) as { values?: unknown; provider?: unknown; excludeProfile?: unknown; reference?: { mode?: unknown; text?: unknown; files?: unknown }; outputLang?: unknown } | null;
   const parsed = buildInputSchema(manifest.inputs).safeParse(body?.values ?? {});
   if (!parsed.success) return Response.json({ intent: null, questions: [] });
   const resolution = resolveRequestedProvider(manifest.id, body?.provider);
@@ -59,7 +60,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   // No own key and not on the team: the run itself will ask for a key, so don't spend the platform's.
   if (!keys.length && !canUsePlatformKey(user.email)) return Response.json({ intent: null, questions: [] });
   try {
-    const r = await runWithApiKey("google", user.id, keys, () => understand(manifest, values, profile, [], AbortSignal.timeout(25_000)));
+    const r = await runWithOutputLanguage(parseOutputLanguage(body?.outputLang), () => runWithApiKey("google", user.id, keys, () => understand(manifest, values, profile, [], AbortSignal.timeout(25_000))));
     return Response.json({ intent: r.intent, questions: r.questions });
   } catch {
     return Response.json({ intent: null, questions: [] });

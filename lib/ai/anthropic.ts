@@ -21,6 +21,7 @@ import {
 } from "./anthropic-response";
 import type { AiAdapter, AiStreamEvent, GenerationResult, TokenUsage } from "./types";
 import { outputSchemaFor } from "@/lib/tools/schemas";
+import { applyToAnthropicParams } from "./output-language";
 
 // Claude is own-key only (product decision) — there is no platform
 // Anthropic key, so unlike Gemini's getClient() there is no fallback
@@ -56,7 +57,11 @@ export async function runWithApiKey<T>(userId: string, apiKeys: string[], fn: ()
 function getClient(): Anthropic {
   const state = userKeyStore.getStore();
   if (!state) throw new Error("Anthropic API 키가 없습니다 — Claude는 직접 등록한 키로만 실행됩니다");
-  return new Anthropic({ apiKey: state.keys[state.index] });
+  const client = new Anthropic({ apiKey: state.keys[state.index] });
+  // The run's result language (lib/ai/output-language.ts) applies to every call.
+  const create = client.messages.create.bind(client.messages) as (params: Anthropic.MessageCreateParams, options?: Anthropic.RequestOptions) => ReturnType<typeof client.messages.create>;
+  client.messages.create = ((params: Anthropic.MessageCreateParams, options?: Anthropic.RequestOptions) => create(applyToAnthropicParams(params), options)) as typeof client.messages.create;
+  return client;
 }
 
 async function generateOnce(
