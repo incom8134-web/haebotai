@@ -45,6 +45,7 @@ import { PROVIDER_LABEL, type ProviderId } from "@/lib/ai/types";
 import type { DictKey } from "@/lib/i18n/dictionaries";
 import type { Source } from "@/lib/tools/registry/shared";
 import type { BusinessProfile } from "@/lib/tools/types";
+import { OutputLanguagePicker, useOutputLanguage } from "@/components/output-language-picker";
 
 // HAEBOT_A_TOOLS_SPEC.md §3.3 / §3.2 / §5.2 — profile chips show exactly
 // what context a tool is using (removing one overrides that run only, it
@@ -163,6 +164,7 @@ function ToolRunner({
   const t = useT();
   const L = useBi();
   const [savedProvider, setSavedProvider] = useLocalValue(`haebot-engine-${toolId}`);
+  const [outputLang] = useOutputLanguage();
   const provider =
     savedProvider && availableProviders.includes(savedProvider as ProviderId)
       ? (savedProvider as ProviderId)
@@ -384,6 +386,7 @@ function ToolRunner({
     const base = {
       values: serialized,
       provider,
+      outputLang,
       ...(projectId ? { projectId } : {}),
       ...(excludedProfileKeys.size ? { excludeProfile: [...excludedProfileKeys] } : {}),
       ...(referencePayload ? { reference: referencePayload } : {}),
@@ -807,7 +810,8 @@ function ToolRunner({
         </>
       )}
 
-      <div className="mt-6 flex items-center gap-2">
+      <OutputLanguagePicker className="mt-6" />
+      <div className="mt-3 flex items-center gap-2">
         <Button
           data-run-button
           onClick={() => handleRun()}

@@ -4,6 +4,7 @@ import { checkGrounding } from "@/lib/tools/grounding";
 import { checkOutputSafety } from "@/lib/tools/policy";
 import { buildReference, referencePaths } from "@/lib/tools/reference-server";
 import { runWithApiKey } from "@/lib/tools/generate";
+import { runWithOutputLanguage } from "@/lib/ai/output-language";
 import { isAccessDenied, providerErrorMessage } from "@/lib/ai/provider-errors";
 import { alert as opsAlert } from "@/lib/spend-guard";
 import { getUserApiKeysFor } from "@/lib/api-keys";
@@ -136,7 +137,7 @@ export async function runAgent(runId: string, startedAt: number): Promise<void> 
 
       let next: string;
       try {
-        next = (await runWithApiKey(state.provider, state.userId, apiKeys, () => stage.run(ctx))).next;
+        next = (await runWithOutputLanguage(state.lang ?? "ko", () => runWithApiKey(state.provider, state.userId, apiKeys, () => stage.run(ctx)))).next;
       } catch (err) {
         if (cancel.signal.aborted) return; // the cancel route already refunded
         if (stage.optional) {
