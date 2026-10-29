@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import PDFDocument from "pdfkit";
 import { fetchAll, fit, imageSize, type FetchedImage } from "../images.ts";
+import { chartPng } from "../chart-png.ts";
 import { designImages, inlineRuns, parseMarkdown, type Block, type Card, type Design, type Section } from "./model.ts";
 
 // The designed PDF: a cover, then each section laid out for its content
@@ -315,7 +316,7 @@ export async function buildDesignedPdf(design: Design): Promise<Buffer> {
     pdf.y = y + h + 14;
   };
 
-  const cards = (items: Card[], cols: 1 | 2 | 3) => {
+  const cards = (items: Card[], cols: 1 | 2 | 3 | 4) => {
     const gap = 12;
     const cw = (W - gap * (cols - 1)) / cols;
     const imgH = cols === 1 ? 220 : cols === 2 ? 150 : 100;
@@ -323,7 +324,7 @@ export async function buildDesignedPdf(design: Design): Promise<Buffer> {
       let h = 16;
       if (c.image && images.get(c.image)) h += imgH + 10;
       if (c.kicker) h += 14;
-      h += textH(c.title, "b", cols === 3 ? 10.5 : 11.5, cw - 28, 3) + 4;
+      h += textH(c.title, "b", cols >= 3 ? 10.5 : 11.5, cw - 28, 3) + 4;
       if (c.body) h += textH(c.body, "r", 9.5, cw - 28, 3) + 6;
       if (c.swatches?.length) h += 18;
       if (c.footer) h += textH(c.footer, "r", 8.5, cw - 28, 2) + 6;
@@ -351,7 +352,7 @@ export async function buildDesignedPdf(design: Design): Promise<Buffer> {
           pdf.font("b").fontSize(8.5).fillColor(i % 2 && !img ? A2 : A).text(c.kicker, x + 14, yy, { width: cw - 28, lineBreak: false, ellipsis: true });
           yy += 14;
         }
-        pdf.font("b").fontSize(cols === 3 ? 10.5 : 11.5).fillColor(INK).text(c.title, x + 14, yy, { width: cw - 28, lineGap: 3 });
+        pdf.font("b").fontSize(cols >= 3 ? 10.5 : 11.5).fillColor(INK).text(c.title, x + 14, yy, { width: cw - 28, lineGap: 3 });
         yy = pdf.y + 4;
         if (c.body) {
           pdf.font("r").fontSize(9.5).fillColor(BODY).text(c.body, x + 14, yy, { width: cw - 28, lineGap: 3 });
@@ -625,6 +626,23 @@ export async function buildDesignedPdf(design: Design): Promise<Buffer> {
       case "kpis":
         kpis(b.items);
         break;
+      case "chart": {
+        const png = chartPng(b.chart, b.palette);
+        if (!png) break;
+        const size = fit({ width: png.width, height: png.height }, W, 300);
+        ensure(size.height + 40);
+        if (b.title) {
+          pdf.font("b").fontSize(11).fillColor(INK).text(b.title, M, pdf.y, { width: W, continued: Boolean(b.estimated) });
+          if (b.estimated) pdf.font("r").fontSize(9).fillColor("#C2410C").text(`  ${b.estimated}`);
+          pdf.moveDown(0.3);
+        }
+        pdf.image(png.data, M + (W - size.width) / 2, pdf.y, size);
+        pdf.y += size.height + 6;
+        if (b.caption) pdf.font("r").fontSize(9).fillColor(MUTED).text(b.caption, M, pdf.y, { width: W, align: "center" });
+        pdf.x = M;
+        pdf.moveDown(0.8);
+        break;
+      }
     }
   };
 

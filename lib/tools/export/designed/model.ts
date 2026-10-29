@@ -9,6 +9,8 @@
 //   PPT   — its own slide story (`slides`), not the document chopped up
 // Pure: no I/O, so composers are tested without a server.
 
+import type { ChartSpec } from "../../report/charts.ts";
+
 export type Lang = "ko" | "en";
 
 export interface Theme {
@@ -48,7 +50,7 @@ export type Block =
   | { t: "swatches"; items: { name: string; hex: string; role?: string; usage?: string }[] }
   | { t: "type"; items: { role: string; family: string; weight: string; sample: string; why?: string }[] }
   | { t: "dodont"; doTitle: string; dontTitle: string; dos: string[]; donts: string[] }
-  | { t: "cards"; cols: 1 | 2 | 3; items: Card[] }
+  | { t: "cards"; cols: 1 | 2 | 3 | 4; items: Card[] }
   /** A social post as it would look in the feed. */
   | { t: "post"; platform: string; name: string; image?: string; text: string; tags?: string[]; cta?: string; note?: string }
   /** Carousel / card-news slides as square tiles. */
@@ -58,7 +60,9 @@ export type Block =
   /** 1–10 scores, drawn as bars. */
   | { t: "meters"; items: { label: string; value: number }[] }
   | { t: "table"; header: string[]; rows: string[][] }
-  | { t: "kpis"; items: { label: string; value: string; note?: string }[] };
+  | { t: "kpis"; items: { label: string; value: string; note?: string }[] }
+  /** A data chart (bar, line, donut…), drawn the same way as on the result page. */
+  | { t: "chart"; chart: ChartSpec; palette: string[]; title?: string; caption?: string; estimated?: string };
 
 export interface Section {
   title: string;

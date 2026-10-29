@@ -25,6 +25,8 @@ export function buildInputSchema(fields: ToolField[]) {
     const required = "required" in f && f.required;
     // A required text field must say something — "" or spaces don't count.
     if (required && s instanceof z.ZodString) s = s.refine((v) => v.trim().length > 0, { message: "empty" });
+    // A required upload needs at least one file.
+    if (required && s instanceof z.ZodArray) s = s.min(1, { message: "empty" });
     shape[f.id] = required ? s : s.optional();
   }
   return z.object(shape);
@@ -41,4 +43,27 @@ export function inputErrorMessage(fields: ToolField[], issues: readonly { path: 
     return `'${label}' 값을 확인해 주세요`;
   });
   return parts.join(" · ");
+}
+
+const LIST_KINDS = new Set(["multiselect", "chips", "image"]);
+
+/**
+ * Form values in the shape each field expects. Values from an older run,
+ * a link or a quick seed can be a string where a list belongs (or the
+ * reverse); a list field always gets a list, so no control crashes on it.
+ */
+export function coerceFormValues<V extends Record<string, unknown>>(fields: ToolField[], values: V): V {
+  const out: Record<string, unknown> = { ...values };
+  for (const f of fields) {
+    const v = out[f.id];
+    if (v === undefined || v === null) continue;
+    if (LIST_KINDS.has(f.kind)) {
+      if (Array.isArray(v)) out[f.id] = v.filter((x) => typeof x === "string" && x.trim());
+      else if (typeof v === "string") out[f.id] = f.kind === "image" ? [] : v.split(/[,\n]/).map((x) => x.trim()).filter(Boolean);
+      else out[f.id] = [];
+    } else if (Array.isArray(v)) {
+      out[f.id] = v.map(String).join(", ");
+    }
+  }
+  return out as V;
 }

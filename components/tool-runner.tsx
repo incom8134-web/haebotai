@@ -46,6 +46,7 @@ import type { DictKey } from "@/lib/i18n/dictionaries";
 import type { Source } from "@/lib/tools/registry/shared";
 import type { BusinessProfile } from "@/lib/tools/types";
 import { OutputLanguagePicker, useOutputLanguage } from "@/components/output-language-picker";
+import { coerceFormValues } from "@/lib/tools/runner";
 
 // HAEBOT_A_TOOLS_SPEC.md §3.3 / §3.2 / §5.2 — profile chips show exactly
 // what context a tool is using (removing one overrides that run only, it
@@ -177,7 +178,8 @@ function ToolRunner({
   // Opened inside a project: the form fills from the project's memory, so
   // it starts empty rather than with another business's example.
   const startsInProject = !!projectId && !initialValues && !chainedFrom && initialPreset === undefined && !initialBrief;
-  const [values, setValues] = useState<ToolFormValues>(() => {
+  const [values, setValues] = useState<ToolFormValues>(() => coerceFormValues(manifest?.inputs ?? [], initialFormValues()));
+  function initialFormValues(): ToolFormValues {
     if (initialValues) return { ...initialValues };
     if (chainedFrom) return seedFromChain(toolId, chainedFrom.toolId, chainedFrom.output, chainedFrom.pick);
     const preset = initialPreset !== undefined ? pack.content?.presets[initialPreset] : undefined;
@@ -190,7 +192,7 @@ function ToolRunner({
     // promise ToolHome's example gallery already makes ("opens with the
     // form filled in"), just honored on a direct /run visit too.
     return { ...presetValuesWith(pack.presetsEn, 0, pack.content?.presets[0]?.values ?? {}, locale) };
-  });
+  }
   // The language is read on the client after the first render, so a form
   // seeded with a preset in Korean switches to the English sample values
   // once English is known — only while the user hasn't edited it.

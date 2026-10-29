@@ -67,3 +67,25 @@ test("a required text field must not be blank, and errors name the field", () =>
   assert.equal(inputErrorMessage(fields, missing.error!.issues), "'제품·서비스' 칸을 채워 주세요 · '가격' 값이 너무 작아요");
   assert.equal(buildInputSchema(fields).safeParse({ product: "그래놀라" }).success, true);
 });
+
+test("a required upload needs at least one file", () => {
+  const fields = [{ kind: "image" as const, id: "product_photo", label: "제품 사진", required: true }];
+  const schema = buildInputSchema(fields);
+  const r = schema.safeParse({ product_photo: [] });
+  assert.equal(r.success, false);
+  if (!r.success) assert.equal(inputErrorMessage(fields, r.error.issues), "'제품 사진' 칸을 채워 주세요");
+  assert.equal(schema.safeParse({ product_photo: ["data:image/png;base64,AA"] }).success, true);
+  assert.equal(buildInputSchema([{ kind: "image", id: "x", label: "x" }]).safeParse({}).success, true);
+});
+
+test("list fields always get a list, text fields a string", async () => {
+  const { coerceFormValues } = await import("./runner.ts");
+  const fields: ToolField[] = [
+    { kind: "chips", id: "ideas", label: "a" },
+    { kind: "multiselect", id: "channels", label: "b", options: [] },
+    { kind: "text", id: "topic", label: "c" },
+    { kind: "image", id: "photo", label: "d" },
+  ];
+  assert.deepEqual(coerceFormValues(fields, { ideas: "밤 디저트 / 세트, 선물\n상자", channels: 3, topic: ["a", "b"], photo: "x" }), { ideas: ["밤 디저트 / 세트", "선물", "상자"], channels: [], topic: "a, b", photo: [] });
+  assert.deepEqual(coerceFormValues(fields, { ideas: ["a", "", 1] }), { ideas: ["a"] });
+});
