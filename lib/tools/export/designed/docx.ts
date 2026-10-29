@@ -36,7 +36,15 @@ export async function buildDesignedDocx(d: Design): Promise<Buffer> {
       .map((t) => new Paragraph({ spacing: { after: o.after ?? 160, line: 340 }, children: t.split("\n").flatMap((line, i) => [...(i ? [new TextRun({ break: 1 })] : []), ...richRuns(line, o)]) }));
   const cell = (children: (Paragraph | Table)[], o: { fill?: string; width?: number; borders?: boolean } = {}) =>
     new TableCell({ children, verticalAlign: VerticalAlign.TOP, margins: { top: 140, bottom: 140, left: 180, right: 180 }, ...(o.fill ? { shading: { type: ShadingType.CLEAR, color: "auto", fill: o.fill } } : {}), ...(o.width ? { width: { size: o.width, type: WidthType.PERCENTAGE } } : {}), ...(o.borders === false ? { borders: { top: NONE, bottom: NONE, left: NONE, right: NONE } } : {}) });
-  const grid = (rows: TableCell[][], borders = false) => new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: rows.map((cells) => new TableRow({ children: cells })), borders: borders ? { top: LINE, bottom: LINE, left: LINE, right: LINE, insideHorizontal: LINE, insideVertical: LINE } : NO_BORDERS });
+  const grid = (rows: TableCell[][], borders = false, columnWidths?: number[]) => new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, ...(columnWidths ? { columnWidths } : {}), rows: rows.map((cells) => new TableRow({ children: cells })), borders: borders ? { top: LINE, bottom: LINE, left: LINE, right: LINE, insideHorizontal: LINE, insideVertical: LINE } : NO_BORDERS });
+  // Column shares for a data table: long text gets the room, short labels stay narrow (same rule as the PDF).
+  const shares = (header: string[], rows: string[][], n: number) => {
+    // Short labels (a name, "작업") get extra room so Word doesn't break them letter by letter.
+    const need = (t: string) => (t.length <= 12 ? t.length * 1.8 : t.length);
+    const w = Array.from({ length: n }, (_, i) => Math.min(40, Math.max(10, need(header[i] ?? ""), ...rows.map((r) => need(r[i] ?? "")))));
+    const total = w.reduce((a, b) => a + b, 0);
+    return w.map((x) => (x / total) * 100);
+  };
   const space = (after = 160) => new Paragraph({ spacing: { after }, children: [] });
   const imagePara = (url: string, max = 560, caption?: string): Paragraph[] => {
     const img = images.get(url);
@@ -127,7 +135,11 @@ export async function buildDesignedDocx(d: Design): Promise<Buffer> {
         const header = b.t === "script" ? [...b.header] : b.header;
         const rows = b.t === "script" ? b.rows.map((r) => [r.time, r.visual, r.voice]) : b.rows;
         const n = Math.max(header.length, ...rows.map((r) => r.length));
-        return [grid([...(header.some(Boolean) ? [header.map((h) => cell([new Paragraph({ children: [run(h, { bold: true, color: "FFFFFF" })] })], { fill: h6(d.theme.dark) }))] : []), ...rows.map((r, ri) => Array.from({ length: n }, (_, i) => cell([new Paragraph({ children: [run(r[i] ?? "", { bold: i === 0 })] })], { fill: ri % 2 ? "F7F8FA" : undefined })))], true), space(240)];
+        const pct = shares(header, rows, n);
+        // 9,506 twips = A4 width (11,906) minus the 1,200 side margins.
+        const twips = pct.map((p) => Math.round((p / 100) * 9506));
+        const small = n > 4 ? { size: 18 } : {};
+        return [grid([...(header.some(Boolean) ? [Array.from({ length: n }, (_, i) => cell([new Paragraph({ children: [run(header[i] ?? "", { bold: true, color: "FFFFFF", ...small })] })], { fill: h6(d.theme.dark), width: pct[i] }))] : []), ...rows.map((r, ri) => Array.from({ length: n }, (_, i) => cell([new Paragraph({ children: [run(r[i] ?? "", { bold: i === 0, ...small })] })], { fill: ri % 2 ? "F7F8FA" : undefined, width: pct[i] })))], true, twips), space(240)];
       }
       case "kv":
         return [grid(b.items.map((it) => [cell([new Paragraph({ children: [run(it.label, { bold: true, color: A })] })], { width: 25 }), cell(para(it.value, { after: 0 }), { width: 75 })]), true), space(240)];
