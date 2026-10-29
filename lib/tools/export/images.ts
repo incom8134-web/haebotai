@@ -12,7 +12,10 @@ export interface FetchedImage {
 }
 
 async function fetchImage(url: string): Promise<FetchedImage | null> {
-  if (!isAllowedImageUrl(url, process.env.NEXT_PUBLIC_SUPABASE_URL)) return null;
+  const origin = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  // Local development runs storage on plain http (supabase start).
+  const devStorage = process.env.NODE_ENV !== "production" && !!origin && url.startsWith(`${origin.replace(/\/$/, "")}/storage/v1/`);
+  if (!isAllowedImageUrl(url, origin) && !devStorage) return null;
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(15_000), cache: "no-store" });
     if (!res.ok) return null;
