@@ -481,7 +481,9 @@ export async function buildDesignedPdf(design: Design): Promise<Buffer> {
       });
     };
     const hh = header.some(Boolean) ? rowH(header, "b") : 0;
-    ensure(hh + 40);
+    // Keep the header with at least its first row.
+    const firstH = rows.length ? rowH(Array.from({ length: n }, (_, i) => rows[0][i] ?? ""), "r") : 0;
+    ensure(hh + Math.min(firstH, 160) + 10);
     let y = pdf.y;
     if (hh) {
       draw(header, y, hh, true, false);
