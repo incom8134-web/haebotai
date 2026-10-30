@@ -23,7 +23,7 @@ function manifestFields(src: string) {
 const manifests = new Map<string, Map<string, { kind: string; options: string[] }>>();
 for (const file of readdirSync(dir)) {
   if (!file.endsWith(".ts") || ["index.ts", "shared.ts", "categories.ts"].includes(file)) continue;
-  const src = readFileSync(new URL(file, dir), "utf8");
+  const src = readFileSync(new URL(file, dir), "utf8").replace(/\r\n/g, "\n"); // CRLF checkouts on Windows
   const id = src.match(/\n  id: "([^"]+)"/)?.[1];
   if (id) manifests.set(id, manifestFields(src));
 }
