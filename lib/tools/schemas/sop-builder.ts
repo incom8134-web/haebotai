@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// 업무 매뉴얼 빌더: a repeated job written as a procedure anyone can follow —
+// 업무 순서 정리: a repeated job written as a procedure anyone can follow —
 // roles, ordered steps (tasks, decisions with what to do on "no", checks),
 // the quality standard per step, exceptions with who to escalate to, and
 // how to tell the procedure is working. Only three lists carry size

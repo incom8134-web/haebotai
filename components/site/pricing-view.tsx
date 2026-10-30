@@ -47,7 +47,7 @@ export function PricingView({ signedIn }: { signedIn: boolean }) {
         <header className="max-w-2xl">
           <h1 className="font-display text-[clamp(2rem,4vw,3rem)] leading-[1.05] font-bold tracking-[-0.02em] break-keep text-fg">{L({ ko: "요금", en: "Pricing" })}</h1>
           <p className="mt-3 text-base leading-relaxed break-keep text-fg-muted">
-            {L({ ko: "25개 도구 모두 내 Gemini API 키로 실행되고, AI 사용 요금은 Google이 내 계정으로 직접 청구해요.", en: "All 25 tools run on your own Gemini API key, and Google bills any AI usage to your own account." })}
+            {L({ ko: "16개 도구 모두 내 Gemini API 키로 실행되고, AI 사용 요금은 Google이 내 계정으로 직접 청구해요.", en: "All 16 tools run on your own Gemini API key, and Google bills any AI usage to your own account." })}
           </p>
         </header>
         <div className="mt-8">
@@ -73,7 +73,7 @@ export function PricingView({ signedIn }: { signedIn: boolean }) {
     <div className="mx-auto max-w-[1100px] px-4 pt-6 pb-14 md:px-8 md:pt-10">
       <header className="max-w-2xl">
         <h1 className="font-display text-[clamp(2rem,4vw,3rem)] leading-[1.05] font-bold tracking-[-0.02em] break-keep text-fg">{L({ ko: "요금", en: "Pricing" })}</h1>
-        <p className="mt-3 text-base leading-relaxed break-keep text-fg-muted">{L({ ko: "무료로 둘러보고, 플러스나 프로로 25개 도구를 모두 실행해요. 30일 이용권이라 자동 결제는 없어요. 가격은 부가세 포함이에요.", en: "Browse free, then run all 25 tools on Plus or Pro. Each is a 30-day pass with no auto-renewal. Prices include VAT." })}</p>
+        <p className="mt-3 text-base leading-relaxed break-keep text-fg-muted">{L({ ko: "무료로 둘러보고, 플러스나 프로로 16개 도구를 모두 실행해요. 30일 이용권이라 자동 결제는 없어요. 가격은 부가세 포함이에요.", en: "Browse free, then run all 16 tools on Plus or Pro. Each is a 30-day pass with no auto-renewal. Prices include VAT." })}</p>
       </header>
 
       <div className="mt-8">

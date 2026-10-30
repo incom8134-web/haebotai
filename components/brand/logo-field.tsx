@@ -89,7 +89,7 @@ export function LogoField({ initialUrl, onColors, onChange }: { initialUrl: stri
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <p className="text-xs leading-relaxed break-keep text-fg-muted">
-          {L({ ko: "PNG·JPG·WEBP, 5MB 이하. 로고 디렉션 랩 결과에서 바로 저장할 수도 있어요.", en: "PNG, JPG or WEBP up to 5MB. You can also save one straight from a Logo Lab result." })}
+          {L({ ko: "PNG·JPG·WEBP, 5MB 이하. 로고 만들기 결과에서 바로 저장할 수도 있어요.", en: "PNG, JPG or WEBP up to 5MB. You can also save one straight from a Logo Lab result." })}
         </p>
         <div className="flex flex-wrap gap-2">
           <input

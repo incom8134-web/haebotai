@@ -10,7 +10,7 @@ import { obj, objs, str, strs } from "@/lib/tools/report/util";
 import { CopyButton, Kicker, useLocalSet } from "@/components/results/discover/shared";
 import { downloadFromUrl, DownloadLink, guessImageExt } from "@/components/results/download";
 
-// 로고 디렉션 랩 result: a concept board. All four directions side by side
+// 로고 만들기 result: a concept board. All four directions side by side
 // first (as a buyer would compare them), then each one with its lockup,
 // the symbol at real sizes down to a 16px favicon, palette with copyable
 // hex, type spec, the reasoning and usage notes. Directions can be

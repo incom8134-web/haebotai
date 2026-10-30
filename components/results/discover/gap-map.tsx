@@ -8,7 +8,7 @@ import { CONFIDENCE_LABELS, ORIGIN_LABELS, readGapMap, SOLUTION_KINDS } from "@/
 import { objs, sourcesOf, str } from "@/lib/tools/report/util";
 import { SectionTitle } from "./shared";
 
-// 시장 빈틈 탐지기 result: a needs × solutions heatmap where empty cells
+// 사업 아이디어 찾기 result: a needs × solutions heatmap where empty cells
 // are the gaps (tap a gap card to light up its needs), every need and gap
 // labelled with where it came from — search, the member's input, or a
 // hypothesis — then the validation questions and sources.

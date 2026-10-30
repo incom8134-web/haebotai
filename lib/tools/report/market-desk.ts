@@ -1,7 +1,7 @@
 import type { Report, ReportSection } from "./types.ts";
 import { keep, obj, objs, PALETTES, sourcesOf, str, strs } from "./util.ts";
 
-// 시장 리서치 데스크 export: where the evidence came from, how many of the
+// 시장 조사하기 export: where the evidence came from, how many of the
 // assumptions are verified, then each question with its evidence.
 
 export const ORIGIN_KO: Record<string, string> = { search: "검색 근거", user: "입력 내용", hypothesis: "가설" };
@@ -53,7 +53,7 @@ export function marketDeskReport(o: Record<string, unknown>): Report {
   ];
   return {
     palette: PALETTES["market-desk"],
-    hero: { eyebrow: "시장 리서치 데스크", title: str(o.decision) || "시장 조사", subtitle: str(o.summary) || undefined, kpis: [{ label: "근거", value: `${evidence.length}개` }, { label: "확인된 가정", value: `${verified}/${assumptions.length}` }] },
+    hero: { eyebrow: "시장 조사하기", title: str(o.decision) || "시장 조사", subtitle: str(o.summary) || undefined, kpis: [{ label: "근거", value: `${evidence.length}개` }, { label: "확인된 가정", value: `${verified}/${assumptions.length}` }] },
     sections: sections.filter((s) => s.blocks.length),
   };
 }

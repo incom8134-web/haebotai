@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// 브랜드 DNA 스튜디오: the brand's rules as a board every later output can
+// 브랜드 정하기: the brand's rules as a board every later output can
 // follow — essence, personality (as scored dimensions and as traits with
 // "this, not that"), positioning, voice with sample lines, a palette with
 // roles, a type pairing from fonts the page can actually load, visual

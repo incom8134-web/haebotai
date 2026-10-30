@@ -14,9 +14,9 @@ test("the homepage flow shows every public tool exactly once", () => {
   );
 });
 
-test("five stages of five tools each", () => {
+test("five stages, in catalog order, each with its step's tools", () => {
   assert.equal(FLOW.length, 5);
-  for (const s of FLOW) assert.equal(s.tools.length, 5, s.id);
+  assert.deepEqual(FLOW.flatMap((s) => s.tools), publicTools().map((t) => t.slug));
 });
 
 test("persona and before/after tools are live public tools", () => {

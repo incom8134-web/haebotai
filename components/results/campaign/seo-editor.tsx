@@ -9,7 +9,7 @@ import { seoChecks } from "@/lib/tools/seo-check";
 import { BlogArticle, type BlogOutput } from "@/components/results/blog-article";
 import { CopyButton, Kicker } from "@/components/results/discover/shared";
 
-// SEO 원고 컴포저 result: editor first. The article opens as a preview
+// 블로그 글 쓰기 result: editor first. The article opens as a preview
 // and switches to an editable draft; the sidebar re-checks the draft as
 // it changes (keyword in title and first paragraph, length against the
 // chosen target, keyword repetition, headings, search description,

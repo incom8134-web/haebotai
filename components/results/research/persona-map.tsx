@@ -6,7 +6,7 @@ import { PALETTES } from "@/lib/tools/report/util";
 import { Chart } from "@/components/results/report-view";
 import { Kicker, SectionTitle } from "@/components/results/discover/shared";
 
-// 고객 페르소나 지도 result: persona cards (in their own words, what they
+// 손님 알아보기 result: persona cards (in their own words, what they
 // want, what frustrates them, what makes them buy and what holds them
 // back, how much each decision factor weighs), then the journey from first
 // hearing of you to recommending you, with the mood curve across stages

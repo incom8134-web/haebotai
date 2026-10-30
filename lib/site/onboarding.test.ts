@@ -19,8 +19,9 @@ test("every onboarding and default tool is a live public tool", () => {
 
 test("recommendations follow the last result, then the goal, skipping used tools", () => {
   const next = catalogTool("brand-dna")!.next;
+  // The last result's hand-offs come first, then the default spread fills in.
   assert.deepEqual(
-    recommendTools({ lastTool: "brand-dna", usedTools: ["brand-dna"] }),
+    recommendTools({ lastTool: "brand-dna", usedTools: ["brand-dna"] }).slice(0, next.length),
     next.slice(0, 3),
   );
   assert.deepEqual(recommendTools({ goal: "sell" }), [

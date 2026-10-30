@@ -1,6 +1,6 @@
 "use client";
 
-import { CATALOG, catalogTool, toolSlug } from "@/lib/tools/catalog";
+import { CATALOG, catalogTool, stepNumber, toolNumber, toolSlug } from "@/lib/tools/catalog";
 import { useState } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
@@ -70,7 +70,12 @@ function ToolHome({ toolId, pack }: { toolId: string; pack: ToolPack }) {
           <span className="studio-gradient-bg grid size-14 place-items-center rounded-[18px] text-white shadow-[inset_0_1px_0_oklch(1_0_0/35%),0_16px_40px_-16px_var(--studio-violet)]">
             <tool.icon size={26} aria-hidden />
           </span>
-          <h1 className="mt-5 font-display text-[34px] leading-[1.08] font-bold tracking-[-0.02em]">{name(tool)}</h1>
+          {toolNumber(slug) > 0 ? (
+            <p className="mt-5 text-xs font-semibold text-fg-muted">
+              {L({ ko: `${toolNumber(slug)}번 도구 · ${stepNumber(tool.category)}단계 ${CATEGORY_LABELS[tool.category].ko}`, en: `Tool ${toolNumber(slug)} · Step ${stepNumber(tool.category)}, ${CATEGORY_LABELS[tool.category].en}` })}
+            </p>
+          ) : null}
+          <h1 className={cn("font-display text-[34px] leading-[1.08] font-bold tracking-[-0.02em]", toolNumber(slug) > 0 ? "mt-1" : "mt-5")}>{name(tool)}</h1>
           <p className="studio-gradient-type mt-2 text-lg font-medium">{L(c.tagline)}</p>
           <p className="mt-4 text-sm leading-relaxed text-fg-muted">{L(c.description)}</p>
 
@@ -127,7 +132,7 @@ function ToolHome({ toolId, pack }: { toolId: string; pack: ToolPack }) {
 
           {modes.length || parent ? (
             <div className="mt-6 border-t border-hairline pt-5 text-sm">
-              <p className="text-fg-muted">{parent ? L({ ko: "이 모드가 속한 도구", en: "Part of" }) : L({ ko: "이 도구의 다른 모드", en: "Other modes of this tool" })}</p>
+              <p className="text-fg-muted">{parent ? L({ ko: "이 기능이 속한 도구", en: "Part of" }) : L({ ko: "이 도구로 이런 것도 할 수 있어요", en: "This tool can also" })}</p>
               <div className="mt-2 flex flex-wrap gap-2">
                 {(parent ? [parent] : modes).map((m) => (
                   <Link key={m.slug} href={`/tools/${m.slug}`} className="inline-flex items-center gap-1.5 rounded-full border border-hairline px-3 py-1.5 text-xs hover:border-studio-cyan hover:text-studio-cyan">

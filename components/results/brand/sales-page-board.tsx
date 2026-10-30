@@ -8,7 +8,7 @@ import { objs, str, strs } from "@/lib/tools/report/util";
 import { CopyButton, Kicker } from "@/components/results/discover/shared";
 import { downloadFromUrl, DownloadLink, guessImageExt } from "@/components/results/download";
 
-// 세일즈 페이지 설계소 result: the plan and the page. "설계도" shows a
+// 상세페이지 만들기 result: the plan and the page. "설계도" shows a
 // wireframe of the page (one block per section, in order — tap one to
 // jump to it) beside each section's headline, body copy and shot list;
 // "완성 이미지" shows the rendered 860px page images to download.

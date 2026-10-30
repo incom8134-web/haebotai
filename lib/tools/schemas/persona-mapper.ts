@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// 고객 페르소나 지도: one or two customers on a page — who they are, in
+// 손님 알아보기: one or two customers on a page — who they are, in
 // their own words, what they want and what stops them, what makes them
 // buy — and their journey from first hearing of you to recommending you,
 // with how they feel at each stage. data_basis says what came from the

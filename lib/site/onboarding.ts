@@ -21,7 +21,7 @@ export const ONBOARDING_GOALS: {
       "무엇을, 누구에게, 어떻게 팔지 정해요.",
       "Decide what to sell, to whom, and how it earns.",
     ),
-    tools: ["idea-radar", "revenue-mapper", "mvp-blueprint"],
+    tools: ["idea-radar", "offer-architect", "market-desk"],
   },
   {
     id: "brand",
@@ -48,16 +48,16 @@ export const ONBOARDING_GOALS: {
       "캠페인 계획과 채널별 콘텐츠.",
       "A campaign plan and content for each channel.",
     ),
-    tools: ["campaign-planner", "hook-lab", "content-transformer"],
+    tools: ["campaign-planner", "ad-factory", "content-transformer"],
   },
   {
     id: "research",
     title: b("시장·고객 알아보기", "Understand the market"),
     body: b(
-      "시장 규모, 경쟁사, 고객 페르소나.",
-      "Market size, competitors and customer personas.",
+      "시장 규모, 경쟁 가게, 우리 손님.",
+      "Market size, competitors and your customers.",
     ),
-    tools: ["market-desk", "competitor-lens", "persona-mapper"],
+    tools: ["market-desk", "persona-mapper", "idea-radar"],
   },
 ];
 

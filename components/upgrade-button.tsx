@@ -33,7 +33,7 @@ export function upgradeTarget(plan: string | null | undefined, host = false): Up
     href: "/pricing",
     label: { ko: "업그레이드", en: "Upgrade" },
     short: { ko: "업그레이드", en: "Upgrade" },
-    pitch: { ko: `플러스 ${won(PRODUCTS.plus.amount)}/30일 — ${PRODUCTS.plus.credits.toLocaleString()} 크레딧으로 25개 도구를 모두 실행해요`, en: `Plus ${won(PRODUCTS.plus.amount)} / 30 days — ${PRODUCTS.plus.credits.toLocaleString()} credits for all 25 tools` },
+    pitch: { ko: `플러스 ${won(PRODUCTS.plus.amount)}/30일 — ${PRODUCTS.plus.credits.toLocaleString()} 크레딧으로 16개 도구를 모두 실행해요`, en: `Plus ${won(PRODUCTS.plus.amount)} / 30 days — ${PRODUCTS.plus.credits.toLocaleString()} credits for all 16 tools` },
   };
 }
 

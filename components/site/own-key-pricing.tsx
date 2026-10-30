@@ -25,7 +25,7 @@ const STEPS = [
   {
     icon: Sparkles,
     title: { ko: "3. 모든 도구 사용", en: "3. Use every tool" },
-    body: { ko: "25개 도구가 모두 내 키로 실행돼요. 앞 도구의 결과가 다음 도구로 이어져요.", en: "All 25 tools run on your key, and each result carries into the next tool." },
+    body: { ko: "16개 도구가 모두 내 키로 실행돼요. 앞 도구의 결과가 다음 도구로 이어져요.", en: "All 16 tools run on your key, and each result carries into the next tool." },
   },
 ];
 

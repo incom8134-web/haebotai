@@ -6,7 +6,7 @@ import type { Bilingual } from "@/lib/tools/content";
 
 const b = (ko: string, en: string): Bilingual => ({ ko, en });
 
-/** IDEA → BUILD → BRAND & SELL → OPERATE → GROW: five stages of five tools, every public tool once. */
+/** The five numbered steps (the catalog's categories, in order): every public tool once. */
 export const FLOW: {
   id: string;
   label: string;
@@ -19,57 +19,57 @@ export const FLOW: {
   {
     id: "idea",
     label: "IDEA",
-    title: b("무엇을 할지", "What to do"),
+    title: b("아이디어 찾기", "Find an idea"),
     body: b(
-      "내 경험과 시장의 빈틈, 고객에서 해볼 만한 사업을 찾아요.",
-      "Find a business worth trying in your experience, the market's gaps and its customers.",
+      "내 경험에 맞는 사업 아이디어를 찾고, 무엇을 얼마에 팔지 정해요.",
+      "Find a business idea that fits you, then decide what to sell and for how much.",
     ),
-    tools: ["idea-radar", "market-gap", "trend-radar", "market-desk", "persona-mapper"],
+    tools: ["idea-radar", "offer-architect"],
     image: { src: "/images/stage-idea.webp", alt: b("밤늦은 책상 위, 동네 지도와 포스트잇에 가게 아이디어를 그려 둔 모습", "A desk late at night: a neighbourhood map and sticky notes sketching shop ideas") },
   },
   {
-    id: "build",
-    label: "BUILD",
-    title: b("어떻게 벌지", "How it earns"),
+    id: "research",
+    label: "LEARN",
+    title: b("시장·손님 알아보기", "Know your market"),
     body: b(
-      "경쟁·수익 구조·첫 제품을 정하고, 팔 수 있는 제안과 계획서로 만들어요.",
-      "Settle the competition, revenue model and first product, then an offer and a plan.",
+      "시장 규모와 경쟁 가게, 우리 손님이 원하는 것을 먼저 알아봐요.",
+      "Learn the market, the competition and what your customers want first.",
     ),
-    tools: ["competitor-lens", "revenue-mapper", "offer-architect", "mvp-blueprint", "doc-studio"],
+    tools: ["market-desk", "persona-mapper"],
     image: { src: "/images/stage-build.webp", alt: b("두 공동 창업자가 한옥 카페에서 계산기와 메모로 수익 구조를 맞춰 보는 모습", "Two co-founders in a hanok café working out the numbers with a calculator and notes") },
   },
   {
     id: "brand",
-    label: "BRAND & SELL",
-    title: b("어떻게 보이고 팔지", "How it looks and sells"),
+    label: "BRAND",
+    title: b("브랜드 만들기", "Build your brand"),
     body: b(
-      "브랜드 기준을 정하고 로고·사이트·상세페이지·광고까지 같은 얼굴로.",
-      "Set the brand, then carry it into a logo, site, product page and ads.",
+      "브랜드를 정하고 로고·상세페이지·홈페이지까지 같은 얼굴로.",
+      "Set the brand, then carry it into a logo, product page and website.",
     ),
-    tools: ["brand-dna", "logo-lab", "web-builder", "sales-page", "ad-factory"],
+    tools: ["brand-dna", "logo-lab", "sales-page", "web-builder"],
     image: { src: "/images/stage-brand.webp", alt: b("작업실에서 유자청 병을 스마트폰으로 제품 촬영하는 모습", "A maker photographing jars of yuzu preserve with a phone in a small studio") },
+  },
+  {
+    id: "grow",
+    label: "PROMOTE",
+    title: b("홍보하기", "Promote"),
+    body: b(
+      "홍보 계획을 세우고 광고·블로그·SNS 글로 손님을 모아요.",
+      "Plan the promotion, then bring customers in with ads, blogs and posts.",
+    ),
+    tools: ["campaign-planner", "ad-factory", "seo-composer", "content-transformer"],
+    image: { src: "/images/stage-grow.webp", alt: b("저녁 카페에서 사장이 늘어나는 매출 그래프 옆에서 고객 반응을 휴대폰으로 확인하며 웃는 모습", "A café owner at dusk smiling at customer responses on her phone, beside a rising sales chart") },
   },
   {
     id: "operate",
     label: "OPERATE",
-    title: b("어떻게 돌릴지", "How it runs"),
+    title: b("문서·업무 정리", "Docs & daily work"),
     body: b(
-      "제안서, 발표자료, 업무 매뉴얼, 회의 결정, 운영 계획을 바로 쓰는 형태로.",
-      "Proposals, decks, SOPs, meeting decisions and operating plans you can use today.",
+      "사업계획서, 발표 자료, 할 일 계획, AI에게 시킬 프롬프트까지.",
+      "Business plans, presentations, to-do plans and prompts for other AIs.",
     ),
-    tools: ["proposal-forge", "pitch-director", "sop-builder", "meeting-action", "ops-planner"],
+    tools: ["doc-studio", "pitch-director", "ops-planner", "prompt-maker"],
     image: { src: "/images/stage-operate.webp", alt: b("저녁 꽃집에서 사장이 클립보드로 주간 일정을 정리하는 모습", "A florist going over the week's schedule on a clipboard at dusk") },
-  },
-  {
-    id: "grow",
-    label: "GROW",
-    title: b("어떻게 키울지", "How it grows"),
-    body: b(
-      "캠페인과 콘텐츠를 돌리고 고객의 목소리로 다음 수를 정해요.",
-      "Run campaigns and content, and let customer feedback set the next move.",
-    ),
-    tools: ["campaign-planner", "hook-lab", "seo-composer", "content-transformer", "insight-miner"],
-    image: { src: "/images/stage-grow.webp", alt: b("저녁 카페에서 사장이 늘어나는 매출 그래프 옆에서 고객 반응을 휴대폰으로 확인하며 웃는 모습", "A café owner at dusk smiling at customer responses on her phone, beside a rising sales chart") },
   },
 ];
 
@@ -124,7 +124,7 @@ export const PERSONAS: {
       "아이디어는 많은데 무엇부터, 얼마에 팔지 모르겠어요.",
       "Plenty of ideas, no idea where to start or what to charge.",
     ),
-    tools: ["idea-radar", "revenue-mapper", "mvp-blueprint"],
+    tools: ["idea-radar", "offer-architect", "doc-studio"],
   },
   {
     id: "shop",
@@ -133,7 +133,7 @@ export const PERSONAS: {
       "상세페이지와 SNS를 혼자 다 챙기기엔 시간이 없어요.",
       "No time to handle the product page and social media alone.",
     ),
-    tools: ["offer-architect", "sales-page", "hook-lab"],
+    tools: ["offer-architect", "sales-page", "ad-factory"],
   },
   {
     id: "marketer",
@@ -157,15 +157,15 @@ export const PERSONAS: {
     id: "freelancer",
     who: b("프리랜서·강사·에이전시", "Freelancer, coach or agency"),
     pain: b(
-      "제안서와 회의 정리, 업무 매뉴얼에 하루가 다 가요.",
-      "Proposals, meeting notes and SOPs eat the whole day.",
+      "제안서와 회의 정리, 업무 계획에 하루가 다 가요.",
+      "Proposals, meeting notes and plans eat the whole day.",
     ),
-    tools: ["proposal-forge", "meeting-action", "sop-builder"],
+    tools: ["doc-studio", "ops-planner", "prompt-maker"],
   },
 ];
 
 /**
- * A real 오퍼 설계소 run (live test, 2026-09-30): the form as entered and
+ * A real 팔 상품·가격 정하기 (offer-architect) run (live test, 2026-09-30): the form as entered and
  * an excerpt of what came back, unedited apart from shortening. The
  * English side is a translation. "[확인 필요: …]" markers are the tool's
  * own — it flags what it couldn't know instead of inventing it.

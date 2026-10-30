@@ -6,7 +6,7 @@ import { useLocalValue } from "@/lib/hooks/use-local-list";
 import { cn } from "@/lib/utils";
 import { objs, str } from "@/lib/tools/report/util";
 
-// 운영 플래너 result: one plan, three ways to work it. 칸반 shows a chosen
+// 할 일 계획 세우기 result: one plan, three ways to work it. 칸반 shows a chosen
 // week's tasks as 할 일 / 하는 중 / 완료; 타임라인 lays the phases and
 // milestones over 13 weeks with how far each week is done; 체크리스트
 // lists every task by week. All three share one status per task, kept in

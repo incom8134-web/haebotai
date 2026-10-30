@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { objs, str, strs } from "@/lib/tools/report/util";
 import { CopyButton, Kicker } from "@/components/results/discover/shared";
 
-// 콘텐츠 변환기 result: the source's core message in the middle and the
+// SNS 글로 바꾸기 result: the source's core message in the middle and the
 // platform versions branching out as tabs. Each version is shown in its
 // own shape — carousel slides as square cards, a short-video script as a
 // timed table, a thread as numbered posts — with a length check against

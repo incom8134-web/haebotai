@@ -1,7 +1,7 @@
 import type { Report, ReportSection } from "./types.ts";
 import { keep, num, obj, objs, PALETTES, str, strs } from "./util.ts";
 
-// 브랜드 DNA 스튜디오: the brand board as a document — personality radar,
+// 브랜드 정하기: the brand board as a document — personality radar,
 // positioning, traits (this / not that), voice with sample lines, the
 // palette with roles and contrast, type pairing, visual direction,
 // taglines and touchpoints.

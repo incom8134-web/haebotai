@@ -1,7 +1,7 @@
 import type { Report, ReportSection } from "./types.ts";
 import { keep, num, obj, objs, PALETTES, str, strs } from "./util.ts";
 
-// 훅 연구소 export: average strength per hook family, then each family's
+// 첫 문장 만들기 export: average strength per hook family, then each family's
 // hooks with on-screen text, first scene, follow-up line and versions.
 
 const FAMILY_KO: Record<string, string> = {
@@ -59,7 +59,7 @@ export function hookLabReport(o: Record<string, unknown>): Report {
   ];
   return {
     palette: PALETTES["hook-lab"],
-    hero: { eyebrow: "훅 연구소", title: str(best.text) || "훅 모음", subtitle: str(o.summary) || undefined, kpis: [{ label: "유형", value: `${families.length}개` }, { label: "훅", value: `${families.reduce((a, f) => a + f.hooks.length, 0)}개` }] },
+    hero: { eyebrow: "첫 문장 만들기", title: str(best.text) || "훅 모음", subtitle: str(o.summary) || undefined, kpis: [{ label: "유형", value: `${families.length}개` }, { label: "훅", value: `${families.reduce((a, f) => a + f.hooks.length, 0)}개` }] },
     sections: sections.filter((s) => s.blocks.length),
   };
 }

@@ -8,7 +8,7 @@ import { objs, str } from "@/lib/tools/report/util";
 import { ReportView } from "@/components/results/report-view";
 import { Kicker } from "@/components/results/discover/shared";
 
-// 캠페인 플래너 result: the campaign as a 13-week timeline with one lane per
+// 홍보 계획 세우기 result: the campaign as a 13-week timeline with one lane per
 // channel and phases as colours, above the full strategy report.
 
 const WEEKS = 13;

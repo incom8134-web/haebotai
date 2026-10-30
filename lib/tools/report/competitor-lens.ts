@@ -2,7 +2,7 @@ import type { Report, ReportSection } from "./types.ts";
 import { keep, num, obj, objs, PALETTES, sourcesOf, str, strs } from "./util.ts";
 import { ORIGIN_KO } from "./market-desk.ts";
 
-// 경쟁사 렌즈 export: total score per company, the positioning map, the
+// 경쟁 가게 비교 export: total score per company, the positioning map, the
 // matrix, each competitor and the openings.
 
 export function competitorLensReport(o: Record<string, unknown>): Report {
@@ -59,7 +59,7 @@ export function competitorLensReport(o: Record<string, unknown>): Report {
   ];
   return {
     palette: PALETTES["competitor-lens"],
-    hero: { eyebrow: "경쟁사 렌즈", title: str(us.position) || "경쟁 비교", subtitle: str(o.summary) || undefined, kpis: [{ label: "경쟁사", value: `${comps.length}곳` }, { label: "비교 기준", value: `${matrix.length}개` }] },
+    hero: { eyebrow: "경쟁 가게 비교", title: str(us.position) || "경쟁 비교", subtitle: str(o.summary) || undefined, kpis: [{ label: "경쟁사", value: `${comps.length}곳` }, { label: "비교 기준", value: `${matrix.length}개` }] },
     sections: sections.filter((s) => s.blocks.length),
   };
 }

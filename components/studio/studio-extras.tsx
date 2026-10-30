@@ -125,7 +125,7 @@ export function PromoStrip() {
           icon: GraduationCap,
           tone: "from-studio-violet/15 to-studio-cyan/10",
           kicker: { ko: "멤버십", en: "Membership" },
-          title: { ko: "플러스 ₩29,900로 25개 도구를 30일 동안, 2,000 크레딧", en: "Plus: all 25 tools for 30 days, 2,000 credits, ₩29,900" },
+          title: { ko: "플러스 ₩29,900로 16개 도구를 30일 동안, 2,000 크레딧", en: "Plus: all 16 tools for 30 days, 2,000 credits, ₩29,900" },
           href: "/account/membership",
           cta: { ko: "플랜 보기", en: "See plans" },
         },

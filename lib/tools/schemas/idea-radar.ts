@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// 아이디어 레이더: 4–6 business concepts built from the member's own skills,
+// 사업 아이디어 찾기: 4–6 business concepts built from the member's own skills,
 // resources and constraints, each scored on the same five axes so they can
 // be compared side by side, with the one cheap test that would prove or
 // kill it first. Scores are the model's judgement (labelled as such).

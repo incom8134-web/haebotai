@@ -4,7 +4,7 @@ import { Clock } from "lucide-react";
 import { useBi } from "@/lib/i18n/context";
 import { SlideDeck, type DeckOutput } from "@/components/results/slide-deck";
 
-// 피치 비주얼 디렉터 result: a storyboard strip over the deck — every slide
+// 발표 자료 만들기 result: a storyboard strip over the deck — every slide
 // as a thumbnail with its layout and an estimated speaking time from its
 // speaker notes (Korean at about 5.5 syllables a second), plus the total,
 // so the member can see the talk's pacing before opening the slides.

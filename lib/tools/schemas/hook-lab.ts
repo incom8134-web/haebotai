@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// 훅 연구소: opening hooks for short-form content, grouped by hook family
+// 첫 문장 만들기: opening hooks for short-form content, grouped by hook family
 // (question, contrarian, number, story, pain, curiosity, before/after,
 // proof) — each with the on-screen text, what the first 3 seconds show,
 // the line that follows, and a version per platform.

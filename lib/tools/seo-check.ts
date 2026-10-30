@@ -1,4 +1,4 @@
-// Live SEO checks for the SEO Content Composer's editor. Pure functions
+// Live SEO checks for the Write a blog post's editor. Pure functions
 // over the draft, so the sidebar re-scores as the member edits. The
 // thresholds are common Korean-blog guidance (Naver/Google), stated on
 // each check rather than hidden in a single score.

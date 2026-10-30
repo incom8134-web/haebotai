@@ -1,7 +1,7 @@
 import type { Report, ReportSection } from "./types.ts";
 import { keep, num, obj, objs, PALETTES, str, strs } from "./util.ts";
 
-// MVP 설계도: must/should/later features, the journey, the tool stack,
+// 할 일 계획 세우기: must/should/later features, the journey, the tool stack,
 // the stages on a timeline (gantt) and the launch checklist.
 
 const PRIORITY_LABELS: Record<string, string> = { must: "Must · 꼭", should: "Should · 있으면 좋음", later: "Later · 다음에" };
@@ -95,7 +95,7 @@ export function mvpBlueprintReport(o: Record<string, unknown>): Report {
   return {
     palette: PALETTES["mvp-blueprint"],
     hero: {
-      eyebrow: "MVP 설계도",
+      eyebrow: "첫 제품 설계",
       title: str(o.product_one_liner) || "MVP",
       subtitle: str(o.core_job) || undefined,
       kpis: [

@@ -246,8 +246,8 @@ function Pricing() {
             kicker={L({ ko: "요금", en: "Pricing" })}
             title={L({ ko: "AI는 내 키로 실행해요", en: "The AI runs on your own key" })}
             body={L({
-              ko: "Google AI Studio에서 받은 내 Gemini API 키를 등록하면 25개 도구를 모두 쓸 수 있어요. AI 사용 요금은 Google이 내 Google 계정으로 직접 청구해요.",
-              en: "Add your own Gemini API key from Google AI Studio and every one of the 25 tools is yours to use. Google bills the AI usage directly to your Google account.",
+              ko: "Google AI Studio에서 받은 내 Gemini API 키를 등록하면 16개 도구를 모두 쓸 수 있어요. AI 사용 요금은 Google이 내 Google 계정으로 직접 청구해요.",
+              en: "Add your own Gemini API key from Google AI Studio and every one of the 16 tools is yours to use. Google bills the AI usage directly to your Google account.",
             })}
           />
           <div className="mt-10">
@@ -263,8 +263,8 @@ function Pricing() {
               en: "Browse free. Run from Plus",
             })}
             body={L({
-              ko: "플러스와 프로 모두 25개 도구를 실행해요. 다른 건 한 달 크레딧이에요. 실행 전에 크레딧이 얼마나 드는지 보여 드리고, 실패하거나 취소한 실행은 자동 환불돼요.",
-              en: "Plus and Pro both run all 25 tools; only the monthly credits differ. You see the credit cost before every run, and failed or cancelled runs are refunded automatically.",
+              ko: "플러스와 프로 모두 16개 도구를 실행해요. 다른 건 한 달 크레딧이에요. 실행 전에 크레딧이 얼마나 드는지 보여 드리고, 실패하거나 취소한 실행은 자동 환불돼요.",
+              en: "Plus and Pro both run all 16 tools; only the monthly credits differ. You see the credit cost before every run, and failed or cancelled runs are refunded automatically.",
             })}
           />
           <div className="mt-10">

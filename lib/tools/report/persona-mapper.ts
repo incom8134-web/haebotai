@@ -1,7 +1,7 @@
 import type { Report, ReportSection } from "./types.ts";
 import { keep, num, objs, PALETTES, str, strs } from "./util.ts";
 
-// 고객 페르소나 지도 export: each persona, their decision factors, then the
+// 손님 알아보기 export: each persona, their decision factors, then the
 // journey with the mood line across stages.
 
 const STAGE_KO: Record<string, string> = { aware: "인지", consider: "고려", decide: "결정", use: "사용", advocate: "추천" };
@@ -54,7 +54,7 @@ export function personaMapperReport(o: Record<string, unknown>): Report {
   ];
   return {
     palette: PALETTES["persona-mapper"],
-    hero: { eyebrow: "고객 페르소나 지도", title: personas.map((p) => str(p.name)).filter(Boolean).join(" · ") || "페르소나", subtitle: str(o.summary) || undefined, kpis: [{ label: "페르소나", value: `${personas.length}명` }] },
+    hero: { eyebrow: "손님 알아보기", title: personas.map((p) => str(p.name)).filter(Boolean).join(" · ") || "페르소나", subtitle: str(o.summary) || undefined, kpis: [{ label: "페르소나", value: `${personas.length}명` }] },
     sections: sections.filter((s) => s.blocks.length),
   };
 }

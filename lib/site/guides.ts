@@ -9,7 +9,7 @@ export const WORKFLOWS: { id: string; title: Bilingual; body: Bilingual; goal: "
     goal: "start",
     title: { ko: "아이디어를 실행 계획으로", en: "From an idea to a working plan" },
     body: { ko: "내 경험에 맞는 아이디어를 고르고, 근거 있는 흐름을 확인한 뒤, 주 단위 실행 계획으로 바꿉니다.", en: "Pick an idea that fits you, check the signals behind it, and turn it into a week-by-week plan." },
-    tools: ["idea-radar", "trend-radar", "ops-planner"],
+    tools: ["idea-radar", "offer-architect", "ops-planner"],
   },
   {
     id: "brand-to-site",
@@ -23,7 +23,7 @@ export const WORKFLOWS: { id: string; title: Bilingual; body: Bilingual; goal: "
     goal: "sell",
     title: { ko: "제품 하나를 팔리게", en: "Get one product selling" },
     body: { ko: "망설임을 푸는 상세페이지를 만들고, 구매 동기별 광고를 뽑고, 바이어에게 보낼 제안서까지 씁니다.", en: "Build a product page that answers doubts, generate ads per buying motive, and write the proposal for buyers." },
-    tools: ["sales-page", "ad-factory", "proposal-forge"],
+    tools: ["sales-page", "ad-factory", "content-transformer"],
   },
   {
     id: "campaign",
@@ -42,8 +42,8 @@ export const WORKFLOWS: { id: string; title: Bilingual; body: Bilingual; goal: "
 ];
 
 export const GOALS: { id: "start" | "brand" | "sell" | "grow"; title: Bilingual; body: Bilingual; category: string }[] = [
-  { id: "start", title: { ko: "사업 방향 잡기", en: "Find a direction" }, body: { ko: "아이디어 · 수익 구조 · MVP", en: "Ideas · Revenue · MVP" }, category: "discover" },
-  { id: "brand", title: { ko: "브랜드와 웹사이트", en: "Brand and website" }, body: { ko: "브랜드 DNA · 로고 · 웹", en: "Brand DNA · Logo · Web" }, category: "brand" },
-  { id: "sell", title: { ko: "판매 준비", en: "Get ready to sell" }, body: { ko: "세일즈 페이지 · 광고 · 제안서", en: "Sales page · Ads · Proposal" }, category: "brand" },
-  { id: "grow", title: { ko: "마케팅 돌리기", en: "Run marketing" }, body: { ko: "캠페인 · 훅 · SEO 원고", en: "Campaign · Hooks · SEO" }, category: "campaign" },
+  { id: "start", title: { ko: "사업 방향 잡기", en: "Find a direction" }, body: { ko: "아이디어 · 상품·가격", en: "Ideas · Offer and price" }, category: "discover" },
+  { id: "brand", title: { ko: "브랜드와 웹사이트", en: "Brand and website" }, body: { ko: "브랜드 · 로고 · 홈페이지", en: "Brand · Logo · Website" }, category: "brand" },
+  { id: "sell", title: { ko: "판매 준비", en: "Get ready to sell" }, body: { ko: "상세페이지 · 광고", en: "Product page · Ads" }, category: "brand" },
+  { id: "grow", title: { ko: "마케팅 돌리기", en: "Run marketing" }, body: { ko: "홍보 계획 · 광고 · 블로그", en: "Promotion plan · Ads · Blog" }, category: "campaign" },
 ];

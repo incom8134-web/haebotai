@@ -1,4 +1,4 @@
-// 인사이트 마이너: is a quote really in the pasted text? Compared after
+// 후기 분석하기: is a quote really in the pasted text? Compared after
 // dropping spaces, punctuation, emoji and star ratings, so line breaks or
 // a trailing "ㅠ" don't count as a change — but a reworded sentence does.
 

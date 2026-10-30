@@ -6,7 +6,7 @@ import { localizeLabels } from "@/lib/tools/report/localize";
 import { buildReport } from "@/lib/tools/report";
 import { ReportView } from "@/components/results/report-view";
 
-// 비즈니스 문서 스튜디오 result: the document with its outline — a sticky
+// 사업계획서 쓰기 result: the document with its outline — a sticky
 // table of contents (tap to jump) beside the rendered plan, so a long
 // business plan reads like a document rather than one long scroll.
 

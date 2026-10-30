@@ -82,7 +82,7 @@ function AuthCard() {
           ? L({ ko: "로그인하면 보던 화면으로 바로 돌아가요.", en: "Sign in and you'll land right back where you were." })
           : returning
             ? L({ ko: "다시 오셨네요. 로그인하면 하던 작업과 프로젝트로 바로 돌아가요.", en: "Welcome back. Sign in to pick up your work and projects." })
-            : L({ ko: hasKakao ? "Google이나 카카오 계정 하나로 25개 도구를 모두 써요. 처음이면 목표와 프로젝트를 정하는 짧은 안내부터 시작해요." : "Google 계정 하나로 25개 도구를 모두 써요. 처음이면 목표와 프로젝트를 정하는 짧은 안내부터 시작해요.", en: hasKakao ? "One Google or Kakao account, all 25 tools. First time? A short setup picks your goal and project." : "One Google account, all 25 tools. First time? A short setup picks your goal and project." })}
+            : L({ ko: hasKakao ? "Google이나 카카오 계정 하나로 16개 도구를 모두 써요. 처음이면 목표와 프로젝트를 정하는 짧은 안내부터 시작해요." : "Google 계정 하나로 16개 도구를 모두 써요. 처음이면 목표와 프로젝트를 정하는 짧은 안내부터 시작해요.", en: hasKakao ? "One Google or Kakao account, all 16 tools. First time? A short setup picks your goal and project." : "One Google account, all 16 tools. First time? A short setup picks your goal and project." })}
       </p>
 
       {error || failed ? (
@@ -152,7 +152,7 @@ function AuthCard() {
               { icon: RotateCcw, text: { ko: "요금은 내 Google 계정에서 직접 확인하고 관리", en: "Any usage is billed to, and managed in, your own Google account" } },
             ]
           : [
-              { icon: Check, text: { ko: "가입은 무료, 카드 등록 없이 25개 도구 둘러보기", en: "Free to sign up — browse all 25 tools, no card needed" } },
+              { icon: Check, text: { ko: "가입은 무료, 카드 등록 없이 16개 도구 둘러보기", en: "Free to sign up — browse all 16 tools, no card needed" } },
               { icon: KeyRound, text: { ko: "실행은 플러스(₩29,900/30일)부터, 자동 결제 없음", en: "Running starts with Plus (₩29,900 / 30 days), no auto-renewal" } },
               { icon: RotateCcw, text: { ko: "실패하거나 취소한 실행은 크레딧 자동 환불", en: "Failed or cancelled runs are refunded in credits" } },
             ]
