@@ -7,12 +7,13 @@ import { useEffect, useMemo, useState, useSyncExternalStore, useTransition } fro
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "motion/react";
-import { FolderKanban, AlertTriangle, CircleGauge, CircleHelp, CircleUserRound, Coins, KeyRound, LayoutGrid, Library, LogOut, Moon, Search, Sparkles, Sun, UserRound, Wand2, X, Zap, type LucideIcon } from "lucide-react";
+import { FolderKanban, AlertTriangle, CircleGauge, CircleHelp, CircleUserRound, Coins, Crown, KeyRound, LayoutGrid, Library, LogOut, Moon, Search, Sparkles, Sun, UserRound, Wand2, X, Zap, type LucideIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { CommandPalette, type CommandPaletteGroup } from "@/components/command-palette";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { signOut } from "@/lib/actions/auth";
 import { planName } from "@/lib/site/plans";
+import { UpgradeButton, upgradeTarget } from "@/components/upgrade-button";
 import { isPaidPlan } from "@/lib/payments/pro";
 import { OWN_KEY_ONLY, STUDENT_PLAN } from "@/lib/site/access";
 import { getTool, listTools } from "@/lib/tools/registry";
@@ -33,6 +34,8 @@ interface ShellProps {
   user: { email: string } | null;
   balance: number | null;
   plan: PlanId;
+  /** Runs free on the platform key (lib/platform-access.ts): no upgrade buttons. */
+  host?: boolean;
   answeredTickets: number;
   /** Announcements and this member's notices, above the page (components/site/service-banner.tsx). */
   notices?: React.ReactNode;
@@ -185,11 +188,12 @@ function LowCreditBanner({ balance, paid }: { balance: number; paid: boolean }) 
   );
 }
 
-function UserMenu({ email, plan, credits }: { email: string; plan: PlanId; credits: string }) {
+function UserMenu({ email, plan, credits, host }: { email: string; plan: PlanId; credits: string; host: boolean }) {
   const L = useBi();
   const router = useRouter();
   const [signingOut, startSignOut] = useTransition();
   const planLabel = planName(plan);
+  const upgrade = upgradeTarget(plan, host);
   const links = [
     { href: "/account", icon: CircleUserRound, label: { ko: "내 계정", en: "My account" } },
     OWN_KEY_ONLY
@@ -212,6 +216,13 @@ function UserMenu({ email, plan, credits }: { email: string; plan: PlanId; credi
             {OWN_KEY_ONLY ? L({ ko: "내 API 키로 사용", en: "Runs on your own API key" }) : <>{L(planLabel)} · {credits} {L({ ko: "크레딧", en: "credits" })}</>}
           </p>
         </div>
+        {upgrade ? (
+          <div className="px-1.5 pb-1.5">
+            <button type="button" onClick={() => router.push(upgrade.href)} className="studio-gradient-bg flex h-10 w-full items-center justify-center gap-1.5 rounded-xl text-sm font-semibold text-white">
+              <Crown size={14} aria-hidden /> {L(upgrade.label)}
+            </button>
+          </div>
+        ) : null}
         <DropdownMenuSeparator />
         {links.map((item) => (
           <DropdownMenuItem key={item.href} onClick={() => router.push(item.href)} className="rounded-lg px-2.5 py-2">
@@ -227,7 +238,7 @@ function UserMenu({ email, plan, credits }: { email: string; plan: PlanId; credi
   );
 }
 
-function AppShell({ user, balance, plan, answeredTickets, notices, children }: ShellProps) {
+function AppShell({ user, balance, plan, host = false, answeredTickets, notices, children }: ShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const L = useBi();
@@ -325,8 +336,9 @@ function AppShell({ user, balance, plan, answeredTickets, notices, children }: S
               <Coins size={14} className="text-studio-cyan" aria-hidden /> {credits}
             </Link>
           )}
+          {user ? <UpgradeButton plan={plan} host={host} size="sm" short className="pointer-events-auto" /> : null}
           {user ? (
-            <UserMenu email={user.email} plan={plan} credits={credits} />
+            <UserMenu email={user.email} plan={plan} credits={credits} host={host} />
           ) : (
             <Link href="/auth" className="studio-gradient-bg pointer-events-auto flex h-11 items-center rounded-2xl px-3.5 text-xs font-semibold text-white lg:hidden">
               {L({ ko: "로그인", en: "Sign in" })}
@@ -376,6 +388,12 @@ function AppShell({ user, balance, plan, answeredTickets, notices, children }: S
             <span className="font-mono text-[10px] text-fg-muted">{credits}</span>
           </Link>
         )}
+        {user && upgradeTarget(plan, host) ? (
+          <Link href={upgradeTarget(plan, host)!.href} className="studio-gradient-bg grid w-12 place-items-center gap-0.5 rounded-2xl py-2 text-white" aria-label={L(upgradeTarget(plan, host)!.label)}>
+            <Crown size={16} aria-hidden />
+            <span className="text-[10px] font-semibold">{L(upgradeTarget(plan, host)!.to === "pro" ? { ko: "프로", en: "Pro" } : { ko: "플랜", en: "Plans" })}</span>
+          </Link>
+        ) : null}
         <ThemeLangControls vertical />
         {!user ? (
           <Link href="/auth" className="studio-gradient-bg mt-1 grid size-12 place-items-center rounded-2xl text-[11px] font-semibold text-white">

@@ -9,6 +9,7 @@ import type { PlanId } from "@/lib/site/plans";
 import type { OwnKeyUsage, ToolUsage } from "@/lib/usage";
 import { PageHeader } from "@/components/site/page";
 import { PriceTable } from "@/components/site/plan-cards";
+import { UpgradeCard } from "@/components/upgrade-button";
 import { PRODUCTS } from "@/lib/payments/pro";
 import { MEMBER_API_KEYS, STUDENT_PLAN } from "@/lib/site/access";
 import { planName } from "@/lib/site/plans";
@@ -54,7 +55,7 @@ function OwnKeyUsagePanel({ ownKey }: { ownKey: OwnKeyUsage[] }) {
   );
 }
 
-function CreditsView({ balance, plan, apiKeyConnected, usage }: { balance: number; plan: PlanId; apiKeyConnected: boolean; usage: { totalRuns: number; totalCredits: number; byTool: ToolUsage[]; ownKey: OwnKeyUsage[] } }) {
+function CreditsView({ balance, plan, apiKeyConnected, usage, host = false }: { balance: number; plan: PlanId; apiKeyConnected: boolean; usage: { totalRuns: number; totalCredits: number; byTool: ToolUsage[]; ownKey: OwnKeyUsage[] }; host?: boolean }) {
   const L = useBi();
   const { locale } = useLocale();
   const allowance = ALLOWANCE[plan];
@@ -67,6 +68,7 @@ function CreditsView({ balance, plan, apiKeyConnected, usage }: { balance: numbe
     <>
       <PageHeader title={L({ ko: "크레딧·한도", en: "Credits & limits" })} lead={L({ ko: "도구마다 정해진 크레딧이 실행 전에 표시되고, 끝나면 차감돼요. 실패하거나 취소하면 자동 환불돼요.", en: "Each tool's credits are shown before you run and charged when it finishes. Failed or cancelled runs are refunded automatically." })} />
 
+      <UpgradeCard plan={plan} host={host} className="mb-6" />
       <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
         <section className="glass-strong rounded-[28px] p-6">
           <p className="text-sm text-fg-muted">{L({ ko: "남은 크레딧", en: "Credits left" })}</p>
