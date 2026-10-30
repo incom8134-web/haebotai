@@ -1,7 +1,7 @@
 import type { Report, ReportSection } from "./types.ts";
 import { keep, objs, PALETTES, str, strs } from "./util.ts";
 
-// 회의→실행 보드 export: the meeting's minutes — counts, decisions, actions
+// 회의 정리하기 export: the meeting's minutes — counts, decisions, actions
 // by owner with due dates, open questions and the next agenda.
 
 export function meetingActionReport(o: Record<string, unknown>): Report {
@@ -59,7 +59,7 @@ export function meetingActionReport(o: Record<string, unknown>): Report {
   ];
   return {
     palette: PALETTES["meeting-action"],
-    hero: { eyebrow: "회의→실행 보드", title: str(o.title) || "회의 정리", subtitle: str(o.summary) || undefined, kpis: [{ label: "할 일", value: `${actions.length}개` }, { label: "담당 미정", value: `${actions.filter((a) => a.owner === "[미정]").length}개`, tone: "warn" as const }] },
+    hero: { eyebrow: "회의 정리하기", title: str(o.title) || "회의 정리", subtitle: str(o.summary) || undefined, kpis: [{ label: "할 일", value: `${actions.length}개` }, { label: "담당 미정", value: `${actions.filter((a) => a.owner === "[미정]").length}개`, tone: "warn" as const }] },
     sections: sections.filter((s) => s.blocks.length),
   };
 }

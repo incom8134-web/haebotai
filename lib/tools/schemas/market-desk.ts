@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { sourceSchema } from "../registry/shared.ts";
 
-// 시장 리서치 데스크: a research framework, not an essay — the questions
+// 시장 조사하기: a research framework, not an essay — the questions
 // the decision depends on, the assumptions behind it (and whether each is
 // verified), evidence blocks per question labelled by where they came
 // from (web search, the member's input, or hypothesis), a sizing with its

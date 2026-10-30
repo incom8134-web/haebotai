@@ -220,12 +220,12 @@ const GUIDE_CHAPTERS = [
 ];
 
 const GUIDE_TOOLS = [
-  { ko: "브랜드 DNA 스튜디오", en: "Brand DNA Studio" },
-  { ko: "로고 디렉션 랩", en: "Logo Direction Lab" },
-  { ko: "광고 크리에이티브 팩토리", en: "Ad Creative Factory" },
-  { ko: "콘텐츠 변환기", en: "Content Transformer" },
-  { ko: "피치 비주얼 디렉터", en: "Pitch Visual Director" },
-  { ko: "웹 익스피리언스 빌더", en: "Web Experience Builder" },
+  { ko: "브랜드 정하기", en: "Define your brand" },
+  { ko: "로고 만들기", en: "Make a logo" },
+  { ko: "광고 문구 쓰기", en: "Write ads" },
+  { ko: "SNS 글로 바꾸기", en: "Rewrite for social" },
+  { ko: "발표 자료 만들기", en: "Make a presentation" },
+  { ko: "홈페이지 만들기", en: "Make a website" },
 ];
 
 /** /help/user-guide — the illustrated tool manual (PDF, Korean and English). */

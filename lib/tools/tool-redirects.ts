@@ -4,7 +4,10 @@
 // "" = retired with no direct successor (goes to the tools list).
 export const TOOL_REDIRECTS: Record<string, string> = {
   money: "idea-radar",
-  trend: "trend-radar",
+  trend: "idea-radar",
+  "trend-radar": "idea-radar",
+  "market-gap": "idea-radar",
+  "mvp-blueprint": "ops-planner",
   strategy: "campaign-planner",
   calendar: "ops-planner",
   blog: "seo-composer",
@@ -19,6 +22,6 @@ export const TOOL_REDIRECTS: Record<string, string> = {
   proposal: "proposal-forge",
   "business-plan": "doc-studio",
   place: "seo-composer",
-  prompt: "",
+  prompt: "prompt-maker",
   grant: "doc-studio",
 };

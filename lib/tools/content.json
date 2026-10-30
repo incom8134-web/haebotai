@@ -413,23 +413,23 @@
   },
   "prompt": {
     "tagline": {
-      "ko": "반복 업무를 재사용 프롬프트로",
-      "en": "Turn repeat work into a reusable prompt"
+      "ko": "AI에게 시킬 말을 대신 써 드려요",
+      "en": "We write what to tell the AI"
     },
     "description": {
-      "ko": "매번 설명하던 업무를 역할, 입력, 단계, 출력 형식이 갖춰진 프롬프트로 정리합니다. 쓰는 모델에 맞춰 문법을 조정합니다.",
-      "en": "Packages a task you keep re-explaining into a prompt with role, inputs, steps and output format — tuned to the model you use."
+      "ko": "원하는 결과를 평소 말하듯 적으면, ChatGPT·이미지 AI·코딩 AI·영상 AI 각각에 맞는 구조로 바로 붙여 넣는 프롬프트를 만들어 드려요.",
+      "en": "Say what you want in plain words and get a ready-to-paste prompt built for ChatGPT, image, coding or video AIs."
     },
     "features": [
       {
         "icon": "layers",
         "title": {
-          "ko": "모델별 최적화",
-          "en": "Tuned per model"
+          "ko": "AI 종류별 구조",
+          "en": "Built per kind of AI"
         },
         "body": {
-          "ko": "GPT, Claude, Gemini 각각의 권장 형식을 따릅니다.",
-          "en": "Follows each model's recommended structure."
+          "ko": "대화형·이미지·코딩·영상 AI마다 잘 먹히는 모양으로 씁니다.",
+          "en": "Written in the shape each kind of AI responds to."
         }
       },
       {
@@ -439,79 +439,88 @@
           "en": "Copy and go"
         },
         "body": {
-          "ko": "변수 자리까지 표시된 완성 프롬프트를 복사해 씁니다.",
-          "en": "Copy a finished prompt with variables marked."
+          "ko": "바꿔 넣을 자리까지 표시된 완성 프롬프트를 드려요.",
+          "en": "A finished prompt with the blanks marked."
         }
       },
       {
         "icon": "sparkles",
         "title": {
-          "ko": "예시로 검증",
-          "en": "Checked with an example"
+          "ko": "예시로 확인",
+          "en": "Checked on examples"
         },
         "body": {
-          "ko": "예시 입력을 넣으면 기대 출력까지 함께 보여 줍니다.",
-          "en": "Add a sample input to see the expected output."
+          "ko": "예시 3개로 어떤 결과가 나올지 미리 보여 줘요.",
+          "en": "Three examples show what to expect."
         }
       }
     ],
     "presets": [
       {
         "title": {
-          "ko": "주간 리뷰 요약",
-          "en": "Weekly review digest"
+          "ko": "릴스 대본",
+          "en": "Reels script"
         },
         "tag": {
-          "ko": "운영",
-          "en": "Ops"
+          "ko": "SNS",
+          "en": "Social"
         },
         "values": {
-          "task": "매주 고객 리뷰를 모아 개선점 3가지와 칭찬 포인트로 요약",
-          "target_model": "claude",
-          "output_format": "markdown",
-          "constraints": [
-            "300자 이내",
-            "개인정보 제외"
-          ]
+          "target_type": "chat",
+          "purpose": "sns",
+          "tone": "witty",
+          "task": "인스타그램 릴스 대본을 써 주는 프롬프트. 보는 사람이 끝까지 보고, 웃긴 부분이 있어야 함."
         }
       },
       {
         "title": {
-          "ko": "상품 설명 JSON",
-          "en": "Product copy as JSON"
+          "ko": "제품 사진",
+          "en": "Product photo"
         },
         "tag": {
-          "ko": "커머스",
-          "en": "Commerce"
+          "ko": "이미지",
+          "en": "Image"
         },
         "values": {
-          "task": "상품명과 특징을 받아 스마트스토어용 제목·요약·태그를 생성",
-          "target_model": "gpt",
-          "output_format": "json",
-          "constraints": [
-            "제목 50자 이내"
-          ]
+          "target_type": "image",
+          "task": "수제 딸기잼 병을 나무 식탁 위에서 아침 햇살로 찍은 듯한 광고 사진을 만드는 프롬프트"
+        }
+      },
+      {
+        "title": {
+          "ko": "주간 후기 요약",
+          "en": "Weekly review digest"
+        },
+        "tag": {
+          "ko": "업무",
+          "en": "Work"
+        },
+        "values": {
+          "target_type": "chat",
+          "purpose": "work",
+          "output_format": "bullets",
+          "task": "매주 손님 후기를 모아 고칠 점 3가지와 칭찬받은 점으로 요약해 주는 프롬프트. 300자 이내, 개인정보 빼기."
         }
       }
     ],
     "steps": [
       {
-        "ko": "반복되는 업무를 평소 말하듯 설명합니다.",
-        "en": "Describe the recurring task in plain words."
+        "ko": "어떤 AI에게 시킬지 고릅니다.",
+        "en": "Pick which AI will run it."
       },
       {
-        "ko": "대상 모델과 출력 형식을 고릅니다.",
-        "en": "Choose the target model and output format."
+        "ko": "원하는 결과를 평소 말하듯 적습니다.",
+        "en": "Say what you want in plain words."
       },
       {
-        "ko": "완성된 프롬프트를 복사해 사용합니다.",
-        "en": "Copy the finished prompt and use it."
+        "ko": "완성된 프롬프트를 복사해 그 AI에 붙여 넣습니다.",
+        "en": "Copy the finished prompt into that AI."
       }
     ],
     "tips": [
       {
-        "ko": "좋았던 결과 예시를 붙이면 품질이 가장 크게 올라갑니다.",
-        "en": "Pasting an example of a good result helps quality most."
+        "ko": "마음에 들었던 프롬프트를 붙이면 품질이 가장 크게 올라가요.",
+        "en": "Pasting a prompt you liked helps quality most."
       }
     ],
     "faq": [
@@ -521,8 +530,8 @@
           "en": "Where are my prompts saved?"
         },
         "a": {
-          "ko": "모든 실행 결과는 보관함에 저장되고, 프롬프트 라이브러리에서 다시 꺼내 쓸 수 있습니다.",
-          "en": "Every run is saved to the Library, and you can reuse prompts from the Prompt Library."
+          "ko": "모든 결과는 보관함에 저장돼요. 언제든 다시 열어 복사할 수 있어요.",
+          "en": "Every result is saved to the Library, where you can reopen and copy it."
         }
       }
     ],
@@ -2350,8 +2359,8 @@
       "en": "Businesses you can start with what you have, scored side by side"
     },
     "description": {
-      "ko": "경력·관심·자금·시간·위험 감수를 넣으면 서로 다른 형태의 사업 아이디어 4~6개를 적합도·수요·속도·자본·우위 다섯 축으로 비교합니다. 아이디어마다 고객, 문제, 수익 방식, MVP, 첫 검증 행동이 붙고, 고른 아이디어는 수익 구조 지도·MVP 설계도·시장 빈틈 탐지기로 바로 이어집니다.",
-      "en": "Enter your experience, interests, budget, time and risk appetite to get 4–6 business ideas of different kinds, compared on fit, demand, speed, capital and edge. Each idea comes with a customer, problem, revenue model, MVP and first validation step — and your pick flows straight into Revenue Mapper, MVP Blueprint or Market Gap Finder."
+      "ko": "경력·관심·자금·시간·위험 감수를 넣으면 서로 다른 형태의 사업 아이디어 4~6개를 적합도·수요·속도·자본·우위 다섯 축으로 비교합니다. 아이디어마다 고객, 문제, 수익 방식, MVP, 첫 검증 행동이 붙고, 고른 아이디어는 돈 버는 방법 정리·할 일 계획 세우기·사업 아이디어 찾기로 바로 이어집니다.",
+      "en": "Enter your experience, interests, budget, time and risk appetite to get 4–6 business ideas of different kinds, compared on fit, demand, speed, capital and edge. Each idea comes with a customer, problem, revenue model, MVP and first validation step — and your pick flows straight into Ways to earn, Plan the weeks ahead or Find business ideas."
     },
     "features": [
       {
@@ -2511,8 +2520,8 @@
           "en": "What happened to my old monetization results?"
         },
         "a": {
-          "ko": "기록에 그대로 남아 있고 열어 볼 수 있습니다. 새 실행은 아이디어 레이더에서 합니다.",
-          "en": "They stay in your library. New runs use Idea Radar."
+          "ko": "기록에 그대로 남아 있고 열어 볼 수 있습니다. 새 실행은 사업 아이디어 찾기에서 합니다.",
+          "en": "They stay in your library. New runs use Find business ideas."
         }
       }
     ],
@@ -2640,7 +2649,7 @@
         "en": "Add what you have, and prices or costs if you know them."
       },
       {
-        "ko": "추천 조합으로 시작하고, 오퍼 설계소에서 판매 제안을 만듭니다.",
+        "ko": "추천 조합으로 시작하고, 팔 상품·가격 정하기에서 판매 제안을 만듭니다.",
         "en": "Start with the recommended mix, then build the offer."
       }
     ],
@@ -2650,8 +2659,8 @@
         "en": "Adding your unit cost makes the unit economics far more accurate."
       },
       {
-        "ko": "아이디어 레이더 결과에서 이어 오면 고객과 문제가 자동으로 채워집니다.",
-        "en": "Coming from Idea Radar fills the customer and problem automatically."
+        "ko": "사업 아이디어 찾기 결과에서 이어 오면 고객과 문제가 자동으로 채워집니다.",
+        "en": "Coming from Find business ideas fills the customer and problem automatically."
       }
     ],
     "faq": [
@@ -2710,8 +2719,8 @@
           "en": "On to the sales page"
         },
         "body": {
-          "ko": "완성한 오퍼를 세일즈 페이지 설계소와 광고 팩토리로 넘깁니다.",
-          "en": "Send the finished offer to the Sales Page Architect or Ad Factory."
+          "ko": "완성한 오퍼를 상세페이지 만들기와 광고 팩토리로 넘깁니다.",
+          "en": "Send the finished offer to the Make a product page or Ad Factory."
         }
       }
     ],
@@ -2935,7 +2944,7 @@
         "en": "Known pains and competitors sharpen the map."
       },
       {
-        "ko": "빈틈 하나를 골라 검증 질문으로 확인하고 아이디어 레이더나 MVP 설계도로 이어갑니다.",
+        "ko": "빈틈 하나를 골라 검증 질문으로 확인하고 사업 아이디어 찾기나 할 일 계획 세우기로 이어갑니다.",
         "en": "Pick a gap, test it with the questions, then continue."
       }
     ],
@@ -3078,7 +3087,7 @@
         "en": "Pick the form, builder, timeline and budget."
       },
       {
-        "ko": "단계대로 만들고, 운영 플래너로 주 단위 계획을 세웁니다.",
+        "ko": "단계대로 만들고, 할 일 계획 세우기로 주 단위 계획을 세웁니다.",
         "en": "Build by stages and plan weekly in Ops Planner."
       }
     ],
@@ -3148,7 +3157,7 @@
           "en": "Into everything next"
         },
         "body": {
-          "ko": "로고 디렉션 랩, 웹 익스피리언스 빌더, 세일즈 페이지 설계소로 바로 이어갑니다.",
+          "ko": "로고 만들기, 홈페이지 만들기, 상세페이지 만들기로 바로 이어갑니다.",
           "en": "Continue straight into Logo Lab, Web Builder or Sales Page."
         }
       }
@@ -3278,8 +3287,8 @@
           "en": "Does it make a logo?"
         },
         "a": {
-          "ko": "로고는 로고 디렉션 랩에서 그립니다. 브랜드 보드에서 '로고 만들기'로 이어가면 이름과 무드가 채워져요.",
-          "en": "Logos are drawn in Logo Direction Lab. Continue from the board and the name and mood are filled in."
+          "ko": "로고는 로고 만들기에서 그립니다. 브랜드 보드에서 '로고 만들기'로 이어가면 이름과 무드가 채워져요.",
+          "en": "Logos are drawn in Make a logo. Continue from the board and the name and mood are filled in."
         }
       }
     ],
@@ -3411,8 +3420,8 @@
         "en": "Pick platforms, goal and tone."
       },
       {
-        "ko": "마음에 드는 훅을 골라 콘텐츠 변환기나 광고 팩토리로 이어갑니다.",
-        "en": "Pick hooks and continue to Content Transformer or Ad Factory."
+        "ko": "마음에 드는 훅을 골라 SNS 글로 바꾸기나 광고 팩토리로 이어갑니다.",
+        "en": "Pick hooks and continue to Rewrite for social or Ad Factory."
       }
     ],
     "tips": [
@@ -4048,8 +4057,8 @@
         "en": "Add competitors and criteria if you have them."
       },
       {
-        "ko": "빈자리를 브랜드 DNA나 오퍼 설계소로 이어갑니다.",
-        "en": "Take the opening to Brand DNA or Offer Architect."
+        "ko": "빈자리를 브랜드 DNA나 팔 상품·가격 정하기로 이어갑니다.",
+        "en": "Take the opening to Brand DNA or Shape your offer & price."
       }
     ],
     "tips": [
@@ -4165,14 +4174,14 @@
         "en": "Paste reviews or interviews if you have them."
       },
       {
-        "ko": "기분이 떨어지는 단계를 개선하고 캠페인 플래너로 이어갑니다.",
-        "en": "Fix the low points and continue to Campaign Planner."
+        "ko": "기분이 떨어지는 단계를 개선하고 홍보 계획 세우기로 이어갑니다.",
+        "en": "Fix the low points and continue to Plan your promotion."
       }
     ],
     "tips": [
       {
-        "ko": "인사이트 마이너 결과에서 이어 오면 실제 고객 목소리로 만들어져요.",
-        "en": "Continue from Insight Miner to build it from real customer voices."
+        "ko": "후기 분석하기 결과에서 이어 오면 실제 고객 목소리로 만들어져요.",
+        "en": "Continue from Analyse reviews to build it from real customer voices."
       }
     ],
     "faq": [

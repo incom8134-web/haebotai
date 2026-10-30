@@ -1,7 +1,7 @@
 import type { Report, ReportSection } from "./types.ts";
 import { keep, num, obj, objs, PALETTES, str, strs, sum } from "./util.ts";
 
-// 업무 매뉴얼 빌더 export: the procedure as a printable manual — time per
+// 업무 순서 정리 export: the procedure as a printable manual — time per
 // step and per role, the steps table, the quality checklist, exceptions.
 
 export function sopBuilderReport(o: Record<string, unknown>): Report {

@@ -1,7 +1,7 @@
 import type { Report, ReportSection } from "./types.ts";
 import { keep, objs, PALETTES, str, strs } from "./util.ts";
 
-// 콘텐츠 변환기 export: the core message, how long each version runs, then
+// SNS 글로 바꾸기 export: the core message, how long each version runs, then
 // every version in its own shape (slides, script, posts or body).
 
 const TARGET_KO: Record<string, string> = {
@@ -50,7 +50,7 @@ export function contentTransformerReport(o: Record<string, unknown>): Report {
   ];
   return {
     palette: PALETTES["content-transformer"],
-    hero: { eyebrow: "콘텐츠 변환기", title: str(o.core_message) || "플랫폼별 버전", kpis: [{ label: "버전", value: `${versions.length}개` }] },
+    hero: { eyebrow: "SNS 글로 바꾸기", title: str(o.core_message) || "플랫폼별 버전", kpis: [{ label: "버전", value: `${versions.length}개` }] },
     sections: sections.filter((s) => s.blocks.length),
   };
 }

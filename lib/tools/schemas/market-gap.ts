@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { sourceSchema } from "../registry/shared.ts";
 
-// 시장 빈틈 탐지기: customer needs × existing solutions, with how well each
+// 사업 아이디어 찾기: customer needs × existing solutions, with how well each
 // solution covers each need — the empty cells are the gaps. Every need and
 // gap says where it came from (search, the member's input, or hypothesis).
 const origin = z.enum(["search", "user", "hypothesis"]);

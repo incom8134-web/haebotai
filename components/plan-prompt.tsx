@@ -29,8 +29,8 @@ export function PlanPrompt({ open, onOpenChange }: { open: boolean; onOpenChange
         <DialogTitle className="text-xl font-bold break-keep">{L({ ko: "실행은 플러스부터예요", en: "Running tools starts with Plus" })}</DialogTitle>
         <DialogDescription className="mt-2 text-sm leading-relaxed break-keep text-fg-muted">
           {L({
-            ko: "무료 플랜은 도구와 예시를 둘러볼 수 있어요. 플랜을 고르면 받은 크레딧으로 25개 도구를 모두 실행할 수 있어요.",
-            en: "The Free plan lets you browse tools and examples. Pick a plan and its credits run all 25 tools.",
+            ko: "무료 플랜은 도구와 예시를 둘러볼 수 있어요. 플랜을 고르면 받은 크레딧으로 16개 도구를 모두 실행할 수 있어요.",
+            en: "The Free plan lets you browse tools and examples. Pick a plan and its credits run all 16 tools.",
           })}
         </DialogDescription>
         <ul className="mt-4 space-y-2">

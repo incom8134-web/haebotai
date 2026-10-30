@@ -1,7 +1,7 @@
 import type { Report, ReportSection } from "./types.ts";
 import { keep, num, obj, objs, PALETTES, str, strs } from "./util.ts";
 
-// 아이디어 레이더: the ideas side by side on the same five axes (a radar
+// 사업 아이디어 찾기: the ideas side by side on the same five axes (a radar
 // for the top three, a total-score bar for all), then one card per idea
 // with its customer, revenue, MVP and the first test to run.
 
@@ -119,7 +119,7 @@ export function ideaRadarReport(o: Record<string, unknown>): Report {
   return {
     palette: PALETTES["idea-radar"],
     hero: {
-      eyebrow: "아이디어 레이더",
+      eyebrow: "사업 아이디어 찾기",
       title: pick ? `추천: ${pick}` : best ? best.name : "사업 아이디어",
       subtitle: str(o.lens) || undefined,
       kpis: [

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// 회의→실행 보드: meeting notes turned into what was decided, who does what
+// 회의 정리하기: meeting notes turned into what was decided, who does what
 // by when, and what is still open. Owners and dates come only from the
 // notes — anything not stated stays "[미정]" rather than being invented.
 

@@ -11,7 +11,7 @@ import { obj, objs, str, strs } from "@/lib/tools/report/util";
 import { Chart } from "@/components/results/report-view";
 import { CopyButton, Kicker, SectionTitle } from "@/components/results/discover/shared";
 
-// 브랜드 DNA 스튜디오 result: the brand board. The hero is set in the
+// 브랜드 정하기 result: the brand board. The hero is set in the
 // brand's own primary colour and heading font (loaded from Google Fonts),
 // the palette shows each colour's role and the readable text colour on it
 // with its WCAG contrast ratio, the type specimen uses the real fonts, and

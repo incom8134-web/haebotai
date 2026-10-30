@@ -1,7 +1,7 @@
 import type { Report, ReportSection } from "./types.ts";
 import { keep, num, objs, PALETTES, sourcesOf, str, strs } from "./util.ts";
 
-// 시장 빈틈 탐지기: the needs × solutions coverage heatmap (the empty
+// 사업 아이디어 찾기: the needs × solutions coverage heatmap (the empty
 // cells are the gaps), need intensity, the gap cards with where each
 // finding came from, and the validation questions.
 
@@ -93,7 +93,7 @@ export function marketGapReport(o: Record<string, unknown>): Report {
   return {
     palette: PALETTES["market-gap"],
     hero: {
-      eyebrow: "시장 빈틈 탐지기",
+      eyebrow: "시장 빈틈 찾기",
       title: gaps[0] ? gaps[0].title : "시장 빈틈",
       subtitle: str(o.market_summary) || undefined,
       kpis: [

@@ -7,7 +7,7 @@ import { CHECK_LABELS, MOMENT_LABELS, readMvp } from "@/lib/tools/report/mvp-blu
 import { obj, str, strs } from "@/lib/tools/report/util";
 import { SectionTitle, useLocalSet } from "./shared";
 
-// MVP 설계도 result: a board — Must / Should / Later columns, the user
+// 할 일 계획 세우기 result: a board — Must / Should / Later columns, the user
 // journey as a strip, the tool stack, stages on a week timeline and a
 // launch checklist the member can tick off (kept in this browser).
 

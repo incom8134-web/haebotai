@@ -8,7 +8,7 @@ import { obj, objs, str, strs } from "@/lib/tools/report/util";
 import { Kicker, SectionTitle } from "@/components/results/discover/shared";
 import { CONFIDENCE, Origin } from "./origin";
 
-// 시장 리서치 데스크 result: the decision on top, then the research
+// 시장 조사하기 result: the decision on top, then the research
 // questions as tabs — each with its evidence blocks (the figure, the
 // finding, where it came from and how sure it is) — the assumptions with
 // whether each is verified, the sizing with its method, implications and

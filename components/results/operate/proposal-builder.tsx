@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { objs, str, strs } from "@/lib/tools/report/util";
 import { CopyButton, Kicker, won } from "@/components/results/discover/shared";
 
-// 제안서 포지 result: the proposal as sections the member can reorder and
+// 제안서 쓰기 result: the proposal as sections the member can reorder and
 // switch off, then copy as one text in that order (the downloads keep the
 // standard order). The pricing table adds up the items and shows VAT.
 

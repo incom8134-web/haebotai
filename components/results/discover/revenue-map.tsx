@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { readRevenue, STREAM_ROLES, STREAM_TYPES, unitEconomics, WILLINGNESS } from "@/lib/tools/report/revenue-mapper";
 import { SectionTitle, won } from "./shared";
 
-// 수익 구조 지도 result: a flow diagram from customer segments to revenue
+// 돈 버는 방법 정리 result: a flow diagram from customer segments to revenue
 // streams (hover or tap a stream to trace who pays for it), the value
 // ladder drawn as rising steps, and a unit-economics panel whose inputs
 // the member can change to see customer value recompute on the page.

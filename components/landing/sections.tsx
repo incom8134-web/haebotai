@@ -143,8 +143,8 @@ export function FlowSection() {
       <SectionHead
         kicker={L({ ko: "아이디어부터 성장까지", en: "From idea to growth" })}
         title={L({
-          ko: "사업의 순서대로 놓인 25개 도구",
-          en: "25 tools, laid out in the order a business happens",
+          ko: "사업의 순서대로 놓인 16개 도구",
+          en: "16 tools, laid out in the order a business happens",
         })}
         body={L({
           ko: "어느 단계에서 시작해도 돼요. 앞 단계의 결과가 있으면 다음 도구가 그걸 이어받아요.",
@@ -348,14 +348,14 @@ export function CategorySection() {
       className="mx-auto max-w-[1200px] scroll-mt-24 px-4 py-16 md:px-6 md:py-20"
     >
       <SectionHead
-        kicker={L({ ko: "다섯 분야", en: "Five areas" })}
+        kicker={L({ ko: "다섯 단계", en: "Five steps" })}
         title={L({
           ko: "도구마다 결과 화면이 달라요",
           en: "Every tool has its own result screen",
         })}
         body={L({
-          ko: "점수표, 브랜드 보드, 훅 카드, 칸반, 포지셔닝 맵. 25개의 같은 입력창이 아니라 일에 맞는 화면이에요.",
-          en: "Score tables, brand boards, hook cards, kanban, positioning maps — screens that fit the job, not 25 copies of one form.",
+          ko: "점수표, 브랜드 보드, 광고 문구 카드, 할 일 표, 비교표. 똑같은 입력창이 아니라 일에 맞는 화면이에요.",
+          en: "Score tables, brand boards, ad cards, to-do boards, comparison tables — screens that fit the job, not copies of one form.",
         })}
       />
       <div className="mt-10 grid gap-3 md:grid-cols-6">

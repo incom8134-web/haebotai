@@ -8,7 +8,7 @@ import { TIER_LABELS } from "@/lib/tools/report/offer-architect";
 import { obj, objs, str, strs } from "@/lib/tools/report/util";
 import { CopyButton, Kicker, won } from "./shared";
 
-// 오퍼 설계소 result: the offer as blocks the member can edit in place and
+// 팔 상품·가격 정하기 result: the offer as blocks the member can edit in place and
 // copy one by one — headline, promise, value stack, the three packages
 // (core highlighted), bonuses, guarantee and urgency with their honesty
 // notes, objection answers, CTA and the two sales messages.

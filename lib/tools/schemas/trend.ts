@@ -17,7 +17,7 @@ const scoreSchema = z.object({
 const outputSchema = z.object({
   summary: z.string(),
   recommended: z.string(),
-  // origin/impact/horizon place each signal on the Trend Radar (impact
+  // origin/impact/horizon place each signal on the Find business ideas (impact
   // 1–5 × how soon it matters), labelled by where it came from.
   signals: z.array(
     z.object({

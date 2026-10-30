@@ -9,7 +9,7 @@ import { Chart } from "@/components/results/report-view";
 import { Kicker, SectionTitle } from "@/components/results/discover/shared";
 import { Origin } from "./origin";
 
-// 경쟁사 렌즈 result: the matrix (criteria × companies, 1–5, our column
+// 경쟁 가게 비교 result: the matrix (criteria × companies, 1–5, our column
 // highlighted), the positioning map with us in the open space, each
 // competitor's card with where its facts came from, and the openings.
 

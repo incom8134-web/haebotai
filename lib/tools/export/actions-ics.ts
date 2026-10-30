@@ -1,6 +1,6 @@
 import { addDays, toIcsDate } from "./calendar.ts";
 
-// 회의→실행 보드: actions that have a real YYYY-MM-DD due date as all-day
+// 회의 정리하기: actions that have a real YYYY-MM-DD due date as all-day
 // calendar events. Actions without a date are left out (the board says
 // how many), never placed on a guessed day.
 

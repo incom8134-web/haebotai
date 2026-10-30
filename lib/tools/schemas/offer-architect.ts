@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// 오퍼 설계소: the offer as blocks — promise, who it's for, what's in it and
+// 팔 상품·가격 정하기: the offer as blocks — promise, who it's for, what's in it and
 // why each part matters, three packages, bonuses, an honest guarantee and
 // urgency, objection answers, the CTA and two lengths of sales message.
 const outputSchema = z.object({

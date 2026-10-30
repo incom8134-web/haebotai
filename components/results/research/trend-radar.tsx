@@ -10,7 +10,7 @@ import { ReportView } from "@/components/results/report-view";
 import { Kicker } from "@/components/results/discover/shared";
 import { Origin } from "./origin";
 
-// 트렌드 레이더 result: the market signals on a radar — rings for how soon
+// 사업 아이디어 찾기 result: the market signals on a radar — rings for how soon
 // each matters (now at the centre), dot size for impact, colour for where
 // it came from (searched, given, hypothesis), arrow for direction — with
 // the list beside it, then the full trend report.

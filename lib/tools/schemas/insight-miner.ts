@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// 인사이트 마이너: what customers keep saying, from pasted reviews, survey
+// 후기 분석하기: what customers keep saying, from pasted reviews, survey
 // answers or interviews — themes with how often they come up and their
 // sentiment split, verbatim quotes (the result page checks each one
 // against the pasted text), complaints, praise, requests, and what to do.

@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { obj, objs, str, strs } from "@/lib/tools/report/util";
 import { CopyButton, Kicker } from "@/components/results/discover/shared";
 
-// 광고 크리에이티브 팩토리 result: a creative board — one row per buying
+// 광고 문구 쓰기 result: a creative board — one row per buying
 // motive with its visual, headline, body and CTA. Each row flips between
 // its A and B versions, or shows both side by side with what the test
 // compares. Channel versions and words to avoid follow; the photo and

@@ -9,7 +9,7 @@ import { objs, str, strs } from "@/lib/tools/report/util";
 import { downloadText } from "@/components/results/download";
 import { CopyButton, Kicker, SectionTitle, useLocalSet } from "@/components/results/discover/shared";
 
-// 회의→실행 보드 result: decisions, then the actions as a board — grouped
+// 회의 정리하기 result: decisions, then the actions as a board — grouped
 // by owner or ordered by due date — each with the line of the notes it
 // came from and a done tick (kept in this browser). Open questions, the
 // next agenda, a follow-up message to send and a calendar file of the

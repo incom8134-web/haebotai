@@ -83,9 +83,11 @@ const PRESET_VALUES_EN: Record<string, Record<number, Record<string, string | st
     1: { model: "Selling low-sugar homemade granola on Smart Store", milestones: ["Product page done", "First order", "₩3M monthly sales"] },
   },
   prompt: {
-    0: { task: "Collect the week's customer reviews and summarize them into 3 improvements and the praise points", constraints: ["Under 300 characters", "No personal data"] },
-    1: { task: "From a product name and features, write a Smart Store title, summary and tags", constraints: ["Title under 50 characters"] },
+    0: { task: "A prompt that writes Instagram Reels scripts. People should watch to the end, with a bit of humor." },
+    1: { task: "A prompt for an ad photo of a jar of homemade strawberry jam on a wooden table in morning light" },
+    2: { task: "A prompt that collects each week's customer reviews and sums them up as 3 things to fix and what customers praised. Under 300 characters, no personal data." },
   },
+
   blog: {
     0: { topic: "New spring strawberry desserts", audience: "People in their 20s–30s who visit neighborhood cafés" },
     1: { topic: "Tax deadlines sole proprietors miss in their first year", audience: "Self-employed owners in their first year" },

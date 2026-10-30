@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// MVP 설계도: the smallest real first version — must/should/later features
+// 할 일 계획 세우기: the smallest real first version — must/should/later features
 // with effort, the user journey from discovery to paying and returning,
 // the tools to build it with (no-code first when that's enough), stages
 // with exit criteria, a launch checklist and the one hypothesis it tests.

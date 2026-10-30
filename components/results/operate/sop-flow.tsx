@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { obj, objs, str, strs } from "@/lib/tools/report/util";
 import { CopyButton, Kicker, SectionTitle, useLocalSet } from "@/components/results/discover/shared";
 
-// 업무 매뉴얼 빌더 result: the procedure as a swimlane flow — one column per
+// 업무 순서 정리 result: the procedure as a swimlane flow — one column per
 // role on wide screens, steps in order down the page, decisions marked
 // with what to do on "no" — then the quality checklist (tickable, kept in
 // this browser), exceptions, KPIs and training tips.

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// 수익 구조 지도: who pays for what, how often and at what price — drawn as
+// 돈 버는 방법 정리: who pays for what, how often and at what price — drawn as
 // a flow from customer segments to revenue streams, a value ladder from the
 // first small purchase to the premium tier, and a unit-economics frame the
 // page computes from (price, variable cost, acquisition cost, repeat rate).

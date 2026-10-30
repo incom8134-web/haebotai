@@ -10,7 +10,7 @@ import { PALETTES } from "@/lib/tools/report/util";
 import { Chart } from "@/components/results/report-view";
 import { SectionTitle, useLocalSet } from "./shared";
 
-// 아이디어 레이더 result: idea cards with five score bars, sortable by
+// 사업 아이디어 찾기 result: idea cards with five score bars, sortable by
 // any axis, a favourites filter, a compare tray (radar + side-by-side
 // table for up to three ideas) and "develop this idea" hand-offs that
 // open the next tool pre-filled with the chosen idea (?pick=).

@@ -253,7 +253,7 @@ function composeCopy(ctx: ComposeContext): Design {
   return { lang: ctx.lang, theme, eyebrow: t("광고 시안 보드", "Ad concept board"), title: s(o.core_message) || name, coverImage: url(angles[0]?.image_url), meta: meta(ctx), sections, slides, footer: `${name} · ${t("광고 시안", "Ad concepts")}` };
 }
 
-// ── Content Transformer: a channel content pack ────────────────────────
+// ── Rewrite for social: a channel content pack ────────────────────────
 
 const PLATFORMS: Record<string, [string, string]> = { instagram_carousel: ["인스타 카드뉴스", "Instagram carousel"], instagram_caption: ["인스타 캡션", "Instagram caption"], threads: ["스레드 연재", "Threads series"], linkedin: ["링크드인", "LinkedIn"], shorts_script: ["쇼츠·릴스 대본", "Shorts / Reels script"], newsletter: ["뉴스레터", "Newsletter"], naver_blog: ["네이버 블로그", "Naver blog"], kakao: ["카카오톡 채널", "KakaoTalk channel"] };
 

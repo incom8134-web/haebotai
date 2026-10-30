@@ -199,7 +199,7 @@ export function runBlock(settings: SiteSettings, slug: string, isStaff: boolean)
 // ── Notices and announcements ──────────────────────────────────────────
 
 const ALL_NOTICE_TEMPLATES: { id: string; title: string; body: string; link: string | null; label: Bi; ownKey?: boolean }[] = [
-  { id: "choose_plan", label: { ko: "플랜 안내", en: "Choose a plan" }, title: "플러스로 25개 도구를 바로 써 보세요", body: "무료 플랜은 둘러보기만 할 수 있어요. 플러스(₩29,900/30일)는 2,000 크레딧으로 블로그 글, 광고 사진, 리포트까지 바로 만들 수 있어요. 자동 결제는 없어요.", link: "/pricing" },
+  { id: "choose_plan", label: { ko: "플랜 안내", en: "Choose a plan" }, title: "플러스로 16개 도구를 바로 써 보세요", body: "무료 플랜은 둘러보기만 할 수 있어요. 플러스(₩29,900/30일)는 2,000 크레딧으로 블로그 글, 광고 사진, 리포트까지 바로 만들 수 있어요. 자동 결제는 없어요.", link: "/pricing" },
   { id: "low_credits", label: { ko: "크레딧 충전 안내", en: "Low credits" }, title: "크레딧이 얼마 남지 않았어요", body: "멤버십에서 ₩5,900에 500 크레딧을 충전하거나, 플랜을 30일 연장하면 그 플랜의 크레딧이 더해져요.", link: "/account/membership" },
   { id: "run_failed", label: { ko: "실행 실패 안내", en: "Run failed" }, title: "실행이 끝나지 못했어요", body: "실패한 실행의 크레딧은 자동으로 돌려드렸어요. 잠시 뒤 [같은 입력으로 다시]를 눌러 주세요. 계속 안 되면 고객센터로 알려 주세요.", link: "/library" },
   { ownKey: true, id: "key_refused", label: { ko: "API 키 확인 요청", en: "Check your API key" }, title: "API 키를 확인해 주세요", body: "등록하신 Gemini API 키가 Google에서 거부되고 있어요. Google AI Studio에서 키가 살아 있는지와 결제 상태를 확인한 뒤, [계정 → 내 API 키]에서 새 키를 등록해 주세요.", link: "/account/api-key" },

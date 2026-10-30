@@ -8,7 +8,7 @@ import { quoteFound } from "@/lib/tools/quote-check";
 import { objs, str, strs } from "@/lib/tools/report/util";
 import { Kicker, SectionTitle } from "@/components/results/discover/shared";
 
-// 인사이트 마이너 result: theme cards sized by how often they come up,
+// 후기 분석하기 result: theme cards sized by how often they come up,
 // with a positive / neutral / negative bar and quotes that are checked
 // against the text the member pasted — a quote that can't be found is
 // flagged, never shown as verified. Filter by complaint / praise /

@@ -2,7 +2,7 @@ import { fmt } from "./charts.ts";
 import type { Report, ReportSection } from "./types.ts";
 import { keep, num, obj, objs, PALETTES, str, strs } from "./util.ts";
 
-// 수익 구조 지도: segments → streams (a table and a time-to-revenue bar),
+// 돈 버는 방법 정리: segments → streams (a table and a time-to-revenue bar),
 // the value ladder, and unit economics computed here from the model's
 // estimates — customer value = (price − variable cost) × purchases/yr ×
 // years, minus acquisition cost.
@@ -173,7 +173,7 @@ export function revenueMapperReport(o: Record<string, unknown>): Report {
   return {
     palette: PALETTES["revenue-mapper"],
     hero: {
-      eyebrow: "수익 구조 지도",
+      eyebrow: "돈 버는 방법 정리",
       title: str(mix.start_with) ? `먼저: ${str(mix.start_with)}` : "수익 구조",
       subtitle: str(o.business_summary) || undefined,
       kpis: [

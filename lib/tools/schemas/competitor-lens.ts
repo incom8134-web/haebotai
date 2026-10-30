@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { sourceSchema } from "../registry/shared.ts";
 
-// 경쟁사 렌즈: competitors side by side — a matrix of the criteria customers
+// 경쟁 가게 비교: competitors side by side — a matrix of the criteria customers
 // actually choose on (scored 1–5 per company), a positioning map on two
 // buyer-relevant axes with us placed in the open space, and the openings
 // that follow. Every competitor fact says where it came from.

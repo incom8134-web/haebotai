@@ -6,7 +6,7 @@ import { obj, objs, str, strs } from "@/lib/tools/report/util";
 import { SitePreview } from "@/components/results/site-preview";
 import { Kicker } from "@/components/results/discover/shared";
 
-// 웹 익스피리언스 빌더 result: the sitemap — the page's sections in scroll
+// 홈페이지 만들기 result: the sitemap — the page's sections in scroll
 // order with what each one is for — above the live PC/mobile preview.
 // Runs from before the sitemap was stored show section titles only.
 

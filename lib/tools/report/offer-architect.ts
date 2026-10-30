@@ -2,7 +2,7 @@ import { fmt } from "./charts.ts";
 import type { Report, ReportSection } from "./types.ts";
 import { keep, num, obj, objs, PALETTES, str, strs } from "./util.ts";
 
-// 오퍼 설계소: the offer as a document — promise, value stack, the three
+// 팔 상품·가격 정하기: the offer as a document — promise, value stack, the three
 // packages, bonuses, guarantee and urgency, objection answers, CTA and
 // the two sales messages.
 
@@ -91,7 +91,7 @@ export function offerArchitectReport(o: Record<string, unknown>): Report {
   return {
     palette: PALETTES["offer-architect"],
     hero: {
-      eyebrow: "오퍼 설계소",
+      eyebrow: "팔 상품·가격 정하기",
       title: str(o.offer_name) || str(o.headline) || "오퍼",
       subtitle: str(o.core_promise) || undefined,
       kpis: prices.length ? [{ label: "가격대", value: `${fmt(Math.min(...prices), "원")}~${fmt(Math.max(...prices), "원")}` }, { label: "구성 블록", value: `${stack.length}개` }] : [],

@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { obj, objs, str, strs } from "@/lib/tools/report/util";
 import { CopyButton, Kicker, useLocalSet } from "@/components/results/discover/shared";
 
-// 훅 연구소 result: hook cards grouped by family. Each card shows the line,
+// 첫 문장 만들기 result: hook cards grouped by family. Each card shows the line,
 // the on-screen text, what the first 3 seconds show and the line that
 // follows; a platform filter swaps in that platform's version. Hooks can
 // be starred (kept in this browser) and copied.

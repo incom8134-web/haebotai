@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// 콘텐츠 변환기: one source piece rewritten for each platform — not the
+// SNS 글로 바꾸기: one source piece rewritten for each platform — not the
 // same text trimmed, but re-shaped for how that platform is read: a
 // carousel as slides, a short video as a timed script, a thread as posts.
 

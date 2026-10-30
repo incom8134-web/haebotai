@@ -224,15 +224,15 @@ const FIELDS_EN: Record<string, Record<string, FieldEn>> = {
     reference: { label: "Data and figures to include" },
   },
   prompt: {
-    task: { label: "The repetitive task" },
-    target_type: { label: "Kind of AI", options: { chat: "Chat AI", image: "Image AI", coding: "Coding agent", video: "Video AI" } },
-    target_model: { label: "Target model", options: { gpt: "GPT", claude: "Claude", gemini: "Gemini", other: "Other" } },
-    output_format: { label: "Output format", options: { text: "Text", json: "JSON", markdown: "Markdown", code: "Code" } },
-    tone: { label: "Tone", options: { neutral: "Neutral", friendly: "Friendly", expert: "Expert", playful: "Playful" } },
-    constraints: { label: "Constraints" },
-    example_input: { label: "Example input" },
-    style_example: { label: "A prompt you liked" },
+    target_type: { label: "AI to run it", options: { chat: "Chat AI", image: "Image AI", coding: "Coding AI", video: "Video AI" } },
+    purpose: { label: "Where you'll use it", options: { auto: "Default (AI decides)", blog: "Blog and writing", sns: "Social posts and short-video scripts", business: "Work documents and email", work: "Getting work done faster", ideas: "Brainstorming", coding: "Coding" } },
+    audience: { label: "Who reads it", options: { auto: "Default (AI decides)", everyone: "Anyone", beginner: "Beginners", expert: "Experts and practitioners", boss: "Managers and executives", customer: "Customers and clients", me: "Just me" } },
+    tone: { label: "Tone", options: { auto: "Default (AI decides)", logical: "Careful and logical", friendly: "Kind and gentle", witty: "Witty", factual: "Plain facts", warm: "Warm and empathetic", persuasive: "Strong and persuasive" } },
+    output_format: { label: "Shape of the result", options: { auto: "Default (AI decides)", paragraphs: "Detailed paragraphs", bullets: "Key points (bullets)", steps: "Step-by-step guide", table: "Comparison table", markdown: "Clean document (Markdown)", code: "Code" } },
+    task: { label: "The goal or result you want" },
+    style_example: { label: "A prompt you liked (optional)" },
   },
+
   proposal: {
     target: { label: "Who it's for" },
     content: { label: "What you're proposing" },
