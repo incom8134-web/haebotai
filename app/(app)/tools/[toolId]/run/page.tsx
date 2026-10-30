@@ -125,6 +125,7 @@ export default async function ToolPage({
       team={await isHost(user?.email)}
       isStudent={STUDENT_PLAN && membership.plan === "student"}
       paid={isPaidPlan(membership.plan)}
+      plan={membership.plan}
       balance={balance}
     />
     </>

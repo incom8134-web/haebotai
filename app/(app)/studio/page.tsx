@@ -153,7 +153,7 @@ export default async function StudioPage() {
         runs30: monthRuns.length,
         keyConnected: keyStatus.providers.google.some((s) => s.connected && !s.broken),
         team: await isHost(user?.email),
-        paid: isPaidPlan((await getMembership()).plan),
+        ...(await getMembership().then((m) => ({ paid: isPaidPlan(m.plan), plan: m.plan }))),
       }}
     />
   );
