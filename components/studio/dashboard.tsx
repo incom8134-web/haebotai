@@ -8,32 +8,32 @@ import {
   ArrowRight,
   Coins,
   FolderKanban,
-  FolderOpen,
-  KeyRound,
+  FolderPlus,
   Loader2,
-  Paperclip,
   Plus,
   Search,
   Sparkles,
+  KeyRound,
+  FolderOpen,
+  Paperclip,
   Wand2,
 } from "lucide-react";
 import { catalogTool, modesOf, publicTools, toolNumber } from "@/lib/tools/catalog";
 import { routeBrief } from "@/lib/tools/route-brief";
-import { PATCH_NOTES } from "@/lib/site/patch-notes";
-import { CountUp, Reveal, useRotatingExample } from "@/components/studio/studio-extras";
+import { CategoryRail, CountUp, HeroBackdrop, PromoStrip, Reveal, ResultGallery, useRotatingExample, WorkflowShowcase } from "@/components/studio/studio-extras";
 import { chainTargets, getTool } from "@/lib/tools/registry";
 import { briefField } from "@/lib/tools/brief";
 import { formatDateTime } from "@/lib/format-date";
 import { useBi, useLocale } from "@/lib/i18n/context";
-import { primaryButton } from "@/components/site/page";
+import { primaryButton, secondaryButton } from "@/components/site/page";
 import { cn } from "@/lib/utils";
 import { OWN_KEY_ONLY } from "@/lib/site/access";
-import { IconTile, toolTone } from "@/components/site/tone";
+import { IconTile, TONE, toneFor, toolTone } from "@/components/site/tone";
 
-// The member's home, laid out as one calm column: a slim status row,
-// "what shall we make?" with a one-line composer that picks the tool,
-// starter pills, then "continue working" beside "try next", and the
-// projects below. Everything is real account state — no sample numbers.
+// The member's home. Everything here is real account state — no sample
+// numbers: what's running or just finished, the projects, the latest
+// results, what to run next (from the last result and the onboarding
+// goal), a one-line quick start, and credits actually spent.
 
 export interface DashboardRun {
   id: string;
@@ -45,6 +45,34 @@ export interface DashboardRun {
 }
 
 const LIVE = new Set(["pending", "streaming"]);
+
+function Card({
+  title,
+  action,
+  children,
+  className,
+}: {
+  title: string;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <section
+      className={cn(
+        "rounded-[22px] border border-hairline bg-surface p-5",
+        className,
+      )}
+      aria-label={title}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-sm font-semibold text-fg">{title}</h2>
+        {action}
+      </div>
+      <div className="mt-4">{children}</div>
+    </section>
+  );
+}
 
 function runName(run: DashboardRun, L: ReturnType<typeof useBi>) {
   const t = catalogTool(run.toolId);
@@ -190,7 +218,7 @@ function QuickCreate({
         </div>
       </div>
       {suggested.length > 1 ? (
-        <div className="flex flex-wrap items-center justify-center gap-1.5" aria-label={L({ ko: "추천 도구", en: "Suggested tools" })}>
+        <div className="flex flex-wrap items-center gap-1.5" aria-label={L({ ko: "추천 도구", en: "Suggested tools" })}>
           <span className="text-2xs text-fg-subtle">{L({ ko: "이런 도구도 맞아요", en: "Also a good fit" })}</span>
           {suggested.map((sl) => {
             const t = tools.find((x) => x.slug === sl);
@@ -212,7 +240,7 @@ function QuickCreate({
           })}
         </div>
       ) : (
-        <div className="flex flex-wrap justify-center gap-2" aria-label={L({ ko: "바로 시작할 예시", en: "Starters" })}>
+        <div className="flex flex-wrap gap-2" aria-label={L({ ko: "바로 시작할 예시", en: "Starters" })}>
           {STARTERS.map((st) => {
             const t = catalogTool(st.slug);
             if (!t) return null;
@@ -298,175 +326,332 @@ export function Dashboard({
   // Only members who spend credits can run low (Free has none to spend).
   const low = !OWN_KEY_ONLY && !!usage.paid && usage.balance !== null && usage.balance < 200;
 
-  const news = PATCH_NOTES[0];
-  const recentRuns = runs.slice(0, 3);
-  const row = "group flex items-center gap-3 rounded-xl border border-hairline bg-surface p-3 transition-colors hover:border-accent/50";
-
   return (
-    <div className="mx-auto max-w-[980px] px-4 pt-5 pb-12 md:px-8">
-      {/* Slim status row */}
-      <div className="flex flex-wrap items-center gap-2 text-xs">
-        <div className="flex min-w-0 flex-wrap items-center gap-2 text-fg-muted">
-          <span className="rounded-full bg-surface-2 px-2.5 py-1 font-medium text-fg">
-            <strong className="font-mono"><CountUp value={usage.runs30} /></strong>{L({ ko: "개 결과 (30일)", en: " results (30d)" })}
-          </span>
-          {OWN_KEY_ONLY ? (
-            <Link href="/account/api-key" className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-medium", usage.keyConnected || usage.team ? "bg-grounded/10 text-grounded" : "bg-accent-dim text-accent")}>
-              <KeyRound size={12} aria-hidden />
-              {usage.keyConnected ? L({ ko: "API 연결됨", en: "API connected" }) : usage.team ? L({ ko: "팀 테스트 키", en: "Team test key" }) : L({ ko: "API 키 등록하기", en: "Add my API key" })}
-            </Link>
-          ) : (
-            <Link href="/account/membership" className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-medium", low ? "bg-danger/10 text-danger" : "bg-surface-2 text-fg")}>
-              <Coins size={12} className={low ? "" : "text-accent"} aria-hidden />
-              {usage.balance === null ? "—" : <strong className="font-mono"><CountUp value={usage.balance} /></strong>} {L({ ko: "크레딧", en: "credits" })}
-              {!usage.paid && !usage.team ? <span className="text-accent">· {L({ ko: "플랜 고르기", en: "Choose a plan" })}</span> : null}
-            </Link>
-          )}
-          {news ? (
-            <Link href="/help/whats-new" className="hidden min-w-0 truncate font-medium text-accent hover:underline md:inline">
-              <Sparkles size={12} className="mr-1 inline" aria-hidden />
-              {L({ ko: `새 소식 ${news.version}: `, en: `New in ${news.version}: ` })}
-              {L(news.title)} →
-            </Link>
-          ) : null}
+    <div className="mx-auto max-w-[1180px] px-4 pt-6 pb-12 md:px-8 md:pt-8">
+      <section className="relative overflow-hidden rounded-[32px] border border-hairline bg-surface px-5 py-7 md:px-10 md:py-10">
+        <HeroBackdrop />
+        <div className="relative grid gap-8 lg:grid-cols-[1.45fr_1fr] lg:items-center">
+          <div>
+            <Reveal>
+              <p className="inline-flex items-center gap-1.5 rounded-full border border-hairline bg-surface/80 px-3 py-1 text-xs text-fg-muted backdrop-blur">
+                <Sparkles size={12} className="text-accent" aria-hidden />
+                {name ? L({ ko: `${name}님, 안녕하세요`, en: `Hello, ${name}` }) : L({ ko: "안녕하세요", en: "Hello" })}
+              </p>
+            </Reveal>
+            <Reveal delay={0.05}>
+              <h1 className="mt-3 font-display text-[clamp(2rem,4.4vw,3.2rem)] leading-[1.08] font-bold tracking-[-0.02em] break-keep text-fg">
+                {L({ ko: "무엇을 만들어 볼까요?", en: "What shall we make?" })}
+              </h1>
+              <p className="mt-2 max-w-xl text-base break-keep text-fg-muted">
+                {runs.length
+                  ? L({ ko: "한 줄로 적으면 맞는 도구를 골라 드려요. 하던 일은 아래에서 이어서 할 수 있어요.", en: "Write it in a line and we'll pick the tool. Your recent work is just below." })
+                  : L({ ko: "한 줄로 적으면 맞는 도구를 골라 드려요. 첫 결과까지 몇 분이면 돼요.", en: "Write it in a line and we'll pick the tool. A first result takes minutes." })}
+              </p>
+            </Reveal>
+            <Reveal delay={0.1} className="mt-5">
+              <QuickCreate projects={projects.map((p) => ({ id: p.id, name: p.name }))} />
+            </Reveal>
+          </div>
+          <Reveal delay={0.15}>
+            <div className="grid grid-cols-2 gap-3">
+              {OWN_KEY_ONLY ? (
+                <div className={cn("col-span-2 rounded-[22px] border p-4 backdrop-blur", usage.keyConnected || usage.team ? "border-hairline bg-surface/85" : "border-accent/40 bg-accent-dim")}>
+                  <p className="flex items-center gap-1.5 text-xs text-fg-muted">
+                    <KeyRound size={13} className="text-accent" aria-hidden /> {L({ ko: "내 API 키", en: "My API key" })}
+                  </p>
+                  <p className="mt-1 font-display text-2xl font-bold break-keep text-fg">
+                    {usage.keyConnected ? L({ ko: "연결됨", en: "Connected" }) : usage.team ? L({ ko: "팀 테스트 키 사용 중", en: "Using the team test key" }) : L({ ko: "아직 없어요", en: "Not added yet" })}
+                  </p>
+                  {!usage.keyConnected && !usage.team ? (
+                    <p className="mt-1 text-xs break-keep text-fg-muted">{L({ ko: "도구를 쓰려면 Google AI Studio 키가 필요해요. 발급은 5분이면 끝나요.", en: "Tools run on your own Google AI Studio key. Getting one takes about 5 minutes." })}</p>
+                  ) : null}
+                  <Link href="/account/api-key" className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-accent hover:underline">
+                    {usage.keyConnected ? L({ ko: "키 관리", en: "Manage key" }) : L({ ko: "API 키 등록하기", en: "Add my API key" })} <ArrowRight size={12} aria-hidden />
+                  </Link>
+                </div>
+              ) : (
+                <div className="col-span-2 rounded-[22px] border border-hairline bg-surface/85 p-4 backdrop-blur">
+                  <p className="flex items-center gap-1.5 text-xs text-fg-muted">
+                    <Coins size={13} className="text-accent" aria-hidden /> {L({ ko: "남은 크레딧", en: "Credits left" })}
+                  </p>
+                  <p className="mt-1 font-display text-4xl font-bold text-fg">{usage.balance === null ? "—" : <CountUp value={usage.balance} />}</p>
+                  {!usage.paid && !usage.team ? <p className="mt-1 text-xs break-keep text-fg-muted">{L({ ko: "무료 플랜은 둘러보기만 해요. 실행은 플러스부터예요.", en: "Free is for browsing. Running starts with Plus." })}</p> : null}
+                  <Link href="/account/membership" className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-accent hover:underline">
+                    {usage.paid ? L({ ko: "충전·멤버십", en: "Top up · Membership" }) : L({ ko: "플랜 고르기", en: "Choose a plan" })} <ArrowRight size={12} aria-hidden />
+                  </Link>
+                </div>
+              )}
+              <div className="rounded-[22px] border border-hairline bg-surface/85 p-4 backdrop-blur">
+                <p className="text-xs text-fg-muted">{L({ ko: "30일 완료", en: "Done, 30 days" })}</p>
+                <p className="mt-1 font-display text-2xl font-bold text-fg"><CountUp value={usage.runs30} /></p>
+              </div>
+              <div className="rounded-[22px] border border-hairline bg-surface/85 p-4 backdrop-blur">
+                <p className="text-xs text-fg-muted">{L({ ko: "프로젝트", en: "Projects" })}</p>
+                <p className="mt-1 font-display text-2xl font-bold text-fg"><CountUp value={projectCount} /></p>
+              </div>
+              <Link href="/projects" className={cn(secondaryButton, "h-10 justify-center bg-surface/85 px-3 backdrop-blur")}>
+                <FolderPlus size={15} aria-hidden /> {L({ ko: "새 프로젝트", en: "New project" })}
+              </Link>
+              <Link href="/tools" className={cn(secondaryButton, "h-10 justify-center bg-surface/85 px-3 backdrop-blur")}>
+                <Search size={15} aria-hidden /> {L({ ko: "도구 찾기", en: "Find a tool" })}
+              </Link>
+            </div>
+          </Reveal>
         </div>
-      </div>
-
-      {/* What shall we make? */}
-      <section className="mx-auto mt-10 max-w-[760px] md:mt-14">
-        <Reveal>
-          <p className="text-center text-sm font-semibold text-accent">
-            {name ? L({ ko: `${name}님, 안녕하세요`, en: `Hello, ${name}` }) : L({ ko: "안녕하세요", en: "Hello" })}
-          </p>
-          <h1 className="mt-1.5 text-center font-display text-[clamp(1.9rem,4.2vw,2.8rem)] leading-[1.1] font-bold tracking-[-0.02em] break-keep text-fg">
-            {L({ ko: "무엇을 만들어 볼까요?", en: "What shall we make today?" })}
-          </h1>
-          <p className="mt-2 text-center text-sm break-keep text-fg-muted">
-            {L({ ko: "한 줄로 적으면 맞는 도구를 자동으로 골라요. 아래에서 직접 바꿀 수도 있어요.", en: "Write it in one line and we pick the tool. You can change it below." })}
-          </p>
-        </Reveal>
-        <Reveal delay={0.06} className="mt-6">
-          <QuickCreate projects={projects.map((p) => ({ id: p.id, name: p.name }))} />
-        </Reveal>
       </section>
 
-      <hr className="mt-10 border-hairline" />
+      <div className="mt-4">
+        <PromoStrip />
+      </div>
 
-      {/* Continue working · Try next */}
-      <div className="mt-8 grid gap-6 md:grid-cols-12">
-        <section className="md:col-span-7" aria-labelledby="continue-title">
-          <div className="flex items-center justify-between">
-            <h2 id="continue-title" className="text-xs font-bold tracking-wider text-accent uppercase">{L({ ko: "이어서 하기", en: "Continue working" })}</h2>
-            <Link href="/projects" className="inline-flex items-center gap-1 text-xs font-semibold text-accent hover:underline">
-              <Plus size={12} aria-hidden /> {L({ ko: "새 프로젝트", en: "New project" })}
-            </Link>
-          </div>
-          {recentRuns.length ? (
-            <ul className="mt-2.5 space-y-2">
-              {recentRuns.map((r) => {
-                const t = catalogTool(r.toolId);
-                return (
-                  <li key={r.id}>
-                    <Link href={`/library/${r.id}`} className={row}>
-                      <IconTile icon={t?.icon ?? Sparkles} tone={toolTone(r.toolId)} size="sm" />
-                      <span className="min-w-0 flex-1">
-                        <span className="flex items-center gap-2">
-                          <span className="truncate text-sm font-semibold text-fg group-hover:text-accent">{runName(r, L)}</span>
-                          <StatusChip status={r.status} />
-                        </span>
-                        <span className="block truncate font-mono text-2xs text-fg-subtle">
-                          {r.projectId && projectName.get(r.projectId) ? `${projectName.get(r.projectId)} · ` : ""}
-                          {formatDateTime(r.createdAt, locale)}
-                        </span>
-                      </span>
-                      <span className="shrink-0 text-xs font-semibold text-accent opacity-80 group-hover:opacity-100">{L({ ko: "열기", en: "Open" })} →</span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
+      <div className="mt-4 grid gap-4 lg:grid-cols-[1.25fr_1fr]">
+        {/* Continue working */}
+        <Card title={L({ ko: "이어서 하기", en: "Continue working" })}>
+          {latest ? (
+            <div className="flex flex-col gap-3">
+              <Link
+                href={`/library/${latest.id}`}
+                className="group flex items-center gap-3 rounded-2xl border border-hairline bg-bg p-3.5 hover:border-accent/40"
+              >
+                {(() => {
+                  const t = catalogTool(latest.toolId);
+                  return t ? (
+                    <IconTile icon={t.icon} tone={t.category} size="lg" />
+                  ) : null;
+                })()}
+                <span className="min-w-0 flex-1">
+                  <span className="flex flex-wrap items-center gap-2">
+                    <span className="truncate font-semibold text-fg">
+                      {runName(latest, L)}
+                    </span>
+                    <StatusChip status={latest.status} />
+                  </span>
+                  <span className="mt-0.5 block font-mono text-2xs text-fg-subtle">
+                    {formatDateTime(latest.createdAt, locale)}
+                    {latest.projectId && projectName.get(latest.projectId)
+                      ? ` · ${projectName.get(latest.projectId)}`
+                      : ""}
+                  </span>
+                </span>
+                <ArrowRight
+                  size={16}
+                  className="shrink-0 text-fg-subtle transition-transform group-hover:translate-x-0.5"
+                  aria-hidden
+                />
+              </Link>
+              {!live && handoffs.length ? (
+                <div>
+                  <p className="text-2xs text-fg-subtle">
+                    {L({
+                      ko: "이 결과로 이어서 만들기",
+                      en: "Carry this result into",
+                    })}
+                  </p>
+                  <div className="mt-1.5 flex flex-wrap gap-1.5">
+                    {handoffs.slice(0, 3).map((t) => {
+                      const slug = t.slug;
+                      return t.engine ? (
+                        <Link
+                          key={slug}
+                          href={`/tools/${slug}/run?fromRun=${latest.id}${latest.projectId ? `&project=${latest.projectId}` : ""}`}
+                          className="inline-flex items-center gap-1 rounded-full border border-hairline px-2.5 py-1 text-xs text-fg hover:border-accent/50 hover:text-accent"
+                        >
+                          {L(t.name)} <ArrowRight size={11} aria-hidden />
+                        </Link>
+                      ) : null;
+                    })}
+                  </div>
+                </div>
+              ) : null}
+              {latestProject ? (
+                <Link
+                  href={`/projects/${latestProject.id}`}
+                  className="flex items-center gap-2 text-xs text-fg-muted hover:text-fg"
+                >
+                  <FolderKanban size={13} className="text-accent" aria-hidden />{" "}
+                  {L({
+                    ko: `'${latestProject.name}' 프로젝트 열기`,
+                    en: `Open '${latestProject.name}'`,
+                  })}
+                </Link>
+              ) : null}
+            </div>
           ) : (
-            <div className="mt-2.5 rounded-xl border border-dashed border-hairline-str p-5 text-center text-sm break-keep text-fg-muted">
-              {L({ ko: "아직 만든 결과가 없어요. 위에 한 줄 적거나, 오른쪽 도구로 시작해 보세요.", en: "No results yet. Write a line above, or start with a tool on the right." })}
+            <div className="rounded-2xl border border-dashed border-hairline-str p-5 text-center">
+              <p className="text-sm break-keep text-fg-muted">
+                {L({
+                  ko: "아직 만든 결과가 없어요. 추천 도구나 바로 시작하기로 첫 결과를 만들어 보세요.",
+                  en: "No results yet. Try a recommended tool or the quick start.",
+                })}
+              </p>
             </div>
           )}
-          {!live && latest && handoffs.length ? (
-            <div className="mt-3">
-              <p className="text-2xs text-fg-subtle">{L({ ko: "방금 결과로 이어서 만들기", en: "Carry the latest result into" })}</p>
-              <div className="mt-1.5 flex flex-wrap gap-1.5">
-                {handoffs.slice(0, 3).map((t) => (
-                  <Link
-                    key={t.slug}
-                    href={`/tools/${t.slug}/run?fromRun=${latest.id}${latest.projectId ? `&project=${latest.projectId}` : ""}`}
-                    className="inline-flex items-center gap-1 rounded-full border border-hairline px-2.5 py-1 text-xs text-fg hover:border-accent/50 hover:text-accent"
-                  >
-                    {toolNumber(t.slug)}. {L(t.name)} <ArrowRight size={11} aria-hidden />
-                  </Link>
-                ))}
-              </div>
-            </div>
-          ) : null}
-          {runs.length > 3 ? (
-            <Link href="/library" className="mt-3 inline-block text-xs text-fg-muted hover:text-fg">{L({ ko: "모든 결과 보기 →", en: "All results →" })}</Link>
-          ) : null}
-        </section>
+        </Card>
 
-        <section className="md:col-span-5" aria-labelledby="next-title">
-          <h2 id="next-title" className="text-xs font-bold tracking-wider text-studio-warning uppercase">{L({ ko: "다음에 해 볼 것", en: "Try next" })}</h2>
-          <ul className="mt-2.5 space-y-2">
+        {/* Recommended */}
+        <Card title={L({ ko: "다음에 해 볼 것", en: "Try next" })}>
+          <ul className="grid gap-2 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
             {recommended.map((slug) => {
               const t = catalogTool(slug)!;
               const m = t.engine ? getTool(t.engine) : undefined;
               return (
                 <li key={slug}>
-                  <Link href={`/tools/${slug}/run${latestProject ? `?project=${latestProject.id}` : ""}`} className={row}>
-                    <IconTile icon={t.icon} tone={t.category} size="sm" />
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-sm font-semibold break-keep text-fg group-hover:text-accent">
-                        <span className="font-mono text-fg-subtle">{toolNumber(slug)}.</span> {L(t.name)}
-                      </span>
-                      <span className="line-clamp-1 text-2xs break-keep text-fg-muted">{L(t.promise)}</span>
+                  <Link
+                    href={`/tools/${slug}/run${latestProject ? `?project=${latestProject.id}` : ""}`}
+                    className={cn("flex h-full flex-col rounded-2xl border border-hairline p-3.5 transition-[border-color,transform] duration-300 hover:-translate-y-0.5", TONE[t.category].wash, TONE[t.category].hover)}
+                  >
+                    <IconTile icon={t.icon} tone={t.category} />
+                    <span className="mt-3 text-[15px] font-bold break-keep text-fg">
+                      {L(t.name)}
                     </span>
-                    {m && !OWN_KEY_ONLY ? <span className="shrink-0 font-mono text-2xs text-fg-subtle">{m.estimatedCredits}</span> : null}
+                    <span className="mt-1 line-clamp-2 text-xs leading-relaxed break-keep text-fg-muted">
+                      {L(t.promise)}
+                    </span>
+                    {m && !OWN_KEY_ONLY ? (
+                      <span className="mt-auto pt-2 font-mono text-2xs text-fg-subtle">
+                        {m.estimatedCredits}{" "}
+                        {L({ ko: "크레딧", en: "credits" })}
+                      </span>
+                    ) : null}
                   </Link>
                 </li>
               );
             })}
           </ul>
-          <Link href="/tools" className="mt-3 inline-block text-xs text-fg-muted hover:text-fg">{L({ ko: "도구 16개 순서대로 보기 →", en: "All 16 tools, in order →" })}</Link>
-        </section>
+        </Card>
+
       </div>
 
-      <UpgradeCard plan={usage.plan} host={usage.team} className="mt-8" />
+      <UpgradeCard plan={usage.plan} host={usage.team} className="mt-5" />
 
-      {/* Projects */}
-      <section className="mt-10" aria-labelledby="projects-title">
-        <div className="flex items-center justify-between">
-          <h2 id="projects-title" className="text-xs font-bold tracking-wider text-fg-muted uppercase">
-            {L({ ko: `프로젝트 ${projectCount}`, en: `Projects ${projectCount}` })}
-          </h2>
-          <Link href="/projects" className="text-xs text-accent hover:underline">{L({ ko: "전체 보기", en: "All" })}</Link>
-        </div>
-        {projects.length ? (
-          <ul className="mt-2.5 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {projects.slice(0, 6).map((p) => (
-              <li key={p.id}>
-                <Link href={`/projects/${p.id}`} className="block rounded-xl border border-hairline bg-surface p-3.5 hover:border-accent/50">
-                  <span className="flex items-center gap-2 text-sm font-semibold text-fg">
-                    <FolderKanban size={14} className="shrink-0 text-accent" aria-hidden /> <span className="truncate">{p.name}</span>
-                  </span>
-                  {p.description ? <span className="mt-1 block truncate text-xs text-fg-muted">{p.description}</span> : null}
-                  <span className="mt-2 block text-2xs text-fg-subtle">{L({ ko: `결과 ${p.runs}개`, en: `${p.runs} results` })}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <Link href="/projects" className="mt-2.5 flex items-center gap-3 rounded-xl border border-dashed border-hairline-str p-4 text-sm text-fg-muted hover:text-fg">
-            <Plus size={16} aria-hidden /> <span className="break-keep">{L({ ko: "프로젝트를 만들면 사업 정보를 기억해서 도구마다 미리 채워 줘요.", en: "A project remembers your business and pre-fills every tool." })}</span>
-          </Link>
-        )}
-      </section>
+      {low ? (
+        <p className="mt-3 rounded-2xl border border-danger/30 bg-danger/5 px-4 py-2.5 text-xs break-keep text-danger">
+          {L({ ko: "크레딧이 얼마 남지 않았어요.", en: "Running low on credits." })}{" "}
+          <Link href="/account/membership/checkout?product=topup" className="font-semibold underline">{L({ ko: "500 크레딧 충전", en: "Top up 500 credits" })}</Link>
+        </p>
+      ) : null}
+
+      <div className="mt-10">
+        <CategoryRail />
+      </div>
+      <div className="mt-10">
+        <WorkflowShowcase projectId={latestProject?.id} />
+      </div>
+      <div className="mt-10">
+        <ResultGallery />
+      </div>
+
+      <div className="mt-10 grid gap-4 lg:grid-cols-2">
+        {/* Projects */}
+        <Card
+          title={L({
+            ko: `프로젝트 ${projectCount}`,
+            en: `Projects ${projectCount}`,
+          })}
+          action={
+            <Link
+              href="/projects"
+              className="text-xs text-accent hover:underline"
+            >
+              {L({ ko: "전체 보기", en: "All" })}
+            </Link>
+          }
+        >
+          {projects.length ? (
+            <ul className="grid gap-2 sm:grid-cols-2">
+              {projects.slice(0, 4).map((p) => (
+                <li key={p.id}>
+                  <Link
+                    href={`/projects/${p.id}`}
+                    className="block rounded-2xl border border-hairline bg-bg p-3.5 hover:border-accent/40"
+                  >
+                    <span className="flex items-center gap-2 text-sm font-semibold text-fg">
+                      <FolderKanban
+                        size={14}
+                        className="shrink-0 text-accent"
+                        aria-hidden
+                      />{" "}
+                      <span className="truncate">{p.name}</span>
+                    </span>
+                    {p.description ? (
+                      <span className="mt-1 block truncate text-xs text-fg-muted">
+                        {p.description}
+                      </span>
+                    ) : null}
+                    <span className="mt-2 block text-2xs text-fg-subtle">
+                      {L({ ko: `결과 ${p.runs}개`, en: `${p.runs} results` })}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <Link
+              href="/projects"
+              className="flex items-center gap-3 rounded-2xl border border-dashed border-hairline-str p-4 text-sm text-fg-muted hover:text-fg"
+            >
+              <Plus size={16} aria-hidden />{" "}
+              <span className="break-keep">
+                {L({
+                  ko: "프로젝트를 만들면 사업 정보를 기억해서 도구마다 미리 채워 줘요.",
+                  en: "A project remembers your business and pre-fills every tool.",
+                })}
+              </span>
+            </Link>
+          )}
+        </Card>
+
+        {/* Recent results */}
+        <Card
+          title={L({ ko: "최근 결과", en: "Recent results" })}
+          action={
+            <Link
+              href="/library"
+              className="text-xs text-accent hover:underline"
+            >
+              {L({ ko: "보관함", en: "Library" })}
+            </Link>
+          }
+        >
+          {runs.length ? (
+            <ul className="divide-y divide-hairline">
+              {runs.slice(0, 6).map((r) => (
+                <li key={r.id}>
+                  <Link
+                    href={`/library/${r.id}`}
+                    className="flex items-center gap-3 py-2.5 hover:text-accent"
+                  >
+                    <IconTile icon={catalogTool(r.toolId)?.icon ?? Sparkles} tone={toolTone(r.toolId)} size="sm" />
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-center gap-2">
+                        <span className="truncate text-sm font-semibold text-fg">
+                          {runName(r, L)}
+                        </span>
+                        <StatusChip status={r.status} />
+                      </span>
+                      <span className="block font-mono text-2xs text-fg-subtle">
+                        {formatDateTime(r.createdAt, locale)}
+                      </span>
+                    </span>
+                    {r.projectId && projectName.get(r.projectId) ? (
+                      <span className={cn("max-w-[40%] shrink-0 truncate rounded-full px-2 py-0.5 text-[10px] font-semibold", TONE[toneFor(r.projectId)].chip)}>
+                        {projectName.get(r.projectId)}
+                      </span>
+                    ) : null}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-fg-muted">
+              {L({
+                ko: "결과는 모두 보관함에 저장돼요.",
+                en: "Every result is saved to your Library.",
+              })}
+            </p>
+          )}
+        </Card>
+      </div>
     </div>
   );
 }
