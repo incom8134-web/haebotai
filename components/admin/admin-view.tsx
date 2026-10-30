@@ -3,8 +3,9 @@
 import { useActionState, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Activity, AlertTriangle, ArrowLeft, ArrowRight, Ban, Copy, KeyRound, Play, Plus, RotateCcw, Save, Search, Trash2, UserPlus, Users, Wrench } from "lucide-react";
-import { checkMemberKeyTier, createMember, deleteMember, replyToTicket, reopenTicket, setMemberSuspended, updateMember, type AdminActionState } from "@/lib/actions/admin";
+import { Activity, AlertTriangle, ArrowLeft, ArrowRight, Ban, Copy, Crown, KeyRound, Play, Plus, RotateCcw, Save, Search, Trash2, UserPlus, Users, Wallet, Wrench } from "lucide-react";
+import { MEMBER_API_KEYS } from "@/lib/site/access";
+import { addHostEmail, adjustMemberCredits, checkMemberKeyTier, createMember, deleteMember, removeHostEmail, replyToTicket, reopenTicket, setMemberPlan, setMemberSuspended, updateMember, type AdminActionState } from "@/lib/actions/admin";
 import type { KeyTier } from "@/lib/ai/key-tier";
 import { useBi } from "@/lib/i18n/context";
 import { filtersToQuery, type MemberFilters } from "@/lib/admin-filters";
@@ -67,10 +68,17 @@ export function AdminOverviewView({ overview: o, alerts }: { overview: AdminOver
       />
 
       {alerts}
+      {MEMBER_API_KEYS ? null : (
+        <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <StatCard label={L({ ko: "30일 매출 (부가세 포함)", en: "Revenue, 30 days (VAT incl.)" })} value={`₩${num(o.revenue30d)}`} icon={Wallet} tone="brand" note={L({ ko: `결제 ${num(o.orders30d)}건`, en: `${num(o.orders30d)} orders` })} />
+          <StatCard label={L({ ko: "플러스 이용 중", en: "On Plus" })} value={num(o.plusMembers)} icon={Crown} tone="discover" href="/admin/members?plan=plus" />
+          <StatCard label={L({ ko: "프로 이용 중", en: "On Pro" })} value={num(o.proMembers)} icon={Crown} tone="campaign" href="/admin/members?plan=pro" />
+        </div>
+      )}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label={L({ ko: "전체 회원", en: "Members" })} value={num(o.members)} icon={Users} tone="discover" note={L({ ko: `최근 7일 +${num(o.newMembers7d)}명`, en: `+${num(o.newMembers7d)} in 7 days` })} noteTone={o.newMembers7d ? "up" : "flat"} spark={days.map((d) => d.signups)} href="/admin/members" />
         <StatCard label={L({ ko: "7일 실행", en: "Runs, 7 days" })} value={num(o.runs7d)} icon={Play} tone="brand" note={L({ ko: `오늘 ${num(o.runsToday)}회 · 누적 ${num(o.runsAllTime)}회`, en: `${num(o.runsToday)} today · ${num(o.runsAllTime)} all time` })} spark={days.map((d) => d.runs)} href="/admin/tools" />
-        <StatCard label={L({ ko: "7일 활동 회원", en: "Active, 7 days" })} value={num(o.activeMembers7d)} icon={Activity} tone="operate" note={L({ ko: `API 키 등록 ${num(o.membersWithKey)}명 (${pct(o.membersWithKey, o.members)}%)`, en: `${num(o.membersWithKey)} with a key (${pct(o.membersWithKey, o.members)}%)` })} spark={days.map((d) => d.activeMembers)} />
+        <StatCard label={L({ ko: "7일 활동 회원", en: "Active, 7 days" })} value={num(o.activeMembers7d)} icon={Activity} tone="operate" note={MEMBER_API_KEYS ? L({ ko: `API 키 등록 ${num(o.membersWithKey)}명 (${pct(o.membersWithKey, o.members)}%)`, en: `${num(o.membersWithKey)} with a key (${pct(o.membersWithKey, o.members)}%)` }) : L({ ko: `유료 ${num(o.plusMembers + o.proMembers)}명 (${pct(o.plusMembers + o.proMembers, o.members)}%) · 플러스 ${num(o.plusMembers)} · 프로 ${num(o.proMembers)}`, en: `${num(o.plusMembers + o.proMembers)} paying (${pct(o.plusMembers + o.proMembers, o.members)}%) · Plus ${num(o.plusMembers)} · Pro ${num(o.proMembers)}` })} spark={days.map((d) => d.activeMembers)} href="/admin/members?plan=paid" />
         <StatCard label={L({ ko: "7일 실패율", en: "Failure rate, 7 days" })} value={`${failRate}%`} icon={AlertTriangle} tone="campaign" alert={failRate >= 20} note={L({ ko: `실패 ${num(o.failed7d)}회 / ${num(o.runs7d)}회`, en: `${num(o.failed7d)} of ${num(o.runs7d)} failed` })} noteTone={failRate >= 20 ? "down" : "flat"} spark={days.map((d) => d.failed)} />
       </div>
 
@@ -236,7 +244,7 @@ export function MemberList({ members, total, all, page, pages, filters, deleted 
   const router = useRouter();
   const [adding, setAdding] = useState(false);
   const link = (p: number) => `/admin/members${filtersToQuery({ ...filters, page: p })}`;
-  const filtered = !!(filters.q || filters.provider || filters.key || filters.activity || filters.status || filters.from || filters.to);
+  const filtered = !!(filters.q || filters.provider || filters.key || filters.plan || filters.activity || filters.status || filters.from || filters.to);
 
   return (
     <div>
@@ -270,7 +278,11 @@ export function MemberList({ members, total, all, page, pages, filters, deleted 
             </span>
           </label>
           <Select name="provider" value={filters.provider} label={L({ ko: "로그인", en: "Sign-in" })} options={[{ value: "", label: L({ ko: "전체", en: "All" }) }, { value: "google", label: "Google" }, { value: "kakao", label: "Kakao" }]} />
-          <Select name="key" value={filters.key} label={L({ ko: "API 키", en: "API key" })} options={[{ value: "", label: L({ ko: "전체", en: "All" }) }, { value: "yes", label: L({ ko: "등록함", en: "Has a key" }) }, { value: "no", label: L({ ko: "없음", en: "No key" }) }]} />
+          {MEMBER_API_KEYS ? (
+            <Select name="key" value={filters.key} label={L({ ko: "API 키", en: "API key" })} options={[{ value: "", label: L({ ko: "전체", en: "All" }) }, { value: "yes", label: L({ ko: "등록함", en: "Has a key" }) }, { value: "no", label: L({ ko: "없음", en: "No key" }) }]} />
+          ) : (
+            <Select name="plan" value={filters.plan} label={L({ ko: "플랜", en: "Plan" })} options={[{ value: "", label: L({ ko: "전체", en: "All" }) }, { value: "paid", label: L({ ko: "유료 (플러스·프로)", en: "Paying (Plus or Pro)" }) }, { value: "plus", label: L({ ko: "플러스", en: "Plus" }) }, { value: "pro", label: L({ ko: "프로", en: "Pro" }) }, { value: "free", label: L({ ko: "무료", en: "Free" }) }, { value: "host", label: L({ ko: "호스트", en: "Hosts" }) }]} />
+          )}
           <Select name="activity" value={filters.activity} label={L({ ko: "활동", en: "Activity" })} options={[{ value: "", label: L({ ko: "전체", en: "All" }) }, { value: "active7", label: L({ ko: "7일 내 실행", en: "Ran in 7 days" }) }, { value: "dormant30", label: L({ ko: "30일 넘게 쉼", en: "Idle 30+ days" }) }, { value: "never", label: L({ ko: "실행 안 함", en: "Never ran" }) }]} />
           <Select name="status" value={filters.status} label={L({ ko: "상태", en: "Status" })} options={[{ value: "", label: L({ ko: "전체", en: "All" }) }, { value: "suspended", label: L({ ko: "이용 정지", en: "Suspended" }) }, { value: "no_name", label: L({ ko: "이름 미입력", en: "No name yet" }) }]} />
           <Select name="sort" value={filters.sort} label={L({ ko: "정렬", en: "Sort" })} options={[{ value: "new", label: L({ ko: "최근 가입", en: "Newest" }) }, { value: "old", label: L({ ko: "오래된 가입", en: "Oldest" }) }, { value: "recent", label: L({ ko: "최근 활동", en: "Recently active" }) }, { value: "runs", label: L({ ko: "실행 많은 순", en: "Most runs" }) }, { value: "name", label: L({ ko: "이름순", en: "Name" }) }]} />
@@ -306,7 +318,7 @@ export function MemberList({ members, total, all, page, pages, filters, deleted 
                   <th className="px-3 py-3">{L({ ko: "카카오 ID · 전화", en: "Kakao ID · phone" })}</th>
                   <th className="px-3 py-3">{L({ ko: "가입", en: "Joined" })}</th>
                   <th className="px-3 py-3">{L({ ko: "최근 로그인", en: "Last sign-in" })}</th>
-                  <th className="px-3 py-3">{L({ ko: "API 키", en: "API key" })}</th>
+                  <th className="px-3 py-3">{MEMBER_API_KEYS ? L({ ko: "API 키", en: "API key" }) : L({ ko: "플랜 · 크레딧", en: "Plan · credits" })}</th>
                   <th className="px-3 py-3 text-right">{L({ ko: "실행", en: "Runs" })}</th>
                   <th className="px-5 py-3">{L({ ko: "상태", en: "Status" })}</th>
                 </tr>
@@ -343,9 +355,7 @@ export function MemberList({ members, total, all, page, pages, filters, deleted 
                     </td>
                     <td className="px-3 py-3 text-fg-muted tabular-nums">{fmtDate(m.createdAt)}</td>
                     <td className="px-3 py-3 text-fg-muted tabular-nums">{fmtDate(m.lastSignInAt)}</td>
-                    <td className="px-3 py-3">
-                      <KeyTierCell m={m} />
-                    </td>
+                    <td className="px-3 py-3">{MEMBER_API_KEYS ? <KeyTierCell m={m} /> : <PlanCell m={m} />}</td>
                     <td className="px-3 py-3 text-right tabular-nums">
                       <span className="font-semibold">{m.runs ? num(m.runs) : "·"}</span>
                       {m.failedRuns ? <span className="block text-xs text-danger">{L({ ko: `실패 ${m.failedRuns}`, en: `${m.failedRuns} failed` })}</span> : null}
@@ -443,6 +453,91 @@ function KeyRow({ k }: { k: AdminMemberDetail["keyDetails"][number] }) {
         {k.tier ? <Pill tone={TIER[k.tier.value].tone}>{L(TIER[k.tier.value].label)}</Pill> : k.provider === "google" ? <Pill tone="gray">{L({ ko: "등급 미확인", en: "Tier unchecked" })}</Pill> : null}
       </span>
     </li>
+  );
+}
+
+const PLAN_NAME: Record<string, Bi> = { plus: { ko: "플러스", en: "Plus" }, pro: { ko: "프로", en: "Pro" } };
+const daysLeft = (iso: string | null | undefined) => (iso ? Math.max(0, Math.ceil((new Date(iso).getTime() - Date.now()) / 86_400_000)) : 0);
+
+/** Make or remove a host from the member page (a Vercel host can't be removed here). */
+function HostToggle({ m }: { m: AdminMemberDetail }) {
+  const L = useBi();
+  const [state, action, pending] = useActionState<AdminActionState, FormData>(m.host ? removeHostEmail : addHostEmail, null);
+  return (
+    <form action={action} className="mt-4 flex flex-wrap items-center gap-3 border-t border-hairline pt-4">
+      <input type="hidden" name="email" value={m.email} />
+      <input type="hidden" name="note" value={m.name ?? ""} />
+      {m.hostEntry === "env" ? (
+        <span className="text-sm text-fg-muted">{L({ ko: "Vercel 환경 변수로 지정된 호스트예요. 해제는 Vercel에서 해요.", en: "A host via the Vercel environment; remove it in Vercel." })}</span>
+      ) : (
+        <>
+          <button type="submit" disabled={pending || !m.email} className={m.host ? btnGhost : btnPrimary}>
+            <Crown className="size-4" aria-hidden /> {m.host ? L({ ko: "호스트 해제", en: "Remove host" }) : L({ ko: "호스트로 지정", en: "Make host" })}
+          </button>
+          <span className="text-xs text-fg-muted">{L({ ko: "호스트는 크레딧 없이 회사 Gemini 키로 실행해요.", en: "Hosts run on the company Gemini key without credits." })}</span>
+        </>
+      )}
+      <ActionNote state={state} />
+    </form>
+  );
+}
+
+/** Member page (SaaS mode): plan, credits and host status, with the staff fixes — refunds, goodwill, comps. */
+function PlanCreditsCard({ m }: { m: AdminMemberDetail }) {
+  const L = useBi();
+  const [creditState, creditAction, creditPending] = useActionState<AdminActionState, FormData>(adjustMemberCredits, null);
+  const [planState, planAction, planPending] = useActionState<AdminActionState, FormData>(setMemberPlan, null);
+  return (
+    <Card title={L({ ko: "플랜 · 크레딧", en: "Plan · credits" })} lead={L({ ko: "환불·보상·테스트용. 바꾼 내용과 사유는 감사 로그에 남아요.", en: "For refunds, goodwill and testing. Every change and its reason goes to the audit log." })}>
+      <div className="flex flex-wrap items-center gap-2 text-sm">
+        {m.activePlan ? <Pill tone={m.activePlan === "pro" ? "blue" : "green"}>{`${L(PLAN_NAME[m.activePlan])} · ~${fmtDate(m.planExpiresAt)}`}</Pill> : <Pill tone="gray">{L({ ko: "무료", en: "Free" })}</Pill>}
+        <span className="font-mono">{L({ ko: `${num(m.credits ?? 0)} 크레딧`, en: `${num(m.credits ?? 0)} credits` })}</span>
+        {m.host ? <Pill tone="amber">{L({ ko: "호스트", en: "Host" })}</Pill> : null}
+      </div>
+
+      <form action={creditAction} className="mt-4 flex flex-col gap-2 border-t border-hairline pt-4">
+        <input type="hidden" name="id" value={m.id} />
+        <span className="text-xs font-semibold text-fg-muted">{L({ ko: "크레딧 더하기·빼기", en: "Add or take back credits" })}</span>
+        <div className="grid gap-2 sm:grid-cols-[120px_1fr_auto]">
+          <input name="delta" type="number" required step={1} placeholder="+500 / -500" aria-label={L({ ko: "크레딧", en: "Credits" })} className={field} />
+          <input name="reason" required maxLength={200} placeholder={L({ ko: "사유 (예: 10/29 환불)", en: "Reason (e.g. refund 10/29)" })} aria-label={L({ ko: "사유", en: "Reason" })} className={field} />
+          <button type="submit" disabled={creditPending} className={btnPrimary}>{L({ ko: "적용", en: "Apply" })}</button>
+        </div>
+        <ActionNote state={creditState} />
+      </form>
+
+      <form action={planAction} className="mt-4 flex flex-col gap-2 border-t border-hairline pt-4">
+        <input type="hidden" name="id" value={m.id} />
+        <span className="text-xs font-semibold text-fg-muted">{L({ ko: "플랜 기간 (같은 플랜이면 남은 기간에 더해져요, 크레딧은 위에서 따로)", en: "Plan days (added to days left on the same plan; credits are separate, above)" })}</span>
+        <div className="grid gap-2 sm:grid-cols-[110px_90px_1fr_auto]">
+          <select name="plan" defaultValue={m.activePlan ?? "plus"} aria-label={L({ ko: "플랜", en: "Plan" })} className={field}>
+            <option value="plus">{L({ ko: "플러스", en: "Plus" })}</option>
+            <option value="pro">{L({ ko: "프로", en: "Pro" })}</option>
+            <option value="free">{L({ ko: "무료로", en: "Free" })}</option>
+          </select>
+          <input name="days" type="number" min={1} max={366} defaultValue={30} aria-label={L({ ko: "일", en: "Days" })} className={field} />
+          <input name="reason" required maxLength={200} placeholder={L({ ko: "사유", en: "Reason" })} aria-label={L({ ko: "사유", en: "Reason" })} className={field} />
+          <button type="submit" disabled={planPending} className={btnGhost}>{L({ ko: "저장", en: "Save" })}</button>
+        </div>
+        <ActionNote state={planState} />
+      </form>
+
+      <HostToggle key={m.host ? "on" : "off"} m={m} />
+    </Card>
+  );
+}
+
+/** Members table, plan column (SaaS mode): plan and days left, credits, host. */
+function PlanCell({ m }: { m: AdminMember }) {
+  const L = useBi();
+  return (
+    <div className="flex flex-col items-start gap-1">
+      <span className="flex flex-wrap gap-1">
+        {m.plan ? <Pill tone={m.plan === "pro" ? "blue" : "green"}>{`${L(PLAN_NAME[m.plan] ?? { ko: m.plan, en: m.plan })} · D-${daysLeft(m.planExpiresAt)}`}</Pill> : <Pill tone="gray">{L({ ko: "무료", en: "Free" })}</Pill>}
+        {m.host ? <Pill tone="amber">{L({ ko: "호스트", en: "Host" })}</Pill> : null}
+      </span>
+      <span className="font-mono text-xs text-fg-muted">{L({ ko: `${num(m.credits ?? 0)} 크레딧`, en: `${num(m.credits ?? 0)} credits` })}</span>
+    </div>
   );
 }
 
@@ -557,8 +652,12 @@ export function MemberProfile({ m, notices }: { m: AdminMemberDetail; notices?: 
       <div className="mt-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard label={L({ ko: "총 실행", en: "Runs" })} value={num(m.runs)} icon={Play} tone="brand" note={L({ ko: `마지막 ${fmtDate(m.lastRunAt)}`, en: `Last ${fmtDate(m.lastRunAt)}` })} />
         <StatCard label={L({ ko: "실패", en: "Failed" })} value={num(m.failedRuns)} icon={AlertTriangle} tone="campaign" alert={m.runs > 0 && pct(m.failedRuns, m.runs) >= 50} note={L({ ko: `실패율 ${pct(m.failedRuns, m.runs)}%`, en: `${pct(m.failedRuns, m.runs)}% failure rate` })} />
-        <StatCard label={L({ ko: "API 키", en: "API keys" })} value={num(m.keyDetails.length)} icon={KeyRound} tone="operate" note={m.keyDetails.some((k) => k.broken) ? L({ ko: "거부된 키 있음", en: "A key was refused" }) : L({ ko: "등록된 키", en: "Saved keys" })} noteTone={m.keyDetails.some((k) => k.broken) ? "down" : "flat"} />
-        <StatCard label={L({ ko: "프로젝트", en: "Projects" })} value={num(m.projects)} icon={Wrench} tone="discover" note={m.plan ? `${m.plan}${m.planExpiresAt ? ` · ~${fmtDate(m.planExpiresAt)}` : ""}` : L({ ko: "무료 플랜", en: "Free plan" })} />
+        {MEMBER_API_KEYS ? (
+          <StatCard label={L({ ko: "API 키", en: "API keys" })} value={num(m.keyDetails.length)} icon={KeyRound} tone="operate" note={m.keyDetails.some((k) => k.broken) ? L({ ko: "거부된 키 있음", en: "A key was refused" }) : L({ ko: "등록된 키", en: "Saved keys" })} noteTone={m.keyDetails.some((k) => k.broken) ? "down" : "flat"} />
+        ) : (
+          <StatCard label={L({ ko: "크레딧", en: "Credits" })} value={num(m.credits ?? 0)} icon={Wallet} tone="operate" note={m.activePlan ? L({ ko: `${L(PLAN_NAME[m.activePlan])} · D-${daysLeft(m.planExpiresAt)}`, en: `${L(PLAN_NAME[m.activePlan])} · ${daysLeft(m.planExpiresAt)} days left` }) : m.host ? L({ ko: "호스트 · 크레딧 없이 실행", en: "Host · runs without credits" }) : L({ ko: "무료 플랜", en: "Free plan" })} />
+        )}
+        <StatCard label={L({ ko: "프로젝트", en: "Projects" })} value={num(m.projects)} icon={Wrench} tone="discover" note={m.activePlan ? `${L(PLAN_NAME[m.activePlan])} · ~${fmtDate(m.planExpiresAt)}` : L({ ko: "무료 플랜", en: "Free plan" })} />
       </div>
 
       <div className="mt-5 grid gap-5 xl:grid-cols-[1fr_1fr]">
@@ -568,6 +667,7 @@ export function MemberProfile({ m, notices }: { m: AdminMemberDetail; notices?: 
             items={m.toolUsage.slice(0, 8).map((t) => ({ key: t.toolId, label: toolLabel(t.toolId), value: t.runs, tone: toolTone(t.toolId), sub: t.failed ? L({ ko: `실패 ${t.failed}회`, en: `${t.failed} failed` }) : undefined }))}
           />
         </Card>
+        {MEMBER_API_KEYS ? (
         <Card title={L({ ko: "API 키", en: "API keys" })} lead={L({ ko: "키 값은 암호화되어 끝 4자리만 보여요. 무료·유료 확인은 회원 목록의 ‘등급 확인’에서 해요.", en: "Encrypted; only the last 4 characters show. Check free/paid with 'Check tier' in the members list." })}>
           {m.keyDetails.length === 0 ? (
             <p className="text-sm text-fg-muted">{L({ ko: "등록한 키가 없어요. 도구를 실행하려면 키가 필요해요.", en: "No key saved. A key is needed to run tools." })}</p>
@@ -579,6 +679,9 @@ export function MemberProfile({ m, notices }: { m: AdminMemberDetail; notices?: 
             </ul>
           )}
         </Card>
+        ) : (
+          <PlanCreditsCard m={m} />
+        )}
       </div>
 
       <Card className="mt-5" title={L({ ko: "최근 실행", en: "Recent runs" })} lead={L({ ko: "최근 15건", en: "Last 15" })} bodyClassName="p-0">
@@ -705,7 +808,7 @@ export function MemberProfile({ m, notices }: { m: AdminMemberDetail; notices?: 
           <form action={delAction} className="mt-6 flex flex-col gap-2 rounded-2xl border border-danger/30 bg-danger/[0.04] p-4">
             <input type="hidden" name="id" value={m.id} />
             <p className="text-sm font-semibold text-danger">{L({ ko: "회원 삭제", en: "Delete member" })}</p>
-            <p className="text-xs leading-relaxed text-fg-muted">{L({ ko: "회원 탈퇴와 똑같이 결과물·프로필·API 키·파일을 지우고 로그인을 없애요. 결제(5년)·문의(3년) 기록만 법에 따라 남아요. 되돌릴 수 없어요.", en: "Same as the member leaving: results, profile, API keys and files are deleted and the login removed. Only payment (5 years) and support (3 years) records stay, as the law requires. This can't be undone." })}</p>
+            <p className="text-xs leading-relaxed text-fg-muted">{L(MEMBER_API_KEYS ? { ko: "회원 탈퇴와 똑같이 결과물·프로필·API 키·파일을 지우고 로그인을 없애요. 결제(5년)·문의(3년) 기록만 법에 따라 남아요. 되돌릴 수 없어요.", en: "Same as the member leaving: results, profile, API keys and files are deleted and the login removed. Only payment (5 years) and support (3 years) records stay, as the law requires. This can't be undone." } : { ko: "회원 탈퇴와 똑같이 결과물·프로필·크레딧·파일을 지우고 로그인을 없애요. 결제(5년)·문의(3년) 기록만 법에 따라 남아요. 되돌릴 수 없어요.", en: "Same as the member leaving: results, profile, credits and files are deleted and the login removed. Only payment (5 years) and support (3 years) records stay, as the law requires. This can't be undone." })}</p>
             <label className="flex flex-col gap-1">
               <span className="text-xs font-semibold text-fg-muted">{L({ ko: "확인을 위해 회원 이메일을 적어 주세요", en: "Type the member's email to confirm" })}</span>
               <input name="confirm" value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder={m.email} className={field} autoComplete="off" disabled={m.isStaff} />

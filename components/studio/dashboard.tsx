@@ -1,5 +1,6 @@
 "use client";
 
+import { UpgradeCard } from "@/components/upgrade-button";
 import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -290,7 +291,7 @@ export function Dashboard({
   runs: DashboardRun[];
   recommended: string[];
   lastTool: string | null;
-  usage: { balance: number | null; used30: number; runs30: number; keyConnected?: boolean; team?: boolean; paid?: boolean };
+  usage: { balance: number | null; used30: number; runs30: number; keyConnected?: boolean; team?: boolean; paid?: boolean; plan?: string };
 }) {
   const L = useBi();
   const { locale } = useLocale();
@@ -511,6 +512,8 @@ export function Dashboard({
         </Card>
 
       </div>
+
+      <UpgradeCard plan={usage.plan} host={usage.team} className="mt-5" />
 
       {low ? (
         <p className="mt-3 rounded-2xl border border-danger/30 bg-danger/5 px-4 py-2.5 text-xs break-keep text-danger">

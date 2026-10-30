@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import type { ConsentState } from "@/lib/consent";
 import { MEMBER_API_KEYS, OWN_KEY_ONLY, STUDENT_PLAN } from "@/lib/site/access";
 import { isPaidPlan, PRODUCTS } from "@/lib/payments/pro";
+import { UpgradeCard } from "@/components/upgrade-button";
 
 const won = (n: number) => `₩${n.toLocaleString("ko-KR")}`;
 
@@ -74,7 +75,7 @@ function providerDescription(provider: ApiKeyProvider): { ko: string; en: string
   };
 }
 
-function AccountOverview({ email, balance, membership, apiKey, brandName, signOut, consent }: { email: string; balance: number | null; membership: Membership; apiKey: ApiKeyStatus; brandName: string | null; signOut: () => void; consent: ConsentState | null }) {
+function AccountOverview({ email, balance, membership, apiKey, brandName, signOut, consent, host = false }: { email: string; balance: number | null; membership: Membership; apiKey: ApiKeyStatus; brandName: string | null; signOut: () => void; consent: ConsentState | null; host?: boolean }) {
   const L = useBi();
   const plan = { name: planName(membership.plan) };
   const allDoors = [
@@ -129,6 +130,8 @@ function AccountOverview({ email, balance, membership, apiKey, brandName, signOu
           <Link href={`/account/membership/checkout?product=${membership.plan}`} className={cn(primaryButton, "h-10")}>{L({ ko: "30일 연장하기", en: "Extend 30 days" })}</Link>
         </section>
       ) : null}
+
+      <UpgradeCard plan={membership.plan} host={host} className="mt-6" />
 
       <ConsentPanel consent={consent} />
 

@@ -3,6 +3,7 @@ import { AppShell } from "@/components/shell/app-shell";
 import { getBalance } from "@/lib/credits";
 import { getMembership } from "@/lib/membership";
 import { getCurrentUser } from "@/lib/supabase/user";
+import { isHost } from "@/lib/platform-access-server";
 import { liveAnnouncements, unreadNotices } from "@/lib/admin-ops-server";
 import { ShellNotices, type ShellNotice } from "@/components/site/service-banner";
 import { dismissMemberNotice } from "@/lib/actions/notices";
@@ -34,6 +35,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       user={user?.email ? { email: user.email } : null}
       balance={balance}
       plan={membership?.plan ?? "free"}
+      host={await isHost(user?.email)}
       answeredTickets={answered?.count ?? 0}
       notices={shellNotices.length ? <ShellNotices items={shellNotices} dismissNotice={dismissMemberNotice} /> : null}
     >

@@ -3,6 +3,8 @@ import { CreditsView } from "@/components/account/credits-view";
 import { MEMBER_API_KEYS, OWN_KEY_ONLY } from "@/lib/site/access";
 import { getBalance } from "@/lib/credits";
 import { getMembership } from "@/lib/membership";
+import { isHost } from "@/lib/platform-access-server";
+import { getCurrentUser } from "@/lib/supabase/user";
 import { getApiKeyStatus } from "@/lib/api-keys";
 import { getMonthlyUsage } from "@/lib/usage";
 import { titled } from "@/lib/site/meta";
@@ -14,5 +16,5 @@ export default async function CreditsPage() {
   if (OWN_KEY_ONLY) redirect("/account/api-key");
   const [balance, membership, apiKey] = await Promise.all([getBalance(), getMembership(), MEMBER_API_KEYS ? getApiKeyStatus() : Promise.resolve({ connected: false })]);
   const usage = await getMonthlyUsage(membership.plan === "student");
-  return <CreditsView balance={balance ?? 0} plan={membership.plan} apiKeyConnected={apiKey.connected} usage={usage} />;
+  return <CreditsView balance={balance ?? 0} plan={membership.plan} apiKeyConnected={apiKey.connected} usage={usage} host={await isHost((await getCurrentUser())?.email)} />;
 }
