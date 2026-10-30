@@ -11,6 +11,10 @@ import { publicTools } from "@/lib/tools/catalog";
 import { deleteAccountData } from "@/lib/account-delete";
 import { normalizeName } from "@/lib/member-name";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { envHostList, normalizeHostEntry } from "@/lib/platform-access";
+
+/** Enough for a team and its partners; a longer list belongs in a table. */
+const HOST_LIMIT = 200;
 
 // Staff actions for /admin. Each one re-checks getAdminUser() itself: the
 // pages are gated, but a server action is a reachable endpoint on its own.
@@ -305,4 +309,92 @@ export async function setToolPaused(_prev: AdminActionState, formData: FormData)
   await logAdminAction(staff.id, pause ? "pause_tool" : "resume_tool", "site_settings", slug, { message });
   revalidatePath("/", "layout");
   return { ok: true, message: pause ? "tool_paused" : "tool_resumed" };
+}
+
+// ── Hosts: free runs on the platform key ───────────────────────────────
+
+/** Adds an email or "@domain" to the host list (lib/platform-access.ts). Live within 15 s. */
+export async function addHostEmail(_prev: AdminActionState, formData: FormData): Promise<AdminActionState> {
+  const staff = await getAdminUser();
+  if (!staff) return { ok: false, message: "not_admin" };
+  const entry = normalizeHostEntry(formData.get("email"));
+  if (!entry) return { ok: false, message: "host_invalid" };
+  const note = String(formData.get("note") ?? "").trim().slice(0, 200);
+  const settings = await getSiteSettings(true);
+  if (settings.hostMeta[entry] || envHostList().includes(entry)) return { ok: false, message: "host_exists" };
+  if (settings.hostEmails.length >= HOST_LIMIT) return { ok: false, message: "host_limit" };
+  const next = { ...settings.hostMeta, [entry]: { addedAt: new Date().toISOString(), by: staff.email, note } };
+  try {
+    await saveSetting("host_emails", next, staff.id);
+  } catch {
+    return { ok: false, message: "ops_not_ready" };
+  }
+  await logAdminAction(staff.id, "host_add", "site_settings", entry, { note });
+  revalidatePath("/admin", "layout");
+  return { ok: true, message: "host_added" };
+}
+
+export async function removeHostEmail(_prev: AdminActionState, formData: FormData): Promise<AdminActionState> {
+  const staff = await getAdminUser();
+  if (!staff) return { ok: false, message: "not_admin" };
+  const entry = normalizeHostEntry(formData.get("email"));
+  const settings = await getSiteSettings(true);
+  if (!entry || !settings.hostMeta[entry]) return { ok: false, message: "host_missing" };
+  const next = { ...settings.hostMeta };
+  delete next[entry];
+  try {
+    await saveSetting("host_emails", next, staff.id);
+  } catch {
+    return { ok: false, message: "ops_not_ready" };
+  }
+  await logAdminAction(staff.id, "host_remove", "site_settings", entry);
+  revalidatePath("/admin", "layout");
+  return { ok: true, message: "host_removed" };
+}
+
+// ── Plans and credits (refunds, goodwill, corrections) ─────────────────
+
+const CREDIT_ADJUST_MAX = 100_000;
+
+/** Adds (or, negative, takes back) credits. Atomic and never below 0 (migration 0023). */
+export async function adjustMemberCredits(_prev: AdminActionState, formData: FormData): Promise<AdminActionState> {
+  const staff = await getAdminUser();
+  if (!staff) return { ok: false, message: "not_admin" };
+  const id = String(formData.get("id") ?? "");
+  const delta = Math.trunc(Number(formData.get("delta")));
+  const reason = String(formData.get("reason") ?? "").trim().slice(0, 200);
+  if (!id) return { ok: false, message: "missing_member" };
+  if (!Number.isFinite(delta) || delta === 0 || Math.abs(delta) > CREDIT_ADJUST_MAX) return { ok: false, message: "credits_invalid" };
+  if (!reason) return { ok: false, message: "reason_required" };
+  const { data, error } = await createAdminClient().rpc("admin_adjust_credits", { p_user_id: id, p_delta: delta });
+  if (error) return { ok: false, message: "credits_not_ready" };
+  await logAdminAction(staff.id, "adjust_credits", "user_credits", id, { delta, reason, balance: data });
+  revalidatePath(`/admin/members/${id}`);
+  return { ok: true, message: "credits_saved" };
+}
+
+/** Sets a member's plan: Plus or Pro for a number of days from today (or added to days left), or back to Free. */
+export async function setMemberPlan(_prev: AdminActionState, formData: FormData): Promise<AdminActionState> {
+  const staff = await getAdminUser();
+  if (!staff) return { ok: false, message: "not_admin" };
+  const id = String(formData.get("id") ?? "");
+  const plan = String(formData.get("plan") ?? "");
+  const days = Math.trunc(Number(formData.get("days")));
+  const reason = String(formData.get("reason") ?? "").trim().slice(0, 200);
+  if (!id) return { ok: false, message: "missing_member" };
+  if (!["free", "plus", "pro"].includes(plan)) return { ok: false, message: "plan_invalid" };
+  if (plan !== "free" && (!Number.isFinite(days) || days < 1 || days > 366)) return { ok: false, message: "days_invalid" };
+  if (!reason) return { ok: false, message: "reason_required" };
+  const admin = createAdminClient();
+  const { data: row } = await admin.from("memberships").select("plan, expires_at").eq("user_id", id).maybeSingle();
+  const now = Date.now();
+  const running = row && (row.plan === "plus" || row.plan === "pro") && row.expires_at && new Date(row.expires_at).getTime() > now ? new Date(row.expires_at).getTime() : now;
+  // Same plan: days stack on what's left. A different plan starts today.
+  const from = row?.plan === plan ? running : now;
+  const next = plan === "free" ? { plan: "free", expires_at: null } : { plan, expires_at: new Date(from + days * 86_400_000).toISOString() };
+  const { error } = await admin.from("memberships").upsert({ user_id: id, ...next });
+  if (error) return { ok: false, message: "save_failed" };
+  await logAdminAction(staff.id, "set_plan", "memberships", id, { from: row ?? null, to: next, reason });
+  revalidatePath(`/admin/members/${id}`);
+  return { ok: true, message: plan === "free" ? "plan_cleared" : "plan_saved" };
 }

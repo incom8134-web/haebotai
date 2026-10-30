@@ -12,7 +12,7 @@ import { runWithApiKey } from "@/lib/tools/generate";
 import { understand } from "@/lib/agents/calls";
 import { parseOutputLanguage, runWithOutputLanguage } from "@/lib/ai/output-language";
 import { isAgentic } from "@/lib/agents/specs";
-import { canUsePlatformKey } from "@/lib/platform-access";
+import { isHost } from "@/lib/platform-access-server";
 import { getMembership } from "@/lib/membership";
 import { isPaidPlan } from "@/lib/payments/pro";
 import { MEMBER_API_KEYS, SAAS } from "@/lib/site/access";
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
   const keys = MEMBER_API_KEYS ? await getUserApiKeys("google", { excludeBroken: true }) : [];
   // Only someone who could run may spend the platform's key here (lib/run-access.ts); the run itself explains why not.
-  const team = canUsePlatformKey(user.email);
+  const team = await isHost(user.email);
   if (SAAS) {
     if (!team && !isPaidPlan((await getMembership()).plan)) return Response.json({ intent: null, questions: [] });
   } else if (!keys.length && !team) return Response.json({ intent: null, questions: [] });

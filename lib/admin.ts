@@ -7,6 +7,14 @@ import { consentOf } from "@/lib/consent";
 import { formatKoreanPhone, profileNameOf } from "@/lib/member-name";
 import { displayName } from "@/lib/site/display-name";
 import type { KeyTier } from "@/lib/ai/key-tier";
+import { getSiteSettings } from "@/lib/admin-ops-server";
+import { canUsePlatformKey } from "@/lib/platform-access";
+
+/** A membership row's plan if it is a paid plan with days left, else null (expired, free and student rows count as Free). */
+function activePlan(row: { plan: string; expires_at: string | null } | null | undefined, now = Date.now()): string | null {
+  if (!row || (row.plan !== "plus" && row.plan !== "pro")) return null;
+  return row.expires_at && new Date(row.expires_at).getTime() > now ? row.plan : null;
+}
 
 // Staff tools behind /admin. Access is an email allow-list (ADMIN_EMAILS,
 // comma-separated), not a role system — right for a small team. Unset
@@ -121,12 +129,17 @@ function toMember(u: User, keys: string[], runs: { count: number; failed: number
 /** Every member with their key and run counts — the rows the list filters. */
 async function allMembers(): Promise<AdminMember[]> {
   const admin = createAdminClient();
-  const [users, keyRows, runRows, tiers] = await Promise.all([
+  const [users, keyRows, runRows, tiers, memberships, credits, settings] = await Promise.all([
     listAllUsers(),
     admin.from("user_api_keys").select("user_id, provider, priority, updated_at").order("priority"),
     admin.from("generations").select("user_id, status, created_at").order("created_at", { ascending: false }).limit(RUN_ROWS),
     lastTierChecks(),
+    admin.from("memberships").select("user_id, plan, expires_at"),
+    admin.from("user_credits").select("user_id, balance"),
+    getSiteSettings(),
   ]);
+  const planOf = new Map((memberships.data ?? []).map((m) => [m.user_id, m]));
+  const creditsOf = new Map((credits.data ?? []).map((c) => [c.user_id, c.balance as number]));
   const keys = new Map<string, Set<string>>();
   const gemini = new Map<string, NonNullable<AdminMember["geminiKey"]>>();
   for (const r of keyRows.data ?? []) {
@@ -143,7 +156,12 @@ async function allMembers(): Promise<AdminMember[]> {
     if (!cur.last) cur.last = r.created_at; // rows arrive newest first
     runs.set(r.user_id, cur);
   }
-  return users.map((u) => toMember(u, [...(keys.get(u.id) ?? [])].sort(), runs.get(u.id) ?? { count: 0, failed: 0, last: null }, gemini.get(u.id) ?? null));
+  return users.map((u) => {
+    const m = toMember(u, [...(keys.get(u.id) ?? [])].sort(), runs.get(u.id) ?? { count: 0, failed: 0, last: null }, gemini.get(u.id) ?? null);
+    const row = planOf.get(u.id);
+    const plan = activePlan(row);
+    return { ...m, plan, planExpiresAt: plan ? (row?.expires_at ?? null) : null, credits: creditsOf.get(u.id) ?? 0, host: canUsePlatformKey(u.email, process.env, settings.hostEmails) };
+  });
 }
 
 /** Latest free/paid check per key slot (audit_log, lib/actions/admin.ts checkMemberKeyTier); pass a member id to read only theirs. */
@@ -180,8 +198,13 @@ export interface AdminMemberDetail extends AdminMember {
   consent: { version: string | null; marketing: boolean; agreedAt: string | null };
   keyDetails: { provider: string; priority: number | null; last4: string | null; broken: boolean; updatedAt: string | null; tier: TierCheck | null }[];
   credits: number | null;
+  /** The stored membership row (may be expired or student). */
   plan: string | null;
   planExpiresAt: string | null;
+  /** "plus" | "pro" while days are left, else null. */
+  activePlan: string | null;
+  /** Runs free on the platform key; hostEntry says whether that comes from Vercel (can't be undone here). */
+  hostEntry: "env" | null;
   brand: { name: string; industry: string | null; region: string | null } | null;
   projects: number;
   toolUsage: { toolId: string; runs: number; failed: number }[];
@@ -246,6 +269,12 @@ export async function getMemberDetail(id: string): Promise<AdminMemberDetail | n
     credits: credits.data?.balance ?? null,
     plan: membership.data?.plan ?? null,
     planExpiresAt: membership.data?.expires_at ?? null,
+    activePlan: activePlan(membership.data as { plan: string; expires_at: string | null } | null),
+    host: canUsePlatformKey(u.email, process.env, (await getSiteSettings()).hostEmails),
+    hostEntry: (() => {
+      const e = (u.email ?? "").toLowerCase();
+      return e ? (envHostEntry(e) ? "env" : null) : null;
+    })(),
     brand: brand.data ? { name: brand.data.name, industry: brand.data.industry ?? null, region: brand.data.region ?? null } : null,
     projects: projects.count ?? 0,
     toolUsage: [...byTool.entries()].map(([toolId, v]) => ({ toolId, ...v })).sort((a, b) => b.runs - a.runs),
@@ -258,6 +287,11 @@ export async function getMemberDetail(id: string): Promise<AdminMemberDetail | n
 /** audit_log target for a key slot's free/paid check. */
 export function keyTierTarget(userId: string, priority: number | null): string {
   return `${userId}:google:${priority ?? 0}`;
+}
+
+/** Whether an email is a host because of the Vercel env (PLATFORM_KEY_EMAILS / ADMIN_EMAILS), not the admin list. */
+function envHostEntry(email: string): boolean {
+  return canUsePlatformKey(email);
 }
 
 /** True if this email is staff (ADMIN_EMAILS) — staff can't be suspended or deleted from /admin. */
@@ -325,6 +359,12 @@ export interface AdminOverview {
   members: number;
   newMembers7d: number;
   membersWithKey: number;
+  /** Members on Plus / Pro with days left. */
+  plusMembers: number;
+  proMembers: number;
+  /** Paid orders in the last 30 days (VAT included). */
+  revenue30d: number;
+  orders30d: number;
   activeMembers7d: number;
   runsToday: number;
   runs7d: number;
@@ -347,13 +387,16 @@ export async function getOverview(): Promise<AdminOverview> {
   const since = new Date(now - DAYS * DAY_MS).toISOString();
   const weekAgo = now - 7 * DAY_MS;
 
-  const [users, keyRows, recentRuns, allRuns, openTickets] = await Promise.all([
+  const [users, keyRows, recentRuns, allRuns, openTickets, memberships, paid] = await Promise.all([
     listAllUsers(),
     admin.from("user_api_keys").select("user_id"),
     admin.from("generations").select("user_id, tool_id, status, created_at").gte("created_at", since).limit(50000),
     admin.from("generations").select("id", { count: "exact", head: true }),
     admin.from("support_tickets").select("id", { count: "exact", head: true }).eq("status", "open"),
+    admin.from("memberships").select("plan, expires_at"),
+    admin.from("payments").select("amount").eq("status", "done").gte("created_at", new Date(now - 30 * DAY_MS).toISOString()),
   ]);
+  const active = (memberships.data ?? []).map((m) => activePlan(m as { plan: string; expires_at: string | null }, now));
   const latest = await admin.from("generations").select("user_id, tool_id, status, created_at").order("created_at", { ascending: false }).limit(8);
   const byId = new Map(users.map((u) => [u.id, u]));
   const nameOf = (u: User | undefined) => (u ? (profileNameOf(u.app_metadata) ?? displayName(u.user_metadata)) : null);
@@ -397,6 +440,10 @@ export async function getOverview(): Promise<AdminOverview> {
     members: users.length,
     newMembers7d: users.filter((u) => new Date(u.created_at).getTime() >= weekAgo).length,
     membersWithKey: new Set((keyRows.data ?? []).map((r) => r.user_id)).size,
+    plusMembers: active.filter((p) => p === "plus").length,
+    proMembers: active.filter((p) => p === "pro").length,
+    revenue30d: (paid.data ?? []).reduce((sum, p) => sum + (p.amount ?? 0), 0),
+    orders30d: (paid.data ?? []).length,
     activeMembers7d: active7d.size,
     runsToday,
     runs7d,
@@ -470,4 +517,59 @@ export async function listAllTickets(status: TicketStatus): Promise<{ tickets: A
     })),
     counts: { open: open.count ?? 0, answered: answered.count ?? 0, closed: closed.count ?? 0 },
   };
+}
+
+// ── Hosts (free runs on the platform key) ──────────────────────────────
+
+export interface HostRow {
+  /** An email or "@domain" entry. */
+  entry: string;
+  source: "admin" | "env_platform" | "env_admin";
+  addedAt: string | null;
+  by: string | null;
+  note: string;
+  /** Members this entry covers (one for an email, any number for a domain). */
+  members: { id: string; email: string; name: string | null }[];
+  runs30d: number;
+  /** Credits those runs would have cost a paying member — ≈ ₩5 of AI each (lib/tools/types.ts). */
+  credits30d: number;
+}
+
+/** Every host entry with who it covers and what they ran in the last 30 days. */
+export async function listHosts(adminList: { entry: string; addedAt: string; by: string; note: string }[]): Promise<HostRow[]> {
+  const split = (v: string | undefined) => (v ?? "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
+  const seen = new Set<string>();
+  const entries: Omit<HostRow, "members" | "runs30d" | "credits30d">[] = [];
+  const add = (row: (typeof entries)[number]) => {
+    if (seen.has(row.entry)) return;
+    seen.add(row.entry);
+    entries.push(row);
+  };
+  for (const a of adminList) add({ entry: a.entry, source: "admin", addedAt: a.addedAt || null, by: a.by || null, note: a.note });
+  for (const e of split(process.env.PLATFORM_KEY_EMAILS)) add({ entry: e, source: "env_platform", addedAt: null, by: null, note: "" });
+  for (const e of split(process.env.ADMIN_EMAILS)) add({ entry: e, source: "env_admin", addedAt: null, by: null, note: "" });
+
+  const [users, runs] = await Promise.all([
+    listAllUsers(),
+    createAdminClient().from("generations").select("user_id, tool_id, status").gte("created_at", new Date(Date.now() - 30 * DAY_MS).toISOString()).limit(RUN_ROWS),
+  ]);
+  const { getTool } = await import("@/lib/tools/registry");
+  const byUser = new Map<string, { runs: number; credits: number }>();
+  for (const r of runs.data ?? []) {
+    if (r.status === "error" || r.status === "cancelled") continue;
+    const cur = byUser.get(r.user_id) ?? { runs: 0, credits: 0 };
+    cur.runs += 1;
+    cur.credits += (r.tool_id ? getTool(r.tool_id)?.estimatedCredits : 0) ?? 0;
+    byUser.set(r.user_id, cur);
+  }
+  return entries.map((e) => {
+    const members = users
+      .filter((u) => {
+        const email = (u.email ?? "").toLowerCase();
+        return e.entry.startsWith("@") ? email.endsWith(e.entry) : email === e.entry;
+      })
+      .map((u) => ({ id: u.id, email: u.email ?? "", name: profileNameOf(u.app_metadata) ?? displayName(u.user_metadata) }));
+    const use = members.reduce((acc, m) => ({ runs: acc.runs + (byUser.get(m.id)?.runs ?? 0), credits: acc.credits + (byUser.get(m.id)?.credits ?? 0) }), { runs: 0, credits: 0 });
+    return { ...e, members, runs30d: use.runs, credits30d: use.credits };
+  });
 }

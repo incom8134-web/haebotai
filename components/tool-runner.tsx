@@ -30,6 +30,7 @@ import { briefField, seedFromBrief } from "@/lib/tools/brief";
 import { RunGuide } from "@/components/tools/run-guide";
 import { ApiKeyPrompt } from "@/components/api-key-prompt";
 import { PlanPrompt } from "@/components/plan-prompt";
+import { UpgradeCard } from "@/components/upgrade-button";
 import { cn } from "@/lib/utils";
 import { ExField } from "@/components/tools/experience/controls";
 import { FreeRequest } from "@/components/tools/free-request";
@@ -126,6 +127,7 @@ function ToolRunner({
   team = false,
   isStudent,
   paid = false,
+  plan,
   balance,
   projects = [],
   initialProject,
@@ -153,6 +155,8 @@ function ToolRunner({
   isStudent: boolean;
   /** On Plus or Pro (SaaS mode: needed to run). */
   paid?: boolean;
+  /** The member's active plan ("free" | "plus" | "pro"), for the upgrade buttons. */
+  plan?: string;
   balance: number | null;
   /** The member's projects, for the picker above the form. */
   projects?: { id: string; name: string }[];
@@ -653,18 +657,20 @@ function ToolRunner({
             </div>
           </div>
         ) : null}
-        {cost > 0 && balance !== null ? (
+        {cost > 0 && balance !== null && !needsPlan ? (
           balance < cost ? (
             <p role="alert" className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-xl border border-danger/30 bg-danger/10 px-3.5 py-2.5 text-sm break-keep text-fg">
               <AlertTriangle size={15} className="shrink-0 text-danger" aria-hidden />
               {L({ ko: `크레딧이 부족해요 — 필요 ${cost} · 보유 ${balance.toLocaleString()}`, en: `Not enough credits — needs ${cost}, you have ${balance.toLocaleString()}` })}
               <Link href={paid ? "/account/membership/checkout?product=topup" : "/account/membership"} className="font-medium text-studio-cyan hover:underline">{L({ ko: "충전하기", en: "Top up" })}</Link>
               {MEMBER_API_KEYS ? <Link href="/account/api-key" className="font-medium text-studio-cyan hover:underline">{L({ ko: "내 API 키 연결", en: "Connect your API key" })}</Link> : null}
+              {plan === "plus" ? <Link href="/account/membership/checkout?product=pro" className="font-medium text-studio-cyan hover:underline">{L({ ko: "프로로 업그레이드 (6,000 크레딧)", en: "Upgrade to Pro (6,000 credits)" })}</Link> : null}
             </p>
           ) : (
             <p className="mt-2 text-2xs text-fg-subtle">{L({ ko: `이번 실행 ${cost} 크레딧 · 실행 후 약 ${(balance - cost).toLocaleString()} 남음`, en: `This run uses ${cost} credits · about ${(balance - cost).toLocaleString()} left after` })}</p>
           )
         ) : null}
+        {needsPlan ? <UpgradeCard plan={plan} className="mt-5" /> : null}
       </header>
 
       {exp?.layout === "steps" && !compact ? (

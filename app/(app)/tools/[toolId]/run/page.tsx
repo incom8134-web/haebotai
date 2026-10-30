@@ -13,7 +13,7 @@ import { listProjects } from "@/lib/projects/server";
 import { createClient } from "@/lib/supabase/server";
 import type { ProviderId } from "@/lib/ai/types";
 import { toolPack } from "@/lib/tools/pack";
-import { canUsePlatformKey } from "@/lib/platform-access";
+import { isHost } from "@/lib/platform-access-server";
 import { getCurrentUser } from "@/lib/supabase/user";
 import { seedFromBrief } from "@/lib/tools/brief";
 import { quickSeed } from "@/lib/site/quick";
@@ -122,9 +122,10 @@ export default async function ToolPage({
       supportedProviders={capability.providers}
       defaultProvider={availableProviders.includes(capability.default) ? capability.default : "google"}
       hasOwnKey={hasOwnKey}
-      team={canUsePlatformKey(user?.email)}
+      team={await isHost(user?.email)}
       isStudent={STUDENT_PLAN && membership.plan === "student"}
       paid={isPaidPlan(membership.plan)}
+      plan={membership.plan}
       balance={balance}
     />
     </>

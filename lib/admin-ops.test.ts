@@ -70,3 +70,9 @@ test("isLive respects publish and the time window", () => {
   assert.equal(isLive({ published: true, starts_at: "2026-10-20T00:00:00Z", ends_at: null }, now), false);
   assert.equal(isLive({ published: true, starts_at: null, ends_at: "2026-10-18T00:00:00Z" }, now), false);
 });
+
+test("host list: clean entries kept, junk dropped", () => {
+  const s = parseSettings([{ key: "host_emails", value: { "Guest@Studio.kr": { addedAt: "2026-10-29T00:00:00Z", by: "boss@x.com", note: "partner" }, "not an email": {}, "@team.co.kr": {} } }]);
+  assert.deepEqual(s.hostEmails, ["guest@studio.kr", "@team.co.kr"]);
+  assert.equal(s.hostMeta["guest@studio.kr"].note, "partner");
+});

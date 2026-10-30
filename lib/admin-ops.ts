@@ -2,6 +2,9 @@
 // lib/admin-ops.test.ts. Server reads and writes are in
 // lib/admin-ops-server.ts.
 
+import { normalizeHostEntry } from "./platform-access.ts";
+import { SAAS } from "./site/access.ts";
+
 type Bi = { ko: string; en: string };
 
 // ── Failure reasons ────────────────────────────────────────────────────
@@ -27,7 +30,7 @@ export function classifyError(message: string | null | undefined): ErrorClass {
   return "other";
 }
 
-export const ERROR_CLASS: Record<ErrorClass, { label: Bi; fix: Bi; memberCause: boolean }> = {
+const OWN_KEY_ERROR_CLASS: Record<ErrorClass, { label: Bi; fix: Bi; memberCause: boolean }> = {
   key_refused: { label: { ko: "API 키 거부", en: "API key refused" }, fix: { ko: "회원 키가 삭제·비활성화됐어요. 회원에게 새 키 등록을 안내하세요.", en: "The member's key was deleted or disabled. Ask them to add a new one." }, memberCause: true },
   billing: { label: { ko: "결제 막힘", en: "Billing blocked" }, fix: { ko: "회원의 Google Cloud 결제가 막혔어요. 결제 수단 확인을 안내하세요.", en: "The member's Google Cloud billing is blocked. Ask them to check their payment method." }, memberCause: true },
   free_tier: { label: { ko: "무료 키 제한", en: "Free-key limit" }, fix: { ko: "무료 키로는 안 되는 기능(이미지 등)이에요. 결제를 켠 키를 안내하세요.", en: "Not available on a free key (e.g. images). Suggest a billing-enabled key." }, memberCause: true },
@@ -38,6 +41,17 @@ export const ERROR_CLASS: Record<ErrorClass, { label: Bi; fix: Bi; memberCause: 
   output: { label: { ko: "결과 생성 실패", en: "Output failed" }, fix: { ko: "AI 결과를 정리하지 못했어요. 같은 도구에서 반복되면 개발 확인이 필요해요.", en: "The AI's answer couldn't be used. If it repeats on one tool, needs a developer look." }, memberCause: false },
   other: { label: { ko: "기타", en: "Other" }, fix: { ko: "분류되지 않은 오류예요. 메시지를 보고 판단하세요.", en: "Unclassified. Read the message." }, memberCause: false },
 };
+
+// SaaS mode: runs use the company's Gemini key (GOOGLE_GENAI_API_KEY in Vercel), so key, billing and quota failures are ours to fix.
+export const ERROR_CLASS: Record<ErrorClass, { label: Bi; fix: Bi; memberCause: boolean }> = SAAS
+  ? {
+      ...OWN_KEY_ERROR_CLASS,
+      key_refused: { label: { ko: "회사 API 키 거부", en: "Company API key refused" }, fix: { ko: "Vercel의 GOOGLE_GENAI_API_KEY가 거부됐어요. Google AI Studio에서 키를 확인하고 Vercel 환경 변수를 바꾼 뒤 다시 배포하세요. 회원 크레딧은 자동 환불됐어요.", en: "GOOGLE_GENAI_API_KEY in Vercel was refused. Check the key in Google AI Studio, update the Vercel env var and redeploy. Members' credits were refunded." }, memberCause: false },
+      billing: { label: { ko: "회사 결제 막힘", en: "Company billing blocked" }, fix: { ko: "회사 Google Cloud 결제(선불 잔액)가 막혔어요. 결제 수단과 잔액을 확인하세요.", en: "The company's Google Cloud billing (prepaid balance) is blocked. Check the payment method and balance." }, memberCause: false },
+      free_tier: { label: { ko: "무료 등급 제한", en: "Free-tier limit" }, fix: { ko: "회사 키가 무료 등급으로 동작했어요. Google AI Studio에서 결제가 켜져 있는지 확인하세요.", en: "The company key acted as free tier. Check that billing is on in Google AI Studio." }, memberCause: false },
+      quota: { label: { ko: "사용 한도 초과", en: "Quota exceeded" }, fix: { ko: "회사 키의 분당·일일 한도가 찼어요. Google Cloud에서 한도 상향을 신청하거나 하루 예산(PLATFORM_DAILY_CREDIT_CAP)을 확인하세요.", en: "The company key hit its rate or daily quota. Request a higher quota in Google Cloud, or check PLATFORM_DAILY_CREDIT_CAP." }, memberCause: false },
+    }
+  : OWN_KEY_ERROR_CLASS;
 
 export interface FailureAlert {
   level: "warning" | "critical";
@@ -67,7 +81,10 @@ export type FunnelStep = "signed_up" | "onboarded" | "has_key" | "first_run" | "
 export const FUNNEL_STEPS: { id: FunnelStep; label: Bi; hint: Bi }[] = [
   { id: "signed_up", label: { ko: "가입", en: "Signed up" }, hint: { ko: "구글·카카오로 계정을 만든 회원", en: "Created an account with Google or Kakao" } },
   { id: "onboarded", label: { ko: "동의·이름 완료", en: "Consent and name" }, hint: { ko: "필수 동의와 이름 입력까지 마친 회원", en: "Finished the required consents and entered a name" } },
-  { id: "has_key", label: { ko: "API 키 등록", en: "Added an API key" }, hint: { ko: "내 API 키를 하나 이상 등록한 회원", en: "Saved at least one API key" } },
+  // SaaS mode measures buying a plan here; own-key mode, adding a key (lib/site/access.ts).
+  SAAS
+    ? { id: "has_key", label: { ko: "플랜 결제", en: "Bought a plan" }, hint: { ko: "플러스·프로를 한 번 이상 결제했거나 호스트인 회원", en: "Paid for Plus or Pro at least once, or is a host" } }
+    : { id: "has_key", label: { ko: "API 키 등록", en: "Added an API key" }, hint: { ko: "내 API 키를 하나 이상 등록한 회원", en: "Saved at least one API key" } },
   { id: "first_run", label: { ko: "첫 실행", en: "First run" }, hint: { ko: "도구를 한 번 이상 실행한 회원", en: "Ran a tool at least once" } },
   { id: "first_success", label: { ko: "첫 결과물", en: "First result" }, hint: { ko: "결과물을 한 번 이상 받은 회원", en: "Got at least one finished result" } },
   { id: "returned", label: { ko: "다시 사용", en: "Came back" }, hint: { ko: "서로 다른 이틀 이상 도구를 쓴 회원", en: "Used tools on two or more different days" } },
@@ -77,6 +94,7 @@ export interface FunnelMember {
   id: string;
   createdAt: string;
   onboarded: boolean;
+  /** Own-key mode: saved a key. SaaS mode: paid for a plan, or is a host. */
   hasKey: boolean;
 }
 
@@ -132,13 +150,17 @@ export interface SiteSettings {
   maintenance: { on: boolean; message: string };
   /** Paused tools by catalog slug, each with the message members see. */
   pausedTools: Record<string, { message: string; at: string }>;
+  /** Hosts added in /admin/hosts: emails or "@domain" entries that run free on the platform key (lib/platform-access.ts). */
+  hostEmails: string[];
+  /** When and by whom each host entry was added, for the admin list. */
+  hostMeta: Record<string, { addedAt: string; by: string; note: string }>;
 }
 
-export const DEFAULT_SETTINGS: SiteSettings = { maintenance: { on: false, message: "" }, pausedTools: {} };
+export const DEFAULT_SETTINGS: SiteSettings = { maintenance: { on: false, message: "" }, pausedTools: {}, hostEmails: [], hostMeta: {} };
 
 /** site_settings rows → settings, ignoring anything malformed. */
 export function parseSettings(rows: { key: string; value: unknown }[]): SiteSettings {
-  const out: SiteSettings = { maintenance: { ...DEFAULT_SETTINGS.maintenance }, pausedTools: {} };
+  const out: SiteSettings = { maintenance: { ...DEFAULT_SETTINGS.maintenance }, pausedTools: {}, hostEmails: [], hostMeta: {} };
   for (const { key, value } of rows) {
     const v = (value ?? {}) as Record<string, unknown>;
     if (key === "maintenance") out.maintenance = { on: v.on === true, message: typeof v.message === "string" ? v.message.slice(0, 300) : "" };
@@ -146,6 +168,16 @@ export function parseSettings(rows: { key: string; value: unknown }[]): SiteSett
       for (const [slug, info] of Object.entries(v)) {
         const i = (info ?? {}) as Record<string, unknown>;
         if (/^[a-z0-9-]{1,60}$/.test(slug)) out.pausedTools[slug] = { message: typeof i.message === "string" ? i.message.slice(0, 300) : "", at: typeof i.at === "string" ? i.at : "" };
+      }
+    }
+    // { "<email or @domain>": { addedAt, by, note } }
+    if (key === "host_emails" && v && typeof v === "object" && !Array.isArray(v)) {
+      for (const [entry, info] of Object.entries(v)) {
+        const clean = normalizeHostEntry(entry);
+        if (!clean || out.hostMeta[clean]) continue;
+        const i = (info ?? {}) as Record<string, unknown>;
+        out.hostEmails.push(clean);
+        out.hostMeta[clean] = { addedAt: typeof i.addedAt === "string" ? i.addedAt : "", by: typeof i.by === "string" ? i.by.slice(0, 254) : "", note: typeof i.note === "string" ? i.note.slice(0, 200) : "" };
       }
     }
   }
@@ -166,12 +198,18 @@ export function runBlock(settings: SiteSettings, slug: string, isStaff: boolean)
 
 // ── Notices and announcements ──────────────────────────────────────────
 
-export const NOTICE_TEMPLATES: { id: string; title: string; body: string; link: string | null; label: Bi }[] = [
-  { id: "key_refused", label: { ko: "API 키 확인 요청", en: "Check your API key" }, title: "API 키를 확인해 주세요", body: "등록하신 Gemini API 키가 Google에서 거부되고 있어요. Google AI Studio에서 키가 살아 있는지와 결제 상태를 확인한 뒤, [계정 → 내 API 키]에서 새 키를 등록해 주세요.", link: "/account/api-key" },
-  { id: "no_key", label: { ko: "API 키 등록 안내", en: "Add an API key" }, title: "API 키만 등록하면 바로 시작할 수 있어요", body: "AI 해바의 도구는 회원님의 Gemini API 키로 실행돼요. 사용 가이드를 따라 키를 만들어 [계정 → 내 API 키]에 붙여 넣어 주세요. 3분이면 끝나요.", link: "/account/api-key" },
-  { id: "free_tier", label: { ko: "무료 키 안내", en: "Free key limits" }, title: "무료 키로는 일부 기능이 제한돼요", body: "지금 등록하신 키는 무료 등급이라 이미지 생성 등 일부 기능을 쓸 수 없어요. Google AI Studio에서 결제를 켜면 모든 도구를 쓸 수 있어요.", link: "/account/api-key" },
+const ALL_NOTICE_TEMPLATES: { id: string; title: string; body: string; link: string | null; label: Bi; ownKey?: boolean }[] = [
+  { id: "choose_plan", label: { ko: "플랜 안내", en: "Choose a plan" }, title: "플러스로 25개 도구를 바로 써 보세요", body: "무료 플랜은 둘러보기만 할 수 있어요. 플러스(₩29,900/30일)는 2,000 크레딧으로 블로그 글, 광고 사진, 리포트까지 바로 만들 수 있어요. 자동 결제는 없어요.", link: "/pricing" },
+  { id: "low_credits", label: { ko: "크레딧 충전 안내", en: "Low credits" }, title: "크레딧이 얼마 남지 않았어요", body: "멤버십에서 ₩5,900에 500 크레딧을 충전하거나, 플랜을 30일 연장하면 그 플랜의 크레딧이 더해져요.", link: "/account/membership" },
+  { id: "run_failed", label: { ko: "실행 실패 안내", en: "Run failed" }, title: "실행이 끝나지 못했어요", body: "실패한 실행의 크레딧은 자동으로 돌려드렸어요. 잠시 뒤 [같은 입력으로 다시]를 눌러 주세요. 계속 안 되면 고객센터로 알려 주세요.", link: "/library" },
+  { ownKey: true, id: "key_refused", label: { ko: "API 키 확인 요청", en: "Check your API key" }, title: "API 키를 확인해 주세요", body: "등록하신 Gemini API 키가 Google에서 거부되고 있어요. Google AI Studio에서 키가 살아 있는지와 결제 상태를 확인한 뒤, [계정 → 내 API 키]에서 새 키를 등록해 주세요.", link: "/account/api-key" },
+  { ownKey: true, id: "no_key", label: { ko: "API 키 등록 안내", en: "Add an API key" }, title: "API 키만 등록하면 바로 시작할 수 있어요", body: "AI 해바의 도구는 회원님의 Gemini API 키로 실행돼요. 사용 가이드를 따라 키를 만들어 [계정 → 내 API 키]에 붙여 넣어 주세요. 3분이면 끝나요.", link: "/account/api-key" },
+  { ownKey: true, id: "free_tier", label: { ko: "무료 키 안내", en: "Free key limits" }, title: "무료 키로는 일부 기능이 제한돼요", body: "지금 등록하신 키는 무료 등급이라 이미지 생성 등 일부 기능을 쓸 수 없어요. Google AI Studio에서 결제를 켜면 모든 도구를 쓸 수 있어요.", link: "/account/api-key" },
   { id: "custom", label: { ko: "직접 작성", en: "Write my own" }, title: "", body: "", link: null },
 ];
+
+/** Notice templates for this access model: API-key ones only while members can add keys, plan ones only when plans are sold. */
+export const NOTICE_TEMPLATES = ALL_NOTICE_TEMPLATES.filter((t) => (t.ownKey ? !SAAS : SAAS || !["choose_plan", "low_credits", "run_failed"].includes(t.id)));
 
 /** Only same-site paths are allowed as notice/announcement links. */
 export function safeLink(raw: unknown): string | null {
