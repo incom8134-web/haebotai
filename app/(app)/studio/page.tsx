@@ -5,7 +5,7 @@ import { getBalance } from "@/lib/credits";
 import { getApiKeyStatus } from "@/lib/api-keys";
 import { getMembership } from "@/lib/membership";
 import { isPaidPlan } from "@/lib/payments/pro";
-import { canUsePlatformKey } from "@/lib/platform-access";
+import { isHost } from "@/lib/platform-access-server";
 import { listProjects } from "@/lib/projects/server";
 import { displayName } from "@/lib/site/display-name";
 import { isGoal, recommendTools } from "@/lib/site/onboarding";
@@ -152,7 +152,7 @@ export default async function StudioPage() {
         used30: monthRuns.reduce((s, r) => s + (r.credits_used ?? 0), 0),
         runs30: monthRuns.length,
         keyConnected: keyStatus.providers.google.some((s) => s.connected && !s.broken),
-        team: canUsePlatformKey(user?.email),
+        team: await isHost(user?.email),
         paid: isPaidPlan((await getMembership()).plan),
       }}
     />

@@ -7,12 +7,15 @@ export type ProviderFilter = "" | "google" | "kakao";
 export type KeyFilter = "" | "yes" | "no";
 export type ActivityFilter = "" | "active7" | "dormant30" | "never";
 export type StatusFilter = "" | "suspended" | "no_name";
+/** Plan filter: "paid" = Plus or Pro with days left; "host" = runs free on the platform key. */
+export type PlanFilter = "" | "free" | "paid" | "plus" | "pro" | "host";
 export type MemberSort = "new" | "old" | "runs" | "recent" | "name";
 
 export interface MemberFilters {
   q: string;
   provider: ProviderFilter;
   key: KeyFilter;
+  plan: PlanFilter;
   activity: ActivityFilter;
   status: StatusFilter;
   sort: MemberSort;
@@ -36,6 +39,12 @@ export interface MemberFacts {
   lastSignInAt: string | null;
   suspended: boolean;
   keys: string[];
+  /** Active paid plan ("plus" | "pro"), or null on Free (an expired or student row counts as Free). */
+  plan?: string | null;
+  planExpiresAt?: string | null;
+  credits?: number | null;
+  /** Runs free on the platform key (lib/platform-access.ts). */
+  host?: boolean;
   runs: number;
   failedRuns: number;
   lastRunAt: string | null;
@@ -52,6 +61,7 @@ export function parseMemberFilters(sp: Record<string, string | string[] | undefi
     q: (one("q") ?? "").toString().trim().slice(0, 100),
     provider: pick(one("provider"), ["", "google", "kakao"], ""),
     key: pick(one("key"), ["", "yes", "no"], ""),
+    plan: pick(one("plan"), ["", "free", "paid", "plus", "pro", "host"], ""),
     activity: pick(one("activity"), ["", "active7", "dormant30", "never"], ""),
     status: pick(one("status"), ["", "suspended", "no_name"], ""),
     sort: pick(one("sort"), ["new", "old", "runs", "recent", "name"], "new"),
@@ -101,6 +111,10 @@ function matches(m: MemberFacts, f: MemberFilters, now: number): boolean {
   if (f.provider && !m.providers.includes(f.provider)) return false;
   if (f.key === "yes" && m.keys.length === 0) return false;
   if (f.key === "no" && m.keys.length > 0) return false;
+  if (f.plan === "free" && (m.plan || m.host)) return false;
+  if (f.plan === "paid" && !m.plan) return false;
+  if ((f.plan === "plus" || f.plan === "pro") && m.plan !== f.plan) return false;
+  if (f.plan === "host" && !m.host) return false;
   const last = m.lastRunAt ? new Date(m.lastRunAt).getTime() : null;
   if (f.activity === "active7" && !(last !== null && now - last <= 7 * DAY)) return false;
   if (f.activity === "dormant30" && !(last !== null && now - last > 30 * DAY)) return false;

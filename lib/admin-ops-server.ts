@@ -1,4 +1,6 @@
 import "server-only";
+import { SAAS } from "@/lib/site/access";
+import { canUsePlatformKey } from "@/lib/platform-access";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { hasCurrentConsent } from "@/lib/consent";
 import { hasProfileName } from "@/lib/member-name";
@@ -27,7 +29,7 @@ export async function getSiteSettings(fresh = false): Promise<SiteSettings> {
   return value;
 }
 
-export async function saveSetting(key: "maintenance" | "paused_tools", value: unknown, staffId: string): Promise<void> {
+export async function saveSetting(key: "maintenance" | "paused_tools" | "host_emails", value: unknown, staffId: string): Promise<void> {
   const { error } = await createAdminClient().from("site_settings").upsert({ key, value, updated_by: staffId, updated_at: new Date().toISOString() });
   if (error) throw new Error(`site_settings: ${error.message}`);
   cache = null;
@@ -141,11 +143,14 @@ export async function getFunnel(range: { from: string; to: string }): Promise<Fu
   }
   const { since, until } = kstRange(range.from, range.to);
   const inRange = users.filter((u) => (!since || u.created_at >= since) && (!until || u.created_at < until));
-  const [keys, runs] = await Promise.all([
-    admin.from("user_api_keys").select("user_id"),
+  const [keys, runs, settings] = await Promise.all([
+    SAAS ? admin.from("payments").select("user_id").eq("status", "done").in("plan", ["plus", "pro"]) : admin.from("user_api_keys").select("user_id"),
     admin.from("generations").select("user_id, status, created_at").order("created_at", { ascending: false }).limit(RUN_ROWS),
+    getSiteSettings(),
   ]);
+  // The funnel's third step: a paid plan (or host) in SaaS mode, a saved key in own-key mode.
   const withKey = new Set((keys.data ?? []).map((k) => k.user_id));
+  if (SAAS) for (const u of inRange) if (canUsePlatformKey(u.email, process.env, settings.hostEmails)) withKey.add(u.id);
   const ids = new Set(inRange.map((u) => u.id));
   const result = computeFunnel(
     inRange.map((u) => ({ id: u.id, createdAt: u.created_at, onboarded: hasCurrentConsent(u.app_metadata) && hasProfileName(u.app_metadata), hasKey: withKey.has(u.id) })),

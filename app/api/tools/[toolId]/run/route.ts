@@ -10,7 +10,7 @@ import { checkToolPolicy } from "@/lib/tools/policy";
 import { ownKeyRequiredError, resolveRequestedProvider } from "@/lib/ai/resolve-provider";
 import { decideRunAccess } from "@/lib/run-access";
 import { MEMBER_API_KEYS, SAAS } from "@/lib/site/access";
-import { canUsePlatformKey } from "@/lib/platform-access";
+import { isHost } from "@/lib/platform-access-server";
 import { getUserApiKeys } from "@/lib/api-keys";
 import { getMembership } from "@/lib/membership";
 import { getBusinessProfile } from "@/lib/profile";
@@ -158,7 +158,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   // Only spend a second query distinguishing "never registered" from
   // "registered but all broken" when it's actually needed for the message.
   // The team may always use the platform's key, free (lib/platform-access.ts).
-  const team = canUsePlatformKey(user.email);
+  const team = await isHost(user.email);
   let hasAnyKey = hasUsableKey;
   if (MEMBER_API_KEYS && !hasUsableKey) {
     hasAnyKey = (await getUserApiKeys(provider)).length > 0;

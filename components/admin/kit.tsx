@@ -70,6 +70,20 @@ export const MSG: Record<string, Bi> = {
   tool_resumed: { ko: "도구를 다시 열었어요.", en: "Tool reopened." },
   no_key: { ko: "이 순위에 등록된 키가 없어요.", en: "No key in that slot." },
   tier_unknown: { ko: "Google이 응답하지 않아 확인하지 못했어요. 잠시 뒤 다시 눌러 주세요.", en: "Google didn't answer. Try again shortly." },
+  host_added: { ko: "호스트로 추가했어요. 15초 안에 크레딧 없이 실행할 수 있어요.", en: "Host added. They can run without credits within 15 seconds." },
+  host_removed: { ko: "호스트에서 뺐어요. 다음 실행부터 플랜이 필요해요.", en: "Removed. From the next run they need a plan." },
+  host_invalid: { ko: "이메일(kim@studio.kr) 또는 @도메인(@genie.co.kr) 형식으로 적어 주세요.", en: "Use an email (kim@studio.kr) or a domain starting with @ (@genie.co.kr)." },
+  host_exists: { ko: "이미 호스트 목록에 있어요.", en: "Already on the host list." },
+  host_missing: { ko: "목록에 없는 항목이에요.", en: "Not on the list." },
+  credits_saved: { ko: "크레딧을 바꿨어요. 감사 로그에 남았어요.", en: "Credits changed and logged." },
+  credits_invalid: { ko: "1~100,000 사이의 숫자를 적어 주세요. 뺄 때는 -를 붙여요.", en: "Enter 1–100,000. Use a minus sign to take credits back." },
+  credits_not_ready: { ko: "바꾸지 못했어요. 데이터베이스 마이그레이션 0023이 적용됐는지 확인해 주세요.", en: "Couldn't change. Check that migration 0023 is applied." },
+  reason_required: { ko: "사유를 적어 주세요 (예: 10/29 환불, 장애 보상).", en: "Add a reason (e.g. refund 10/29, outage credit)." },
+  plan_saved: { ko: "플랜을 바꿨어요. 회원은 바로 실행할 수 있어요.", en: "Plan updated. They can run right away." },
+  plan_cleared: { ko: "무료로 바꿨어요. 남은 크레딧은 그대로예요.", en: "Moved to Free. Their credits stay." },
+  plan_invalid: { ko: "플랜을 골라 주세요.", en: "Choose a plan." },
+  days_invalid: { ko: "기간은 1~366일이에요.", en: "Days must be 1–366." },
+  host_limit: { ko: "호스트는 200개까지 넣을 수 있어요. 도메인(@…)으로 묶어 보세요.", en: "Up to 200 hosts. Try grouping them by domain (@…)." },
 };
 
 export function ActionNote({ state }: { state: AdminActionState }) {

@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import Link from "next/link";
 import { AlertTriangle, BellRing, Megaphone, PauseCircle, PlayCircle, Power, Send, Siren, Wrench } from "lucide-react";
 import { useBi } from "@/lib/i18n/context";
+import { SAAS } from "@/lib/site/access";
 import { changeAnnouncement, saveAnnouncement, sendMemberNotice, setMaintenance, setToolPaused, type AdminActionState } from "@/lib/actions/admin";
 import { ERROR_CLASS, FUNNEL_STEPS, MAINTENANCE_DEFAULT, NOTICE_TEMPLATES, PAUSED_DEFAULT, type ErrorClass, type FailureAlert, type FunnelStep, type SiteSettings } from "@/lib/admin-ops";
 import type { Announcement, ErrorReport, MemberNotice } from "@/lib/admin-ops-server";
@@ -132,9 +133,9 @@ export function NoticePanel({ memberId, sent }: { memberId: string; sent: Member
 
 const STUCK_HELP: Partial<Record<FunnelStep, { next: Bi; template?: string }>> = {
   signed_up: { next: { ko: "동의·이름을 안 마친 회원", en: "Haven't finished consent and name" } },
-  onboarded: { next: { ko: "API 키를 안 등록한 회원", en: "Haven't added an API key" }, template: "no_key" },
-  has_key: { next: { ko: "키는 있지만 실행 안 한 회원", en: "Have a key but never ran a tool" } },
-  first_run: { next: { ko: "실행했지만 결과물을 못 받은 회원", en: "Ran but never got a result" }, template: "key_refused" },
+  onboarded: SAAS ? { next: { ko: "플랜을 결제하지 않은 회원", en: "Haven't bought a plan" }, template: "choose_plan" } : { next: { ko: "API 키를 안 등록한 회원", en: "Haven't added an API key" }, template: "no_key" },
+  has_key: SAAS ? { next: { ko: "결제했지만 실행 안 한 회원", en: "Paid but never ran a tool" } } : { next: { ko: "키는 있지만 실행 안 한 회원", en: "Have a key but never ran a tool" } },
+  first_run: { next: { ko: "실행했지만 결과물을 못 받은 회원", en: "Ran but never got a result" }, template: SAAS ? "run_failed" : "key_refused" },
   first_success: { next: { ko: "결과물을 받고 다시 안 온 회원", en: "Got a result but didn't come back" } },
 };
 
@@ -223,7 +224,8 @@ export function FunnelView({ steps, stuckAt, members, range }: { steps: { id: Fu
 // ── Failure reasons ────────────────────────────────────────────────────
 
 const CLASS_TONE: Record<ErrorClass, "red" | "amber" | "blue" | "gray"> = { key_refused: "red", billing: "red", free_tier: "amber", quota: "amber", overloaded: "blue", timeout: "blue", guard: "gray", output: "gray", other: "gray" };
-const NOTICE_FOR: Partial<Record<ErrorClass, string>> = { key_refused: "key_refused", billing: "key_refused", free_tier: "free_tier" };
+// In SaaS mode key and quota errors are ours (the platform key), so the member just gets the "your credits were returned" notice.
+const NOTICE_FOR: Partial<Record<ErrorClass, string>> = SAAS ? { key_refused: "run_failed", billing: "run_failed", free_tier: "run_failed", quota: "run_failed" } : { key_refused: "key_refused", billing: "key_refused", free_tier: "free_tier" };
 
 export function ErrorsView({ report, alerts, settings, period, range, names }: { report: ErrorReport; alerts: FailureAlert[]; settings: SiteSettings; period: number | null; range: { from: string; to: string }; names: Record<string, string> }) {
   const L = useBi();
