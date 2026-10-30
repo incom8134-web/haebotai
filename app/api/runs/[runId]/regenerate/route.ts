@@ -14,7 +14,7 @@ import { getUserApiKeys } from "@/lib/api-keys";
 import { getMembership } from "@/lib/membership";
 import { decideRunAccess } from "@/lib/run-access";
 import { MEMBER_API_KEYS, SAAS } from "@/lib/site/access";
-import { canUsePlatformKey } from "@/lib/platform-access";
+import { isHost } from "@/lib/platform-access-server";
 import { reserveCredits, releaseUnattachedReservation, settleGenerationCredits } from "@/lib/credits";
 import { runLimiter, checkRateLimit } from "@/lib/rate-limit";
 import { checkSpend } from "@/lib/spend-guard";
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
   const [keys, membership] = await Promise.all([MEMBER_API_KEYS ? getUserApiKeys("google", { excludeBroken: true }) : Promise.resolve([]), getMembership()]);
   // Same rule as a run (lib/run-access.ts), at a quarter of the tool's credits.
-  const team = canUsePlatformKey(user.email);
+  const team = await isHost(user.email);
   const access = decideRunAccess({ saas: SAAS, provider: "google", team, plan: membership.plan, estimatedCredits: regenerateCost(manifest.estimatedCredits), ownKeyError: !SAAS && !keys.length && !team ? OWN_KEY_REQUIRED : null, hasUsableKey: keys.length > 0 });
   if (!access.ok) return Response.json({ error: access.error, code: access.code }, { status: access.status });
   const cost = access.cost;
@@ -179,7 +179,7 @@ async function reviseDocumentRun(opts: {
 
   const [keys, membership] = await Promise.all([MEMBER_API_KEYS ? getUserApiKeys("google", { excludeBroken: true }) : Promise.resolve([]), getMembership()]);
   // A design-only change calls no model; everything else follows the run rule (lib/run-access.ts).
-  const team = canUsePlatformKey(user.email);
+  const team = await isHost(user.email);
   let cost = 0;
   if (route?.kind !== "design") {
     const access = decideRunAccess({ saas: SAAS, provider: "google", team, plan: membership.plan, estimatedCredits: free ? 0 : regenerateCost(manifest.estimatedCredits), ownKeyError: !SAAS && !keys.length && !team ? OWN_KEY_REQUIRED : null, hasUsableKey: keys.length > 0 });

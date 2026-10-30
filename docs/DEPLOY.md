@@ -35,6 +35,7 @@ project order (0001 → 0012, currently).
 | `0012_pro_payments.sql` | Pro checkout: `payments` order ledger (read-own, service-role writes) and `activate_pro` (service-role only) — marks a pending order done, extends Pro 30 days, adds 2,000 credits, in one transaction |
 | `0019_audit_log.sql` | `audit_log` for staff actions in `/admin` (service-role only). Optional: `/admin` works without it, it just records nothing |
 | `0022_saas_plans.sql` | Paid plans: `memberships.plan` allows `plus`; `payments.plan` allows `plus`/`pro`/`topup`; `activate_order` (service-role only) finishes any order by its stored plan — Plus/Pro extend 30 days (stacking; buying Plus never lowers a running Pro), a top-up only adds credits |
+| `0023_admin_credit_adjust.sql` | `admin_adjust_credits` (service-role only): staff add or take back credits from `/admin` in one atomic update, never below 0 |
 
 Storage buckets (`inputs`, `exports`, `logos`) and their RLS policies are
 created by `0001_init.sql` — no manual bucket setup needed.

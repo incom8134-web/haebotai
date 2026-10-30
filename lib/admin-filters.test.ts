@@ -8,16 +8,16 @@ const iso = (daysAgo: number) => new Date(NOW - daysAgo * DAY).toISOString();
 
 const base: MemberFacts = { id: "u0", email: "a@x.com", name: null, providers: ["google"], kakaoId: null, phone: null, createdAt: iso(10), lastSignInAt: iso(1), suspended: false, keys: [], runs: 0, failedRuns: 0, lastRunAt: null };
 const members: MemberFacts[] = [
-  { ...base, id: "u1", email: "minji@cafe.kr", name: "김민지", providers: ["kakao"], kakaoId: "3021987", phone: "010-1234-5678", createdAt: iso(1), keys: ["google"], runs: 12, lastRunAt: iso(2) },
-  { ...base, id: "u2", email: "jun@bakery.kr", name: "Jun Park", createdAt: iso(40), keys: [], runs: 3, lastRunAt: iso(45) },
-  { ...base, id: "u3", email: "new@x.com", createdAt: iso(5) },
+  { ...base, id: "u1", email: "minji@cafe.kr", name: "김민지", providers: ["kakao"], kakaoId: "3021987", phone: "010-1234-5678", createdAt: iso(1), keys: ["google"], runs: 12, lastRunAt: iso(2), plan: "pro" },
+  { ...base, id: "u2", email: "jun@bakery.kr", name: "Jun Park", createdAt: iso(40), keys: [], runs: 3, lastRunAt: iso(45), plan: "plus" },
+  { ...base, id: "u3", email: "new@x.com", createdAt: iso(5), host: true },
   { ...base, id: "u4", email: "bad@x.com", name: "Spam", createdAt: iso(20), suspended: true, runs: 1, lastRunAt: iso(20), keys: ["google"] },
 ];
 const f = (sp: Record<string, string>) => parseMemberFilters(sp);
 const ids = (sp: Record<string, string>) => applyMemberFilters(members, f(sp), NOW).rows.map((m) => m.id);
 
 test("parseMemberFilters keeps known values and drops the rest", () => {
-  assert.deepEqual(f({ provider: "kakao", key: "yes", sort: "runs", page: "2" }), { q: "", provider: "kakao", key: "yes", activity: "", status: "", sort: "runs", from: "", to: "", page: 2 });
+  assert.deepEqual(f({ provider: "kakao", key: "yes", sort: "runs", page: "2" }), { q: "", provider: "kakao", key: "yes", plan: "", activity: "", status: "", sort: "runs", from: "", to: "", page: 2 });
   const junk = f({ provider: "naver", key: "maybe", sort: "x", page: "-3" });
   assert.equal(junk.provider, "");
   assert.equal(junk.key, "");
@@ -87,4 +87,12 @@ test("the Google/Kakao name is searchable but doesn't count as an entered name",
   const withProvider = [{ ...base, id: "u9", email: "g@x.com", name: null, providerName: "Google Name" }];
   assert.deepEqual(applyMemberFilters(withProvider, f({ q: "google name" }), NOW).rows.map((m) => m.id), ["u9"]);
   assert.deepEqual(applyMemberFilters(withProvider, f({ status: "no_name" }), NOW).rows.map((m) => m.id), ["u9"]);
+});
+
+test("plan filter: free, paid, each plan, hosts", () => {
+  assert.deepEqual(ids({ plan: "paid" }).sort(), ["u1", "u2"]);
+  assert.deepEqual(ids({ plan: "pro" }), ["u1"]);
+  assert.deepEqual(ids({ plan: "plus" }), ["u2"]);
+  assert.deepEqual(ids({ plan: "host" }), ["u3"]);
+  assert.deepEqual(ids({ plan: "free" }), ["u4"]);
 });
