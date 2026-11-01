@@ -13,7 +13,7 @@ import { parseOutputLanguage, runWithOutputLanguage } from "@/lib/ai/output-lang
 import { getUserApiKeys } from "@/lib/api-keys";
 import { getMembership } from "@/lib/membership";
 import { decideRunAccess } from "@/lib/run-access";
-import { MEMBER_API_KEYS, SAAS } from "@/lib/site/access";
+import { FREE_OWN_KEY, MEMBER_API_KEYS, SAAS } from "@/lib/site/access";
 import { isHost } from "@/lib/platform-access-server";
 import { reserveCredits, releaseUnattachedReservation, settleGenerationCredits } from "@/lib/credits";
 import { runLimiter, checkRateLimit } from "@/lib/rate-limit";
@@ -74,10 +74,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const [keys, membership] = await Promise.all([MEMBER_API_KEYS ? getUserApiKeys("google", { excludeBroken: true }) : Promise.resolve([]), getMembership()]);
   // Same rule as a run (lib/run-access.ts), at a quarter of the tool's credits.
   const team = await isHost(user.email);
-  const access = decideRunAccess({ saas: SAAS, provider: "google", team, plan: membership.plan, estimatedCredits: regenerateCost(manifest.estimatedCredits), ownKeyError: !SAAS && !keys.length && !team ? OWN_KEY_REQUIRED : null, hasUsableKey: keys.length > 0 });
+  const access = decideRunAccess({ saas: SAAS, provider: "google", team, plan: membership.plan, estimatedCredits: regenerateCost(manifest.estimatedCredits), ownKeyError: !SAAS && !keys.length && !team ? OWN_KEY_REQUIRED : null, hasUsableKey: keys.length > 0, freeOwnKey: FREE_OWN_KEY });
   if (!access.ok) return Response.json({ error: access.error, code: access.code }, { status: access.status });
   const cost = access.cost;
-  const usesPlatformKey = keys.length === 0;
+  // Only a run on the member's own key uses it (Plus and Pro stay on the platform key).
+  const ownKeys = access.ownKey ? keys : [];
+  const usesPlatformKey = ownKeys.length === 0;
   const spend = await checkSpend(user.id, usesPlatformKey ? regenerateCost(manifest.estimatedCredits) : 0, usesPlatformKey);
   if (!spend.ok) return Response.json({ error: spend.message }, { status: 429 });
   const reservation = cost > 0 ? await reserveCredits(user.id, cost) : ({ ok: true } as const);
@@ -124,7 +126,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
   let result: Awaited<ReturnType<typeof call>>;
   try {
-    result = await runWithOutputLanguage(parseOutputLanguage((run.input as Record<string, unknown> | null)?._output_lang), () => (keys.length ? runWithApiKey(keys, call) : call()));
+    result = await runWithOutputLanguage(parseOutputLanguage((run.input as Record<string, unknown> | null)?._output_lang), () => (ownKeys.length ? runWithApiKey(ownKeys, call) : call()));
   } catch (err) {
     if (cost > 0) await releaseUnattachedReservation(user.id, cost);
     console.warn("regenerate failed", (err as Error).message);
@@ -181,13 +183,16 @@ async function reviseDocumentRun(opts: {
   // A design-only change calls no model; everything else follows the run rule (lib/run-access.ts).
   const team = await isHost(user.email);
   let cost = 0;
+  // Only a run on the member's own key uses it (Plus and Pro stay on the platform key).
+  let ownKeys: string[] = [];
   if (route?.kind !== "design") {
-    const access = decideRunAccess({ saas: SAAS, provider: "google", team, plan: membership.plan, estimatedCredits: free ? 0 : regenerateCost(manifest.estimatedCredits), ownKeyError: !SAAS && !keys.length && !team ? OWN_KEY_REQUIRED : null, hasUsableKey: keys.length > 0 });
+    const access = decideRunAccess({ saas: SAAS, provider: "google", team, plan: membership.plan, estimatedCredits: free ? 0 : regenerateCost(manifest.estimatedCredits), ownKeyError: !SAAS && !keys.length && !team ? OWN_KEY_REQUIRED : null, hasUsableKey: keys.length > 0, freeOwnKey: FREE_OWN_KEY });
     if (!access.ok) return Response.json({ error: access.error, code: access.code }, { status: access.status });
     cost = access.cost;
+    if (access.ownKey) ownKeys = keys;
   }
   if (!free) {
-    const usesPlatformKey = keys.length === 0;
+    const usesPlatformKey = ownKeys.length === 0;
     const spend = await checkSpend(user.id, usesPlatformKey ? regenerateCost(manifest.estimatedCredits) : 0, usesPlatformKey);
     if (!spend.ok) return Response.json({ error: spend.message }, { status: 429 });
   }
@@ -202,7 +207,7 @@ async function reviseDocumentRun(opts: {
   const go = () => reviseDocument({ doc: document, instruction, target: section, contractText: report?.contractText ?? "", requestText: buildContext(manifest, input, null), signal: AbortSignal.timeout(280_000) });
   let result: Awaited<ReturnType<typeof go>>;
   try {
-    result = await runWithOutputLanguage(parseOutputLanguage((run.input as Record<string, unknown> | null)?._output_lang), () => (keys.length ? runWithApiKey(keys, go) : go()));
+    result = await runWithOutputLanguage(parseOutputLanguage((run.input as Record<string, unknown> | null)?._output_lang), () => (ownKeys.length ? runWithApiKey(ownKeys, go) : go()));
   } catch (err) {
     console.warn("document revise failed", (err as Error).message);
     result = { ok: false, status: 502, error: cost > 0 ? "다시 만들지 못했어요. 크레딧은 돌려드렸어요." : "다시 만들지 못했어요. 잠시 후 다시 시도해 주세요." };

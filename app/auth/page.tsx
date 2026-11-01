@@ -13,7 +13,7 @@ import { useBi } from "@/lib/i18n/context";
 import { ThemeLangControls } from "@/components/shell/app-shell";
 import { AUTH_PROVIDERS, oauthScopes, type AuthProvider } from "@/lib/auth-providers";
 import { HOME_AFTER_SIGN_IN } from "@/lib/consent";
-import { OWN_KEY_ONLY } from "@/lib/site/access";
+import { FREE_OWN_KEY, OWN_KEY_ONLY } from "@/lib/site/access";
 
 // Sign-in (docs/redesign-plan.md §5). Google, plus Kakao when it's switched
 // on (lib/auth-providers.ts) — email sign-up was closed on purpose. Next to the one button: what you can build (from the
@@ -152,8 +152,8 @@ function AuthCard() {
               { icon: RotateCcw, text: { ko: "요금은 내 Google 계정에서 직접 확인하고 관리", en: "Any usage is billed to, and managed in, your own Google account" } },
             ]
           : [
-              { icon: Check, text: { ko: "가입은 무료, 카드 등록 없이 16개 도구 둘러보기", en: "Free to sign up — browse all 16 tools, no card needed" } },
-              { icon: KeyRound, text: { ko: "실행은 플러스(₩29,900/30일)부터, 자동 결제 없음", en: "Running starts with Plus (₩29,900 / 30 days), no auto-renewal" } },
+              { icon: Check, text: FREE_OWN_KEY ? { ko: "가입은 무료, 카드 등록 없이 내 Gemini API 키로 16개 도구 실행", en: "Free to sign up — run all 16 tools on your own Gemini API key, no card needed" } : { ko: "가입은 무료, 카드 등록 없이 16개 도구 둘러보기", en: "Free to sign up — browse all 16 tools, no card needed" } },
+              { icon: KeyRound, text: FREE_OWN_KEY ? { ko: "키 없이 쓰려면 플러스(₩29,900/30일)부터, 자동 결제 없음", en: "No key? Plus (₩29,900 / 30 days) runs on credits, no auto-renewal" } : { ko: "실행은 플러스(₩29,900/30일)부터, 자동 결제 없음", en: "Running starts with Plus (₩29,900 / 30 days), no auto-renewal" } },
               { icon: RotateCcw, text: { ko: "실패하거나 취소한 실행은 크레딧 자동 환불", en: "Failed or cancelled runs are refunded in credits" } },
             ]
         ).map((item) => (

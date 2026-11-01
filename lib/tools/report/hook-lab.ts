@@ -24,11 +24,11 @@ export function hookLabReport(o: Record<string, unknown>): Report {
     {
       id: "overview",
       kicker: "개요",
-      title: "유형별 훅의 힘",
+      title: "유형별 첫 문장의 힘",
       lead: str(o.audience_insight) || undefined,
       blocks: keep([
-        !!str(best.text) && { type: "callout", label: "먼저 찍어 볼 훅", text: `${str(best.text)}\n${str(best.reason)}` },
-        bestStrength > 0 && { type: "chart", title: "추천 훅의 강도", half: true, chart: { kind: "gauge", value: bestStrength, max: 10, label: "강도" }, estimated: true },
+        !!str(best.text) && { type: "callout", label: "먼저 찍어 볼 첫 문장", text: `${str(best.text)}\n${str(best.reason)}` },
+        bestStrength > 0 && { type: "chart", title: "추천 첫 문장의 강도", half: true, chart: { kind: "gauge", value: bestStrength, max: 10, label: "강도" }, estimated: true },
         families.length > 0 && {
           type: "chart",
           title: "유형별 평균 강도 (10점)",
@@ -46,7 +46,7 @@ export function hookLabReport(o: Record<string, unknown>): Report {
       blocks: keep([
         {
           type: "table",
-          header: ["훅", "화면 글자", "첫 장면", "이어지는 문장", "강도"],
+          header: ["첫 문장", "화면 글자", "첫 장면", "이어지는 문장", "강도"],
           rows: f.hooks.map((h) => [str(h.text), str(h.on_screen), str(h.first_scene), str(h.follow_line), String(num(h.strength))]),
         },
         {
@@ -59,7 +59,7 @@ export function hookLabReport(o: Record<string, unknown>): Report {
   ];
   return {
     palette: PALETTES["hook-lab"],
-    hero: { eyebrow: "첫 문장 만들기", title: str(best.text) || "훅 모음", subtitle: str(o.summary) || undefined, kpis: [{ label: "유형", value: `${families.length}개` }, { label: "훅", value: `${families.reduce((a, f) => a + f.hooks.length, 0)}개` }] },
+    hero: { eyebrow: "첫 문장 만들기", title: str(best.text) || "첫 문장 모음", subtitle: str(o.summary) || undefined, kpis: [{ label: "유형", value: `${families.length}개` }, { label: "첫 문장", value: `${families.reduce((a, f) => a + f.hooks.length, 0)}개` }] },
     sections: sections.filter((s) => s.blocks.length),
   };
 }

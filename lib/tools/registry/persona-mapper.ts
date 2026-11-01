@@ -16,7 +16,7 @@ export const personaMapper: ToolManifest = {
     {
       kind: "select",
       id: "count",
-      label: "페르소나 수",
+      label: "대표 손님 수",
       options: [
         { value: "1", label: "1명 (깊게)" },
         { value: "2", label: "2명 (비교)" },

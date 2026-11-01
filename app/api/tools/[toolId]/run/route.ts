@@ -9,7 +9,7 @@ import { buildReference, referenceForStorage } from "@/lib/tools/reference-serve
 import { checkToolPolicy } from "@/lib/tools/policy";
 import { ownKeyRequiredError, resolveRequestedProvider } from "@/lib/ai/resolve-provider";
 import { decideRunAccess } from "@/lib/run-access";
-import { MEMBER_API_KEYS, SAAS } from "@/lib/site/access";
+import { FREE_OWN_KEY, MEMBER_API_KEYS, SAAS } from "@/lib/site/access";
 import { isHost } from "@/lib/platform-access-server";
 import { getUserApiKeys } from "@/lib/api-keys";
 import { getMembership } from "@/lib/membership";
@@ -151,8 +151,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   // Own-key mode: a member's keys (priority 1-3) are tried in order inside
   // runWithApiKey, switching past any that hit a quota error; slots
   // already flagged broken (401/403) are excluded here.
-  // Own keys are only consulted when members may bring one (lib/site/access.ts);
-  // in SaaS mode every run uses the platform key and paid-plan credits.
+  // Own keys are only consulted when members may bring one (lib/site/access.ts).
+  // In SaaS mode only a Free account's key is used; Plus and Pro run on the
+  // platform key and credits even if they saved one (lib/run-access.ts).
   const [userApiKeys, membership] = await Promise.all([MEMBER_API_KEYS ? getUserApiKeys(provider, { excludeBroken: true }) : Promise.resolve([]), getMembership()]);
   const hasUsableKey = userApiKeys.length > 0;
   // Only spend a second query distinguishing "never registered" from
@@ -171,6 +172,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     estimatedCredits: manifest.estimatedCredits,
     ownKeyError: SAAS ? null : ownKeyRequiredError(provider, { hasAnyKey, hasUsableKey }, team),
     hasUsableKey,
+    freeOwnKey: FREE_OWN_KEY,
   });
   if (!access.ok) {
     return Response.json({ error: access.error, code: access.code }, { status: access.status });
@@ -179,7 +181,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
   // Platform-wide ceilings on top of credits (lib/spend-guard-core.ts):
   // kill switch, daily platform AI budget, per-member daily run cap.
-  const usesPlatformKey = provider === "google" && !hasUsableKey;
+  const usesPlatformKey = provider === "google" && !access.ownKey;
   const spend = await checkSpend(user.id, usesPlatformKey ? manifest.estimatedCredits : 0, usesPlatformKey);
   if (!spend.ok) {
     return Response.json({ error: spend.message }, { status: 429 });
@@ -210,7 +212,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     userId: user.id,
     runId: "",
     origin: request.nextUrl.origin,
-    ownKey: hasUsableKey,
+    ownKey: access.ownKey,
     referenceRaw: reference.bundle ? rawReference : null,
     profile,
     intent: agent.intent,

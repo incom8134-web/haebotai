@@ -44,7 +44,7 @@ export function ProjectsView({ projects }: { projects: { id: string; name: strin
         tone="discover"
         eyebrow={L({ ko: "사업별 기억", en: "Memory per business" })}
         title={L({ ko: "프로젝트", en: "Projects" })}
-        lead={L({ ko: "사업이나 프로젝트마다 기억을 따로 둡니다. 프로젝트 안에서 도구를 실행하면 알고 있는 내용이 미리 채워지고, 결과에서 정해진 것(고객, 포지셔닝, 색, 가격…)이 다시 쌓여요.", en: "Each business or project keeps its own memory. Tools run inside a project start pre-filled with what it knows, and add what each result establishes — customer, positioning, colours, pricing…" })}
+        lead={L({ ko: "사업이나 프로젝트마다 기억을 따로 둡니다. 프로젝트 안에서 도구를 실행하면 알고 있는 내용이 미리 채워지고, 결과에서 정해진 것(고객, 차별점, 색, 가격…)이 다시 쌓여요.", en: "Each business or project keeps its own memory. Tools run inside a project start pre-filled with what it knows, and add what each result establishes — customer, positioning, colours, pricing…" })}
         className="mb-2"
       />
 

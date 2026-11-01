@@ -161,7 +161,7 @@ function seedFromDiscover(targetId: string, sourceId: string, source: unknown, p
     const palette = arr(out.palette).map((c) => `${s(c.name)} ${s(c.hex)}`.trim()).filter(Boolean);
     const brief = lines(
       s(essence.one_line),
-      s(pos.statement) && `포지셔닝: ${s(pos.statement)}`,
+      s(pos.statement) && `차별점: ${s(pos.statement)}`,
       Array.isArray(voice.tone_words) && `말투: ${(voice.tone_words as unknown[]).map(s).join(", ")}`,
       palette.length > 0 && `브랜드 색: ${palette.join(", ")}`,
       s(o(o(out.typography).heading).family) && `제목 서체: ${s(o(o(out.typography).heading).family)}`,

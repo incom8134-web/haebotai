@@ -18,9 +18,9 @@ import { SectionTitle, useLocalSet } from "./shared";
 const AXIS_EN: Record<string, string> = { fit: "Fit", demand: "Demand", speed: "Speed", capital: "Low capital", edge: "Edge" };
 const NEXT = [
   { slug: "revenue-mapper", ko: "수익 구조 짜기", en: "Map revenue" },
-  { slug: "mvp-blueprint", ko: "MVP 설계", en: "Plan the MVP" },
+  { slug: "mvp-blueprint", ko: "시험용 첫 상품 설계", en: "Plan the MVP" },
   { slug: "market-gap", ko: "시장 빈틈 확인", en: "Check the market" },
-  { slug: "offer-architect", ko: "오퍼 만들기", en: "Build the offer" },
+  { slug: "offer-architect", ko: "팔 상품·가격 정하기", en: "Build the offer" },
 ];
 
 type SortKey = "total" | (typeof IDEA_AXES)[number]["key"];

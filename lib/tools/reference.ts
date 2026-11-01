@@ -87,7 +87,7 @@ const REFERENCE_MODES: Record<string, ReferenceMode[]> = {
     REFERENCE,
     {
       id: "seo",
-      label: { ko: "초안 SEO 최적화", en: "SEO-optimize my draft" },
+      label: { ko: "초안 검색 노출 다듬기", en: "SEO-optimize my draft" },
       hint: { ko: "내 글을 상위 노출 구조로 다듬기", en: "Rework a draft to rank" },
       instruction: "참고 자료는 사용자가 쓴 블로그 초안입니다. 글쓴이의 경험·사실·말투는 살리고, 검색 의도에 맞게 제목·도입부·소제목 구조·키워드 배치·메타 설명을 최적화한 완성본으로 다시 쓰세요.",
     },
@@ -276,8 +276,8 @@ const REFERENCE_MODES: Record<string, ReferenceMode[]> = {
     REFERENCE,
     {
       id: "style",
-      label: { ko: "이 룩북 스타일로", en: "Match this lookbook" },
-      hint: { ko: "올린 사진의 무드와 연출을 따라", en: "Same mood and styling" },
+      label: { ko: "이 사진 스타일로", en: "Match this lookbook" },
+      hint: { ko: "올린 사진의 분위기와 연출을 따라", en: "Same mood and styling" },
       instruction: "참고 자료의 이미지는 룩북 스타일 기준입니다. 무드, 조명, 포즈의 느낌을 맞추되 실존 인물을 닮게 만들지 마세요.",
     },
   ],

@@ -631,19 +631,19 @@ function describeChart(spec: ChartSpec): string {
     case "donut":
       return `비율 그래프: ${list(spec.slices.map((x) => `${x.label} ${x.value}${spec.unit ?? ""}`))}`;
     case "radar":
-      return `레이더 차트: ${list(spec.axes)}`;
+      return `방사형 차트: ${list(spec.axes)}`;
     case "scatter":
-      return `포지셔닝 맵 (${spec.xLabel} × ${spec.yLabel}): ${list(spec.points.map((x) => x.label))}`;
+      return `경쟁 위치 지도 (${spec.xLabel} × ${spec.yLabel}): ${list(spec.points.map((x) => x.label))}`;
     case "gantt":
       return `일정표: ${list(spec.rows.map((x) => x.label))}`;
     case "heatmap":
-      return `히트맵: ${list(spec.rows)} × ${list(spec.cols)}`;
+      return `색 표: ${list(spec.rows)} × ${list(spec.cols)}`;
     case "gauge":
-      return `게이지: ${spec.label} ${spec.value}/${spec.max}`;
+      return `점수: ${spec.label} ${spec.value}/${spec.max}`;
     case "circles":
       return `지표: ${list(spec.items.map((x) => `${x.label} ${x.value}`))}`;
     case "funnel":
-      return `퍼널: ${list(spec.stages.map((x) => `${x.label} ${x.display ?? x.value}`))}`;
+      return `단계별 감소: ${list(spec.stages.map((x) => `${x.label} ${x.display ?? x.value}`))}`;
   }
 }
 

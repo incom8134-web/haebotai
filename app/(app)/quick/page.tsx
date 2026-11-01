@@ -2,7 +2,7 @@ import { QuickStart } from "@/components/quick/quick-start";
 import { getCurrentUser } from "@/lib/supabase/user";
 import { getApiKeyStatus } from "@/lib/api-keys";
 import { isHost } from "@/lib/platform-access-server";
-import { MEMBER_API_KEYS, OWN_KEY_ONLY, SAAS } from "@/lib/site/access";
+import { FREE_OWN_KEY, MEMBER_API_KEYS, OWN_KEY_ONLY, SAAS } from "@/lib/site/access";
 import { getMembership } from "@/lib/membership";
 import { isPaidPlan } from "@/lib/payments/pro";
 import { titled } from "@/lib/site/meta";
@@ -15,7 +15,10 @@ export default async function QuickPage() {
   const [user, keyStatus, membership] = await Promise.all([getCurrentUser(), MEMBER_API_KEYS ? getApiKeyStatus() : Promise.resolve(null), getMembership()]);
   // Same rules as the tool page (tool-runner needsKey / needsPlan): every quick tool runs on Google.
   const team = !!user && (await isHost(user.email));
-  const needsKey = !!user && OWN_KEY_ONLY && !team && !keyStatus?.providers.google.some((s) => s.connected && !s.broken);
-  const needsPlan = !!user && SAAS && !team && !isPaidPlan(membership.plan);
-  return <QuickStart signedIn={!!user} needsKey={needsKey} needsPlan={needsPlan} />;
+  const paid = isPaidPlan(membership.plan);
+  // Runs on the member's own key: own-key mode, or a Free account in paid-plan mode.
+  const onOwnKey = !!user && !team && (OWN_KEY_ONLY || (SAAS && FREE_OWN_KEY && !paid));
+  const needsKey = onOwnKey && !keyStatus?.providers.google.some((s) => s.connected && !s.broken);
+  const needsPlan = !!user && SAAS && !team && !paid && !FREE_OWN_KEY;
+  return <QuickStart signedIn={!!user} needsKey={needsKey} needsPlan={needsPlan} onOwnKey={onOwnKey} plans={onOwnKey && SAAS} />;
 }

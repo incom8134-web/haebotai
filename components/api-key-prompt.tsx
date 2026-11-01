@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ExternalLink, KeyRound } from "lucide-react";
+import { Crown, KeyRound, PlayCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { primaryButton, secondaryButton } from "@/components/site/page";
 import { useBi } from "@/lib/i18n/context";
@@ -11,7 +11,8 @@ import { cn } from "@/lib/utils";
 // run: on opening a tool, on pressing Run, and on Quick start's Make.
 // Without it, members who skipped the key step hit a greyed-out Run button
 // and left. "How to get a key" opens the guide's video; "Add my key"
-// returns to `next` once the key is saved.
+// returns to `next` once the key is saved. With `plans` (Free accounts in
+// paid-plan mode) it also offers Plus and Pro, which run without a key.
 
 const STEPS = [
   { ko: "Google AI Studio에서 무료 키 만들기", en: "Get a free key in Google AI Studio" },
@@ -19,7 +20,7 @@ const STEPS = [
   { ko: "돌아와서 바로 실행", en: "Come back and run" },
 ];
 
-export function ApiKeyPrompt({ open, onOpenChange, next }: { open: boolean; onOpenChange: (open: boolean) => void; next: string }) {
+export function ApiKeyPrompt({ open, onOpenChange, next, plans = false }: { open: boolean; onOpenChange: (open: boolean) => void; next: string; plans?: boolean }) {
   const L = useBi();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -43,13 +44,20 @@ export function ApiKeyPrompt({ open, onOpenChange, next }: { open: boolean; onOp
           ))}
         </ol>
         <div className="mt-6 flex flex-col gap-2 sm:flex-row">
-          <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer" className={cn(secondaryButton, "h-11 flex-1 font-semibold")}>
-            Google AI Studio <ExternalLink size={15} aria-hidden />
-          </a>
+          <Link href="/help/api-guide#video" className={cn(secondaryButton, "h-11 flex-1 font-semibold")}>
+            <PlayCircle size={16} aria-hidden /> {L({ ko: "키 받는 방법 보기", en: "How to get a key" })}
+          </Link>
           <Link href={`/account/api-key?next=${encodeURIComponent(next)}`} className={cn(primaryButton, "h-11 flex-1")}>
             <KeyRound size={16} aria-hidden /> {L({ ko: "API 키 등록하기", en: "Add my key" })}
           </Link>
         </div>
+        {plans ? (
+          <p className="mt-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center text-xs break-keep text-fg-muted">
+            <Crown size={13} className="shrink-0 text-studio-cyan" aria-hidden />
+            {L({ ko: "키 없이 쓰려면 플러스·프로 플랜", en: "No key? Plus and Pro run on credits" })}
+            <Link href="/account/membership" className="font-semibold text-studio-cyan hover:underline">{L({ ko: "플랜 보기", en: "See plans" })}</Link>
+          </p>
+        ) : null}
         <button type="button" onClick={() => onOpenChange(false)} className="mx-auto mt-3 text-xs text-fg-subtle hover:text-fg">
           {L({ ko: "나중에 할게요", en: "Maybe later" })}
         </button>

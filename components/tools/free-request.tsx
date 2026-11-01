@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 const EXAMPLES: Record<string, { ko: string; en: string }[]> = {
   presentation: [
     { ko: "기존 슬라이드 순서와 장수는 그대로, 문장과 디자인만 더 설득력 있게", en: "Keep my slide order and count; just make the wording and design more convincing" },
-    { ko: "숫자는 크게, 글은 최소로. 사진 위주의 감성적인 덱", en: "Big numbers, minimal text — a photo-led, emotional deck" },
+    { ko: "숫자는 크게, 글은 최소로. 사진 위주의 감성적인 발표 자료", en: "Big numbers, minimal text — a photo-led, emotional deck" },
     { ko: "투자자용이라 재무 슬라이드를 3장 이상 넣어 줘", en: "It's for investors — include at least 3 financial slides" },
   ],
   homepage: [

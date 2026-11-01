@@ -15,7 +15,7 @@ const GROUPS: { title: { ko: string; en: string }; items: { keys: string[]; labe
   },
   {
     title: { ko: "스튜디오", en: "Studio" },
-    items: [{ keys: ["⌘", "Enter"], label: { ko: "브리프로 생성하기 (Windows: Ctrl + Enter)", en: "Generate from the brief (Windows: Ctrl + Enter)" } }],
+    items: [{ keys: ["⌘", "Enter"], label: { ko: "요청으로 만들기 (Windows: Ctrl + Enter)", en: "Generate from the brief (Windows: Ctrl + Enter)" } }],
   },
   {
     title: { ko: "도구 입력", en: "Tool forms" },

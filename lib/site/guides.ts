@@ -15,7 +15,7 @@ export const WORKFLOWS: { id: string; title: Bilingual; body: Bilingual; goal: "
     id: "brand-to-site",
     goal: "brand",
     title: { ko: "브랜드부터 웹사이트까지", en: "Brand to website" },
-    body: { ko: "로고 방향을 그려 보고, 그 느낌 그대로 인터랙티브 사이트를 만들고, 검색으로 찾아오게 원고를 씁니다.", en: "Draw logo directions, build an interactive site in the same spirit, and write articles people find through search." },
+    body: { ko: "로고 방향을 그려 보고, 그 느낌 그대로 직접 눌러 볼 수 있는 사이트를 만들고, 검색으로 찾아오게 원고를 씁니다.", en: "Draw logo directions, build an interactive site in the same spirit, and write articles people find through search." },
     tools: ["logo-lab", "web-builder", "seo-composer"],
   },
   {
@@ -29,14 +29,14 @@ export const WORKFLOWS: { id: string; title: Bilingual; body: Bilingual; goal: "
     id: "campaign",
     goal: "grow",
     title: { ko: "캠페인을 한 흐름으로", en: "One connected campaign" },
-    body: { ko: "포지셔닝과 채널 계획을 세우고, 채널별 광고를 만들고, 내부 공유용 덱으로 정리합니다.", en: "Set positioning and a channel plan, produce ads per channel, and wrap it in a deck to share." },
+    body: { ko: "차별점과 채널 계획을 세우고, 채널별 광고를 만들고, 내부 공유용 발표 자료로 정리합니다.", en: "Set positioning and a channel plan, produce ads per channel, and wrap it in a deck to share." },
     tools: ["campaign-planner", "ad-factory", "pitch-director"],
   },
   {
     id: "funding",
     goal: "start",
     title: { ko: "투자·대출·지원사업 준비", en: "Prepare for funding" },
-    body: { ko: "심사자에 맞춘 사업계획서와 계산되는 재무표를 만들고, 같은 이야기를 발표 덱으로 옮깁니다.", en: "Write a plan structured for its reviewer with computed financials, then carry the story into a pitch deck." },
+    body: { ko: "심사자에 맞춘 사업계획서와 계산되는 재무표를 만들고, 같은 이야기를 발표 자료로 옮깁니다.", en: "Write a plan structured for its reviewer with computed financials, then carry the story into a pitch deck." },
     tools: ["doc-studio", "pitch-director"],
   },
 ];
