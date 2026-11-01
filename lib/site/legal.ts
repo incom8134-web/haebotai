@@ -1,6 +1,6 @@
 import { BUSINESS, biz } from "./business";
 import { KAKAO_PHONE } from "../auth-providers";
-import { SAAS } from "./access.ts";
+import { FREE_OWN_KEY, SAAS } from "./access.ts";
 import { PRODUCTS } from "../payments/pro.ts";
 
 // The three legal documents as data, rendered by components/site/legal-doc.tsx.
@@ -129,7 +129,9 @@ export const TERMS: LegalDoc = {
       body: [
         {
           list: [
-            "회원가입과 도구·예시 둘러보기, 비즈니스 프로필과 프로젝트 만들기는 무료입니다. 무료 회원에게는 크레딧이 지급되지 않으며, 도구 실행은 플랜을 이용하는 동안에만 할 수 있습니다.",
+            FREE_OWN_KEY
+              ? "회원가입과 도구·예시 둘러보기, 비즈니스 프로필과 프로젝트 만들기는 무료입니다. 무료 회원에게는 크레딧이 지급되지 않습니다. 무료 회원은 본인이 발급받은 Google Gemini API 키를 등록하여 도구를 실행할 수 있으며, 이때 발생하는 AI 이용 요금은 회원의 Google 계정으로 직접 청구되고 회사는 이를 청구하거나 환불하지 않습니다. 플랜을 이용하는 회원의 도구 실행에는 크레딧이 쓰이며, 등록한 API 키는 쓰이지 않습니다."
+              : "회원가입과 도구·예시 둘러보기, 비즈니스 프로필과 프로젝트 만들기는 무료입니다. 무료 회원에게는 크레딧이 지급되지 않으며, 도구 실행은 플랜을 이용하는 동안에만 할 수 있습니다.",
             `플랜은 플러스(30일 ${won(PLUS.amount)}, ${PLUS.credits.toLocaleString()} 크레딧)와 프로(30일 ${won(PRO.amount)}, ${PRO.credits.toLocaleString()} 크레딧)가 있으며, 가격은 부가가치세를 포함합니다. 플랜을 이용하는 동안에는 ${won(TOPUP.amount)}에 ${TOPUP.credits} 크레딧을 충전할 수 있습니다. 가격과 제공 내용은 결제 화면에 표시된 바에 따릅니다.`,
             "도구마다 실행에 드는 크레딧이 실행 전에 표시됩니다. 실행을 시작하면 해당 크레딧이 예약되고 실행이 끝나면 차감됩니다. 실행이 실패하거나 회원이 취소한 경우 예약된 크레딧은 자동으로 반환됩니다.",
             "크레딧에는 유효기간이 없으나, 플랜 이용 기간이 끝나면 다시 플랜을 이용할 때까지 크레딧으로 도구를 실행할 수 없습니다. 크레딧은 현금으로 교환하거나 타인에게 양도할 수 없습니다.",

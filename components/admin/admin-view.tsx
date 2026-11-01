@@ -4,7 +4,7 @@ import { useActionState, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Activity, AlertTriangle, ArrowLeft, ArrowRight, Ban, Copy, Crown, KeyRound, Play, Plus, RotateCcw, Save, Search, Trash2, UserPlus, Users, Wallet, Wrench } from "lucide-react";
-import { MEMBER_API_KEYS } from "@/lib/site/access";
+import { MEMBER_API_KEYS, OWN_KEY_ONLY } from "@/lib/site/access";
 import { addHostEmail, adjustMemberCredits, checkMemberKeyTier, createMember, deleteMember, removeHostEmail, replyToTicket, reopenTicket, setMemberPlan, setMemberSuspended, updateMember, type AdminActionState } from "@/lib/actions/admin";
 import type { KeyTier } from "@/lib/ai/key-tier";
 import { useBi } from "@/lib/i18n/context";
@@ -68,7 +68,8 @@ export function AdminOverviewView({ overview: o, alerts }: { overview: AdminOver
       />
 
       {alerts}
-      {MEMBER_API_KEYS ? null : (
+      {/* Paid plans exist whenever members don't all run on their own key (lib/site/access.ts). */}
+      {OWN_KEY_ONLY ? null : (
         <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
           <StatCard label={L({ ko: "30일 매출 (부가세 포함)", en: "Revenue, 30 days (VAT incl.)" })} value={`₩${num(o.revenue30d)}`} icon={Wallet} tone="brand" note={L({ ko: `결제 ${num(o.orders30d)}건`, en: `${num(o.orders30d)} orders` })} />
           <StatCard label={L({ ko: "플러스 이용 중", en: "On Plus" })} value={num(o.plusMembers)} icon={Crown} tone="discover" href="/admin/members?plan=plus" />
@@ -278,7 +279,7 @@ export function MemberList({ members, total, all, page, pages, filters, deleted 
             </span>
           </label>
           <Select name="provider" value={filters.provider} label={L({ ko: "로그인", en: "Sign-in" })} options={[{ value: "", label: L({ ko: "전체", en: "All" }) }, { value: "google", label: "Google" }, { value: "kakao", label: "Kakao" }]} />
-          {MEMBER_API_KEYS ? (
+          {OWN_KEY_ONLY ? (
             <Select name="key" value={filters.key} label={L({ ko: "API 키", en: "API key" })} options={[{ value: "", label: L({ ko: "전체", en: "All" }) }, { value: "yes", label: L({ ko: "등록함", en: "Has a key" }) }, { value: "no", label: L({ ko: "없음", en: "No key" }) }]} />
           ) : (
             <Select name="plan" value={filters.plan} label={L({ ko: "플랜", en: "Plan" })} options={[{ value: "", label: L({ ko: "전체", en: "All" }) }, { value: "paid", label: L({ ko: "유료 (플러스·프로)", en: "Paying (Plus or Pro)" }) }, { value: "plus", label: L({ ko: "플러스", en: "Plus" }) }, { value: "pro", label: L({ ko: "프로", en: "Pro" }) }, { value: "free", label: L({ ko: "무료", en: "Free" }) }, { value: "host", label: L({ ko: "호스트", en: "Hosts" }) }]} />
@@ -318,7 +319,7 @@ export function MemberList({ members, total, all, page, pages, filters, deleted 
                   <th className="px-3 py-3">{L({ ko: "카카오 ID · 전화", en: "Kakao ID · phone" })}</th>
                   <th className="px-3 py-3">{L({ ko: "가입", en: "Joined" })}</th>
                   <th className="px-3 py-3">{L({ ko: "최근 로그인", en: "Last sign-in" })}</th>
-                  <th className="px-3 py-3">{MEMBER_API_KEYS ? L({ ko: "API 키", en: "API key" }) : L({ ko: "플랜 · 크레딧", en: "Plan · credits" })}</th>
+                  <th className="px-3 py-3">{OWN_KEY_ONLY ? L({ ko: "API 키", en: "API key" }) : L({ ko: "플랜 · 크레딧", en: "Plan · credits" })}</th>
                   <th className="px-3 py-3 text-right">{L({ ko: "실행", en: "Runs" })}</th>
                   <th className="px-5 py-3">{L({ ko: "상태", en: "Status" })}</th>
                 </tr>
@@ -355,7 +356,7 @@ export function MemberList({ members, total, all, page, pages, filters, deleted 
                     </td>
                     <td className="px-3 py-3 text-fg-muted tabular-nums">{fmtDate(m.createdAt)}</td>
                     <td className="px-3 py-3 text-fg-muted tabular-nums">{fmtDate(m.lastSignInAt)}</td>
-                    <td className="px-3 py-3">{MEMBER_API_KEYS ? <KeyTierCell m={m} /> : <PlanCell m={m} />}</td>
+                    <td className="px-3 py-3">{OWN_KEY_ONLY ? <KeyTierCell m={m} /> : <PlanCell m={m} />}</td>
                     <td className="px-3 py-3 text-right tabular-nums">
                       <span className="font-semibold">{m.runs ? num(m.runs) : "·"}</span>
                       {m.failedRuns ? <span className="block text-xs text-danger">{L({ ko: `실패 ${m.failedRuns}`, en: `${m.failedRuns} failed` })}</span> : null}
@@ -652,7 +653,7 @@ export function MemberProfile({ m, notices }: { m: AdminMemberDetail; notices?: 
       <div className="mt-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard label={L({ ko: "총 실행", en: "Runs" })} value={num(m.runs)} icon={Play} tone="brand" note={L({ ko: `마지막 ${fmtDate(m.lastRunAt)}`, en: `Last ${fmtDate(m.lastRunAt)}` })} />
         <StatCard label={L({ ko: "실패", en: "Failed" })} value={num(m.failedRuns)} icon={AlertTriangle} tone="campaign" alert={m.runs > 0 && pct(m.failedRuns, m.runs) >= 50} note={L({ ko: `실패율 ${pct(m.failedRuns, m.runs)}%`, en: `${pct(m.failedRuns, m.runs)}% failure rate` })} />
-        {MEMBER_API_KEYS ? (
+        {OWN_KEY_ONLY ? (
           <StatCard label={L({ ko: "API 키", en: "API keys" })} value={num(m.keyDetails.length)} icon={KeyRound} tone="operate" note={m.keyDetails.some((k) => k.broken) ? L({ ko: "거부된 키 있음", en: "A key was refused" }) : L({ ko: "등록된 키", en: "Saved keys" })} noteTone={m.keyDetails.some((k) => k.broken) ? "down" : "flat"} />
         ) : (
           <StatCard label={L({ ko: "크레딧", en: "Credits" })} value={num(m.credits ?? 0)} icon={Wallet} tone="operate" note={m.activePlan ? L({ ko: `${L(PLAN_NAME[m.activePlan])} · D-${daysLeft(m.planExpiresAt)}`, en: `${L(PLAN_NAME[m.activePlan])} · ${daysLeft(m.planExpiresAt)} days left` }) : m.host ? L({ ko: "호스트 · 크레딧 없이 실행", en: "Host · runs without credits" }) : L({ ko: "무료 플랜", en: "Free plan" })} />

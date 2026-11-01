@@ -9,6 +9,10 @@ import { z } from "zod";
 import { getCurrentUser } from "@/lib/supabase/user";
 import { listProjects } from "@/lib/projects/server";
 import { resignOutput } from "@/lib/run-assets-server";
+import { getMembership } from "@/lib/membership";
+import { isPaidPlan } from "@/lib/payments/pro";
+import { isHost } from "@/lib/platform-access-server";
+import { FREE_OWN_KEY, OWN_KEY_ONLY } from "@/lib/site/access";
 
 // HAEBOT_A_TOOLS_SPEC.md T2 — run history is only real if a past run's
 // actual output is reachable, not just its row in the list. Reuses the
@@ -45,6 +49,10 @@ export default async function LibraryRunPage({ params }: { params: Promise<{ run
 
   if (!run || !run.tool_id) notFound();
 
+  // A Free account redoes parts on its own key, like its runs (lib/run-access.ts).
+  const [membership, team] = await Promise.all([getMembership(), isHost(user.email)]);
+  const onOwnKey = OWN_KEY_ONLY || (FREE_OWN_KEY && !team && !isPaidPlan(membership.plan));
+
   const [projects, children, output, share] = await Promise.all([
     listProjects(),
     run.parent_run_id !== undefined
@@ -77,6 +85,7 @@ export default async function LibraryRunPage({ params }: { params: Promise<{ run
       projects={projects.map((p) => ({ id: p.id, name: p.name }))}
       versioned={run.parent_run_id !== undefined}
       shareToken={share.error ? undefined : (share.data?.token ?? null)}
+      onOwnKey={onOwnKey}
     />
   );
 }

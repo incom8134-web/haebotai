@@ -11,7 +11,7 @@ import { PageHeader } from "@/components/site/page";
 import { PriceTable } from "@/components/site/plan-cards";
 import { UpgradeCard } from "@/components/upgrade-button";
 import { PRODUCTS } from "@/lib/payments/pro";
-import { MEMBER_API_KEYS, STUDENT_PLAN } from "@/lib/site/access";
+import { FREE_OWN_KEY, MEMBER_API_KEYS, STUDENT_PLAN } from "@/lib/site/access";
 import { planName } from "@/lib/site/plans";
 
 // /account/credits — what I have, what each tool costs, what I've used
@@ -83,9 +83,10 @@ function CreditsView({ balance, plan, apiKeyConnected, usage, host = false }: { 
           ) : unlimited ? (
             <p className="mt-3 text-sm text-studio-success">{L({ ko: "학생 멤버십 — 크레딧이 차감되지 않아요.", en: "Student membership — credits are never charged." })}</p>
           ) : (
-            <p className="mt-3 text-sm break-keep text-fg-muted">{L({ ko: "무료 플랜은 도구를 둘러볼 수 있어요. 실행은 플러스부터예요.", en: "The Free plan lets you browse. Running tools starts with Plus." })}</p>
+            <p className="mt-3 text-sm break-keep text-fg-muted">{L(FREE_OWN_KEY ? { ko: "무료 플랜은 내 Gemini API 키로 모든 도구를 실행해요. 플러스·프로는 키 없이 크레딧으로 실행돼요.", en: "On the Free plan, every tool runs on your own Gemini API key. Plus and Pro run on credits, without a key." } : { ko: "무료 플랜은 도구를 둘러볼 수 있어요. 실행은 플러스부터예요.", en: "The Free plan lets you browse. Running tools starts with Plus." })}</p>
           )}
-          {MEMBER_API_KEYS && apiKeyConnected ? <p className="mt-3 text-sm text-studio-success">{L({ ko: "내 API 키 연결됨 — 실행에 크레딧이 들지 않아요.", en: "Your API key is connected — runs use no credits." })}</p> : null}
+          {/* A saved key only pays for runs on the Free plan; Plus and Pro use credits (lib/run-access.ts). */}
+          {MEMBER_API_KEYS && apiKeyConnected && !paid ? <p className="mt-3 text-sm text-studio-success">{L({ ko: "내 API 키 연결됨 — 실행에 크레딧이 들지 않아요.", en: "Your API key is connected — runs use no credits." })}</p> : null}
 
           <ul className="mt-6 space-y-3 border-t border-hairline pt-5 text-sm">
             <li className="flex gap-3"><Timer size={16} className="mt-0.5 shrink-0 text-studio-cyan" aria-hidden /><span><b className="font-medium">{L({ ko: "분당 10회 실행", en: "10 runs per minute" })}</b><span className="text-fg-muted"> — {L({ ko: "크레딧과 별개로 모든 플랜에 적용돼요.", en: "applies on every plan, separate from credits." })}</span></span></li>
@@ -98,7 +99,7 @@ function CreditsView({ balance, plan, apiKeyConnected, usage, host = false }: { 
             ) : null}
             {paid ? <span className="text-fg-subtle">·</span> : null}
             <Link href="/account/membership" className="text-studio-cyan underline underline-offset-2">{paid ? L({ ko: `${planName(plan).ko} 이용 중 · 멤버십`, en: `On ${planName(plan).en} · Membership` }) : L({ ko: "플랜 고르기", en: "Choose a plan" })}</Link>
-            {MEMBER_API_KEYS ? (
+            {MEMBER_API_KEYS && !paid ? (
               <>
                 <span className="text-fg-subtle">·</span>
                 <Link href="/account/api-key" className="inline-flex items-center gap-1 text-studio-cyan underline underline-offset-2"><KeyRound size={13} aria-hidden /> {L({ ko: "내 API 키로 실행", en: "Run on your own key" })}</Link>

@@ -25,7 +25,6 @@ import { QUICK_MAIN, QUICK_MORE, quickHref, type QuickId, type QuickTool } from 
 import { primaryButton, secondaryButton } from "@/components/site/page";
 import { ApiKeyPrompt } from "@/components/api-key-prompt";
 import { PlanPrompt } from "@/components/plan-prompt";
-import { MEMBER_API_KEYS } from "@/lib/site/access";
 import { OutputLanguagePicker } from "@/components/output-language-picker";
 import { cn } from "@/lib/utils";
 
@@ -50,7 +49,7 @@ function minutes(tool: QuickTool) {
   return Math.max(1, Math.round(s / 60));
 }
 
-export function QuickStart({ signedIn, needsKey = false, needsPlan = false }: { signedIn: boolean; needsKey?: boolean; needsPlan?: boolean }) {
+export function QuickStart({ signedIn, needsKey = false, needsPlan = false, onOwnKey = false, plans = false }: { signedIn: boolean; needsKey?: boolean; needsPlan?: boolean; onOwnKey?: boolean; plans?: boolean }) {
   const L = useBi();
   const router = useRouter();
   const reduce = useReducedMotion();
@@ -224,7 +223,7 @@ export function QuickStart({ signedIn, needsKey = false, needsPlan = false }: { 
         <p className="mt-3 text-sm leading-relaxed break-keep text-fg-muted">
           {L({ ko: `약 ${minutes(pick)}분 걸려요. `, en: `Takes about ${minutes(pick)} min. ` })}
           {signedIn
-            ? MEMBER_API_KEYS
+            ? onOwnKey
               ? L({ ko: "내 API 키로 실행되고, 결과는 보관함에 저장돼요.", en: "It runs on your API key and is saved to your Library." })
               : L({ ko: "플랜 크레딧으로 실행되고, 결과는 보관함에 저장돼요.", en: "It runs on your plan's credits and is saved to your Library." })
             : L({ ko: "누르면 Google 로그인 후 바로 이어서 만들어요.", en: "You'll sign in with Google, then it carries on." })}
@@ -233,10 +232,10 @@ export function QuickStart({ signedIn, needsKey = false, needsPlan = false }: { 
           <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-2xl border border-studio-cyan/40 bg-studio-cyan/10 px-4 py-3 text-sm font-medium break-keep text-fg">
             <KeyRound size={15} className="shrink-0 text-studio-cyan" aria-hidden />
             {L({ ko: "아직 API 키가 없어요. 만들기 전에 먼저 등록해 주세요.", en: "You don't have an API key yet. Add one before you make anything." })}
-            <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer" className="font-semibold text-studio-cyan hover:underline">{L({ ko: "Google AI Studio에서 키 받기", en: "Get a key at Google AI Studio" })}</a>
+            <Link href="/help/api-guide#video" className="font-semibold text-studio-cyan hover:underline">{L({ ko: "키 받는 방법 보기", en: "How to get a key" })}</Link>
           </p>
         ) : null}
-        <ApiKeyPrompt open={keyPrompt} onOpenChange={setKeyPrompt} next={quickHref(pick, text)} />
+        <ApiKeyPrompt open={keyPrompt} onOpenChange={setKeyPrompt} next={quickHref(pick, text)} plans={plans} />
         <PlanPrompt open={planPrompt} onOpenChange={setPlanPrompt} />
       </section>
 

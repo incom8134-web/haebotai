@@ -16,7 +16,7 @@ import { useBi, useLocale } from "@/lib/i18n/context";
 import type { ToolManifest } from "@/lib/tools/types";
 import { primaryButton, secondaryButton } from "@/components/site/page";
 import { cn } from "@/lib/utils";
-import { OWN_KEY_ONLY } from "@/lib/site/access";
+import { FREE_OWN_KEY, OWN_KEY_ONLY } from "@/lib/site/access";
 
 // Tool overview. Split layout: a sticky glass identity card on the left
 // (what it is, what it costs, start), and a scrolling column on the right
@@ -100,7 +100,7 @@ function ToolHome({ toolId, pack }: { toolId: string; pack: ToolPack }) {
             ) : (
               <div>
                 <p className="font-mono text-lg">{tool.estimatedCredits}</p>
-                <p className="text-2xs text-fg-subtle">{L({ ko: "크레딧", en: "credits" })}</p>
+                <p className="text-2xs text-fg-subtle">{FREE_OWN_KEY ? L({ ko: "크레딧 · 무료는 내 키", en: "credits · Free uses your key" }) : L({ ko: "크레딧", en: "credits" })}</p>
               </div>
             )}
             <div>

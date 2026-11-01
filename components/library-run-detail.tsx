@@ -46,6 +46,7 @@ function LibraryRunDetail({
   projects = [],
   versioned = false,
   shareToken,
+  onOwnKey = false,
 }: {
   toolId: string;
   runId: string;
@@ -65,6 +66,8 @@ function LibraryRunDetail({
   versioned?: boolean;
   /** The live public link's token; null for none, undefined before migration 0017. */
   shareToken?: string | null;
+  /** Redo-a-part runs on the member's own key (lib/run-access.ts). */
+  onOwnKey?: boolean;
 }) {
   const { locale } = useLocale();
   const t = useT();
@@ -125,7 +128,7 @@ function LibraryRunDetail({
           />
         ) : null}
         {status === "done" && versioned ? (
-          <RegeneratePanel runId={runId} toolId={toolId} output={output} estimatedCredits={manifest.estimatedCredits} />
+          <RegeneratePanel runId={runId} toolId={toolId} output={output} estimatedCredits={manifest.estimatedCredits} onOwnKey={onOwnKey} />
         ) : null}
         {status === "done" ? null : status === "error" ? (
           <div className="glass rounded-[20px] p-4 ">

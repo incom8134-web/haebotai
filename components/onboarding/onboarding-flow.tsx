@@ -11,7 +11,7 @@ import { useBi } from "@/lib/i18n/context";
 import { primaryButton, secondaryButton } from "@/components/site/page";
 import { cn } from "@/lib/utils";
 import { seedBusinessProfile } from "@/lib/profile";
-import { OWN_KEY_ONLY } from "@/lib/site/access";
+import { FREE_OWN_KEY, OWN_KEY_ONLY } from "@/lib/site/access";
 
 // First visit (docs/redesign-plan.md §5): what are you building → the
 // project's basics → recommended tools and a first task. Three short
@@ -419,7 +419,22 @@ export function OnboardingFlow({ name }: { name: string | null }) {
             </Link>
           </div>
           <p className="mt-6 text-2xs text-fg-subtle">
-            {OWN_KEY_ONLY ? (
+            {FREE_OWN_KEY ? (
+              <>
+                {L({ ko: "무료 플랜은 내 Gemini API 키로 실행돼요. ", en: "On the Free plan, tools run on your own Gemini API key. " })}
+                <Link href="/help/api-guide#video" className="font-medium text-accent hover:underline">
+                  {L({ ko: "키 받는 방법 보기", en: "How to get a key" })}
+                </Link>
+                {" · "}
+                <Link href="/account/api-key" className="font-medium text-accent hover:underline">
+                  {L({ ko: "API 키 등록하기", en: "Add my API key" })}
+                </Link>
+                {L({ ko: " · 키 없이 쓰려면 플러스부터예요. ", en: " · No key? Plus runs on credits. " })}
+                <Link href="/pricing" className="font-medium text-accent hover:underline">
+                  {L({ ko: "요금 보기", en: "See pricing" })}
+                </Link>
+              </>
+            ) : OWN_KEY_ONLY ? (
               <>
                 {L({ ko: "도구는 내 Gemini API 키로 실행돼요. ", en: "Tools run on your own Gemini API key. " })}
                 <Link href="/account/api-key" className="font-medium text-accent hover:underline">

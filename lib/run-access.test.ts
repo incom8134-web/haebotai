@@ -18,6 +18,17 @@ test("SaaS: free and old student accounts can't run", () => {
   }
 });
 
+test("SaaS + free-on-own-key: Free runs on its own key at no cost, needs one otherwise", () => {
+  assert.deepEqual(decideRunAccess({ ...base, plan: "free", freeOwnKey: true, hasUsableKey: true }), { ok: true, cost: 0, ownKey: true });
+  const r = decideRunAccess({ ...base, plan: "free", freeOwnKey: true, hasUsableKey: false });
+  assert.equal(!r.ok && r.code, "own_key_required");
+  assert.equal(!r.ok && r.status, 400);
+});
+
+test("SaaS + free-on-own-key: Plus and Pro stay on credits even with a saved key", () => {
+  for (const plan of ["plus", "pro"]) assert.deepEqual(decideRunAccess({ ...base, plan, freeOwnKey: true, hasUsableKey: true }), { ok: true, cost: 40, ownKey: false });
+});
+
 test("SaaS: the team runs free; Claude isn't offered", () => {
   assert.deepEqual(decideRunAccess({ ...base, plan: "free", team: true }), { ok: true, cost: 0, ownKey: false });
   const r = decideRunAccess({ ...base, provider: "anthropic" });
