@@ -16,7 +16,7 @@ export const image: ToolManifest = {
     {
       kind: "select",
       id: "preset",
-      label: "용도 프리셋",
+      label: "용도 선택",
       options: [
         { value: "studio", label: "제품 스튜디오컷" },
         { value: "packaging", label: "패키징" },

@@ -3,7 +3,7 @@
 // lib/admin-ops-server.ts.
 
 import { normalizeHostEntry } from "./platform-access.ts";
-import { SAAS } from "./site/access.ts";
+import { FREE_OWN_KEY, SAAS } from "./site/access.ts";
 
 type Bi = { ko: string; en: string };
 
@@ -53,6 +53,21 @@ export const ERROR_CLASS: Record<ErrorClass, { label: Bi; fix: Bi; memberCause: 
     }
   : OWN_KEY_ERROR_CLASS;
 
+// Free accounts run on their own key (FREE_OWN_KEY): a key, billing or quota failure on a Free
+// member's run is that member's key, not the company's. Say so in the fix note.
+if (SAAS && FREE_OWN_KEY) {
+  for (const id of ["key_refused", "billing", "free_tier", "quota"] as const) {
+    const c = ERROR_CLASS[id];
+    ERROR_CLASS[id] = {
+      ...c,
+      fix: {
+        ko: `${c.fix.ko} 무료 회원의 실행이라면 회원이 등록한 키 문제예요 — 회원에게 키 확인 안내를 보내세요.`,
+        en: `${c.fix.en} If it was a Free member's run, it's their own key — send them a check-your-key notice.`,
+      },
+    };
+  }
+}
+
 export interface FailureAlert {
   level: "warning" | "critical";
   message: Bi;
@@ -81,8 +96,10 @@ export type FunnelStep = "signed_up" | "onboarded" | "has_key" | "first_run" | "
 export const FUNNEL_STEPS: { id: FunnelStep; label: Bi; hint: Bi }[] = [
   { id: "signed_up", label: { ko: "가입", en: "Signed up" }, hint: { ko: "구글·카카오로 계정을 만든 회원", en: "Created an account with Google or Kakao" } },
   { id: "onboarded", label: { ko: "동의·이름 완료", en: "Consent and name" }, hint: { ko: "필수 동의와 이름 입력까지 마친 회원", en: "Finished the required consents and entered a name" } },
-  // SaaS mode measures buying a plan here; own-key mode, adding a key (lib/site/access.ts).
-  SAAS
+  // SaaS mode measures buying a plan here (or adding a key, with FREE_OWN_KEY); own-key mode, adding a key (lib/site/access.ts).
+  SAAS && FREE_OWN_KEY
+    ? { id: "has_key", label: { ko: "플랜 결제 또는 API 키", en: "Plan or API key" }, hint: { ko: "플러스·프로를 결제했거나 내 API 키를 등록한 회원(또는 호스트)", en: "Paid for Plus or Pro, or saved an API key (or is a host)" } }
+    : SAAS
     ? { id: "has_key", label: { ko: "플랜 결제", en: "Bought a plan" }, hint: { ko: "플러스·프로를 한 번 이상 결제했거나 호스트인 회원", en: "Paid for Plus or Pro at least once, or is a host" } }
     : { id: "has_key", label: { ko: "API 키 등록", en: "Added an API key" }, hint: { ko: "내 API 키를 하나 이상 등록한 회원", en: "Saved at least one API key" } },
   { id: "first_run", label: { ko: "첫 실행", en: "First run" }, hint: { ko: "도구를 한 번 이상 실행한 회원", en: "Ran a tool at least once" } },
@@ -209,7 +226,8 @@ const ALL_NOTICE_TEMPLATES: { id: string; title: string; body: string; link: str
 ];
 
 /** Notice templates for this access model: API-key ones only while members can add keys, plan ones only when plans are sold. */
-export const NOTICE_TEMPLATES = ALL_NOTICE_TEMPLATES.filter((t) => (t.ownKey ? !SAAS : SAAS || !["choose_plan", "low_credits", "run_failed"].includes(t.id)));
+// Free accounts on their own key (FREE_OWN_KEY) bring the API-key notices back alongside the plan ones.
+export const NOTICE_TEMPLATES = ALL_NOTICE_TEMPLATES.filter((t) => (t.ownKey ? !SAAS || FREE_OWN_KEY : SAAS || !["choose_plan", "low_credits", "run_failed"].includes(t.id)));
 
 /** Only same-site paths are allowed as notice/announcement links. */
 export function safeLink(raw: unknown): string | null {

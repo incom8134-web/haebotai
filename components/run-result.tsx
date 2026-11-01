@@ -92,7 +92,7 @@ const TOOL_HINTS: Record<string, Partial<Record<ExportFormat, [string, string]>>
   presentation: { pdf: ["인쇄용 발표 자료", "Print handout"], docx: ["발표 대본", "Speaker script"] },
   homepage: { pdf: ["사이트 기획서", "Site plan"], pptx: ["사이트 소개 슬라이드", "Site walkthrough slides"], docx: ["사이트 원고", "Site copy"] },
   image: { pdf: ["사진 촬영본 (컷별 크게)", "Photo set, one per page"], pptx: ["사진 소개 슬라이드", "Photo slides"], docx: ["사진 정리 문서", "Photo sheet"] },
-  "brand-model": { pdf: ["모델 룩북", "Model lookbook"], pptx: ["룩북 슬라이드", "Lookbook slides"], docx: ["룩북 정리 문서", "Lookbook sheet"] },
+  "brand-model": { pdf: ["모델 사진 모음", "Model lookbook"], pptx: ["모델 사진 슬라이드", "Lookbook slides"], docx: ["모델 사진 정리 문서", "Lookbook sheet"] },
   sangsepage: { pdf: ["상세페이지 시안 + 원고", "Page proof + copy"], docx: ["디자이너에게 넘길 원고", "Copy for your designer"], pptx: ["구역별 기획 슬라이드", "Section-by-section slides"] },
 };
 

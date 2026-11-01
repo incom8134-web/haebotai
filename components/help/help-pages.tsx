@@ -8,7 +8,7 @@ import { PATCH_NOTES } from "@/lib/site/patch-notes";
 import { useBi, useLocale } from "@/lib/i18n/context";
 import { PageHeader, primaryButton, secondaryButton } from "@/components/site/page";
 import { cn } from "@/lib/utils";
-import { OWN_KEY_ONLY } from "@/lib/site/access";
+import { FREE_OWN_KEY, MEMBER_API_KEYS, OWN_KEY_ONLY } from "@/lib/site/access";
 
 export function HelpTitle({ title, lead }: { title: { ko: string; en: string }; lead?: { ko: string; en: string } }) {
   const L = useBi();
@@ -24,6 +24,7 @@ export function HelpHome() {
   const doors = [
     { href: "/help/faq", icon: CircleHelp, title: { ko: "자주 묻는 질문", en: "FAQ" }, body: { ko: `${FAQ.length}개 질문을 주제별로`, en: `${FAQ.length} answers by topic` } },
     { href: "/help/contact", icon: Headset, title: { ko: "고객센터", en: "Customer service" }, body: { ko: "1:1 문의와 원격 지원", en: "Tickets and remote help" } },
+    ...(MEMBER_API_KEYS ? [{ href: "/help/api-guide", icon: KeyRound, title: { ko: "API 키 설명서", en: "API key manual" }, body: { ko: "키 받기부터 연결까지 영상·PDF", en: "Get and connect a key: video and PDF" } }] : []),
     { href: "/onboarding", icon: Rocket, title: { ko: "처음 시작하기", en: "Getting started" }, body: { ko: "목표 → 프로젝트 → 첫 도구, 세 화면", en: "Goal → project → first tool, three screens" } },
     OWN_KEY_ONLY
       ? { href: "/pricing", icon: CircleGauge, title: { ko: "요금", en: "Pricing" }, body: { ko: "AI는 내 API 키로 실행", en: "The AI runs on your own key" } }
@@ -99,7 +100,7 @@ export function ApiGuide() {
   const [copied, setCopied] = useState(false);
   return (
     <>
-      <PageHeader title={L({ ko: "API 키 설명서", en: "API key manual" })} lead={L(OWN_KEY_ONLY ? { ko: "해바의 도구는 내 Google AI Studio 키로 실행돼요. 발급과 등록은 5분이면 끝나요.", en: "Haeba's tools run on your own Google AI Studio key. Getting and adding one takes about 5 minutes." } : { ko: "내 Google AI Studio 키로 해바를 쓰면 크레딧이 차감되지 않아요. 5분이면 끝나요.", en: "Run Haeba on your own Google AI Studio key and no credits are charged. Takes five minutes." })} />
+      <PageHeader title={L({ ko: "API 키 설명서", en: "API key manual" })} lead={L(FREE_OWN_KEY ? { ko: "무료 플랜은 내 Google AI Studio 키로 모든 도구를 실행해요. 키는 무료로 받을 수 있고, 발급과 등록은 5분이면 끝나요. 플러스·프로는 키 없이 크레딧으로 실행돼요.", en: "On the Free plan, every tool runs on your own Google AI Studio key. Keys are free, and getting and adding one takes about 5 minutes. Plus and Pro run on credits, without a key." } : OWN_KEY_ONLY ? { ko: "해바의 도구는 내 Google AI Studio 키로 실행돼요. 발급과 등록은 5분이면 끝나요.", en: "Haeba's tools run on your own Google AI Studio key. Getting and adding one takes about 5 minutes." } : { ko: "내 Google AI Studio 키로 해바를 쓰면 크레딧이 차감되지 않아요. 5분이면 끝나요.", en: "Run Haeba on your own Google AI Studio key and no credits are charged. Takes five minutes." })} />
       {/* Watch first: the 8-step walkthrough (search → create → copy → paste → applied), then the full manuals with screenshots. */}
       <section id="video" className="mb-6 grid scroll-mt-24 grid-cols-1 gap-6 lg:grid-cols-[1.3fr_1fr]">
         <div className="min-w-0">

@@ -3,7 +3,7 @@
 import { useActionState, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AlertTriangle, ArrowRight, Check, CircleCheck, CircleGauge, Crown, ExternalLink, GraduationCap, KeyRound, LogOut, Trash2 } from "lucide-react";
+import { AlertTriangle, ArrowRight, Check, CircleCheck, CircleGauge, Crown, ExternalLink, GraduationCap, KeyRound, LogOut, PlayCircle, Trash2 } from "lucide-react";
 import { PLANS, planName } from "@/lib/site/plans";
 import { requestStudentVerification, type StudentRequestState } from "@/lib/actions/membership";
 import { deleteApiKey, saveApiKey, testApiKey, type ApiKeyActionState } from "@/lib/actions/api-keys";
@@ -16,7 +16,7 @@ import { listTools } from "@/lib/tools/registry";
 import { PageHeader, inputClass, primaryButton, secondaryButton, textareaClass } from "@/components/site/page";
 import { cn } from "@/lib/utils";
 import type { ConsentState } from "@/lib/consent";
-import { MEMBER_API_KEYS, OWN_KEY_ONLY, STUDENT_PLAN } from "@/lib/site/access";
+import { FREE_OWN_KEY, MEMBER_API_KEYS, MEMBER_KEY_PROVIDERS, OWN_KEY_ONLY, STUDENT_PLAN } from "@/lib/site/access";
 import { isPaidPlan, PRODUCTS } from "@/lib/payments/pro";
 import { UpgradeCard } from "@/components/upgrade-button";
 
@@ -251,7 +251,7 @@ function MembershipPanel({ membership, payments }: { membership: Membership; pay
     <>
       <PageHeader
         title={L({ ko: "멤버십", en: "Membership" })}
-        lead={L({ ko: "무료로 둘러보고, 플러스나 프로로 모든 도구를 실행해요. 30일 이용권이라 자동 결제는 없고, 남은 기간에 이어서 연장돼요.", en: "Browse free; run every tool on Plus or Pro. Each is a 30-day pass with no auto-renewal, and buying again extends what's left." })}
+        lead={L(FREE_OWN_KEY ? { ko: "무료 플랜은 내 Gemini API 키로, 플러스와 프로는 키 없이 크레딧으로 모든 도구를 실행해요. 30일 이용권이라 자동 결제는 없고, 남은 기간에 이어서 연장돼요.", en: "Free runs every tool on your own Gemini API key; Plus and Pro run on credits, without a key. Each is a 30-day pass with no auto-renewal, and buying again extends what's left." } : { ko: "무료로 둘러보고, 플러스나 프로로 모든 도구를 실행해요. 30일 이용권이라 자동 결제는 없고, 남은 기간에 이어서 연장돼요.", en: "Browse free; run every tool on Plus or Pro. Each is a 30-day pass with no auto-renewal, and buying again extends what's left." })}
       />
       {/* Plan */}
       <section>
@@ -442,12 +442,19 @@ function ProviderKeyCard({ provider, slots }: { provider: ApiKeyProvider; slots:
   );
 }
 
-function ApiKeyPanel({ apiKey }: { apiKey: ApiKeyStatus }) {
+function ApiKeyPanel({ apiKey, paidPlan = false }: { apiKey: ApiKeyStatus; paidPlan?: boolean }) {
   const L = useBi();
   return (
     <>
       <PageHeader title={L({ ko: "내 API 키", en: "My API key" })} lead={L({ ko: "도구는 직접 발급받은 내 API 키로 실행돼요. 제공사마다 키를 최대 3개까지 우선순위로 등록할 수 있고, 한도가 차면 다음 키로 자동 전환돼요.", en: "Tools run on API keys you get yourself. Register up to 3 priority-ordered keys per provider — when one hits its quota, the next takes over." })} />
       <section className="space-y-6">
+        {/* Plus and Pro run on credits; a saved key is only used on the Free plan (lib/run-access.ts). */}
+        {paidPlan ? (
+          <p className="flex items-start gap-2 rounded-2xl border border-hairline bg-surface-2/60 px-4 py-3 text-sm break-keep text-fg-muted">
+            <Crown size={16} className="mt-0.5 shrink-0 text-studio-cyan" aria-hidden />
+            {L({ ko: "플러스·프로 플랜은 키 없이 크레딧으로 실행돼요. 여기 등록한 키는 무료 플랜일 때만 쓰여요.", en: "Plus and Pro run on credits, without a key. A key saved here is only used on the Free plan." })}
+          </p>
+        ) : null}
         {/* No Google key yet: how to get one comes first, not in small print at the bottom. */}
         {apiKey.enabled && !apiKey.providers.google.some((k) => k.connected) ? (
           <div className="rounded-[24px] border border-studio-cyan/40 bg-studio-cyan/10 p-5">
@@ -459,7 +466,10 @@ function ApiKeyPanel({ apiKey }: { apiKey: ApiKeyStatus }) {
               {L({ ko: "Google AI Studio에서 키를 만들고 「Copy key」로 복사한 뒤, 아래 Google Gemini 「1순위」 칸에 붙여넣고 「적용」을 누르세요.", en: "Create a key in Google AI Studio, click \"Copy key\", then paste it into the Google Gemini \"1st priority\" box below and click \"apply\"." })}
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
-              <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer" className={cn(primaryButton, "h-10 px-4")}>
+              <Link href="/help/api-guide#video" className={cn(primaryButton, "h-10 px-4")}>
+                <PlayCircle size={16} aria-hidden /> {L({ ko: "키 받는 방법 보기", en: "How to get a key" })}
+              </Link>
+              <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer" className={cn(secondaryButton, "h-10 px-4")}>
                 Google AI Studio <ExternalLink size={14} aria-hidden />
               </a>
             </div>
@@ -467,12 +477,16 @@ function ApiKeyPanel({ apiKey }: { apiKey: ApiKeyStatus }) {
         ) : null}
         {apiKey.enabled ? (
           <>
-            <ProviderKeyCard provider="google" slots={apiKey.providers.google} />
-            <ProviderKeyCard provider="anthropic" slots={apiKey.providers.anthropic} />
+            {MEMBER_KEY_PROVIDERS.map((p) => (
+              <ProviderKeyCard key={p} provider={p} slots={apiKey.providers[p]} />
+            ))}
           </>
         ) : (
           <p className="rounded-xl bg-studio-warning/10 p-3 text-sm text-fg-muted">{L(KEY_MSG.server_disabled)}</p>
         )}
+        <p className="text-sm text-fg-muted">
+          {L({ ko: "처음이라면", en: "First time?" })} <Link href="/help/api-guide" className="text-studio-cyan underline underline-offset-2">{L({ ko: "API 키 설명서", en: "Read the API key manual" })}</Link>{L({ ko: "를 보세요 — 발급, 보안, 문제 해결까지 담겨 있어요.", en: " — getting a key, security and troubleshooting." })}
+        </p>
       </section>
     </>
   );

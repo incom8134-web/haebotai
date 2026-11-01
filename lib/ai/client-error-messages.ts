@@ -124,6 +124,16 @@ const PATTERNS: { test: (msg: string) => boolean; map: (msg: string) => MappedEr
     map: () => ({ ko: "크레딧이 부족해요.", en: "Not enough credits.", link: "/account/membership", linkLabel: { ko: "크레딧 충전하기", en: "Top up credits" } }),
   },
   {
+    // FREE_KEY_REQUIRED_MESSAGE (lib/run-access.ts): a Free account with no working key.
+    test: (m) => m.includes("무료 플랜은 내 Gemini API 키로 실행해요"),
+    map: () => ({
+      ko: "무료 플랜은 내 Gemini API 키로 실행해요. 키를 등록하거나, 키 없이 쓰려면 플러스 플랜을 골라 주세요.",
+      en: "The Free plan runs on your own Gemini API key. Add a key, or choose Plus to run without one.",
+      link: "/account/api-key",
+      linkLabel: { ko: "API 키 등록하기", en: "Add my API key" },
+    }),
+  },
+  {
     test: (m) => m.includes("플러스 플랜부터"),
     map: () => ({
       ko: "도구 실행은 플러스 플랜부터 할 수 있어요.",

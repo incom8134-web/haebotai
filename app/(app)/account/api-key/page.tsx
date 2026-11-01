@@ -5,7 +5,9 @@ import { getApiKeyStatus } from "@/lib/api-keys";
 import { cookies } from "next/headers";
 import { titled } from "@/lib/site/meta";
 import { redirect } from "next/navigation";
-import { MEMBER_API_KEYS } from "@/lib/site/access";
+import { MEMBER_API_KEYS, SAAS } from "@/lib/site/access";
+import { getMembership } from "@/lib/membership";
+import { isPaidPlan } from "@/lib/payments/pro";
 
 export const generateMetadata = titled("내 API 키", "My API key");
 
@@ -18,7 +20,7 @@ function safeNext(raw: string | undefined) {
 export default async function ApiKeyPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   // Hidden while members can't add their own key (lib/site/access.ts); the page stays for when they can again.
   if (!MEMBER_API_KEYS) redirect("/account/membership");
-  const [apiKey, { next }, jar] = await Promise.all([getApiKeyStatus(), searchParams, cookies()]);
+  const [apiKey, { next }, jar, membership] = await Promise.all([getApiKeyStatus(), searchParams, cookies(), getMembership()]);
   const locale = jar.get("locale")?.value === "en" ? "en" : "ko";
   const back = safeNext(next);
   return (
@@ -34,7 +36,7 @@ export default async function ApiKeyPage({ searchParams }: { searchParams: Promi
           </Link>
         </div>
       ) : null}
-      <ApiKeyPanel apiKey={apiKey} />
+      <ApiKeyPanel apiKey={apiKey} paidPlan={SAAS && isPaidPlan(membership.plan)} />
     </>
   );
 }

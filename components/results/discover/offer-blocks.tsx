@@ -81,7 +81,7 @@ export function OfferBlocks({ output }: { output: Record<string, unknown> }) {
 
       <div className="grid gap-3 md:grid-cols-2">
         <EditableBlock label={L({ ko: "핵심 약속", en: "Core promise" })} initial={str(output.core_promise)} big />
-        <EditableBlock label={L({ ko: "포지셔닝 한 줄", en: "Positioning line" })} initial={str(output.positioning_line)} />
+        <EditableBlock label={L({ ko: "차별점 한 줄", en: "Positioning line" })} initial={str(output.positioning_line)} />
       </div>
 
       {str(target.who) ? (

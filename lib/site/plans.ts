@@ -1,5 +1,6 @@
 import type { Bilingual } from "@/lib/tools/content";
 import { PRODUCTS } from "@/lib/payments/pro";
+import { FREE_OWN_KEY } from "@/lib/site/access";
 
 // "student" stays a valid stored value (old rows); the app treats it as
 // free while the student plan is off (lib/site/access.ts).
@@ -14,14 +15,22 @@ export const PLANS: { id: Exclude<PlanId, "student">; name: Bilingual; price: Bi
     id: "free",
     name: { ko: "무료", en: "Free" },
     price: { ko: "₩0", en: "₩0" },
-    note: { ko: "둘러보기", en: "Browse" },
+    // Free accounts run on their own Gemini key while FREE_OWN_KEY is on (lib/site/access.ts).
+    note: FREE_OWN_KEY ? { ko: "내 API 키로 실행", en: "Runs on your own API key" } : { ko: "둘러보기", en: "Browse" },
     credits: { ko: "크레딧 없음", en: "No credits" },
-    features: [
-      { ko: "16개 도구와 예시 결과 둘러보기", en: "Browse all 16 tools and sample results" },
-      { ko: "비즈니스 프로필·프로젝트 만들기", en: "Set up your Business Profile and projects" },
-      { ko: "공유받은 결과 보기", en: "Open results shared with you" },
-      { ko: "도구 실행은 플러스부터", en: "Running tools starts with Plus" },
-    ],
+    features: FREE_OWN_KEY
+      ? [
+          { ko: "내 Gemini API 키로 16개 도구 모두 실행", en: "Run all 16 tools on your own Gemini API key" },
+          { ko: "AI 요금은 내 Google 계정으로 직접 청구", en: "AI usage billed to your own Google account" },
+          { ko: "비즈니스 프로필·프로젝트 만들기", en: "Set up your Business Profile and projects" },
+          { ko: "공유받은 결과 보기", en: "Open results shared with you" },
+        ]
+      : [
+          { ko: "16개 도구와 예시 결과 둘러보기", en: "Browse all 16 tools and sample results" },
+          { ko: "비즈니스 프로필·프로젝트 만들기", en: "Set up your Business Profile and projects" },
+          { ko: "공유받은 결과 보기", en: "Open results shared with you" },
+          { ko: "도구 실행은 플러스부터", en: "Running tools starts with Plus" },
+        ],
   },
   {
     id: "plus",
@@ -31,7 +40,7 @@ export const PLANS: { id: Exclude<PlanId, "student">; name: Bilingual; price: Bi
     credits: credits(PRODUCTS.plus.credits),
     features: [
       { ko: "16개 도구 모두 실행", en: "Run all 16 tools" },
-      { ko: `${PRODUCTS.plus.credits.toLocaleString()} 크레딧 (예: 블로그 글 5편 + 리포트 20개)`, en: `${PRODUCTS.plus.credits.toLocaleString()} credits (e.g. 5 blog posts + 20 reports)` },
+      { ko: `${PRODUCTS.plus.credits.toLocaleString()} 크레딧 (예: 블로그 글 5편 + 보고서 20개)`, en: `${PRODUCTS.plus.credits.toLocaleString()} credits (e.g. 5 blog posts + 20 reports)` },
       { ko: "PDF·Word·PPT 디자인 결과 파일", en: "Designed PDF, Word and PPT downloads" },
       { ko: `모자라면 ${PRODUCTS.topup.credits} 크레딧 ${won(PRODUCTS.topup.amount)} 충전`, en: `Top up ${PRODUCTS.topup.credits} credits for ${won(PRODUCTS.topup.amount)}` },
     ],

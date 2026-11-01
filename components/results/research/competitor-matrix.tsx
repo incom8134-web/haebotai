@@ -72,7 +72,7 @@ export function CompetitorMatrix({ output }: { output: Record<string, unknown> }
       {comps.length ? (
         <section className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
           <div className="rounded-2xl border border-hairline bg-surface p-4">
-            <Kicker>{L({ ko: "포지셔닝 맵", en: "Positioning map" })}</Kicker>
+            <Kicker>{L({ ko: "경쟁 위치 지도", en: "Positioning map" })}</Kicker>
             <Chart
               half
               palette={PALETTES["competitor-lens"]}

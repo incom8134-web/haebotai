@@ -16,7 +16,7 @@ export function competitorLensReport(o: Record<string, unknown>): Report {
     {
       id: "map",
       kicker: "위치",
-      title: "포지셔닝 맵과 합계",
+      title: "경쟁 위치 지도와 합계",
       lead: str(o.summary) || undefined,
       blocks: keep([
         comps.length > 0 && {
@@ -42,7 +42,7 @@ export function competitorLensReport(o: Record<string, unknown>): Report {
       blocks: keep([
         {
           type: "table",
-          header: ["경쟁사", "포지션", "가격", "강점", "약점", "출처"],
+          header: ["경쟁사", "차별점", "가격", "강점", "약점", "출처"],
           rows: comps.map((c) => [str(c.name), str(c.positioning), str(c.price), strs(c.strengths).join(", "), strs(c.weaknesses).join(", "), ORIGIN_KO[str(c.origin)] ?? str(c.origin)]),
         },
       ]),

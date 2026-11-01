@@ -111,7 +111,7 @@ export function businessPlanReport(o: Record<string, unknown>): Report {
       matrix.length > 1 && { type: "table", title: "경쟁사 비교", header: matrix[0], rows: matrix.slice(1) },
       players.length > 1 && {
         type: "chart",
-        title: "포지셔닝 맵",
+        title: "경쟁 위치 지도",
         chart: { kind: "scatter", points: players, xLabel: str(positioning.x_axis) || "가로축", yLabel: str(positioning.y_axis) || "세로축", xMax: 10, yMax: 10 },
       },
       has(swot.strengths) && {
@@ -210,7 +210,7 @@ export function businessPlanReport(o: Record<string, unknown>): Report {
 
   add({
     id: "roadmap",
-    kicker: "07 · 실행 로드맵",
+    kicker: "07 · 실행 일정",
     title: "언제 무엇을 증명하는가",
     blocks: keep([
       {
@@ -229,7 +229,7 @@ export function businessPlanReport(o: Record<string, unknown>): Report {
     blocks: keep([
       risks.length > 0 && {
         type: "chart",
-        title: "리스크 매트릭스 (가능성 × 영향)",
+        title: "위험 표 (가능성 × 영향)",
         half: true,
         chart: {
           kind: "scatter",

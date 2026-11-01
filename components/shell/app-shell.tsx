@@ -15,7 +15,7 @@ import { signOut } from "@/lib/actions/auth";
 import { planName } from "@/lib/site/plans";
 import { UpgradeButton, upgradeTarget } from "@/components/upgrade-button";
 import { isPaidPlan } from "@/lib/payments/pro";
-import { OWN_KEY_ONLY, STUDENT_PLAN } from "@/lib/site/access";
+import { FREE_OWN_KEY, OWN_KEY_ONLY, STUDENT_PLAN } from "@/lib/site/access";
 import { getTool, listTools } from "@/lib/tools/registry";
 import { CATEGORY_LABELS } from "@/lib/tools/registry/categories";
 import { PATCH_NOTES } from "@/lib/site/patch-notes";
@@ -188,15 +188,22 @@ function LowCreditBanner({ balance, paid }: { balance: number; paid: boolean }) 
   );
 }
 
+// Whether this member's runs use their own API key (lib/site/access.ts): in own-key
+// mode everyone; in paid-plan mode a signed-in Free account (not the team).
+function runsOnOwnKey(signedIn: boolean, plan: PlanId, host: boolean): boolean {
+  return OWN_KEY_ONLY || (FREE_OWN_KEY && signedIn && !host && !isPaidPlan(plan));
+}
+
 function UserMenu({ email, plan, credits, host }: { email: string; plan: PlanId; credits: string; host: boolean }) {
   const L = useBi();
   const router = useRouter();
   const [signingOut, startSignOut] = useTransition();
   const planLabel = planName(plan);
   const upgrade = upgradeTarget(plan, host);
+  const onOwnKey = runsOnOwnKey(true, plan, host);
   const links = [
     { href: "/account", icon: CircleUserRound, label: { ko: "내 계정", en: "My account" } },
-    OWN_KEY_ONLY
+    onOwnKey
       ? { href: "/account/api-key", icon: KeyRound, label: { ko: "내 API 키", en: "My API key" } }
       : { href: "/account/credits", icon: CircleGauge, label: { ko: "크레딧·한도", en: "Credits & limits" } },
     { href: "/help", icon: CircleHelp, label: { ko: "도움말", en: "Help" } },
@@ -213,7 +220,7 @@ function UserMenu({ email, plan, credits, host }: { email: string; plan: PlanId;
         <div className="px-2.5 py-2">
           <p className="truncate text-sm font-medium text-fg">{email}</p>
           <p className="mt-0.5 text-2xs text-fg-muted">
-            {OWN_KEY_ONLY ? L({ ko: "내 API 키로 사용", en: "Runs on your own API key" }) : <>{L(planLabel)} · {credits} {L({ ko: "크레딧", en: "credits" })}</>}
+            {onOwnKey ? L({ ko: "내 API 키로 사용", en: "Runs on your own API key" }) : <>{L(planLabel)} · {credits} {L({ ko: "크레딧", en: "credits" })}</>}
           </p>
         </div>
         {upgrade ? (
@@ -327,7 +334,7 @@ function AppShell({ user, balance, plan, host = false, answeredTickets, notices,
             <span className="hidden truncate sm:inline">{L({ ko: "도구 찾기", en: "Find a tool" })}</span>
             <kbd className="ml-auto hidden rounded-md border border-hairline px-1.5 font-mono text-[10px] sm:inline">⌘K</kbd>
           </button>
-          {OWN_KEY_ONLY ? (
+          {runsOnOwnKey(!!user, plan, host) ? (
             <Link href="/account/api-key" className="glass pointer-events-auto flex h-11 items-center gap-2 rounded-2xl px-3.5 text-xs lg:hidden" aria-label={L({ ko: "내 API 키", en: "My API key" })}>
               <KeyRound size={14} className="text-studio-cyan" aria-hidden /> {L({ ko: "API 키", en: "API key" })}
             </Link>
@@ -377,7 +384,7 @@ function AppShell({ user, balance, plan, host = false, answeredTickets, notices,
           />
         ))}
         <span className="my-1 h-px w-8 bg-hairline" aria-hidden />
-        {OWN_KEY_ONLY ? (
+        {runsOnOwnKey(!!user, plan, host) ? (
           <Link href="/account/api-key" className="grid w-12 place-items-center gap-0.5 rounded-2xl py-2 text-studio-cyan" aria-label={L({ ko: "내 API 키", en: "My API key" })}>
             <KeyRound size={16} aria-hidden />
             <span className="text-[10px] text-fg-muted">{L({ ko: "API 키", en: "Key" })}</span>

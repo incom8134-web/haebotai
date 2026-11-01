@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { applyToAnthropicParams, applyToGeminiParams, currentOutputLanguage, ENGLISH_RULE, localizeText, parseOutputLanguage, runWithOutputLanguage } from "./output-language.ts";
+import { applyToAnthropicParams, applyToGeminiParams, currentOutputLanguage, ENGLISH_RULE, localizeText, parseOutputLanguage, PLAIN_KOREAN_RULE, runWithOutputLanguage } from "./output-language.ts";
 
 test("only 'en' selects English; anything else is Korean", () => {
   assert.equal(parseOutputLanguage("en"), "en");
@@ -9,9 +9,20 @@ test("only 'en' selects English; anything else is Korean", () => {
   assert.equal(parseOutputLanguage("fr"), "ko");
 });
 
-test("Korean runs leave prompts untouched", () => {
-  const params = { model: "m", contents: "한국어로 요약하세요", config: { systemInstruction: "반드시 한국어로 작성하세요." } };
+test("Korean runs keep their prompts and add only the plain-Korean rule", () => {
+  const params = { model: "m", contents: "한국어로 요약하세요", config: { systemInstruction: "반드시 한국어로 작성하세요.", temperature: 1 } };
+  const out = applyToGeminiParams(params, "ko");
+  assert.equal(out.contents, "한국어로 요약하세요");
+  assert.equal(out.config.systemInstruction, `반드시 한국어로 작성하세요.\n\n${PLAIN_KOREAN_RULE}`);
+  assert.equal(out.config.temperature, 1);
+  assert.equal(params.config.systemInstruction, "반드시 한국어로 작성하세요."); // the caller's object is not changed
+});
+
+test("Korean calls without instructions (e.g. image-only) are left as they are", () => {
+  const params = { model: "m", contents: "x" };
   assert.equal(applyToGeminiParams(params, "ko"), params);
+  const anthropic = { system: "요약하세요.", messages: [{ role: "user", content: "정리" }] };
+  assert.equal(applyToAnthropicParams(anthropic, "ko").system, `요약하세요.\n\n${PLAIN_KOREAN_RULE}`);
 });
 
 test("English runs swap the Korean directives and add the English rule", () => {

@@ -134,7 +134,7 @@ export function AdBoard({ output }: { output: Record<string, unknown> }) {
           <Camera className="size-3.5 text-accent" aria-hidden /> {L({ ko: "제품 사진 모드로 광고 사진 찍기", en: "Shoot ad photos in photo mode" })}
         </Link>
         <Link href="/tools/ad-model/run" className="inline-flex items-center gap-1.5 rounded-xl border border-hairline px-3 py-2 text-xs text-fg hover:border-accent">
-          <UserSquare className="size-3.5 text-accent" aria-hidden /> {L({ ko: "모델 룩북 모드", en: "Model lookbook mode" })}
+          <UserSquare className="size-3.5 text-accent" aria-hidden /> {L({ ko: "모델 사진 모드", en: "Model lookbook mode" })}
         </Link>
       </section>
     </div>

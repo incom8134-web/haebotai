@@ -9,6 +9,7 @@ import { getTool } from "@/lib/tools/registry";
 import { useBi } from "@/lib/i18n/context";
 import { primaryButton, secondaryButton } from "@/components/site/page";
 import { cn } from "@/lib/utils";
+import { FREE_OWN_KEY } from "@/lib/site/access";
 
 // The three plans and the per-tool price list, shared by the homepage,
 // /pricing and the account's credits page so they never disagree.
@@ -38,10 +39,10 @@ export function PlanCards({ signedIn }: { signedIn: boolean }) {
             ))}
           </ul>
           <Link
-            href={p.id === "free" ? (signedIn ? "/tools" : "/auth") : signedIn ? `/account/membership/checkout?product=${p.id}` : `/auth?next=${encodeURIComponent(`/account/membership/checkout?product=${p.id}`)}`}
+            href={p.id === "free" ? (signedIn ? (FREE_OWN_KEY ? "/account/api-key" : "/tools") : "/auth") : signedIn ? `/account/membership/checkout?product=${p.id}` : `/auth?next=${encodeURIComponent(`/account/membership/checkout?product=${p.id}`)}`}
             className={cn(p.id === "free" ? secondaryButton : primaryButton, "mt-7")}
           >
-            {p.id === "free" ? L({ ko: "둘러보기", en: "Browse the tools" }) : L({ ko: `${p.name.ko} 시작하기`, en: `Get ${p.name.en}` })}
+            {p.id === "free" ? (FREE_OWN_KEY ? L({ ko: "무료로 시작하기", en: "Start free" }) : L({ ko: "둘러보기", en: "Browse the tools" })) : L({ ko: `${p.name.ko} 시작하기`, en: `Get ${p.name.en}` })}
           </Link>
         </article>
       ))}

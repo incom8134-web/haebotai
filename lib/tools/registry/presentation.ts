@@ -33,7 +33,7 @@ export const presentation: ToolManifest = {
       id: "purpose",
       label: "목적",
       options: [
-        { value: "pitch", label: "제안·피칭" },
+        { value: "pitch", label: "제안·투자 발표" },
         { value: "report", label: "성과 보고" },
         { value: "launch", label: "런칭 전략" },
         { value: "education", label: "교육·설명" },
@@ -45,7 +45,7 @@ export const presentation: ToolManifest = {
       label: "디자인 톤",
       options: [
         { value: "trust", label: "단정하고 신뢰감 있게" },
-        { value: "bold", label: "강렬하고 임팩트 있게" },
+        { value: "bold", label: "강렬하고 눈에 띄게" },
       ],
     },
     { kind: "textarea", id: "reference", label: "꼭 넣을 자료·수치", rows: 4, max: 3000 },

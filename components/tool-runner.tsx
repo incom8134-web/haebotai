@@ -4,7 +4,7 @@ import { toolSlug } from "@/lib/tools/catalog";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { notFound, usePathname, useRouter, useSearchParams } from "next/navigation";
-import { AlertTriangle, Crown, KeyRound, RotateCcw, SlidersHorizontal, SquarePen, X } from "lucide-react";
+import { AlertTriangle, Crown, KeyRound, PlayCircle, RotateCcw, SlidersHorizontal, SquarePen, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -41,7 +41,7 @@ import { Stage } from "@/components/tools/experience/stage";
 import { useLocale, useT, useBi } from "@/lib/i18n/context";
 import { useLocalValue } from "@/lib/hooks/use-local-list";
 import { resolveCost } from "@/lib/ai/resolve-provider";
-import { MEMBER_API_KEYS, OWN_KEY_ONLY, SAAS } from "@/lib/site/access";
+import { FREE_OWN_KEY, MEMBER_API_KEYS, OWN_KEY_ONLY, SAAS } from "@/lib/site/access";
 import { mapRunError } from "@/lib/ai/client-error-messages";
 import { PROVIDER_LABEL, type ProviderId } from "@/lib/ai/types";
 import type { DictKey } from "@/lib/i18n/dictionaries";
@@ -178,11 +178,13 @@ function ToolRunner({
     savedProvider && availableProviders.includes(savedProvider as ProviderId)
       ? (savedProvider as ProviderId)
       : defaultProvider;
-  // SaaS: every run costs the tool's credits on Plus or Pro (the team runs free). Own-key mode: nothing is charged (lib/site/access.ts).
-  const cost = !manifest || OWN_KEY_ONLY || team ? 0 : SAAS ? manifest.estimatedCredits : resolveCost(provider, !!hasOwnKey[provider], isStudent, manifest.estimatedCredits);
-  const needsKey = OWN_KEY_ONLY && !hasOwnKey[provider] && !(provider === "google" && team);
-  // Free accounts browse; running needs a plan (lib/run-access.ts).
-  const needsPlan = SAAS && !team && !paid;
+  // SaaS: Plus and Pro pay the tool's credits; a Free account runs on its own Gemini key
+  // for nothing (the team runs free). Own-key mode: nothing is charged (lib/site/access.ts).
+  const freeOnOwnKey = SAAS && FREE_OWN_KEY && !team && !paid;
+  const cost = !manifest || OWN_KEY_ONLY || team || freeOnOwnKey ? 0 : SAAS ? manifest.estimatedCredits : resolveCost(provider, !!hasOwnKey[provider], isStudent, manifest.estimatedCredits);
+  const needsKey = (OWN_KEY_ONLY && !hasOwnKey[provider] && !(provider === "google" && team)) || (freeOnOwnKey && !hasOwnKey.google);
+  // Without free-on-own-key, Free accounts browse and running needs a plan (lib/run-access.ts).
+  const needsPlan = SAAS && !team && !paid && !FREE_OWN_KEY;
 
   const [projectId, setProjectId] = useState(initialProject && projects.some((p) => p.id === initialProject) ? initialProject : "");
   // Opened inside a project: the form fills from the project's memory, so
@@ -619,7 +621,7 @@ function ToolRunner({
           </span>
           <span className="text-sm font-semibold break-keep">{locale === "en" ? manifest.name_en : manifest.name_ko}</span>
           <span className="rounded-full border border-hairline px-2.5 py-0.5 font-mono text-2xs whitespace-nowrap text-fg-subtle">
-            {OWN_KEY_ONLY ? (
+            {OWN_KEY_ONLY || freeOnOwnKey ? (
               <>
                 ~{manifest.estimatedSeconds}
                 {t("seconds")} · {hasOwnKey[provider] ? L({ ko: "내 API 키로 실행", en: "Runs on your API key" }) : team ? L({ ko: "팀 테스트 키", en: "Team test key" }) : L({ ko: "API 키 필요", en: "API key needed" })}
@@ -654,7 +656,17 @@ function ToolRunner({
               <Link href={`/account/api-key?next=${encodeURIComponent(here)}`} className="studio-gradient-bg inline-flex h-11 items-center gap-1.5 rounded-2xl px-5 text-sm font-semibold text-white shadow-[inset_0_1px_0_oklch(1_0_0/30%),0_10px_24px_-10px_var(--studio-violet)] hover:opacity-95">
                 <KeyRound size={15} aria-hidden /> {L({ ko: "API 키 등록하기", en: "Add my API key" })}
               </Link>
+              <Link href="/help/api-guide#video" className="inline-flex h-11 items-center gap-1.5 rounded-2xl border border-hairline bg-surface px-5 text-sm font-semibold text-fg hover:border-studio-cyan">
+                <PlayCircle size={15} className="text-studio-cyan" aria-hidden /> {L({ ko: "키 받는 방법 보기 (영상)", en: "How to get a key (video)" })}
+              </Link>
             </div>
+            {freeOnOwnKey ? (
+              <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-fg-muted">
+                <Crown size={14} className="shrink-0 text-studio-cyan" aria-hidden />
+                {L({ ko: "키 없이 쓰고 싶다면 플러스·프로 플랜으로 크레딧으로 실행할 수 있어요.", en: "Rather not use a key? Plus and Pro run on credits instead." })}
+                <Link href="/account/membership" className="font-semibold text-studio-cyan hover:underline">{L({ ko: "플랜 보기", en: "See plans" })}</Link>
+              </p>
+            ) : null}
           </div>
         ) : null}
         {cost > 0 && balance !== null && !needsPlan ? (
@@ -663,7 +675,7 @@ function ToolRunner({
               <AlertTriangle size={15} className="shrink-0 text-danger" aria-hidden />
               {L({ ko: `크레딧이 부족해요 — 필요 ${cost} · 보유 ${balance.toLocaleString()}`, en: `Not enough credits — needs ${cost}, you have ${balance.toLocaleString()}` })}
               <Link href={paid ? "/account/membership/checkout?product=topup" : "/account/membership"} className="font-medium text-studio-cyan hover:underline">{L({ ko: "충전하기", en: "Top up" })}</Link>
-              {MEMBER_API_KEYS ? <Link href="/account/api-key" className="font-medium text-studio-cyan hover:underline">{L({ ko: "내 API 키 연결", en: "Connect your API key" })}</Link> : null}
+              {OWN_KEY_ONLY && MEMBER_API_KEYS ? <Link href="/account/api-key" className="font-medium text-studio-cyan hover:underline">{L({ ko: "내 API 키 연결", en: "Connect your API key" })}</Link> : null}
               {plan === "plus" ? <Link href="/account/membership/checkout?product=pro" className="font-medium text-studio-cyan hover:underline">{L({ ko: "프로로 업그레이드 (6,000 크레딧)", en: "Upgrade to Pro (6,000 credits)" })}</Link> : null}
             </p>
           ) : (
@@ -858,7 +870,7 @@ function ToolRunner({
         </p>
       ) : null}
       {phase === "streaming" && cancelNote ? <p role="status" className="mt-2 text-xs text-fg-muted">{cancelNote}</p> : null}
-      <ApiKeyPrompt open={keyPrompt} onOpenChange={setKeyPrompt} next={here} />
+      <ApiKeyPrompt open={keyPrompt} onOpenChange={setKeyPrompt} next={here} plans={freeOnOwnKey} />
       <PlanPrompt open={planPrompt} onOpenChange={setPlanPrompt} />
 
       {phase === "understanding" ? (

@@ -19,9 +19,9 @@ export function strategyReport(o: Record<string, unknown>): Report {
   sections.push({
     id: "core",
     kicker: "핵심",
-    title: "한 문장 포지셔닝",
+    title: "한 문장 차별점",
     blocks: keep([
-      { type: "callout", label: "포지셔닝", text: str(o.positioning_statement) },
+      { type: "callout", label: "차별점", text: str(o.positioning_statement) },
       { type: "text", text: str(o.summary) },
       { type: "callout", label: "고객이 느끼는 긴장", text: str(o.core_tension), tone: "warn" },
       { type: "bullets", title: "믿을 이유", style: "check", items: strs(o.reasons_to_believe) },
@@ -35,18 +35,18 @@ export function strategyReport(o: Record<string, unknown>): Report {
       {
         type: "cards",
         columns: 2,
-        items: objs(o.market_insights).map((m, i) => ({ kicker: `인사이트 ${i + 1}`, title: str(m.insight), lines: str(m.implication) ? [`→ ${str(m.implication)}`] : [] })).filter((c) => c.title),
+        items: objs(o.market_insights).map((m, i) => ({ kicker: `발견 ${i + 1}`, title: str(m.insight), lines: str(m.implication) ? [`→ ${str(m.implication)}`] : [] })).filter((c) => c.title),
       },
     ]),
   });
   sections.push({
     id: "segments",
     kicker: "고객",
-    title: topSeg ? `핵심 고객: ${topSeg.name}` : "고객 세그먼트",
+    title: topSeg ? `핵심 고객: ${topSeg.name}` : "손님 유형",
     blocks: keep([
       segments.some((s) => s.share > 0) && {
         type: "chart",
-        chart: { kind: "donut", slices: segments.map((s) => ({ label: s.name, value: s.share })), unit: "%", center: { value: `${segments.length}개`, label: "세그먼트" } },
+        chart: { kind: "donut", slices: segments.map((s) => ({ label: s.name, value: s.share })), unit: "%", center: { value: `${segments.length}개`, label: "유형" } },
         estimated: true,
       },
       {
@@ -91,13 +91,13 @@ export function strategyReport(o: Record<string, unknown>): Report {
   });
   sections.push({
     id: "offers",
-    kicker: "오퍼",
+    kicker: "상품 구성",
     title: "무엇을 얼마에",
     lead: str(o.promise) ? `약속: ${str(o.promise)}` : undefined,
     blocks: keep([
       {
         type: "table",
-        header: ["오퍼", "내용", "가격 아이디어", "왜 통하나"],
+        header: ["상품 구성", "내용", "가격 아이디어", "왜 통하나"],
         rows: objs(o.offers).map((f) => [str(f.name), str(f.what), str(f.price_idea), str(f.why_it_works)]).filter((r) => r[0]),
       },
     ]),

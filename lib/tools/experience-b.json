@@ -72,7 +72,7 @@
     "ui": {
       "product_name": { "placeholder": { "ko": "예: 저당 수제 그래놀라 500g", "en": "e.g. Low-sugar granola, 500g" } },
       "features": { "placeholder": { "ko": "Enter로 추가 — 예: 당류 5g 이하", "en": "Press Enter — e.g. under 5g sugar" } },
-      "page_mood": { "display": "cards", "options": { "clean": { "icon": "layout-list", "desc": { "ko": "스펙 비교가 중요할 때", "en": "When specs matter" } }, "warm": { "icon": "heart", "desc": { "ko": "이야기로 설득할 때", "en": "When story sells" } }, "premium": { "icon": "gem", "desc": { "ko": "선물·고가 제품", "en": "Gifts, high-end" } } } }
+      "page_mood": { "display": "cards", "options": { "clean": { "icon": "layout-list", "desc": { "ko": "사양 비교가 중요할 때", "en": "When specs matter" } }, "warm": { "icon": "heart", "desc": { "ko": "이야기로 설득할 때", "en": "When story sells" } }, "premium": { "icon": "gem", "desc": { "ko": "선물·고가 제품", "en": "Gifts, high-end" } } } }
     },
     "stage": { "headline": { "ko": "사고 싶어지는 순서", "en": "Built in buying order" }, "story": { "ko": "여섯 섹션을 스토어 규격 860px 이미지로 렌더링합니다. 과장 광고 표현은 걸러 내요.", "en": "Six sections rendered at the 860px store standard, with exaggerated claims filtered out." }, "promises": [ { "icon": "layers", "text": { "ko": "6개 섹션", "en": "6 sections" } }, { "icon": "smartphone", "text": { "ko": "860px 이미지", "en": "860px image" } }, { "icon": "shield-check", "text": { "ko": "과장 표현 차단", "en": "No false claims" } } ] }
   },
