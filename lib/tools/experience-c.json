@@ -263,7 +263,7 @@
         "en": "Revenue map and value ladder"
       },
       "story": {
-        "ko": "세그먼트와 수익 흐름을 선으로 잇고, 첫 계단부터 프리미엄까지의 사다리와 고객 한 명의 가치를 보여 드려요.",
+        "ko": "손님 유형과 수익 흐름을 선으로 잇고, 첫 계단부터 프리미엄까지의 사다리와 고객 한 명의 가치를 보여 드려요.",
         "en": "Segments connected to streams, a ladder from first step to premium, and what one customer is worth."
       },
       "promises": [
@@ -407,7 +407,7 @@
     },
     "stage": {
       "headline": {
-        "ko": "복사해서 바로 쓰는 오퍼 블록",
+        "ko": "복사해서 바로 쓰는 상품 구성 문구",
         "en": "Offer blocks, ready to copy"
       },
       "story": {
@@ -698,7 +698,7 @@
     },
     "stage": {
       "headline": {
-        "ko": "MVP 보드: 기능, 여정, 단계",
+        "ko": "시험용 첫 상품 보드: 기능, 여정, 단계",
         "en": "MVP board: features, journey, stages"
       },
       "story": {
@@ -899,7 +899,7 @@
         {
           "icon": "target",
           "text": {
-            "ko": "포지셔닝",
+            "ko": "차별점",
             "en": "Positioning"
           }
         }
@@ -915,7 +915,7 @@
         "en": "The first 3 seconds that stop the scroll"
       },
       "story": {
-        "ko": "무엇을 누구에게 보여 줄지 알려 주세요. 서로 다른 심리로 여는 훅을 유형별로, 첫 장면까지 함께 만들어 드려요.",
+        "ko": "무엇을 누구에게 보여 줄지 알려 주세요. 서로 다른 심리로 여는 첫 문장을 유형별로, 첫 장면까지 함께 만들어 드려요.",
         "en": "Tell us what you're showing and to whom. You'll get hooks by family, each with its first scene."
       }
     },
@@ -1008,11 +1008,11 @@
     },
     "stage": {
       "headline": {
-        "ko": "유형별 훅 카드",
+        "ko": "유형별 첫 문장 카드",
         "en": "Hook cards by family"
       },
       "story": {
-        "ko": "훅마다 화면 글자, 첫 장면, 이어지는 문장, 플랫폼별 변형까지.",
+        "ko": "첫 문장마다 화면 글자, 첫 장면, 이어지는 문장, 플랫폼별 변형까지.",
         "en": "Each hook with on-screen text, first scene, follow-up line and platform versions."
       },
       "promises": [
@@ -1033,7 +1033,7 @@
         {
           "icon": "trophy",
           "text": {
-            "ko": "먼저 찍을 훅",
+            "ko": "먼저 찍을 첫 문장",
             "en": "Shoot this first"
           }
         }
@@ -1566,14 +1566,14 @@
         {
           "icon": "layout-list",
           "text": {
-            "ko": "비교 매트릭스",
+            "ko": "비교 표",
             "en": "Matrix"
           }
         },
         {
           "icon": "map-pin",
           "text": {
-            "ko": "포지셔닝 맵",
+            "ko": "경쟁 위치 지도",
             "en": "Map"
           }
         },
@@ -1649,7 +1649,7 @@
     },
     "stage": {
       "headline": {
-        "ko": "페르소나와 여정",
+        "ko": "대표 손님과 구매 과정",
         "en": "Persona and journey"
       },
       "story": {
@@ -1660,7 +1660,7 @@
         {
           "icon": "user-round",
           "text": {
-            "ko": "페르소나 카드",
+            "ko": "대표 손님 카드",
             "en": "Persona card"
           }
         },

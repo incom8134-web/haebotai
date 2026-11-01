@@ -14,7 +14,7 @@ export const calendar: ToolManifest = {
   inputs: [
     { kind: "textarea", id: "model", label: "실행할 모델", rows: 2, required: true },
     { kind: "text", id: "start_date", label: "시작일", placeholder: "YYYY-MM-DD", required: true },
-    { kind: "chips", id: "milestones", label: "주요 마일스톤" },
+    { kind: "chips", id: "milestones", label: "주요 중간 목표" },
     {
       kind: "select",
       id: "pace",

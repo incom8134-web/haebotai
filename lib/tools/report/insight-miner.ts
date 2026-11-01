@@ -55,7 +55,7 @@ export function insightMinerReport(o: Record<string, unknown>): Report {
   ];
   return {
     palette: PALETTES["insight-miner"],
-    hero: { eyebrow: "후기 분석하기", title: themes[0] ? `가장 많이 나온 이야기: ${str(themes[0].name)}` : "고객 인사이트", subtitle: str(o.summary) || undefined, kpis: [{ label: "읽은 자료", value: `${num(o.items_read)}건` }, { label: "주제", value: `${themes.length}개` }] },
+    hero: { eyebrow: "후기 분석하기", title: themes[0] ? `가장 많이 나온 이야기: ${str(themes[0].name)}` : "손님에 대해 알게 된 점", subtitle: str(o.summary) || undefined, kpis: [{ label: "읽은 자료", value: `${num(o.items_read)}건` }, { label: "주제", value: `${themes.length}개` }] },
     sections: sections.filter((s) => s.blocks.length),
   };
 }

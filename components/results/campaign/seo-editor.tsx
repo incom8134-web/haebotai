@@ -72,10 +72,10 @@ export function SeoEditor({ output, input }: { output: Record<string, unknown>; 
         )}
       </div>
 
-      <aside className="flex flex-col gap-3 lg:sticky lg:top-20 lg:self-start" aria-label={L({ ko: "SEO 점검", en: "SEO checks" })}>
+      <aside className="flex flex-col gap-3 lg:sticky lg:top-20 lg:self-start" aria-label={L({ ko: "검색 노출 점검", en: "SEO checks" })}>
         <section className="rounded-2xl border border-hairline bg-surface p-3">
           <div className="flex items-baseline justify-between">
-            <Kicker>{L({ ko: "SEO 점검", en: "SEO checks" })}</Kicker>
+            <Kicker>{L({ ko: "검색 노출 점검", en: "SEO checks" })}</Kicker>
             <span className={cn("text-sm font-bold tabular-nums", passed === checks.length ? "text-grounded" : "text-fg")} aria-live="polite">
               {passed}/{checks.length}
             </span>
@@ -91,7 +91,7 @@ export function SeoEditor({ output, input }: { output: Record<string, unknown>; 
               </li>
             ))}
           </ul>
-          <p className="mt-2 text-[10px] leading-relaxed text-fg-subtle">{L({ ko: "편집하면 바로 다시 점검해요. 기준은 일반적인 블로그 SEO 권장값입니다.", en: "Re-checks as you edit. Thresholds are common blog SEO guidance." })}</p>
+          <p className="mt-2 text-[10px] leading-relaxed text-fg-subtle">{L({ ko: "편집하면 바로 다시 점검해요. 기준은 일반적인 블로그 검색 노출 권장값입니다.", en: "Re-checks as you edit. Thresholds are common blog SEO guidance." })}</p>
         </section>
 
         {post.titles?.length ? (

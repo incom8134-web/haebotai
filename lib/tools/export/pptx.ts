@@ -1247,7 +1247,7 @@ export async function buildPptx(doc: ExportDoc): Promise<Buffer> {
     renderPresentation(deck, o, images);
   } else if (doc.report) {
     const mood = collectImageUrls(o.mood_board).map((u) => images.get(u)).filter((x): x is FetchedImage => Boolean(x));
-    if (mood.length) deck.image("MOOD", "추천 방향 무드보드", mood.map((img) => ({ img })), colorAt(0));
+    if (mood.length) deck.image("MOOD", "추천 방향 분위기 보드", mood.map((img) => ({ img })), colorAt(0));
     renderReport(ctx, doc.report);
   } else {
     const sections = Object.entries(o).filter(([k, v]) => !SKIP_KEYS.has(k) && !SLIDE_SKIP.has(k) && !isEmpty(v) && !isSourceArray(v));

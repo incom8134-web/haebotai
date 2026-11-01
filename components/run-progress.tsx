@@ -24,10 +24,10 @@ const RESEARCH_STEPS: Step[] = [
 const STEPS: Record<string, Step[]> = {
   strategy: [
     { ko: "시장·경쟁 리서치", en: "Market and competitor research" },
-    { ko: "고객 세그먼트와 핵심 긴장 찾기", en: "Segments and core tension" },
-    { ko: "포지셔닝·오퍼·실행 계획 작성", en: "Positioning, offers, plan" },
+    { ko: "손님 유형과 핵심 고민 찾기", en: "Segments and core tension" },
+    { ko: "차별점·상품 구성·실행 계획 작성", en: "Positioning, offers, plan" },
     { ko: "편집자 검토", en: "Editor pass" },
-    { ko: "추천 방향 무드보드 촬영", en: "Shooting the mood board" },
+    { ko: "추천 방향 분위기 보드 촬영", en: "Shooting the mood board" },
   ],
   blog: [
     { ko: "검색 의도와 상위 글 빈틈 조사", en: "Search intent and content gaps" },
@@ -39,7 +39,7 @@ const STEPS: Record<string, Step[]> = {
   copy: [
     { ko: "경쟁 광고 문구 조사", en: "Studying competitor ads" },
     { ko: "구매 동기별 광고 각도 설계", en: "Angles per buying motive" },
-    { ko: "헤드라인·본문·CTA 작성", en: "Headlines, body, CTAs" },
+    { ko: "제목·본문·구매 유도 문구 작성", en: "Headlines, body, CTAs" },
     { ko: "각도별 광고 사진 촬영", en: "Shooting an ad visual per angle" },
     { ko: "채널별 버전 정리", en: "Channel versions" },
   ],
@@ -55,7 +55,7 @@ const STEPS: Record<string, Step[]> = {
     { ko: "슬라이드별 주장과 근거 작성", en: "Writing each slide's claim" },
     { ko: "발표 메모와 편집자 검토", en: "Speaker notes and editor pass" },
     { ko: "표지·슬라이드 사진 촬영", en: "Shooting cover and slide photos" },
-    { ko: "브랜드 컬러로 덱 완성", en: "Finishing the deck" },
+    { ko: "브랜드 색으로 발표 자료 완성", en: "Finishing the deck" },
   ],
   logo: [
     { ko: "이름과 업종에서 상징 찾기", en: "Finding symbols in the name" },
@@ -72,25 +72,25 @@ const STEPS: Record<string, Step[]> = {
   "brand-model": [
     { ko: "모델과 룩 설정", en: "Casting the look" },
     { ko: "포즈와 장면 구성", en: "Poses and scenes" },
-    { ko: "룩북 4컷 촬영", en: "Shooting 4 looks" },
+    { ko: "모델 사진 4컷 촬영", en: "Shooting 4 looks" },
     { ko: "보정과 저장", en: "Finishing and saving" },
   ],
   sangsepage: [
     { ko: "경쟁 상세페이지 조사", en: "Studying top product pages" },
-    { ko: "구매 망설임과 셀링 포인트 정리", en: "Doubts and selling points" },
+    { ko: "구매 망설임과 판매 포인트 정리", en: "Doubts and selling points" },
     { ko: "섹션 카피 작성", en: "Writing each section" },
     { ko: "제품 사진 촬영", en: "Shooting product photos" },
-    { ko: "860px 상세페이지 렌더링", en: "Rendering the 860px page" },
+    { ko: "860px 상세페이지 그리기", en: "Rendering the 860px page" },
   ],
   calendar: [
-    { ko: "목표에서 거꾸로 마일스톤 계산", en: "Working back from the goal" },
+    { ko: "목표에서 거꾸로 중간 목표 계산", en: "Working back from the goal" },
     { ko: "13주 일정 배분", en: "Spreading 13 weeks" },
     { ko: "주별 과제와 완료 기준 작성", en: "Weekly tasks and done criteria" },
     { ko: "결과 정리", en: "Putting it together" },
   ],
   prompt: [
     { ko: "업무의 입력·출력 분해", en: "Breaking down the task" },
-    { ko: "시스템 프롬프트 설계", en: "Designing the system prompt" },
+    { ko: "AI 기본 지시문 설계", en: "Designing the system prompt" },
     { ko: "예시 실행과 실패 사례 점검", en: "Sample runs and failure modes" },
     { ko: "결과 정리", en: "Putting it together" },
   ],
@@ -104,7 +104,7 @@ const NOTES: Record<string, Step[]> = {
   ],
   presentation: [
     { ko: "슬라이드 제목은 라벨이 아니라 그 장의 주장으로 써요.", en: "Every slide title is a claim, not a label." },
-    { ko: "사진은 덱 전체가 한 톤으로 보이도록 같은 색감으로 촬영해요.", en: "Photos share one color grade so the deck feels like one piece." },
+    { ko: "사진은 발표 자료 전체가 한 톤으로 보이도록 같은 색감으로 촬영해요.", en: "Photos share one color grade so the deck feels like one piece." },
     { ko: "완성되면 PowerPoint로 바로 받아 발표할 수 있어요.", en: "When it's done you can download it as PowerPoint." },
   ],
 };

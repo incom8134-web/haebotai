@@ -13,7 +13,7 @@ export function personaMapperReport(o: Record<string, unknown>): Report {
   const sections: ReportSection[] = [
     ...personas.map((p, i) => ({
       id: `persona-${i}`,
-      kicker: `페르소나 ${i + 1}`,
+      kicker: `대표 손님 ${i + 1}`,
       title: `${str(p.name)} · ${str(p.age_range)}`,
       lead: str(p.situation) || undefined,
       blocks: keep([
@@ -54,7 +54,7 @@ export function personaMapperReport(o: Record<string, unknown>): Report {
   ];
   return {
     palette: PALETTES["persona-mapper"],
-    hero: { eyebrow: "손님 알아보기", title: personas.map((p) => str(p.name)).filter(Boolean).join(" · ") || "페르소나", subtitle: str(o.summary) || undefined, kpis: [{ label: "페르소나", value: `${personas.length}명` }] },
+    hero: { eyebrow: "손님 알아보기", title: personas.map((p) => str(p.name)).filter(Boolean).join(" · ") || "대표 손님", subtitle: str(o.summary) || undefined, kpis: [{ label: "대표 손님", value: `${personas.length}명` }] },
     sections: sections.filter((s) => s.blocks.length),
   };
 }

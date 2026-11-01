@@ -183,7 +183,7 @@ function StageView({ index }: { index: number }) {
         ))}
         <p className="col-span-3 rounded-lg bg-surface-2 px-2.5 py-1.5 text-2xs text-fg-muted">
           {L({
-            ko: "보증 · 보너스 · 반론 대응 · CTA까지",
+            ko: "보증 · 보너스 · 반론 대응 · 구매 유도 문구까지",
             en: "Guarantee, bonuses, objections and CTA too",
           })}
         </p>

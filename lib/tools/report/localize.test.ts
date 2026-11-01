@@ -4,7 +4,7 @@ import { englishMoney, labelEn, localizeLabels } from "./localize.ts";
 import { buildReport } from "./index.ts";
 
 test("exact and templated labels", () => {
-  assert.equal(labelEn("포지셔닝 맵"), "Positioning Map");
+  assert.equal(labelEn("경쟁 위치 지도"), "Positioning Map");
   assert.equal(labelEn("12개월 차"), "Month 12");
   assert.equal(labelEn("3주 차"), "Week 3");
   assert.equal(labelEn("  추정"), "  estimate");
@@ -19,7 +19,7 @@ test("Korean money becomes ₩ figures", () => {
 });
 
 test("Korean runs are untouched; colors and ids are kept", () => {
-  const r = { title: "포지셔닝 맵", color: "#2F3E5C", id: "verdict" };
+  const r = { title: "경쟁 위치 지도", color: "#2F3E5C", id: "verdict" };
   assert.equal(localizeLabels(r, "ko"), r);
   assert.deepEqual(localizeLabels(r, "en"), { title: "Positioning Map", color: "#2F3E5C", id: "verdict" });
 });

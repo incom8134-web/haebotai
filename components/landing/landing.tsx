@@ -173,7 +173,7 @@ function Hero() {
         </h1>
         <p className="mt-6 max-w-xl text-lg leading-relaxed break-keep text-fg-muted">
           {L({
-            ko: "사업 아이디어, 오퍼, 브랜드, 상세페이지, 캠페인, 업무 문서까지. 하나의 프로젝트가 정한 내용을 기억하고, 한 도구의 결과가 다음 도구의 입력이 돼요.",
+            ko: "사업 아이디어, 팔 상품 구성, 브랜드, 상세페이지, 캠페인, 업무 문서까지. 하나의 프로젝트가 정한 내용을 기억하고, 한 도구의 결과가 다음 도구의 입력이 돼요.",
             en: "Business ideas, offers, brand, sales pages, campaigns and operating documents. One project remembers what you've settled, and each tool's result becomes the next one's input.",
           })}
         </p>

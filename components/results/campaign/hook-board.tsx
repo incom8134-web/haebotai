@@ -63,7 +63,7 @@ export function HookBoard({ output, runId }: { output: Record<string, unknown>; 
       {str(best.text) ? (
         <div className="rounded-2xl border border-accent/30 bg-accent-dim p-4">
           <p className="flex items-center gap-1.5 text-2xs font-semibold text-accent">
-            <Trophy className="size-3.5" aria-hidden /> {L({ ko: "먼저 찍어 볼 훅", en: "Shoot this first" })}
+            <Trophy className="size-3.5" aria-hidden /> {L({ ko: "먼저 찍어 볼 첫 문장", en: "Shoot this first" })}
           </p>
           <div className="mt-1 flex items-start gap-2">
             <p className="flex-1 text-lg leading-snug font-bold text-fg break-keep">{str(best.text)}</p>
