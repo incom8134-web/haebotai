@@ -26,7 +26,7 @@ import {
   StepsSection,
   reveal,
 } from "./sections";
-import { OWN_KEY_ONLY } from "@/lib/site/access";
+import { FREE_OWN_KEY, OWN_KEY_ONLY } from "@/lib/site/access";
 import { OwnKeyPricing } from "@/components/site/own-key-pricing";
 
 // Public homepage (docs/redesign-plan.md §5). In order: the promise with a
@@ -209,7 +209,7 @@ function Hero() {
                 { ko: "내 Gemini API 키로 실행", en: "Runs on your own Gemini key" },
               ]
             : [
-                { ko: "무료로 둘러보기", en: "Browse free" },
+                FREE_OWN_KEY ? { ko: "무료는 내 API 키로 실행", en: "Free on your own API key" } : { ko: "무료로 둘러보기", en: "Browse free" },
                 { ko: "플러스 ₩29,900/30일", en: "Plus ₩29,900 / 30 days" },
                 { ko: "실패한 실행은 자동 환불", en: "Failed runs refunded" },
               ]
@@ -259,8 +259,8 @@ function Pricing() {
           <SectionHead
             kicker={L({ ko: "요금", en: "Pricing" })}
             title={L({
-              ko: "무료로 둘러보고, 플러스부터 실행",
-              en: "Browse free. Run from Plus",
+              ko: FREE_OWN_KEY ? "무료는 내 키로, 플러스부터는 키 없이" : "무료로 둘러보고, 플러스부터 실행",
+              en: FREE_OWN_KEY ? "Free on your own key. No key from Plus" : "Browse free. Run from Plus",
             })}
             body={L({
               ko: "플러스와 프로 모두 16개 도구를 실행해요. 다른 건 한 달 크레딧이에요. 실행 전에 크레딧이 얼마나 드는지 보여 드리고, 실패하거나 취소한 실행은 자동 환불돼요.",

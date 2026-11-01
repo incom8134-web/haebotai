@@ -15,7 +15,7 @@ import { isAgentic } from "@/lib/agents/specs";
 import { isHost } from "@/lib/platform-access-server";
 import { getMembership } from "@/lib/membership";
 import { isPaidPlan } from "@/lib/payments/pro";
-import { MEMBER_API_KEYS, SAAS } from "@/lib/site/access";
+import { FREE_OWN_KEY, MEMBER_API_KEYS, SAAS } from "@/lib/site/access";
 import { intentLimiter, checkRateLimit } from "@/lib/rate-limit";
 
 // Before a run: read the request into an understanding (lib/agents/intent.ts)
@@ -59,11 +59,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const full = await getBusinessProfile();
   const profile = full && excluded.size ? (Object.fromEntries(Object.entries(full).filter(([k]) => !excluded.has(k))) as typeof full) : full;
 
-  const keys = MEMBER_API_KEYS ? await getUserApiKeys("google", { excludeBroken: true }) : [];
-  // Only someone who could run may spend the platform's key here (lib/run-access.ts); the run itself explains why not.
+  let keys = MEMBER_API_KEYS ? await getUserApiKeys("google", { excludeBroken: true }) : [];
+  // Only someone who could run may spend a key here (lib/run-access.ts); the run itself explains why not.
   const team = await isHost(user.email);
   if (SAAS) {
-    if (!team && !isPaidPlan((await getMembership()).plan)) return Response.json({ intent: null, questions: [] });
+    // Plus, Pro and the team use the platform key; a Free account only its own key.
+    if (team || isPaidPlan((await getMembership()).plan)) keys = [];
+    else if (!FREE_OWN_KEY || !keys.length) return Response.json({ intent: null, questions: [] });
   } else if (!keys.length && !team) return Response.json({ intent: null, questions: [] });
   try {
     const r = await runWithOutputLanguage(parseOutputLanguage(body?.outputLang), () => runWithApiKey("google", user.id, keys, () => understand(manifest, values, profile, [], AbortSignal.timeout(25_000))));

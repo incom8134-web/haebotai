@@ -1,0 +1,37 @@
+WEBVTT
+
+00:00:00.350 --> 00:00:09.622
+AI Haeba runs on your own Google API key.
+Let's get one and connect it, step by step.
+
+00:00:10.522 --> 00:00:19.578
+First, search Google for "Google AI Studio" and click the first result.
+Sign in with your Google account.
+
+00:00:20.478 --> 00:00:27.470
+Click "API Keys" in the left menu,
+then "Create API key" at the top right.
+
+00:00:28.370 --> 00:00:35.938
+Give the key a name you'll recognize and click "Create key".
+Leave the project as it is.
+
+00:00:36.838 --> 00:00:44.310
+When the key appears, click "Copy key".
+Keys start with AQ. or AIza.
+
+00:00:45.210 --> 00:00:51.218
+The new key shows up in the list: done! Now over to AI Haeba.
+
+00:00:52.118 --> 00:00:58.366
+Sign in to AI Haeba and click "API key" near the bottom of the right-hand menu.
+
+00:00:59.266 --> 00:01:04.938
+Paste the key into the Google Gemini "1st priority" box and click "Apply".
+
+00:01:05.838 --> 00:01:13.358
+When you see "Applied" and the key's last four characters,
+you're connected. Any charges go to your own Google account.
+
+00:01:14.258 --> 00:01:18.034
+Now pick a tool and run it!

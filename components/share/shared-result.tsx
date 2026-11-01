@@ -9,7 +9,7 @@ import { catalogTool, toolSlug } from "@/lib/tools/catalog";
 import type { Source } from "@/lib/tools/registry/shared";
 import { primaryButton } from "@/components/site/page";
 import { cn } from "@/lib/utils";
-import { OWN_KEY_ONLY } from "@/lib/site/access";
+import { FREE_OWN_KEY, OWN_KEY_ONLY } from "@/lib/site/access";
 
 // A result someone shared (/share/<token>): read-only — no actions that
 // need the owner's account — with its sources and a way to make one.
@@ -68,7 +68,7 @@ export function SharedResult({ toolId, title, output, input, sources, createdAt 
 
       <section className="mt-10 rounded-[24px] border border-hairline bg-surface p-6 text-center">
         <p className="font-display text-xl font-bold break-keep text-fg">{L({ ko: `이런 ${toolName} 결과, 내 사업으로도 만들어 보세요`, en: `Make a ${toolName} result for your own business` })}</p>
-        <p className="mt-1 text-sm text-fg-muted">{OWN_KEY_ONLY ? L({ ko: "도구는 내 Gemini API 키로 실행해요", en: "Tools run on your own Gemini API key" }) : L({ ko: "가입은 무료, 실행은 플러스부터", en: "Free to sign up; running starts with Plus" })}</p>
+        <p className="mt-1 text-sm text-fg-muted">{OWN_KEY_ONLY ? L({ ko: "도구는 내 Gemini API 키로 실행해요", en: "Tools run on your own Gemini API key" }) : FREE_OWN_KEY ? L({ ko: "가입은 무료, 내 Gemini API 키로 바로 실행", en: "Free to sign up; run it on your own Gemini API key" }) : L({ ko: "가입은 무료, 실행은 플러스부터", en: "Free to sign up; running starts with Plus" })}</p>
         <Link href={`/tools/${toolSlug(toolId)}`} className={cn(primaryButton, "mt-4 inline-flex h-11 px-6")}>
           {L({ ko: "나도 만들어 보기", en: "Make your own" })} <ArrowRight className="size-4" aria-hidden />
         </Link>

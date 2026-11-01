@@ -19,7 +19,7 @@ const DOC_PRESETS = [
 // "이 부분만 다시": pick one part of the result and say how to change it.
 // The rewrite is saved as a new version; this one stays as it is.
 
-export function RegeneratePanel({ runId, toolId, output, estimatedCredits, isFree }: { runId: string; toolId: string; output: unknown; estimatedCredits: number; isFree?: boolean }) {
+export function RegeneratePanel({ runId, toolId, output, estimatedCredits, isFree, onOwnKey = OWN_KEY_ONLY }: { runId: string; toolId: string; output: unknown; estimatedCredits: number; isFree?: boolean; onOwnKey?: boolean }) {
   const L = useBi();
   const router = useRouter();
   const sections = regeneratableSections(toolId, output);
@@ -52,7 +52,7 @@ export function RegeneratePanel({ runId, toolId, output, estimatedCredits, isFre
     <details className="mt-4 rounded-2xl border border-hairline bg-surface px-4 py-3">
       <summary className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-fg">
         <Wand2 className="size-4 text-accent" aria-hidden /> {L({ ko: "이 부분만 다시 만들기", en: "Redo one part" })}
-        <span className="ml-auto text-2xs font-normal text-fg-subtle">{OWN_KEY_ONLY ? L({ ko: "내 API 키로 실행", en: "Runs on your API key" }) : isFree ? L({ ko: "0 크레딧", en: "0 credits" }) : L({ ko: `${cost} 크레딧`, en: `${cost} credits` })}</span>
+        <span className="ml-auto text-2xs font-normal text-fg-subtle">{onOwnKey ? L({ ko: "내 API 키로 실행", en: "Runs on your API key" }) : isFree ? L({ ko: "0 크레딧", en: "0 credits" }) : L({ ko: `${cost} 크레딧`, en: `${cost} credits` })}</span>
       </summary>
       <div className="mt-3 flex flex-col gap-2">
         <label className="flex flex-col gap-1 text-xs text-fg-muted">

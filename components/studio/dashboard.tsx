@@ -27,7 +27,7 @@ import { formatDateTime } from "@/lib/format-date";
 import { useBi, useLocale } from "@/lib/i18n/context";
 import { primaryButton, secondaryButton } from "@/components/site/page";
 import { cn } from "@/lib/utils";
-import { OWN_KEY_ONLY } from "@/lib/site/access";
+import { FREE_OWN_KEY, OWN_KEY_ONLY } from "@/lib/site/access";
 import { IconTile, TONE, toneFor, toolTone } from "@/components/site/tone";
 
 // The member's home. Everything here is real account state — no sample
@@ -375,7 +375,7 @@ export function Dashboard({
                     <Coins size={13} className="text-accent" aria-hidden /> {L({ ko: "남은 크레딧", en: "Credits left" })}
                   </p>
                   <p className="mt-1 font-display text-4xl font-bold text-fg">{usage.balance === null ? "—" : <CountUp value={usage.balance} />}</p>
-                  {!usage.paid && !usage.team ? <p className="mt-1 text-xs break-keep text-fg-muted">{L({ ko: "무료 플랜은 둘러보기만 해요. 실행은 플러스부터예요.", en: "Free is for browsing. Running starts with Plus." })}</p> : null}
+                  {!usage.paid && !usage.team ? <p className="mt-1 text-xs break-keep text-fg-muted">{L(FREE_OWN_KEY ? { ko: "무료 플랜은 내 API 키로 실행해요. 키 없이 쓰려면 플러스부터예요.", en: "Free runs on your own API key. No key? Plus runs on credits." } : { ko: "무료 플랜은 둘러보기만 해요. 실행은 플러스부터예요.", en: "Free is for browsing. Running starts with Plus." })}</p> : null}
                   <Link href="/account/membership" className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-accent hover:underline">
                     {usage.paid ? L({ ko: "충전·멤버십", en: "Top up · Membership" }) : L({ ko: "플랜 고르기", en: "Choose a plan" })} <ArrowRight size={12} aria-hidden />
                   </Link>
