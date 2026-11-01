@@ -7,6 +7,7 @@ import { FAQ } from "@/lib/site/faq";
 import { useBi } from "@/lib/i18n/context";
 import { PlanCards, PriceTable, toolPrices } from "@/components/site/plan-cards";
 import { FREE_OWN_KEY, OWN_KEY_ONLY } from "@/lib/site/access";
+import { FreeKeyBanner } from "@/components/site/free-key-banner";
 import { OwnKeyPricing } from "@/components/site/own-key-pricing";
 import { PRODUCTS } from "@/lib/payments/pro";
 
@@ -75,6 +76,8 @@ export function PricingView({ signedIn }: { signedIn: boolean }) {
         <h1 className="font-display text-[clamp(2rem,4vw,3rem)] leading-[1.05] font-bold tracking-[-0.02em] break-keep text-fg">{L({ ko: "요금", en: "Pricing" })}</h1>
         <p className="mt-3 text-base leading-relaxed break-keep text-fg-muted">{L(FREE_OWN_KEY ? { ko: "무료 플랜은 내 Gemini API 키로, 플러스와 프로는 키 없이 크레딧으로 16개 도구를 모두 실행해요. 30일 이용권이라 자동 결제는 없어요. 가격은 부가세 포함이에요.", en: "Run all 16 tools free on your own Gemini API key, or without a key on Plus or Pro credits. Each plan is a 30-day pass with no auto-renewal. Prices include VAT." } : { ko: "무료로 둘러보고, 플러스나 프로로 16개 도구를 모두 실행해요. 30일 이용권이라 자동 결제는 없어요. 가격은 부가세 포함이에요.", en: "Browse free, then run all 16 tools on Plus or Pro. Each is a 30-day pass with no auto-renewal. Prices include VAT." })}</p>
       </header>
+
+      {FREE_OWN_KEY ? <FreeKeyBanner signedIn={signedIn} className="mt-8" /> : null}
 
       <div className="mt-8">
         <PlanCards signedIn={signedIn} />

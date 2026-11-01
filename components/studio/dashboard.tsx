@@ -28,6 +28,7 @@ import { useBi, useLocale } from "@/lib/i18n/context";
 import { primaryButton, secondaryButton } from "@/components/site/page";
 import { cn } from "@/lib/utils";
 import { FREE_OWN_KEY, OWN_KEY_ONLY } from "@/lib/site/access";
+import { FreeKeyBanner } from "@/components/site/free-key-banner";
 import { IconTile, TONE, toneFor, toolTone } from "@/components/site/tone";
 
 // The member's home. Everything here is real account state — no sample
@@ -354,7 +355,8 @@ export function Dashboard({
           </div>
           <Reveal delay={0.15}>
             <div className="grid grid-cols-2 gap-3">
-              {OWN_KEY_ONLY ? (
+              {/* Free members run on their own key (FREE_OWN_KEY): show the key, not a credit balance they can't spend. */}
+              {OWN_KEY_ONLY || (FREE_OWN_KEY && !usage.paid && !usage.team) ? (
                 <div className={cn("col-span-2 rounded-[22px] border p-4 backdrop-blur", usage.keyConnected || usage.team ? "border-hairline bg-surface/85" : "border-accent/40 bg-accent-dim")}>
                   <p className="flex items-center gap-1.5 text-xs text-fg-muted">
                     <KeyRound size={13} className="text-accent" aria-hidden /> {L({ ko: "내 API 키", en: "My API key" })}
@@ -399,6 +401,8 @@ export function Dashboard({
           </Reveal>
         </div>
       </section>
+
+      {FREE_OWN_KEY && !usage.paid && !usage.team && !usage.keyConnected ? <FreeKeyBanner signedIn className="mt-4" /> : null}
 
       <div className="mt-4">
         <PromoStrip />

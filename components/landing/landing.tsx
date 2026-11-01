@@ -27,6 +27,7 @@ import {
   reveal,
 } from "./sections";
 import { FREE_OWN_KEY, OWN_KEY_ONLY } from "@/lib/site/access";
+import { FreeKeyBanner } from "@/components/site/free-key-banner";
 import { OwnKeyPricing } from "@/components/site/own-key-pricing";
 
 // Public homepage (docs/redesign-plan.md §5). In order: the promise with a
@@ -267,6 +268,7 @@ function Pricing() {
               en: "Plus and Pro both run all 16 tools; only the monthly credits differ. You see the credit cost before every run, and failed or cancelled runs are refunded automatically.",
             })}
           />
+          {FREE_OWN_KEY ? <FreeKeyBanner signedIn={signedIn} className="mt-10" /> : null}
           <div className="mt-10">
             <PlanCards signedIn={signedIn} />
           </div>
