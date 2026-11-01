@@ -55,9 +55,10 @@ const KEY_MSG: Record<string, { ko: string; en: string }> = {
   save_failed: { ko: "저장하지 못했어요. 잠시 후 다시 시도해 주세요.", en: "Couldn't save. Please try again shortly." },
 };
 
-const PROVIDER_INFO: Record<ApiKeyProvider, { name: string; placeholder: string }> = {
-  google: { name: "Google Gemini", placeholder: "AQ.… / AIza…" },
-  anthropic: { name: "Anthropic (Claude)", placeholder: "sk-ant-…" },
+// The placeholder is an example of the key's shape, never a real key.
+const PROVIDER_INFO: Record<ApiKeyProvider, { name: string; placeholder: { ko: string; en: string } }> = {
+  google: { name: "Google Gemini", placeholder: { ko: "예: AIzaSyA1b2C3d4… 또는 AQ.Ab8RN6…", en: "e.g. AIzaSyA1b2C3d4… or AQ.Ab8RN6…" } },
+  anthropic: { name: "Anthropic (Claude)", placeholder: { ko: "예: sk-ant-api03-…", en: "e.g. sk-ant-api03-…" } },
 };
 
 function providerDescription(provider: ApiKeyProvider): { ko: string; en: string } {
@@ -372,7 +373,7 @@ const PRIORITY_LABEL: Record<ApiKeyPriority, { ko: string; en: string }> = {
   3: { ko: "3순위 (대기)", en: "3rd priority (waitlist)" },
 };
 
-function KeySlotRow({ provider, slot, placeholder }: { provider: ApiKeyProvider; slot: ApiKeySlot; placeholder: string }) {
+function KeySlotRow({ provider, slot, placeholder }: { provider: ApiKeyProvider; slot: ApiKeySlot; placeholder: { ko: string; en: string } }) {
   const L = useBi();
   const [state, action, saving] = useActionState<ApiKeyActionState, FormData>(saveApiKey, null);
   const [other, setOther] = useState<ApiKeyActionState>(null);
@@ -416,7 +417,22 @@ function KeySlotRow({ provider, slot, placeholder }: { provider: ApiKeyProvider;
         <form ref={keyRef} onSubmit={onKeySubmit} className="mt-2 flex flex-wrap gap-2">
           <input type="hidden" name="provider" value={provider} />
           <input type="hidden" name="priority" value={slot.priority} />
-          <input name="apiKey" type="password" autoComplete="off" spellCheck={false} required className={cn(inputClass, "h-9 min-w-0 flex-1 font-mono text-sm")} placeholder={placeholder} aria-label={placeholder} />
+          {/* "new-password" (not "off", which browsers ignore on password fields) and the password-manager
+              opt-outs keep a saved site password from being filled in, so the box starts empty. */}
+          <input
+            name="apiKey"
+            type="password"
+            autoComplete="new-password"
+            data-1p-ignore
+            data-lpignore="true"
+            data-bwignore
+            data-form-type="other"
+            spellCheck={false}
+            required
+            className={cn(inputClass, "h-9 min-w-0 flex-1 font-mono text-sm placeholder:font-sans placeholder:text-fg-subtle/80")}
+            placeholder={L(placeholder)}
+            aria-label={L({ ko: `${PROVIDER_INFO[provider].name} API 키 붙여넣기`, en: `Paste your ${PROVIDER_INFO[provider].name} API key` })}
+          />
           <button type="submit" disabled={saving} className={cn(primaryButton, "h-9 px-4 text-sm")}>{saving ? L({ ko: "확인 중…", en: "Checking…" }) : L({ ko: "적용", en: "apply" })}</button>
         </form>
       )}
