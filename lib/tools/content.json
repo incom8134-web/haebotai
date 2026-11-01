@@ -175,7 +175,7 @@
           "en": "Sources panel"
         },
         "body": {
-          "ko": "각 주장 옆에 제목·도메인·링크가 달린 출처가 붙습니다.",
+          "ko": "각 주장 옆에 제목·사이트 주소·링크가 달린 출처가 붙습니다.",
           "en": "Each claim lists a source with title, domain and link."
         }
       },
@@ -296,7 +296,7 @@
       "en": "Turn a model into a 13-week plan"
     },
     "description": {
-      "ko": "실행할 사업 모델을 주 단위 할 일로 쪼개고 마일스톤을 배치합니다. 구글·애플 캘린더(.ics)와 스프레드시트(.csv)로 바로 내보낼 수 있습니다.",
+      "ko": "실행할 사업 모델을 주 단위 할 일로 쪼개고 중간 목표를 배치합니다. 구글·애플 캘린더(.ics)와 스프레드시트(.csv)로 바로 내보낼 수 있습니다.",
       "en": "Breaks your model into weekly tasks with milestones, exportable to Google/Apple Calendar (.ics) or a spreadsheet (.csv)."
     },
     "features": [
@@ -380,7 +380,7 @@
         "en": "Describe the model in a sentence or two."
       },
       {
-        "ko": "시작일과 주요 마일스톤을 정합니다.",
+        "ko": "시작일과 주요 중간 목표를 정합니다.",
         "en": "Pick a start date and key milestones."
       },
       {
@@ -390,7 +390,7 @@
     ],
     "tips": [
       {
-        "ko": "마일스톤은 '첫 매출'처럼 확인 가능한 사건으로 적으세요.",
+        "ko": "중간 목표는 '첫 매출'처럼 확인 가능한 사건으로 적으세요.",
         "en": "Write milestones as checkable events, like \"first sale\"."
       }
     ],
@@ -407,7 +407,7 @@
       }
     ],
     "sample": {
-      "ko": "1주차 — 클래스 커리큘럼 확정, 재료 원가 계산\n2주차 — 모집 페이지 제작, 지인 5명 체험 수업\n3주차 — 첫 모집 공지 (마일스톤)",
+      "ko": "1주차 — 클래스 커리큘럼 확정, 재료 원가 계산\n2주차 — 모집 페이지 제작, 지인 5명 체험 수업\n3주차 — 첫 모집 공지 (중간 목표)",
       "en": "Week 1 — finalize curriculum, cost ingredients\nWeek 2 — build signup page, trial class with 5 friends\nWeek 3 — first public signup (milestone)"
     }
   },
@@ -553,7 +553,7 @@
       {
         "icon": "search",
         "title": {
-          "ko": "플랫폼별 SEO",
+          "ko": "플랫폼별 검색 노출",
           "en": "Platform-aware SEO"
         },
         "body": {
@@ -579,7 +579,7 @@
           "en": "Image slots included"
         },
         "body": {
-          "ko": "어느 소제목 뒤에 어떤 이미지가 들어갈지 프롬프트와 함께 제안합니다.",
+          "ko": "어느 소제목 뒤에 어떤 이미지가 들어갈지 설명과 함께 제안합니다.",
           "en": "Suggests where images go, with a prompt for each."
         }
       }
@@ -688,7 +688,7 @@
       {
         "icon": "layers",
         "title": {
-          "ko": "3단계 티어",
+          "ko": "3단계 구분",
           "en": "Three tiers"
         },
         "body": {
@@ -914,14 +914,14 @@
       "en": "Four on-purpose shots from one product"
     },
     "description": {
-      "ko": "스튜디오컷, 패키지, 3D 렌더, 랜딩 UI, 광고 배너, 배경까지 용도별 프리셋으로 이미지를 4컷 생성합니다. 참조 이미지를 넣으면 제품 형태를 유지합니다.",
+      "ko": "스튜디오컷, 패키지, 3D 렌더, 랜딩 UI, 광고 배너, 배경까지 용도에 맞춰 이미지를 4컷 생성합니다. 참조 이미지를 넣으면 제품 형태를 유지합니다.",
       "en": "Generates four images per run from purpose presets — studio, packaging, 3D render, landing UI, ad banner, background. Add a reference to keep your product's shape."
     },
     "features": [
       {
         "icon": "layers",
         "title": {
-          "ko": "용도별 프리셋",
+          "ko": "용도별 스타일",
           "en": "Purpose presets"
         },
         "body": {
@@ -1020,7 +1020,7 @@
         "en": "Describe the product and scene in one sentence."
       },
       {
-        "ko": "용도 프리셋과 비율을 고르고, 가능하면 참조 사진을 넣습니다.",
+        "ko": "용도와 비율을 고르고, 가능하면 참조 사진을 넣습니다.",
         "en": "Pick a preset and ratio; add a reference photo if you have one."
       },
       {
@@ -1061,7 +1061,7 @@
       "en": "Four logo concepts from a name and three words"
     },
     "description": {
-      "ko": "아트 디렉터처럼 서로 다른 방향 4가지를 기획하고, 각 콘셉트의 심볼을 이미지 모델로 그린 뒤 브랜드명을 정확한 한글 서체로 조판해 로고로 완성합니다. 콘셉트 설명, 색상 HEX, 서체, 사용 팁을 함께 드립니다.",
+      "ko": "아트 디렉터처럼 서로 다른 방향 4가지를 기획하고, 각 콘셉트의 심볼을 이미지 모델로 그린 뒤 브랜드명을 정확한 한글 서체로 조판해 로고로 완성합니다. 콘셉트 설명, 색상 코드, 서체, 사용 팁을 함께 드립니다.",
       "en": "Plans four distinct directions like an art director, draws each symbol with the image model, and typesets the brand name in a real Korean font. Comes with the idea, HEX colors, type and usage tips for each."
     },
     "features": [
@@ -1083,7 +1083,7 @@
           "en": "Sanitized"
         },
         "body": {
-          "ko": "스크립트 등 위험 요소를 제거하고 렌더링을 확인합니다.",
+          "ko": "스크립트 등 위험 요소를 없애고 화면에 제대로 보이는지 확인합니다.",
           "en": "Scripts and unsafe elements are stripped and rendering is checked."
         }
       },
@@ -1357,7 +1357,7 @@
           "en": "Upload-ready image"
         },
         "body": {
-          "ko": "스마트스토어 규격 860px 이미지로 렌더링됩니다.",
+          "ko": "스마트스토어 규격 860px 이미지로 만들어 드려요.",
           "en": "Rendered at the 860px store standard."
         }
       },
@@ -1732,7 +1732,7 @@
           "en": "Structured by purpose"
         },
         "body": {
-          "ko": "정부지원 양식과 투자 IR은 강조점이 다릅니다. 목적에 맞게 씁니다.",
+          "ko": "정부지원 양식과 투자 유치 자료는 강조점이 다릅니다. 목적에 맞게 씁니다.",
           "en": "Grant forms and investor decks stress different things — it adapts."
         }
       },
@@ -1781,7 +1781,7 @@
       },
       {
         "title": {
-          "ko": "B2B SaaS",
+          "ko": "기업용 구독 서비스",
           "en": "B2B SaaS"
         },
         "tag": {
@@ -1789,7 +1789,7 @@
           "en": "Investment"
         },
         "values": {
-          "item": "소상공인용 재고·발주 자동화 SaaS",
+          "item": "소상공인용 재고·발주 자동화 구독형 프로그램",
           "purpose": "investment",
           "market": "국내 소상공인 POS 연동 시장",
           "unit_price": 29000,
@@ -1967,7 +1967,7 @@
       "en": "From market read to a 90-day plan"
     },
     "description": {
-      "ko": "제품과 시장 설명을 넣으면 시장 인사이트, 고객 세그먼트, 경쟁사별 약점과 우리가 이길 틈, 포지셔닝, 상품·가격 제안, 캠페인 방향 3가지, 30/60/90일 실행 계획과 성과 지표를 만듭니다. 시장·경쟁 관련 주장은 웹 검색 출처와 함께 씁니다.",
+      "ko": "제품과 시장 설명을 넣으면 시장에서 알게 된 점, 손님 유형, 경쟁사별 약점과 우리가 이길 틈, 차별점, 상품·가격 제안, 캠페인 방향 3가지, 30/60/90일 실행 계획과 성과 지표를 만듭니다. 시장·경쟁 관련 주장은 웹 검색 출처와 함께 씁니다.",
       "en": "Describe your product and market to get market insights, customer segments, each competitor's weak spot and your opening, positioning, offer and pricing ideas, three campaign routes, a 30/60/90-day plan and KPIs. Market and competitor claims come with web sources."
     },
     "features": [
@@ -2008,7 +2008,7 @@
     "presets": [
       {
         "title": {
-          "ko": "포지셔닝 스프린트",
+          "ko": "차별점 정리",
           "en": "Positioning sprint"
         },
         "tag": {
@@ -2030,7 +2030,7 @@
           "en": "Launch territories"
         },
         "tag": {
-          "ko": "크리에이티브",
+          "ko": "광고 아이디어",
           "en": "Creative"
         },
         "values": {
@@ -2072,7 +2072,7 @@
       }
     ],
     "sample": {
-      "ko": "포지셔닝: 아침 시간이 없는 성수동 직장인에게, 편의점 빵 대신 7시 갓 구운 빵을 7분 만에 건네는 동네 베이커리\n경쟁 지도 — 프랜차이즈 카페: 빠르지만 빵이 전날 것 → 우리가 이길 틈: '오늘 아침 구운 빵'\n오퍼: 출근길 픽업 세트(빵+커피) 6,500원\n0~30일: 네이버 예약 픽업 오픈, 릴스 3편 촬영 · KPI: 평일 7~9시 픽업 하루 40건",
+      "ko": "차별점: 아침 시간이 없는 성수동 직장인에게, 편의점 빵 대신 7시 갓 구운 빵을 7분 만에 건네는 동네 베이커리\n경쟁 지도 — 프랜차이즈 카페: 빠르지만 빵이 전날 것 → 우리가 이길 틈: '오늘 아침 구운 빵'\n상품 구성: 출근길 픽업 세트(빵+커피) 6,500원\n0~30일: 네이버 예약 픽업 오픈, 릴스 3편 촬영 · 성과 지표: 평일 7~9시 픽업 하루 40건",
       "en": "Positioning: for Seongsu commuters with no time in the morning, the neighborhood bakery that hands over bread baked at 7 in seven minutes — instead of convenience-store bread\nCompetitor map — franchise café: fast but yesterday's bread → our opening: \"baked this morning\"\nOffer: commute pickup set (bread + coffee) ₩6,500\nDays 0–30: open Naver pre-order pickup, shoot 3 reels · KPI: 40 weekday 7–9am pickups a day"
     }
   },
@@ -2082,7 +2082,7 @@
       "en": "One message, copy for every channel"
     },
     "description": {
-      "ko": "알리고 싶은 것을 넣으면 핵심 메시지를 정하고, 고객 동기별 헤드라인·본문·CTA와 채널별 버전을 씁니다. 단어만 바꾼 변형이 아니라 서로 다른 설득 각도를 제안합니다.",
+      "ko": "알리고 싶은 것을 넣으면 핵심 메시지를 정하고, 고객 동기별 제목·본문·구매 유도 문구와 채널별 버전을 씁니다. 단어만 바꾼 변형이 아니라 서로 다른 설득 각도를 제안합니다.",
       "en": "Enter what you want to announce to get a core message, headline/body/CTA per customer motivation, and a version per channel — genuinely different angles, not word swaps."
     },
     "features": [
@@ -2301,7 +2301,7 @@
       },
       {
         "title": {
-          "ko": "투자 피칭",
+          "ko": "투자 발표",
           "en": "Investor pitch"
         },
         "tag": {
@@ -2309,7 +2309,7 @@
           "en": "12 slides"
         },
         "values": {
-          "brief": "소상공인 재고·발주 자동화 SaaS 시드 투자 유치",
+          "brief": "소상공인 재고·발주 자동화 구독형 프로그램 초기 투자 유치",
           "audience": "초기 투자자",
           "slide_count": "12",
           "purpose": "pitch"
@@ -2359,7 +2359,7 @@
       "en": "Businesses you can start with what you have, scored side by side"
     },
     "description": {
-      "ko": "경력·관심·자금·시간·위험 감수를 넣으면 서로 다른 형태의 사업 아이디어 4~6개를 적합도·수요·속도·자본·우위 다섯 축으로 비교합니다. 아이디어마다 고객, 문제, 수익 방식, MVP, 첫 검증 행동이 붙고, 고른 아이디어는 돈 버는 방법 정리·할 일 계획 세우기·사업 아이디어 찾기로 바로 이어집니다.",
+      "ko": "경력·관심·자금·시간·위험 감수를 넣으면 서로 다른 형태의 사업 아이디어 4~6개를 적합도·수요·속도·자본·우위 다섯 축으로 비교합니다. 아이디어마다 고객, 문제, 수익 방식, 시험용 첫 상품, 첫 검증 행동이 붙고, 고른 아이디어는 돈 버는 방법 정리·할 일 계획 세우기·사업 아이디어 찾기로 바로 이어집니다.",
       "en": "Enter your experience, interests, budget, time and risk appetite to get 4–6 business ideas of different kinds, compared on fit, demand, speed, capital and edge. Each idea comes with a customer, problem, revenue model, MVP and first validation step — and your pick flows straight into Ways to earn, Plan the weeks ahead or Find business ideas."
     },
     "features": [
@@ -2392,7 +2392,7 @@
           "en": "Continue in the next tool"
         },
         "body": {
-          "ko": "고른 아이디어를 수익 구조·MVP·시장 빈틈 분석에 그대로 넘깁니다.",
+          "ko": "고른 아이디어를 수익 구조·시험용 첫 상품·시장 빈틈 분석에 그대로 넘깁니다.",
           "en": "Send your pick to revenue, MVP or market-gap analysis with one click."
         }
       }
@@ -2426,7 +2426,7 @@
       },
       {
         "title": {
-          "ko": "물류 영업 12년차의 B2B 창업",
+          "ko": "물류 영업 12년차의 기업 대상 창업",
           "en": "B2B launch after 12 years in logistics sales"
         },
         "tag": {
@@ -2526,7 +2526,7 @@
       }
     ],
     "sample": {
-      "ko": "① 퇴원 후 2주 보호자 가이드 상담 — 적합도 9 · 속도 8 · 첫 검증: 맘카페에 무료 체크리스트, 7일 안에 신청 20건\n② 병동 간호 노하우 전자책 — 자본 9 · 수요 6\n③ 요양원 대상 보호자 교육 워크숍(B2B) — 우위 8 · 속도 5",
+      "ko": "① 퇴원 후 2주 보호자 가이드 상담 — 적합도 9 · 속도 8 · 첫 검증: 맘카페에 무료 체크리스트, 7일 안에 신청 20건\n② 병동 간호 노하우 전자책 — 자본 9 · 수요 6\n③ 요양원 대상 보호자 교육 워크숍(기업 대상) — 우위 8 · 속도 5",
       "en": "① Post-discharge caregiver coaching — fit 9 · speed 8 · first test: free checklist in parent forums, 20 sign-ups in 7 days\n② Ward-nursing e-book — capital 9 · demand 6\n③ Caregiver workshops for care homes (B2B) — edge 8 · speed 5"
     }
   },
@@ -2536,14 +2536,14 @@
       "en": "Every way one idea can earn, on one map"
     },
     "description": {
-      "ko": "고객 세그먼트와 수익 흐름을 연결한 지도, 첫 계단부터 프리미엄까지의 가치 사다리, 고객 한 명이 남기는 가치를 계산하는 단위 경제성 틀을 만듭니다. 지금 시작할 조합과 미뤄야 할 것까지 이유와 함께 알려 드립니다.",
+      "ko": "손님 유형과 수익 흐름을 연결한 지도, 첫 계단부터 프리미엄까지의 가치 사다리, 고객 한 명이 남기는 가치를 계산하는 단위 경제성 틀을 만듭니다. 지금 시작할 조합과 미뤄야 할 것까지 이유와 함께 알려 드립니다.",
       "en": "Get a map linking customer segments to revenue streams, a value ladder from the first step to premium, and a unit-economics frame showing what one customer is worth — plus the mix to start with now and what to postpone."
     },
     "features": [
       {
         "icon": "shapes",
         "title": {
-          "ko": "세그먼트 × 수익 흐름 지도",
+          "ko": "손님 유형 × 수익 흐름 지도",
           "en": "Segments × streams map"
         },
         "body": {
@@ -2676,7 +2676,7 @@
       }
     ],
     "sample": {
-      "ko": "핵심: 월 8회 정기권 18만 원 · 첫 계단: 체험 1회 2만 원 · 업셀: 1:1 자세 교정 6만 원\n고객 1명 가치(추정): 18만 원 × 연 10회 × 1.5년 − 확보비 4만 원",
+      "ko": "핵심: 월 8회 정기권 18만 원 · 첫 계단: 체험 1회 2만 원 · 추가 판매: 1:1 자세 교정 6만 원\n고객 1명 가치(추정): 18만 원 × 연 10회 × 1.5년 − 확보비 4만 원",
       "en": "Core: 8-class monthly pass ₩180k · first step: ₩20k trial · upsell: ₩60k 1:1 posture session\nCustomer value (est.): ₩180k × 10/yr × 1.5 yrs − ₩40k acquisition"
     }
   },
@@ -2719,7 +2719,7 @@
           "en": "On to the sales page"
         },
         "body": {
-          "ko": "완성한 오퍼를 상세페이지 만들기와 광고 팩토리로 넘깁니다.",
+          "ko": "완성한 상품 구성을 상세페이지 만들기와 광고 문구 쓰기로 넘깁니다.",
           "en": "Send the finished offer to the Make a product page or Ad Factory."
         }
       }
@@ -3097,7 +3097,7 @@
         "en": "List features you think are essential — you'll hear which can wait and why."
       },
       {
-        "ko": "개발을 못 해도 괜찮습니다. 노코드 도구 조합으로 설계합니다.",
+        "ko": "개발을 못 해도 괜찮습니다. 코딩 없이 쓰는 도구(노코드)를 조합해 설계합니다.",
         "en": "No coding needed — the blueprint can use no-code tools."
       }
     ],
@@ -3114,7 +3114,7 @@
       }
     ],
     "sample": {
-      "ko": "Must: 예약·변경, 카톡 알림 · Later: 식단 사진 AI 분석\n단계: 1~2주 노코드 예약 → 3~4주 회원 20명 시범 → 5~6주 결제 연결\n가설: 회원의 60%가 앱으로 예약을 바꾼다",
+      "ko": "Must: 예약·변경, 카톡 알림 · Later: 식단 사진 AI 분석\n단계: 1~2주 코딩 없이 예약 기능 → 3~4주 회원 20명 시범 → 5~6주 결제 연결\n가설: 회원의 60%가 앱으로 예약을 바꾼다",
       "en": "Must: booking and changes, KakaoTalk alerts · Later: AI meal-photo analysis\nStages: wk 1–2 no-code booking → wk 3–4 pilot with 20 members → wk 5–6 payments\nHypothesis: 60% of members reschedule in the app"
     }
   },
@@ -3124,7 +3124,7 @@
       "en": "Your brand's rules on one board, for everything you make"
     },
     "description": {
-      "ko": "성격·가치·포지셔닝·목소리·색·서체·시각 방향을 한 장의 브랜드 보드로 만듭니다. 색마다 역할과 글자 대비를, 서체는 실제 한글 폰트 견본을, 말투는 상황별 예시 문장을 보여 드려요. 완성한 기준은 로고·웹사이트·세일즈 페이지로 그대로 이어집니다.",
+      "ko": "성격·가치·차별점·목소리·색·서체·시각 방향을 한 장의 브랜드 보드로 만듭니다. 색마다 역할과 글자 대비를, 서체는 실제 한글 폰트 견본을, 말투는 상황별 예시 문장을 보여 드려요. 완성한 기준은 로고·웹사이트·세일즈 페이지로 그대로 이어집니다.",
       "en": "Build one brand board: personality, values, positioning, voice, colours, type and visual direction. Colours come with roles and contrast checks, type with real Korean font specimens, voice with sample lines for real situations — and the rules carry into your logo, website and sales page."
     },
     "features": [
@@ -3287,23 +3287,23 @@
           "en": "Does it make a logo?"
         },
         "a": {
-          "ko": "로고는 로고 만들기에서 그립니다. 브랜드 보드에서 '로고 만들기'로 이어가면 이름과 무드가 채워져요.",
+          "ko": "로고는 로고 만들기에서 그립니다. 브랜드 보드에서 '로고 만들기'로 이어가면 이름과 분위기가 채워져요.",
           "en": "Logos are drawn in Make a logo. Continue from the board and the name and mood are filled in."
         }
       }
     ],
     "sample": {
-      "ko": "원형: 돌보는 사람 · 따뜻함 9 · 전문성 7 · 장난기 3\n포지셔닝: 퇴근 후에도 서두르지 않고 설명해 주는 동네 소아과\n색: 새벽 하늘 #3B6E8F · 크림 #FFF8EE · 살구 #F2A477\n서체: 제목 Gowun Dodum / 본문 Noto Sans KR",
+      "ko": "원형: 돌보는 사람 · 따뜻함 9 · 전문성 7 · 장난기 3\n차별점: 퇴근 후에도 서두르지 않고 설명해 주는 동네 소아과\n색: 새벽 하늘 #3B6E8F · 크림 #FFF8EE · 살구 #F2A477\n서체: 제목 Gowun Dodum / 본문 Noto Sans KR",
       "en": "Archetype: Caregiver · warmth 9 · expertise 7 · playfulness 3\nPositioning: the neighbourhood clinic that explains without rushing, even after work\nColours: dawn blue #3B6E8F · cream #FFF8EE · apricot #F2A477\nType: Gowun Dodum / Noto Sans KR"
     }
   },
   "hook-lab": {
     "tagline": {
-      "ko": "첫 3초를 잡는 훅, 유형별로 나란히",
+      "ko": "첫 3초를 잡는 첫 문장, 유형별로 나란히",
       "en": "Hooks that win the first 3 seconds, by family"
     },
     "description": {
-      "ko": "주제와 보는 사람을 넣으면 질문·통념 뒤집기·숫자·이야기·전후 비교 같은 유형별로 훅을 만듭니다. 훅마다 화면 글자, 첫 장면, 이어지는 문장, 플랫폼별 변형이 함께 나와 바로 촬영할 수 있어요.",
+      "ko": "주제와 보는 사람을 넣으면 질문·통념 뒤집기·숫자·이야기·전후 비교 같은 유형별로 첫 문장을 만듭니다. 첫 문장마다 화면 글자, 첫 장면, 이어지는 문장, 플랫폼별 변형이 함께 나와 바로 촬영할 수 있어요.",
       "en": "Give a topic and audience to get hooks grouped by family — question, myth-busting, numbers, story, before/after. Each comes with on-screen text, the first scene, the follow-up line and a version per platform, ready to shoot."
     },
     "features": [
@@ -3332,7 +3332,7 @@
       {
         "icon": "shield-check",
         "title": {
-          "ko": "낚시 없는 훅",
+          "ko": "낚시 없는 첫 문장",
           "en": "No clickbait"
         },
         "body": {
@@ -3393,7 +3393,7 @@
           "en": "Freelancer tax guide"
         },
         "tag": {
-          "ko": "B2C 서비스",
+          "ko": "일반 손님 대상 서비스",
           "en": "Service"
         },
         "values": {
@@ -3420,13 +3420,13 @@
         "en": "Pick platforms, goal and tone."
       },
       {
-        "ko": "마음에 드는 훅을 골라 SNS 글로 바꾸기나 광고 팩토리로 이어갑니다.",
+        "ko": "마음에 드는 첫 문장을 골라 SNS 글로 바꾸기나 광고 문구 쓰기로 이어갑니다.",
         "en": "Pick hooks and continue to Rewrite for social or Ad Factory."
       }
     ],
     "tips": [
       {
-        "ko": "쓸 수 있는 숫자나 사실을 넣으면 숫자형·증거형 훅이 훨씬 강해집니다.",
+        "ko": "쓸 수 있는 숫자나 사실을 넣으면 숫자형·증거형 첫 문장이 훨씬 강해집니다.",
         "en": "Real numbers make number and proof hooks far stronger."
       },
       {
@@ -3437,7 +3437,7 @@
     "faq": [
       {
         "q": {
-          "ko": "훅 강도 점수는 무엇인가요?",
+          "ko": "첫 문장 강도 점수는 무엇인가요?",
           "en": "What is the strength score?"
         },
         "a": {
@@ -3968,7 +3968,7 @@
       "en": "Competitors side by side, and where you can stand apart"
     },
     "description": {
-      "ko": "우리 사업을 적으면 고객이 실제로 비교하는 경쟁사를 찾아 고르는 기준별 점수표, 포지셔닝 맵, 비어 있는 자리와 할 일을 정리합니다. 경쟁사 정보마다 검색으로 확인한 것인지 표시해요.",
+      "ko": "우리 사업을 적으면 고객이 실제로 비교하는 경쟁사를 찾아 고르는 기준별 점수표, 경쟁 위치 지도, 비어 있는 자리와 할 일을 정리합니다. 경쟁사 정보마다 검색으로 확인한 것인지 표시해요.",
       "en": "Describe your business to get the competitors customers really compare you with, a scored matrix by buying criteria, a positioning map and the openings to take — each competitor fact labelled by source."
     },
     "features": [
@@ -3986,7 +3986,7 @@
       {
         "icon": "map-pin",
         "title": {
-          "ko": "포지셔닝 맵",
+          "ko": "경쟁 위치 지도",
           "en": "Positioning map"
         },
         "body": {
@@ -4094,14 +4094,14 @@
       "en": "One customer everyone on the team pictures the same way"
     },
     "description": {
-      "ko": "무엇을 파는지와 고객 자료(리뷰·인터뷰)가 있으면 넣어 주세요. 고객의 목표, 불편, 구매 계기, 망설임을 담은 페르소나와, 처음 알게 된 순간부터 추천하기까지의 여정과 기분을 한 장에 보여 드려요. 무엇이 자료 근거이고 무엇이 추론인지 따로 적습니다.",
+      "ko": "무엇을 파는지와 고객 자료(리뷰·인터뷰)가 있으면 넣어 주세요. 고객의 목표, 불편, 구매 계기, 망설임을 담은 대표 손님과, 처음 알게 된 순간부터 추천하기까지의 여정과 기분을 한 장에 보여 드려요. 무엇이 자료 근거이고 무엇이 추론인지 따로 적습니다.",
       "en": "Tell us what you sell and paste customer data if you have it. You'll get a persona — goals, frustrations, triggers, doubts — and their journey and mood from first hearing of you to recommending you, with evidence and assumptions noted apart."
     },
     "features": [
       {
         "icon": "user-round",
         "title": {
-          "ko": "페르소나 카드",
+          "ko": "대표 손님 카드",
           "en": "Persona card"
         },
         "body": {
@@ -4191,7 +4191,7 @@
           "en": "Isn't this a made-up customer?"
         },
         "a": {
-          "ko": "페르소나는 대표 고객을 묘사한 것이고, 어떤 부분이 자료 근거이고 어떤 부분이 추론인지 결과에 따로 적어 드려요.",
+          "ko": "대표 손님은 여러 손님을 한 사람으로 묘사한 것이고, 어떤 부분이 자료 근거이고 어떤 부분이 추론인지 결과에 따로 적어 드려요.",
           "en": "It's a representative portrait; the result notes which parts come from data and which are assumed."
         }
       }

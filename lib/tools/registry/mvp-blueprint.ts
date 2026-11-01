@@ -5,7 +5,7 @@ import type { ToolManifest } from "../types";
 export const mvpBlueprint: ToolManifest = {
   id: "mvp-blueprint",
   category: "discover",
-  name_ko: "MVP 설계도",
+  name_ko: "시험용 첫 상품 설계",
   name_en: "MVP Blueprint",
   summary: "아이디어를 처음 내놓을 최소한의 제품과 출시 순서로",
   icon: Rocket,
@@ -29,7 +29,7 @@ export const mvpBlueprint: ToolManifest = {
       id: "build_skill",
       label: "만드는 사람",
       options: [
-        { value: "none", label: "개발을 못 해요 (노코드)" },
+        { value: "none", label: "개발을 못 해요 (코딩 없이)" },
         { value: "some", label: "조금 해요" },
         { value: "dev", label: "개발자가 있어요" },
       ],

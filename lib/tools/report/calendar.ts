@@ -45,7 +45,7 @@ export function calendarReport(o: Record<string, unknown>, input: Record<string,
 
   sections.push({
     id: "roadmap",
-    kicker: "로드맵",
+    kicker: "실행 일정",
     title: "13주를 어떻게 나눴나",
     blocks: keep([
       {

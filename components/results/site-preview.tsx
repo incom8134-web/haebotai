@@ -27,7 +27,7 @@ const SCENE_LABEL: Record<string, { ko: string; en: string }> = {
   "particles-text": { ko: "입자로 그린 상호", en: "Particle wordmark" },
   "photo-ring": { ko: "3D 사진 링", en: "3D photo ring" },
   waves: { ko: "흐르는 3D 지형", en: "Flowing 3D terrain" },
-  floating: { ko: "떠다니는 3D 오브젝트", en: "Floating 3D objects" },
+  floating: { ko: "떠다니는 3D 장식", en: "Floating 3D objects" },
   aurora: { ko: "살아 있는 그라데이션", en: "Living gradient" },
   bokeh: { ko: "부드러운 빛망울", en: "Soft bokeh light" },
   ribbons: { ko: "흐르는 리본", en: "Flowing ribbons" },

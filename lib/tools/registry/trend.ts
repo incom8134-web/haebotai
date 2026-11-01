@@ -7,7 +7,7 @@ import type { ToolManifest } from "../types";
 export const trend: ToolManifest = {
   id: "trend",
   category: "research",
-  name_ko: "트렌드 레이더",
+  name_ko: "트렌드 살펴보기",
   name_en: "Trend Radar",
   summary: "후보 아이디어를 실시간 근거로 점수화합니다.",
   icon: TrendingUp,

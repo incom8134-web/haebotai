@@ -6,7 +6,9 @@ import { AsyncLocalStorage } from "node:async_hooks";
 // same way the member's API key travels (lib/ai/gemini.ts): every model
 // call made inside runWithOutputLanguage("en", …) gets its Korean
 // "write in Korean" directives swapped and an explicit English rule
-// appended. Korean runs are left exactly as they were.
+// appended. Korean runs keep their prompts and get one short rule: write
+// in plain Korean a small-business owner understands, not marketing jargon
+// (PLAIN_KOREAN_RULE) — added only to calls that already have instructions.
 
 export type OutputLanguage = "ko" | "en";
 
@@ -30,6 +32,22 @@ export const ENGLISH_RULE = [
   "These instructions are in Korean; follow them, but do not answer in Korean. Translate Korean input into English where you use it. Keep brand, product and place names as the member wrote them, adding a romanized form only when it helps (e.g. 해운대 → Haeundae).",
   "JSON keys, enum values, ids, numbers, URLs and color codes stay exactly as the schema requires.",
 ].join("\n");
+
+export const PLAIN_KOREAN_RULE = [
+  "[쉬운 우리말]",
+  "결과는 소상공인 사장님이 바로 이해하도록 쉬운 우리말로 쓰세요. 포지셔닝·페르소나·세그먼트·오퍼·훅·CTA·MVP·KPI·리드·퍼널·인사이트 같은 영어 외래어나 마케팅 전문 용어 대신 차별점·대표 손님·손님 유형·상품 구성·첫 문장·구매 유도 문구·시험용 첫 상품·성과 지표·알게 된 점 같은 말을 쓰세요.",
+  "꼭 필요한 용어는 처음 한 번만 괄호로 짧게 풀어 주세요. 고유명사·브랜드명·플랫폼 이름(인스타그램, 네이버 등)과 JSON 키·값의 형식은 그대로 둡니다.",
+].join("\n");
+
+/** A Korean run's system instruction with the plain-Korean rule added (only when there is one). */
+function withPlainKorean(system: unknown): unknown {
+  if (typeof system === "string" && system.trim()) return `${system}\n\n${PLAIN_KOREAN_RULE}`;
+  if (system && typeof system === "object" && Array.isArray((system as Content).parts) && (system as Content).parts!.length) {
+    const c = system as Content;
+    return { ...c, parts: [...(c.parts ?? []), { text: PLAIN_KOREAN_RULE }] };
+  }
+  return system;
+}
 
 // "반드시 한국어로 작성하세요." and "…한국어로 정리/요약…" in the prompts.
 const KOREAN_DIRECTIVE = /반드시 한국어로 작성하세요\.?/g;
@@ -67,8 +85,12 @@ function withRule(system: unknown, lang: OutputLanguage): unknown {
 
 /** Gemini generateContent params for the run's language (unchanged for Korean). */
 export function applyToGeminiParams<P extends object>(params: P, lang: OutputLanguage = currentOutputLanguage()): P {
-  if (lang !== "en") return params;
   const p = params as { contents?: unknown; config?: { systemInstruction?: unknown } };
+  if (lang !== "en") {
+    const system = p.config?.systemInstruction;
+    const plain = withPlainKorean(system);
+    return plain === system ? params : ({ ...params, config: { ...(p.config ?? {}), systemInstruction: plain } } as P);
+  }
   return {
     ...params,
     contents: localizeContents(p.contents, lang),
@@ -78,8 +100,8 @@ export function applyToGeminiParams<P extends object>(params: P, lang: OutputLan
 
 /** Anthropic messages.create params for the run's language (unchanged for Korean). */
 export function applyToAnthropicParams<P extends object>(params: P, lang: OutputLanguage = currentOutputLanguage()): P {
-  if (lang !== "en") return params;
   const q = params as { system?: unknown; messages?: unknown };
+  if (lang !== "en") return typeof q.system === "string" && q.system.trim() ? ({ ...params, system: withPlainKorean(q.system) } as P) : params;
   const system = typeof q.system === "string" || q.system === undefined ? (withRule(q.system, lang) as string) : q.system;
   const messages = Array.isArray(q.messages)
     ? q.messages.map((m: { content?: unknown } & Record<string, unknown>) => ({

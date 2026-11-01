@@ -16,7 +16,7 @@ export const STREAM_TYPES: Record<string, string> = {
   licensing: "라이선스",
   advertising: "광고",
 };
-export const STREAM_ROLES: Record<string, string> = { core: "핵심", upsell: "업셀", recurring: "반복", experimental: "실험" };
+export const STREAM_ROLES: Record<string, string> = { core: "핵심", upsell: "추가 판매", recurring: "반복", experimental: "실험" };
 export const WILLINGNESS: Record<string, string> = { low: "낮음", medium: "보통", high: "높음" };
 
 export function unitEconomics(ue: Record<string, unknown>) {

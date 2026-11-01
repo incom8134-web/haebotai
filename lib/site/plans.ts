@@ -40,7 +40,7 @@ export const PLANS: { id: Exclude<PlanId, "student">; name: Bilingual; price: Bi
     credits: credits(PRODUCTS.plus.credits),
     features: [
       { ko: "16개 도구 모두 실행", en: "Run all 16 tools" },
-      { ko: `${PRODUCTS.plus.credits.toLocaleString()} 크레딧 (예: 블로그 글 5편 + 리포트 20개)`, en: `${PRODUCTS.plus.credits.toLocaleString()} credits (e.g. 5 blog posts + 20 reports)` },
+      { ko: `${PRODUCTS.plus.credits.toLocaleString()} 크레딧 (예: 블로그 글 5편 + 보고서 20개)`, en: `${PRODUCTS.plus.credits.toLocaleString()} credits (e.g. 5 blog posts + 20 reports)` },
       { ko: "PDF·Word·PPT 디자인 결과 파일", en: "Designed PDF, Word and PPT downloads" },
       { ko: `모자라면 ${PRODUCTS.topup.credits} 크레딧 ${won(PRODUCTS.topup.amount)} 충전`, en: `Top up ${PRODUCTS.topup.credits} credits for ${won(PRODUCTS.topup.amount)}` },
     ],

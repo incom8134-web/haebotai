@@ -23,7 +23,7 @@ export function offerArchitectReport(o: Record<string, unknown>): Report {
   sections.push({
     id: "promise",
     kicker: "핵심",
-    title: str(o.headline) || str(o.offer_name) || "오퍼",
+    title: str(o.headline) || str(o.offer_name) || "상품 구성",
     lead: str(o.subheadline) || undefined,
     blocks: keep([
       { type: "callout", label: "핵심 약속", text: str(o.core_promise) },
@@ -36,7 +36,7 @@ export function offerArchitectReport(o: Record<string, unknown>): Report {
           { title: "원하는 결과", lines: [str(target.desired_outcome)].filter(Boolean) },
         ].filter((c) => c.lines.length),
       },
-      { type: "text", title: "포지셔닝", text: str(o.positioning_line) },
+      { type: "text", title: "차별점", text: str(o.positioning_line) },
     ]),
   });
 
@@ -92,7 +92,7 @@ export function offerArchitectReport(o: Record<string, unknown>): Report {
     palette: PALETTES["offer-architect"],
     hero: {
       eyebrow: "팔 상품·가격 정하기",
-      title: str(o.offer_name) || str(o.headline) || "오퍼",
+      title: str(o.offer_name) || str(o.headline) || "상품 구성",
       subtitle: str(o.core_promise) || undefined,
       kpis: prices.length ? [{ label: "가격대", value: `${fmt(Math.min(...prices), "원")}~${fmt(Math.max(...prices), "원")}` }, { label: "구성 블록", value: `${stack.length}개` }] : [],
     },

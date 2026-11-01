@@ -31,8 +31,8 @@ export function TrendRadar({ output, input }: { output: Record<string, unknown>;
     <div className="mt-3 flex flex-col gap-5">
       <section className="grid gap-4 rounded-2xl border border-hairline bg-surface p-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <div>
-          <Kicker>{L({ ko: "신호 레이더", en: "Signal radar" })}</Kicker>
-          <svg viewBox={`${-R - 10} ${-R - 10} ${2 * R + 20} ${2 * R + 20}`} className="mt-2 w-full max-w-sm" role="img" aria-label={L({ ko: "시장 신호 레이더", en: "Market signal radar" })}>
+          <Kicker>{L({ ko: "시장 신호 차트", en: "Signal radar" })}</Kicker>
+          <svg viewBox={`${-R - 10} ${-R - 10} ${2 * R + 20} ${2 * R + 20}`} className="mt-2 w-full max-w-sm" role="img" aria-label={L({ ko: "시장 신호 방사형 차트", en: "Market signal radar" })}>
             {(["later", "soon", "now"] as const).map((h) => (
               <g key={h}>
                 <circle r={RING[h] * R} fill="none" stroke="var(--color-hairline-str)" strokeDasharray={h === "now" ? undefined : "3 3"} />

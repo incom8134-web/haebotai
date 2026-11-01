@@ -551,7 +551,7 @@ export function BeforeAfterSection() {
           </p>
           <p className="mt-3 text-2xs text-fg-subtle">
             {L({
-              ko: "이 밖에 가치 목록, 보너스, 반론 대응, 판매 문구, CTA가 함께 나와요.",
+              ko: "이 밖에 가치 목록, 보너스, 반론 대응, 판매 문구, 구매 유도 문구가 함께 나와요.",
               en: "Also in the result: value stack, bonuses, objection handling, sales copy and CTA.",
             })}
           </p>

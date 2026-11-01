@@ -126,7 +126,7 @@ export function BrandBoard({ output, input, runId }: { output: Record<string, un
       {str(pos.statement) ? (
         <section className="rounded-2xl border border-accent/30 bg-accent-dim p-4">
           <div className="flex items-start gap-2">
-            <Kicker>{L({ ko: "포지셔닝", en: "Positioning" })}</Kicker>
+            <Kicker>{L({ ko: "차별점", en: "Positioning" })}</Kicker>
             <CopyButton text={str(pos.statement)} className="ml-auto" />
           </div>
           <p className="mt-1 text-base leading-relaxed font-semibold text-fg break-keep">{str(pos.statement)}</p>

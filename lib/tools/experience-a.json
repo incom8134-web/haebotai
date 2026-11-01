@@ -43,7 +43,7 @@
       "goal": { "placeholder": { "ko": "예: 평일 오전 매출 늘리기", "en": "e.g. Grow weekday morning sales" } },
       "customer_voice": { "placeholder": { "ko": "예: \"빵은 좋은데 아침엔 들를 시간이 없어요\"", "en": "e.g. \"Love the bread, but no time in the morning\"" } }
     },
-    "stage": { "headline": { "ko": "한 장으로 정리된 포지셔닝", "en": "Positioning on a single page" }, "story": { "ko": "대상, 경쟁 구도, 핵심 긴장, 약속, 믿을 이유. 그리고 방향 세 가지 중 추천 하나. 결과는 카피와 발표자료가 그대로 이어받아요.", "en": "Audience, competitive frame, tension, promise, reasons to believe — plus one recommended route of three. Copy and decks pick it up directly." }, "promises": [ { "icon": "compass", "text": { "ko": "방향 3가지", "en": "3 routes" } }, { "icon": "search", "text": { "ko": "경쟁 근거", "en": "Competitive evidence" } }, { "icon": "link", "text": { "ko": "카피·발표로 연결", "en": "Feeds copy & decks" } } ] }
+    "stage": { "headline": { "ko": "한 장으로 정리된 차별점", "en": "Positioning on a single page" }, "story": { "ko": "대상, 경쟁 구도, 핵심 긴장, 약속, 믿을 이유. 그리고 방향 세 가지 중 추천 하나. 결과는 카피와 발표자료가 그대로 이어받아요.", "en": "Audience, competitive frame, tension, promise, reasons to believe — plus one recommended route of three. Copy and decks pick it up directly." }, "promises": [ { "icon": "compass", "text": { "ko": "방향 3가지", "en": "3 routes" } }, { "icon": "search", "text": { "ko": "경쟁 근거", "en": "Competitive evidence" } }, { "icon": "link", "text": { "ko": "카피·발표로 연결", "en": "Feeds copy & decks" } } ] }
   },
   "calendar": {
     "layout": "split", "visual": "calendar",
@@ -58,7 +58,7 @@
       "pace": { "display": "cards", "options": { "steady": { "icon": "footprints", "desc": { "ko": "본업과 함께", "en": "Alongside a job" } }, "sprint": { "icon": "flame", "desc": { "ko": "여기에 집중", "en": "Main focus" } } } },
       "milestones": { "placeholder": { "ko": "Enter로 추가 — 예: 첫 모집 공지", "en": "Press Enter — e.g. first signup post" } }
     },
-    "stage": { "headline": { "ko": "13주, 주마다 한 줄", "en": "13 weeks, one line each" }, "story": { "ko": "세 단계로 나눈 주간 계획에 마일스톤을 배치합니다. .ics로 내보내면 구글·애플 캘린더에 그대로 들어가요.", "en": "A weekly plan in three phases with your milestones placed. Export .ics straight into Google or Apple Calendar." }, "promises": [ { "icon": "calendar-days", "text": { "ko": "13주 계획", "en": "13-week plan" } }, { "icon": "flag", "text": { "ko": "마일스톤 배치", "en": "Milestones placed" } }, { "icon": "file-down", "text": { "ko": ".ics 내보내기", "en": ".ics export" } } ] }
+    "stage": { "headline": { "ko": "13주, 주마다 한 줄", "en": "13 weeks, one line each" }, "story": { "ko": "세 단계로 나눈 주간 계획에 중간 목표를 배치합니다. .ics로 내보내면 구글·애플 캘린더에 그대로 들어가요.", "en": "A weekly plan in three phases with your milestones placed. Export .ics straight into Google or Apple Calendar." }, "promises": [ { "icon": "calendar-days", "text": { "ko": "13주 계획", "en": "13-week plan" } }, { "icon": "flag", "text": { "ko": "중간 목표 배치", "en": "Milestones placed" } }, { "icon": "file-down", "text": { "ko": ".ics 내보내기", "en": ".ics export" } } ] }
   },
   "prompt": {
     "layout": "steps",
@@ -209,7 +209,7 @@
     ],
     "ui": {
       "topic": { "placeholder": { "ko": "예: 봄 시즌 딸기 디저트 신메뉴", "en": "e.g. Our spring strawberry dessert menu" } },
-      "platform": { "display": "cards", "options": { "naver": { "icon": "badge-check", "desc": { "ko": "검색 노출 중심", "en": "Search-first" } }, "tistory": { "icon": "file-code", "desc": { "ko": "구글·다음 SEO", "en": "Google SEO" } }, "brunch": { "icon": "feather", "desc": { "ko": "읽는 맛 중심", "en": "Reading-first" } }, "wordpress": { "icon": "globe", "desc": { "ko": "해외·자사 블로그", "en": "Own site" } } } },
+      "platform": { "display": "cards", "options": { "naver": { "icon": "badge-check", "desc": { "ko": "검색 노출 중심", "en": "Search-first" } }, "tistory": { "icon": "file-code", "desc": { "ko": "구글·다음 검색 노출", "en": "Google SEO" } }, "brunch": { "icon": "feather", "desc": { "ko": "읽는 맛 중심", "en": "Reading-first" } }, "wordpress": { "icon": "globe", "desc": { "ko": "해외·자사 블로그", "en": "Own site" } } } },
       "post_type": { "display": "segmented" },
       "length": { "display": "slider-select" },
       "must_include_facts": { "placeholder": { "ko": "예: 1조각 6,500원 / 오전 7시~오후 8시 / 월요일 휴무", "en": "e.g. ₩6,500 a slice / 7am–8pm / closed Mondays" } }
@@ -246,6 +246,6 @@
       "intent": { "display": "cards", "options": { "buy": { "icon": "shopping-bag", "desc": { "ko": "주문·가격·예약", "en": "Order, price, book" } }, "learn": { "icon": "book-open", "desc": { "ko": "방법·비교·추천", "en": "How-to, compare" } }, "local": { "icon": "map-pin", "desc": { "ko": "근처·지역명", "en": "Near me, area" } } } },
       "platforms": { "display": "toggles" }
     },
-    "stage": { "headline": { "ko": "지금 공략할 것, 나중에 노릴 것", "en": "Target now, aim for later" }, "story": { "ko": "마이크로·미드·메가 키워드를 네 개씩, 그리고 경쟁자가 비워 둔 콘텐츠 공백 세 가지. 고른 키워드로 블로그 원고를 바로 시작할 수 있어요.", "en": "Four micro, mid and mega keywords each, plus three content gaps. Start a blog draft from any of them." }, "promises": [ { "icon": "triangle", "text": { "ko": "3단계 티어", "en": "3 tiers" } }, { "icon": "scan-search", "text": { "ko": "콘텐츠 공백", "en": "Content gaps" } }, { "icon": "arrow-right", "text": { "ko": "블로그로 연결", "en": "Into a blog post" } } ] }
+    "stage": { "headline": { "ko": "지금 공략할 것, 나중에 노릴 것", "en": "Target now, aim for later" }, "story": { "ko": "마이크로·미드·메가 키워드를 네 개씩, 그리고 경쟁자가 비워 둔 콘텐츠 공백 세 가지. 고른 키워드로 블로그 원고를 바로 시작할 수 있어요.", "en": "Four micro, mid and mega keywords each, plus three content gaps. Start a blog draft from any of them." }, "promises": [ { "icon": "triangle", "text": { "ko": "3단계 구분", "en": "3 tiers" } }, { "icon": "scan-search", "text": { "ko": "콘텐츠 공백", "en": "Content gaps" } }, { "icon": "arrow-right", "text": { "ko": "블로그로 연결", "en": "Into a blog post" } } ] }
   }
 }

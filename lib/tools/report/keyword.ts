@@ -58,7 +58,7 @@ export function keywordReport(o: Record<string, unknown>, input: Record<string, 
           yLabel: "월 검색량(로그)",
           xMax: 100,
           yMax: 10,
-          quadrants: ["골든 키워드", "레드오션", "틈새 롱테일", "피할 것"],
+          quadrants: ["골든 키워드", "레드오션", "틈새 검색어", "피할 것"],
         },
         caption: "진하게 표시된 점이 이 키워드 판에서 검색 대비 경쟁이 가장 낮은 골든 키워드입니다.",
         estimated: all.some((k) => k.estimated),
@@ -81,7 +81,7 @@ export function keywordReport(o: Record<string, unknown>, input: Record<string, 
     blocks: keep([
       numeric.length > 0 && {
         type: "chart",
-        title: "티어별 검색량",
+        title: "단계별 검색량",
         half: true,
         chart: { kind: "funnel", stages: tierSums.filter((t) => t.n).map((t) => ({ label: `${TIER_LABEL[t.t]} ${t.n}개`, value: Math.max(t.v, 1), display: `월 ${fmt(t.v)}` })) },
       },
@@ -97,7 +97,7 @@ export function keywordReport(o: Record<string, unknown>, input: Record<string, 
   sections.push({
     id: "list",
     kicker: "전체 목록",
-    title: "티어별 키워드",
+    title: "단계별 검색어",
     blocks: keep(
       (Object.keys(TIER_LABEL) as (keyof typeof TIER_LABEL)[]).map((t) => {
         const rows = all.filter((k) => k.tier === t);
