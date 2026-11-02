@@ -36,8 +36,8 @@ export async function getPaymentHistory(): Promise<PaymentRecord[]> {
   const base = "order_id, amount, status, created_at, plan, receipt_url:raw->receipt->>url";
   const query = (cols: string) => supabase.from("payments").select(cols).eq("user_id", user.id).order("created_at", { ascending: false }).limit(24);
   // refunded_amount and tax invoices arrive with migration 0025; read without them until then.
-  let { data, error } = await query(`${base}, refunded_amount`);
-  if (error) ({ data } = await query(base));
+  const first = await query(`${base}, refunded_amount`);
+  const { data } = first.error ? await query(base) : first;
   const { data: invoices } = await supabase.from("tax_invoice_requests").select("order_id, status").eq("user_id", user.id);
   const invoiceOf = new Map((invoices ?? []).map((i) => [i.order_id as string, i.status as TaxInvoiceStatus]));
   return ((data ?? []) as unknown as PaymentRow[]).map((r) => ({

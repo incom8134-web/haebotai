@@ -4,6 +4,19 @@ export type NoteKind = "new" | "improved" | "fixed";
 
 export const PATCH_NOTES: { version: string; date: string; title: Bilingual; items: { kind: NoteKind; text: Bilingual }[] }[] = [
   {
+    version: "3.2.0",
+    date: "2026-11-02",
+    title: { ko: "세금계산서 신청, 이 부분만 다시, 카카오톡 초대", en: "Tax invoices, redo one part, KakaoTalk invites" },
+    items: [
+      { kind: "new", text: { ko: "[멤버십 → 결제 내역]에서 결제마다 영수증을 보고, 사업자는 세금계산서를 신청할 수 있어요", en: "Membership → payments shows a receipt for each payment, and businesses can request a tax invoice" } },
+      { kind: "new", text: { ko: "결과를 받은 화면에서 바로 '이 부분만 다시 만들기'를 할 수 있어요", en: "Redo one part right from the result screen" } },
+      { kind: "new", text: { ko: "초대 링크를 카카오톡 등으로 바로 보낼 수 있어요", en: "Send your invite link straight to KakaoTalk and other apps" } },
+      { kind: "new", text: { ko: "플랜이 3일 안에 끝나거나 크레딧이 얼마 남지 않으면 화면 위에 알려 드려요", en: "A notice appears when your plan ends within 3 days or credits run low" } },
+      { kind: "improved", text: { ko: "Gemini 키를 등록하면 무료 등급 키인지 알려 주고, 오늘 무료 사용량을 다 쓰면 언제 다시 채워지는지 안내해요", en: "Adding a Gemini key tells you if it's free-tier, and a used-up daily quota says when it refills" } },
+      { kind: "improved", text: { ko: "첫 화면에서 실제로 만든 결과물과 주요 기능을 볼 수 있어요", en: "The home page shows real results and the main features" } },
+    ],
+  },
+  {
     version: "3.1.0",
     date: "2026-11-02",
     title: { ko: "친구를 초대하면 결제의 20%를 현금으로", en: "Earn 20% in cash when friends you invite pay" },
