@@ -51,3 +51,12 @@ test("reconcile closes cancelled, expired and long-abandoned orders", () => {
   const old = order({ createdAt: new Date(Date.now() - 2 * 86_400_000).toISOString() });
   assert.deepEqual(planReconcile(old, { found: false }), { kind: "close", status: "failed", reason: "abandoned" });
 });
+
+test("refunds of a finished order: full closes it, partial shrinks the share", async () => {
+  const { planRefund } = await import("./pro.ts");
+  const done = { status: "done" as const, amount: 29_900 };
+  assert.deepEqual(planRefund(done, { found: true, status: "CANCELED", totalAmount: 29_900 }), { kind: "refund_full" });
+  assert.deepEqual(planRefund(done, { found: true, status: "PARTIAL_CANCELED", totalAmount: 29_900, balanceAmount: 14_950 }), { kind: "refund_partial", remaining: 14_950 });
+  assert.deepEqual(planRefund(done, { found: true, status: "DONE", totalAmount: 29_900 }), { kind: "none" });
+  assert.deepEqual(planRefund({ status: "pending", amount: 29_900 }, { found: true, status: "CANCELED", totalAmount: 29_900 }), { kind: "none" });
+});

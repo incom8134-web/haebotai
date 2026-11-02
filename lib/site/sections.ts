@@ -1,4 +1,4 @@
-import { MEMBER_API_KEYS, OWN_KEY_ONLY, REFERRAL_CREDITS } from "./access.ts";
+import { MEMBER_API_KEYS, OWN_KEY_ONLY, REFERRAL_CREDITS, REFERRAL_REVENUE_SHARE } from "./access.ts";
 import type { SubNavItem } from "@/components/site/sub-nav";
 
 // Separate pages, grouped: Help = look up / ask / learn; Account = me /
@@ -26,13 +26,13 @@ const ALL_ACCOUNT_NAV: SubNavItem[] = [
   { href: "/account/credits", label: { ko: "크레딧·한도", en: "Credits & limits" }, icon: "circle-gauge" },
   { href: "/account/membership", label: { ko: "멤버십", en: "Membership" }, icon: "crown" },
   { href: "/account/api-key", label: { ko: "내 API 키", en: "My API key" }, icon: "key-round" },
-  { href: "/account/referral", label: { ko: "친구 초대", en: "Invite friends" }, icon: "gift" },
+  { href: "/account/referral", label: { ko: "친구 초대·수익", en: "Invite & earn" }, icon: "gift" },
 ];
 
 /** Own-key mode: no credits, plans or invites. SaaS mode: no own keys, and invites only while they pay credits (lib/site/access.ts). */
 export const ACCOUNT_NAV: SubNavItem[] = OWN_KEY_ONLY
   ? ALL_ACCOUNT_NAV.filter((i) => i.href === "/account" || i.href === "/account/api-key")
-  : ALL_ACCOUNT_NAV.filter((i) => (MEMBER_API_KEYS || i.href !== "/account/api-key") && (REFERRAL_CREDITS || i.href !== "/account/referral"));
+  : ALL_ACCOUNT_NAV.filter((i) => (MEMBER_API_KEYS || i.href !== "/account/api-key") && (REFERRAL_CREDITS || REFERRAL_REVENUE_SHARE || i.href !== "/account/referral"));
 
 export const LEGAL_NAV: SubNavItem[] = [
   { href: "/legal/terms", label: { ko: "이용약관", en: "Terms" }, icon: "scroll-text" },

@@ -28,3 +28,5 @@ export const MEMBER_KEY_PROVIDERS: readonly ("google" | "anthropic")[] = SAAS ? 
 export const STUDENT_PLAN = false;
 /** Referral sign-up bonuses (off: free accounts get no credits). */
 export const REFERRAL_CREDITS = false;
+/** Referral revenue share: inviters earn cash from friends' purchases (lib/referral.ts REVENUE_SHARE). */
+export const REFERRAL_REVENUE_SHARE = SAAS;
