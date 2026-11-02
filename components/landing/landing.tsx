@@ -14,7 +14,6 @@ import { publicTools } from "@/lib/tools/catalog";
 import { FAQ } from "@/lib/site/faq";
 import { useBi } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
-import { HeroMock } from "./hero-mock";
 import { ConceptFilm } from "./concept-film";
 import { SceneVideo } from "./scene-video";
 import {
@@ -150,89 +149,66 @@ function Hero() {
   const count = publicTools().length;
   return (
     <div className="relative isolate overflow-hidden">
-      {/* A quiet glass-and-light scene on a seamless loop. The wash keeps the headline readable. */}
+      {/* The sapphire gem film, full bleed (a vertical cut on phones). The wash keeps the headline readable. */}
       <div aria-hidden className="absolute inset-0 -z-10">
-        <SceneVideo name="hero" priority loop className="opacity-90 dark:opacity-25" />
-        <div className="absolute inset-0 bg-gradient-to-r from-bg/90 via-bg/60 to-bg/20" />
-        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-bg to-transparent" />
+        {/* Phones: the gem sits below the buttons, and the text area is washed out more. */}
+        <SceneVideo name="gem" priority loop className="max-md:translate-y-[30%] dark:opacity-40" />
+        <div className="absolute inset-0 bg-gradient-to-b from-bg from-35% via-bg/70 via-60% to-bg/0 md:bg-gradient-to-r md:from-bg/95 md:from-0% md:via-bg/55 md:via-50% md:to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-bg to-transparent" />
       </div>
-    <section className="mx-auto grid max-w-[1200px] gap-10 px-4 pt-12 pb-16 md:px-6 md:pt-20 lg:grid-cols-[1fr_1.05fr] lg:items-center lg:gap-14">
-      <motion.div
-        initial={{ opacity: 0, y: 14 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <p className="inline-flex items-center gap-2 rounded-full border border-hairline bg-surface px-3 py-1 text-xs font-medium text-fg-muted">
-          <span className="size-1.5 rounded-full bg-accent" aria-hidden />{" "}
-          {L({
-            ko: `작은 사업을 위한 ${count}개 AI 도구`,
-            en: `${count} AI tools for small businesses`,
-          })}
-        </p>
-        <h1 className="mt-6 font-display text-[clamp(2.4rem,5vw,3.8rem)] leading-[1.06] font-bold tracking-[-0.03em] break-keep text-fg">
-          {L({ ko: "아이디어에서 매출까지,", en: "From idea to revenue," })}
-          <br />
-          <span className="text-accent">
-            {L({ ko: "이어지는 사업 작업실", en: "one connected workshop" })}
-          </span>
-        </h1>
-        <p className="mt-6 max-w-xl text-lg leading-relaxed break-keep text-fg-muted">
-          {L({
-            ko: "사업 아이디어, 팔 상품 구성, 브랜드, 상세페이지, 캠페인, 업무 문서까지. 하나의 프로젝트가 정한 내용을 기억하고, 한 도구의 결과가 다음 도구의 입력이 돼요.",
-            en: "Business ideas, offers, brand, sales pages, campaigns and operating documents. One project remembers what you've settled, and each tool's result becomes the next one's input.",
-          })}
-        </p>
-        <div className="mt-8 flex flex-wrap gap-3">
-          <Link
-            href="/quick"
-            className={cn(primaryButton, "h-12 w-full px-6 text-[15px] sm:w-auto")}
-          >
-            <Wand2 size={17} aria-hidden />
-            {L({ ko: "가게 홍보 바로 시작하기", en: "Start shop marketing now" })}
-          </Link>
-          <Link
-            href={signedIn ? "/studio" : "/auth"}
-            className={cn(secondaryButton, "h-12 px-6 text-[15px]")}
-          >
-            {signedIn
-              ? L({ ko: "스튜디오로 가기", en: "Go to Studio" })
-              : L({ ko: "시작하기", en: "Get started" })}{" "}
-            <ArrowRight size={16} aria-hidden />
-          </Link>
-          <Link
-            href="/tools"
-            className={cn(secondaryButton, "h-12 px-6 text-[15px]")}
-          >
-            {L({ ko: "도구 둘러보기", en: "Browse tools" })}
-          </Link>
-        </div>
-        <ul className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-sm text-fg-muted">
-          {(OWN_KEY_ONLY
-            ? [
-                { ko: "한 줄이면 바로 시작", en: "Start with one line" },
-                { ko: "카드 등록 없음", en: "No card needed" },
-                { ko: "내 Gemini API 키로 실행", en: "Runs on your own Gemini key" },
-              ]
-            : [
-                FREE_OWN_KEY ? { ko: "무료는 내 API 키로 실행", en: "Free on your own API key" } : { ko: "무료로 둘러보기", en: "Browse free" },
-                { ko: "플러스 ₩29,900/30일", en: "Plus ₩29,900 / 30 days" },
-                { ko: "실패한 실행은 자동 환불", en: "Failed runs refunded" },
-              ]
-          ).map((t) => (
-            <li key={t.en} className="flex items-center gap-1.5 break-keep">
-              <Check size={15} className="text-grounded" aria-hidden /> {L(t)}
-            </li>
-          ))}
-        </ul>
-      </motion.div>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <HeroMock />
-      </motion.div>
-    </section>
+      <section className="mx-auto flex min-h-[calc(100svh-4rem)] max-w-[1200px] flex-col justify-center px-4 pt-14 pb-24 md:min-h-[min(88vh,860px)] md:px-6">
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          className="max-w-[640px]"
+        >
+          <p className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/55 px-3 py-1 text-xs font-medium text-fg-muted backdrop-blur-md dark:border-hairline dark:bg-surface/60">
+            <span className="size-1.5 rounded-full bg-accent" aria-hidden />{" "}
+            {L({ ko: `작은 사업을 위한 ${count}개 AI 도구`, en: `${count} AI tools for small businesses` })}
+          </p>
+          <h1 className="mt-6 font-display text-[clamp(2.5rem,6vw,4.6rem)] leading-[1.04] font-bold tracking-[-0.035em] break-keep text-fg">
+            {L({ ko: "아이디어에서 매출까지,", en: "From idea to revenue," })}
+            <br />
+            <span className="bg-gradient-to-r from-[#12449a] via-accent to-[#2a6fd0] bg-clip-text text-transparent dark:from-[#7fb0ff] dark:to-[#a9c8ff]">
+              {L({ ko: "AI가 함께 만드는 가게", en: "a shop built with AI" })}
+            </span>
+          </h1>
+          <p className="mt-6 max-w-xl text-lg leading-relaxed break-keep text-fg-muted">
+            {L({
+              ko: "한 줄만 적으면 사업 아이디어, 브랜드, 로고, 상세페이지, 광고 문구, 블로그 글까지 바로 써먹을 결과로 나와요. 한 도구의 결과가 다음 도구로 이어져요.",
+              en: "Write one line and get results you can use right away: business ideas, a brand, a logo, product pages, ad copy and blog posts. Each tool's result flows into the next.",
+            })}
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link href="/quick" className={cn(primaryButton, "h-12 w-full px-6 text-[15px] shadow-[0_16px_40px_-16px_var(--studio-violet)] sm:w-auto")}>
+              <Wand2 size={17} aria-hidden />
+              {L({ ko: "가게 홍보 바로 시작하기", en: "Start shop marketing now" })}
+            </Link>
+            <Link href={signedIn ? "/studio" : "/auth"} className={cn(secondaryButton, "h-12 bg-white/70 px-6 text-[15px] backdrop-blur-md dark:bg-surface/70")}>
+              {signedIn ? L({ ko: "스튜디오로 가기", en: "Go to Studio" }) : L({ ko: "무료로 시작하기", en: "Start free" })} <ArrowRight size={16} aria-hidden />
+            </Link>
+          </div>
+          <ul className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-sm text-fg-muted">
+            {(OWN_KEY_ONLY
+              ? [
+                  { ko: "한 줄이면 바로 시작", en: "Start with one line" },
+                  { ko: "카드 등록 없음", en: "No card needed" },
+                  { ko: "내 Gemini API 키로 실행", en: "Runs on your own Gemini key" },
+                ]
+              : [
+                  FREE_OWN_KEY ? { ko: "무료는 내 API 키로 실행", en: "Free on your own API key" } : { ko: "무료로 둘러보기", en: "Browse free" },
+                  { ko: "플러스 ₩29,900/30일", en: "Plus ₩29,900 / 30 days" },
+                  { ko: "실패한 실행은 자동 환불", en: "Failed runs refunded" },
+                ]
+            ).map((t) => (
+              <li key={t.en} className="flex items-center gap-1.5 break-keep">
+                <Check size={15} className="text-grounded" aria-hidden /> {L(t)}
+              </li>
+            ))}
+          </ul>
+        </motion.div>
+      </section>
     </div>
   );
 }
@@ -344,15 +320,20 @@ function FinalCta() {
     <section className="mx-auto max-w-[1200px] px-4 pt-6 pb-20 md:px-6">
       <motion.div
         {...reveal}
-        className="rounded-[32px] bg-fg px-6 py-14 text-center md:px-12"
+        className="relative isolate overflow-hidden rounded-[32px] bg-[#0b2a66] px-6 py-16 text-center md:px-12 md:py-24"
       >
-        <h2 className="mx-auto max-w-2xl font-display text-[clamp(1.8rem,3.8vw,2.8rem)] leading-tight font-bold tracking-[-0.02em] break-keep text-bg">
+        {/* Sapphire ribbons of light (a vertical cut on phones), darkened for the white text. */}
+        <div aria-hidden className="absolute inset-0 -z-10">
+          <SceneVideo name="cta" loop />
+          <div className="absolute inset-0 bg-[#061a44]/45" />
+        </div>
+        <h2 className="mx-auto max-w-2xl font-display text-[clamp(1.8rem,3.8vw,2.8rem)] leading-tight font-bold tracking-[-0.02em] break-keep text-white">
           {L({
             ko: "오늘 만든 프로젝트가 내일 도구의 출발점이 됩니다",
             en: "Today's project is where tomorrow's tool starts",
           })}
         </h2>
-        <p className="mx-auto mt-4 max-w-lg text-base leading-relaxed break-keep text-bg/70">
+        <p className="mx-auto mt-4 max-w-lg text-base leading-relaxed break-keep text-white/80">
           {L({
             ko: "구글 계정으로 바로 시작하세요. 결과는 도구에 따라 1~4분이면 나와요.",
             en: "Start with your Google account. Results take 1–4 minutes depending on the tool.",
@@ -360,7 +341,7 @@ function FinalCta() {
         </p>
         <Link
           href={signedIn ? "/studio" : "/auth"}
-          className={cn(primaryButton, "mt-8 h-12 px-7 text-[15px]")}
+          className={cn(primaryButton, "mt-8 h-12 bg-white bg-none px-7 text-[15px] text-[#12449a] hover:bg-white/90")}
         >
           {signedIn
             ? L({ ko: "스튜디오로 가기", en: "Go to Studio" })
