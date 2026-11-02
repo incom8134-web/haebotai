@@ -83,6 +83,16 @@ const PATTERNS: { test: (msg: string) => boolean; map: (msg: string) => MappedEr
     }),
   },
   {
+    // Own key out of Google's free daily allowance (provider-errors.ts): wait, or run on credits.
+    test: (m) => m.includes("무료 사용량을 다 썼어요"),
+    map: () => ({
+      ko: "오늘 내 Gemini 키의 무료 사용량을 다 썼어요. 한국 시간 오후 5시쯤 다시 채워져요. 기다리기 싫다면 플러스로 키 없이 바로 실행할 수 있어요.",
+      en: "Your Gemini key has used today's free allowance. It refills around 5 pm Korea time. Rather not wait? Plus runs without a key, right away.",
+      link: "/pricing",
+      linkLabel: { ko: "플러스 보기", en: "See Plus" },
+    }),
+  },
+  {
     test: (m) => m.includes("AI 엔진 사용 한도를 초과했습니다"),
     map: () => ({
       ko: "AI 엔진 사용 한도를 초과했습니다 — 잠시 후 다시 시도해주세요.",

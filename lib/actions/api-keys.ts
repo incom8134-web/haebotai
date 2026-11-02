@@ -5,7 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { env } from "@/lib/env";
 import { looksLikeAnthropicKey, looksLikeGoogleKey, seal } from "@/lib/crypto/secret-box";
-import { getUserApiKeySlot, verifyAnthropicKey, verifyGoogleKey, type ApiKeyPriority, type ApiKeyProvider } from "@/lib/api-keys";
+import { checkGoogleKeyTier, getUserApiKeySlot, verifyAnthropicKey, verifyGoogleKey, type ApiKeyPriority, type ApiKeyProvider } from "@/lib/api-keys";
+import { PRO_TEXT_MODEL } from "@/lib/ai/gemini-studio";
 import { limitSensitive } from "@/lib/rate-limit";
 
 export type ApiKeyActionState = { ok: boolean; message: string } | null;
@@ -14,6 +15,12 @@ const CHECKS: Record<ApiKeyProvider, { looksLike: (key: string) => boolean; veri
   google: { looksLike: looksLikeGoogleKey, verify: verifyGoogleKey },
   anthropic: { looksLike: looksLikeAnthropicKey, verify: verifyAnthropicKey },
 };
+
+/** A working Gemini key on Google's free tier runs text tools but not image ones (lib/ai/key-tier.ts): say so up front. */
+async function withTier(provider: ApiKeyProvider, key: string, base: "saved" | "valid"): Promise<string> {
+  if (provider !== "google") return base;
+  return (await checkGoogleKeyTier(key, PRO_TEXT_MODEL)) === "free" ? `${base}_free` : base;
+}
 
 function parsePriority(value: FormDataEntryValue | null): ApiKeyPriority | null {
   const n = Number(value);
@@ -57,7 +64,7 @@ export async function saveApiKey(_prev: ApiKeyActionState, formData: FormData): 
     return { ok: false, message: "save_failed" };
   }
   revalidatePath("/account/api-key");
-  return { ok: true, message: "saved" };
+  return { ok: true, message: await withTier(provider, key, "saved") };
 }
 
 export async function deleteApiKey(provider: ApiKeyProvider, priority: ApiKeyPriority): Promise<ApiKeyActionState> {
@@ -87,5 +94,5 @@ export async function testApiKey(provider: ApiKeyProvider, priority: ApiKeyPrior
     // retrying — the user may have just fixed it on the provider's side.
     await createAdminClient().from("user_api_keys").update({ broken: false }).eq("user_id", caller.id).eq("provider", provider).eq("priority", priority);
   }
-  return valid ? { ok: true, message: "valid" } : { ok: false, message: "rejected_by_provider" };
+  return valid ? { ok: true, message: await withTier(provider, key, "valid") } : { ok: false, message: "rejected_by_provider" };
 }
