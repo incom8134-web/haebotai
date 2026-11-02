@@ -171,13 +171,22 @@ export interface SiteSettings {
   hostEmails: string[];
   /** When and by whom each host entry was added, for the admin list. */
   hostMeta: Record<string, { addedAt: string; by: string; note: string }>;
+  /** Shared results staff feature on the landing page (/share/<token>), newest first. */
+  showcase: { token: string; note: string; addedAt: string }[];
 }
 
-export const DEFAULT_SETTINGS: SiteSettings = { maintenance: { on: false, message: "" }, pausedTools: {}, hostEmails: [], hostMeta: {} };
+export const DEFAULT_SETTINGS: SiteSettings = { maintenance: { on: false, message: "" }, pausedTools: {}, hostEmails: [], hostMeta: {}, showcase: [] };
+
+/** The share token in a pasted /share/<token> link (or a bare token), else null. */
+export function shareTokenFrom(raw: string): string | null {
+  const s = raw.trim();
+  const m = s.includes("/") ? /\/share\/([A-Za-z0-9_-]{22,64})\/?(?:[?#].*)?$/.exec(s) : /^([A-Za-z0-9_-]{22,64})$/.exec(s);
+  return m ? m[1] : null;
+}
 
 /** site_settings rows → settings, ignoring anything malformed. */
 export function parseSettings(rows: { key: string; value: unknown }[]): SiteSettings {
-  const out: SiteSettings = { maintenance: { ...DEFAULT_SETTINGS.maintenance }, pausedTools: {}, hostEmails: [], hostMeta: {} };
+  const out: SiteSettings = { maintenance: { ...DEFAULT_SETTINGS.maintenance }, pausedTools: {}, hostEmails: [], hostMeta: {}, showcase: [] };
   for (const { key, value } of rows) {
     const v = (value ?? {}) as Record<string, unknown>;
     if (key === "maintenance") out.maintenance = { on: v.on === true, message: typeof v.message === "string" ? v.message.slice(0, 300) : "" };
@@ -185,6 +194,14 @@ export function parseSettings(rows: { key: string; value: unknown }[]): SiteSett
       for (const [slug, info] of Object.entries(v)) {
         const i = (info ?? {}) as Record<string, unknown>;
         if (/^[a-z0-9-]{1,60}$/.test(slug)) out.pausedTools[slug] = { message: typeof i.message === "string" ? i.message.slice(0, 300) : "", at: typeof i.at === "string" ? i.at : "" };
+      }
+    }
+    // [{ token, note, addedAt }]
+    if (key === "showcase" && Array.isArray(value)) {
+      for (const item of value.slice(0, 12)) {
+        const i = (item ?? {}) as Record<string, unknown>;
+        const token = typeof i.token === "string" ? shareTokenFrom(i.token) : null;
+        if (token && !out.showcase.some((s) => s.token === token)) out.showcase.push({ token, note: typeof i.note === "string" ? i.note.slice(0, 120) : "", addedAt: typeof i.addedAt === "string" ? i.addedAt : "" });
       }
     }
     // { "<email or @domain>": { addedAt, by, note } }

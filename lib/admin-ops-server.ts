@@ -29,7 +29,7 @@ export async function getSiteSettings(fresh = false): Promise<SiteSettings> {
   return value;
 }
 
-export async function saveSetting(key: "maintenance" | "paused_tools" | "host_emails", value: unknown, staffId: string): Promise<void> {
+export async function saveSetting(key: "maintenance" | "paused_tools" | "host_emails" | "showcase", value: unknown, staffId: string): Promise<void> {
   const { error } = await createAdminClient().from("site_settings").upsert({ key, value, updated_by: staffId, updated_at: new Date().toISOString() });
   if (error) throw new Error(`site_settings: ${error.message}`);
   cache = null;

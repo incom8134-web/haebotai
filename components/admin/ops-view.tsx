@@ -5,7 +5,7 @@ import Link from "next/link";
 import { AlertTriangle, BellRing, Megaphone, PauseCircle, PlayCircle, Power, Send, Siren, Wrench } from "lucide-react";
 import { useBi } from "@/lib/i18n/context";
 import { SAAS } from "@/lib/site/access";
-import { changeAnnouncement, saveAnnouncement, sendMemberNotice, setMaintenance, setToolPaused, type AdminActionState } from "@/lib/actions/admin";
+import { addShowcase, changeAnnouncement, removeShowcase, saveAnnouncement, sendMemberNotice, setMaintenance, setToolPaused, type AdminActionState } from "@/lib/actions/admin";
 import { ERROR_CLASS, FUNNEL_STEPS, MAINTENANCE_DEFAULT, NOTICE_TEMPLATES, PAUSED_DEFAULT, type ErrorClass, type FailureAlert, type FunnelStep, type SiteSettings } from "@/lib/admin-ops";
 import type { Announcement, ErrorReport, MemberNotice } from "@/lib/admin-ops-server";
 import { catalogTool, publicTools } from "@/lib/tools/catalog";
@@ -508,6 +508,35 @@ export function AnnouncementsView({ items }: { items: Announcement[] }) {
 
 // ── Maintenance mode and paused tools ──────────────────────────────────
 
+function ShowcaseCard({ items }: { items: SiteSettings["showcase"] }) {
+  const L = useBi();
+  const [state, action, pending] = useActionState<AdminActionState, FormData>(addShowcase, null);
+  const [removeState, removeAction] = useActionState<AdminActionState, FormData>(removeShowcase, null);
+  return (
+    <Card title={L({ ko: "첫 화면 결과 예시", en: "Landing page examples" })} lead={L({ ko: "운영진 계정으로 도구를 실행하고 [공유]로 만든 링크를 붙여 넣으세요. 첫 화면 '실제로 만든 결과' 칸에 보여요. 최대 8개.", en: "Run a tool on a staff account, create a share link and paste it here. It appears in the landing page's examples. Up to 8." })}>
+      <form action={action} className="flex flex-col gap-2 sm:flex-row">
+        <input name="link" required placeholder="https://…/share/…" className={cn(field, "sm:flex-1")} aria-label={L({ ko: "공유 링크", en: "Share link" })} />
+        <input name="note" maxLength={120} placeholder={L({ ko: "한 줄 설명 (예: 동네 카페 블로그 글)", en: "One line (e.g. a café's blog post)" })} className={cn(field, "sm:flex-1")} aria-label={L({ ko: "설명", en: "Note" })} />
+        <button type="submit" disabled={pending} className={btnPrimary}>{L({ ko: "올리기", en: "Add" })}</button>
+      </form>
+      <ActionNote state={state ?? removeState} />
+      {items.length ? (
+        <ul className="mt-3 divide-y divide-hairline">
+          {items.map((i) => (
+            <li key={i.token} className="flex items-center justify-between gap-3 py-2 text-sm">
+              <a href={`/share/${i.token}`} target="_blank" rel="noopener noreferrer" className="min-w-0 truncate text-accent hover:underline">{i.note || i.token}</a>
+              <form action={removeAction}>
+                <input type="hidden" name="token" value={i.token} />
+                <button type="submit" className={cn(btnGhost, "h-8 px-3 text-xs")}>{L({ ko: "내리기", en: "Remove" })}</button>
+              </form>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </Card>
+  );
+}
+
 function MaintenanceCard({ settings }: { settings: SiteSettings }) {
   const L = useBi();
   const [state, action, pending] = useActionState<AdminActionState, FormData>(setMaintenance, null);
@@ -579,7 +608,10 @@ export function SettingsView({ settings }: { settings: SiteSettings }) {
     <div>
       <AdminPageHeader title={L({ ko: "운영 설정", en: "Operations" })} lead={L({ ko: "배포 없이 바로 바뀌어요. 바꾼 내용은 15초 안에 모든 서버에 적용되고 감사 로그에 남아요.", en: "Changes apply without a deploy, reach every server within 15 seconds, and go to the audit log." })} />
       <div className="grid gap-5 xl:grid-cols-[1fr_1.4fr]">
-        <MaintenanceCard settings={settings} />
+        <div className="flex flex-col gap-5">
+          <MaintenanceCard settings={settings} />
+          <ShowcaseCard items={settings.showcase} />
+        </div>
         <Card title={L({ ko: "도구 일시 중지", en: "Pause a tool" })} lead={pausedCount ? L({ ko: `지금 ${pausedCount}개 중지됨`, en: `${pausedCount} paused now` }) : L({ ko: "문제가 생긴 도구만 잠시 막아요. 실행 화면에 안내가 보여요.", en: "Block just the tool that's misbehaving. Its run page shows a notice." })} bodyClassName="px-5 py-1">
           <ul className="divide-y divide-hairline">
             {[...tools].sort((a, b) => Number(!!settings.pausedTools[b.slug]) - Number(!!settings.pausedTools[a.slug])).map((t) => (

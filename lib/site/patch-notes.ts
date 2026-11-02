@@ -4,12 +4,36 @@ export type NoteKind = "new" | "improved" | "fixed";
 
 export const PATCH_NOTES: { version: string; date: string; title: Bilingual; items: { kind: NoteKind; text: Bilingual }[] }[] = [
   {
+    version: "3.2.0",
+    date: "2026-11-02",
+    title: { ko: "세금계산서 신청, 이 부분만 다시, 카카오톡 초대", en: "Tax invoices, redo one part, KakaoTalk invites" },
+    items: [
+      { kind: "new", text: { ko: "[멤버십 → 결제 내역]에서 결제마다 영수증을 보고, 사업자는 세금계산서를 신청할 수 있어요", en: "Membership → payments shows a receipt for each payment, and businesses can request a tax invoice" } },
+      { kind: "new", text: { ko: "결과를 받은 화면에서 바로 '이 부분만 다시 만들기'를 할 수 있어요", en: "Redo one part right from the result screen" } },
+      { kind: "new", text: { ko: "초대 링크를 카카오톡 등으로 바로 보낼 수 있어요", en: "Send your invite link straight to KakaoTalk and other apps" } },
+      { kind: "new", text: { ko: "플랜이 3일 안에 끝나거나 크레딧이 얼마 남지 않으면 화면 위에 알려 드려요", en: "A notice appears when your plan ends within 3 days or credits run low" } },
+      { kind: "improved", text: { ko: "Gemini 키를 등록하면 무료 등급 키인지 알려 주고, 오늘 무료 사용량을 다 쓰면 언제 다시 채워지는지 안내해요", en: "Adding a Gemini key tells you if it's free-tier, and a used-up daily quota says when it refills" } },
+      { kind: "improved", text: { ko: "첫 화면에서 실제로 만든 결과물과 주요 기능을 볼 수 있어요", en: "The home page shows real results and the main features" } },
+    ],
+  },
+  {
     version: "3.1.0",
     date: "2026-11-02",
     title: { ko: "친구를 초대하면 결제의 20%를 현금으로", en: "Earn 20% in cash when friends you invite pay" },
     items: [
       { kind: "new", text: { ko: "초대한 친구가 90일 안에 결제할 때마다 결제 금액(부가세 제외)의 20%가 내 추천 수익으로 쌓여요. 7일 뒤 확정되고 1만 원부터 본인 계좌로 정산받을 수 있어요", en: "Every payment a friend you invited makes in their first 90 days earns you 20% (excl. VAT). It's confirmed after 7 days, with payouts to your own bank account from ₩10,000" } },
       { kind: "new", text: { ko: "[계정 → 친구 초대·수익]에서 초대 링크, 보류·출금 가능 금액, 수익·정산 내역을 한눈에 볼 수 있어요", en: "Account → Invite & earn shows your link, held and withdrawable amounts, and every earning and payout" } },
+    ],
+  },
+  {
+    version: "3.0.1",
+    date: "2026-11-01",
+    title: { ko: "무료 플랜은 내 Gemini 키로, 결과는 쉬운 우리말로", en: "Free runs on your own Gemini key; results in plain Korean" },
+    items: [
+      { kind: "new", text: { ko: "무료 플랜도 16개 도구를 모두 실행해요. Google AI Studio에서 무료로 받은 내 Gemini API 키를 등록하면 크레딧 없이 쓸 수 있어요", en: "The Free plan now runs all 16 tools. Add a Gemini API key you get free from Google AI Studio, and no credits are used" } },
+      { kind: "new", text: { ko: "API 키 받는 방법을 영상과 PDF 설명서로 볼 수 있어요", en: "A video and PDF guides show how to get an API key" } },
+      { kind: "improved", text: { ko: "화면과 AI 결과에서 '페르소나·CTA·포지셔닝' 같은 외래어 대신 '대표 손님·구매 유도 문구·차별점'처럼 쉬운 말을 써요", en: "Screens and AI results use plain Korean instead of marketing jargon like persona, CTA and positioning" } },
+      { kind: "fixed", text: { ko: "API 키 입력칸에 브라우저가 저장된 비밀번호를 채우던 문제를 고쳤어요", en: "The API key box no longer gets filled with a saved password" } },
     ],
   },
   {

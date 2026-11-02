@@ -5,13 +5,16 @@ import { redirect } from "next/navigation";
 import { getAdminUser, isStaffEmail, keyTierTarget, logAdminAction, revealPayoutRrn } from "@/lib/admin";
 import { checkGoogleKeyTier, getUserApiKeySlotFor, type ApiKeyPriority } from "@/lib/api-keys";
 import { PRO_TEXT_MODEL } from "@/lib/ai/gemini-studio";
-import { NOTICE_TEMPLATES, safeLink } from "@/lib/admin-ops";
+import { NOTICE_TEMPLATES, safeLink, shareTokenFrom } from "@/lib/admin-ops";
 import { clearAnnouncementCache, getSiteSettings, saveSetting, sendNotice } from "@/lib/admin-ops-server";
 import { publicTools } from "@/lib/tools/catalog";
 import { deleteAccountData } from "@/lib/account-delete";
 import { normalizeName } from "@/lib/member-name";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { envHostList, normalizeHostEntry } from "@/lib/platform-access";
+import { isHost } from "@/lib/platform-access-server";
+import { cancelTossPayment } from "@/lib/payments/toss";
+import { reconcileOrder } from "@/lib/payments/reconcile";
 
 /** Enough for a team and its partners; a longer list belongs in a table. */
 const HOST_LIMIT = 200;
@@ -431,4 +434,106 @@ export async function revealReferralRrn(_prev: AdminActionState, formData: FormD
   if (!rrn) return { ok: false, message: "rrn_unavailable" };
   await logAdminAction(staff.id, "reveal_rrn", "referral_payout_accounts", userId);
   return { ok: true, message: "rrn_shown", id: `${rrn.slice(0, 6)}-${rrn.slice(6)}` };
+}
+
+// ── Landing page showcase ──────────────────────────────────────────────
+
+const SHOWCASE_LIMIT = 8;
+
+/**
+ * Features a shared result on the landing page. Only results the team
+ * made (staff or host accounts): a member's result is theirs, and a share
+ * link is consent to a link, not to an advert.
+ */
+export async function addShowcase(_prev: AdminActionState, formData: FormData): Promise<AdminActionState> {
+  const staff = await getAdminUser();
+  if (!staff) return { ok: false, message: "not_admin" };
+  const token = shareTokenFrom(String(formData.get("link") ?? ""));
+  if (!token) return { ok: false, message: "showcase_invalid" };
+  const note = String(formData.get("note") ?? "").trim().slice(0, 120);
+  const admin = createAdminClient();
+  const { data: share } = await admin.from("run_shares").select("user_id").eq("token", token).is("revoked_at", null).maybeSingle();
+  if (!share) return { ok: false, message: "showcase_missing" };
+  const { data: owner } = await admin.auth.admin.getUserById(share.user_id);
+  if (!isStaffEmail(owner.user?.email) && !(await isHost(owner.user?.email))) return { ok: false, message: "showcase_not_team" };
+  const settings = await getSiteSettings(true);
+  if (settings.showcase.some((s) => s.token === token)) return { ok: false, message: "showcase_exists" };
+  if (settings.showcase.length >= SHOWCASE_LIMIT) return { ok: false, message: "showcase_limit" };
+  try {
+    await saveSetting("showcase", [{ token, note, addedAt: new Date().toISOString() }, ...settings.showcase], staff.id);
+  } catch {
+    return { ok: false, message: "ops_not_ready" };
+  }
+  await logAdminAction(staff.id, "showcase_add", "site_settings", token, { note });
+  revalidatePath("/");
+  revalidatePath("/admin/settings");
+  return { ok: true, message: "showcase_added" };
+}
+
+export async function removeShowcase(_prev: AdminActionState, formData: FormData): Promise<AdminActionState> {
+  const staff = await getAdminUser();
+  if (!staff) return { ok: false, message: "not_admin" };
+  const token = shareTokenFrom(String(formData.get("token") ?? ""));
+  const settings = await getSiteSettings(true);
+  if (!token || !settings.showcase.some((s) => s.token === token)) return { ok: false, message: "showcase_missing" };
+  try {
+    await saveSetting("showcase", settings.showcase.filter((s) => s.token !== token), staff.id);
+  } catch {
+    return { ok: false, message: "ops_not_ready" };
+  }
+  await logAdminAction(staff.id, "showcase_remove", "site_settings", token);
+  revalidatePath("/");
+  revalidatePath("/admin/settings");
+  return { ok: true, message: "showcase_removed" };
+}
+
+// ── Payments: refunds and tax invoices ─────────────────────────────────
+
+/**
+ * Refunds an order at Toss (all of it, or `amount` won), then reconciles:
+ * revoke_order takes back credits and plan days in proportion and cancels
+ * or shrinks the inviter's share (migration 0025).
+ */
+export async function refundPayment(_prev: AdminActionState, formData: FormData): Promise<AdminActionState> {
+  const staff = await getAdminUser();
+  if (!staff) return { ok: false, message: "not_admin" };
+  const orderId = String(formData.get("orderId") ?? "");
+  const reason = String(formData.get("reason") ?? "").trim().slice(0, 200);
+  const rawAmount = String(formData.get("amount") ?? "").replace(/[,\s원₩]/g, "");
+  if (!reason) return { ok: false, message: "reason_required" };
+  const admin = createAdminClient();
+  const { data: order } = await admin.from("payments").select("payment_key, amount, status").eq("order_id", orderId).maybeSingle();
+  if (!order?.payment_key || order.status !== "done") return { ok: false, message: "refund_failed" };
+  const amount = rawAmount ? Number(rawAmount) : undefined;
+  if (amount !== undefined && (!Number.isInteger(amount) || amount <= 0 || amount > order.amount)) return { ok: false, message: "refund_amount_invalid" };
+  const res = await cancelTossPayment({ paymentKey: order.payment_key, reason, cancelAmount: amount, idempotencyKey: `refund-${orderId}-${amount ?? "all"}-${Date.now()}` });
+  if (!res.ok) {
+    await logAdminAction(staff.id, "refund_failed", "payments", orderId, { code: res.code, message: res.message });
+    return { ok: false, message: "refund_failed" };
+  }
+  await reconcileOrder(orderId);
+  await logAdminAction(staff.id, "refund", "payments", orderId, { amount: amount ?? order.amount, reason });
+  revalidatePath("/admin/payments");
+  return { ok: true, message: "refunded" };
+}
+
+/** After issuing it on 홈택스: mark a tax invoice request issued, or reject it with a reason. */
+export async function processTaxInvoice(_prev: AdminActionState, formData: FormData): Promise<AdminActionState> {
+  const staff = await getAdminUser();
+  if (!staff) return { ok: false, message: "not_admin" };
+  const id = String(formData.get("id") ?? "");
+  const decision = String(formData.get("decision") ?? "");
+  const note = String(formData.get("note") ?? "").trim().slice(0, 200);
+  if (!id || !["issued", "rejected"].includes(decision)) return { ok: false, message: "invoice_missing" };
+  if (decision === "rejected" && !note) return { ok: false, message: "reason_required" };
+  const { data, error } = await createAdminClient()
+    .from("tax_invoice_requests")
+    .update({ status: decision, note: note || null, processed_at: new Date().toISOString(), processed_by: staff.id })
+    .eq("id", id)
+    .eq("status", "requested")
+    .select("order_id");
+  if (error || !data?.length) return { ok: false, message: "invoice_missing" };
+  await logAdminAction(staff.id, decision === "issued" ? "tax_invoice_issued" : "tax_invoice_rejected", "tax_invoice_requests", id, { order: data[0].order_id, note });
+  revalidatePath("/admin/payments");
+  return { ok: true, message: decision === "issued" ? "invoice_issued" : "invoice_rejected" };
 }

@@ -35,3 +35,13 @@ test("payout details: resident number and account number checks", async () => {
   assert.equal(normalizeAccountNumber("123-456-789012"), "123456789012");
   assert.equal(normalizeAccountNumber("123"), null);
 });
+
+test("self-referral hints: same mailbox, card or name", async () => {
+  const { emailIdentity, referralRisks } = await import("./referral.ts");
+  assert.equal(emailIdentity("Kim.Haeba+shop@Gmail.com"), "kimhaeba@gmail.com");
+  assert.equal(emailIdentity("kim.haeba@naver.com"), "kim.haeba@naver.com");
+  const inviter = { email: "kimhaeba@gmail.com", cards: ["43301234****123*"], name: "김해바" };
+  assert.deepEqual(referralRisks(inviter, [{ email: "friend@naver.com", cards: ["11112222****333*"], name: "이친구" }]), []);
+  assert.deepEqual(referralRisks(inviter, [{ email: "kim.haeba+2@gmail.com", cards: [], name: null }]), ["same_email"]);
+  assert.deepEqual(referralRisks(inviter, [{ email: "other@daum.net", cards: ["43301234****123*"], name: "김 해바" }]).sort(), ["same_card", "same_name"]);
+});

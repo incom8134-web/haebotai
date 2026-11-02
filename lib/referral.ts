@@ -64,5 +64,42 @@ export function normalizeAccountNumber(raw: unknown): string | null {
   return /^\d{10,16}$/.test(digits) ? digits : null;
 }
 
+/** An email's mailbox as the provider sees it: case, "+tags" and (Gmail) dots don't make a different person. */
+export function emailIdentity(email: string): string {
+  const [rawName, rawDomain] = email.trim().toLowerCase().split("@");
+  if (!rawDomain) return email.trim().toLowerCase();
+  const domain = rawDomain === "googlemail.com" ? "gmail.com" : rawDomain;
+  let name = rawName.split("+")[0];
+  if (domain === "gmail.com") name = name.replace(/\./g, "");
+  return `${name}@${domain}`;
+}
+
+export type ReferralRisk = "same_email" | "same_card" | "same_name";
+
+export interface ReferralParty {
+  email: string;
+  /** Masked card numbers Toss returned for this person's payments ("4330****1234****"). */
+  cards: string[];
+  /** Display name, or the payout account holder for the inviter. */
+  name: string | null;
+}
+
+/**
+ * Signs that an inviter may be buying through their own invite (a second
+ * account to earn the share back). Hints for the person approving the
+ * payout, never an automatic block: family and coworkers share names.
+ */
+export function referralRisks(inviter: ReferralParty, buyers: ReferralParty[]): ReferralRisk[] {
+  const risks = new Set<ReferralRisk>();
+  const cards = new Set(inviter.cards.filter(Boolean));
+  const norm = (s: string | null) => (s ?? "").replace(/\s+/g, "").toLowerCase();
+  for (const b of buyers) {
+    if (emailIdentity(b.email) === emailIdentity(inviter.email)) risks.add("same_email");
+    if (b.cards.some((c) => c && cards.has(c))) risks.add("same_card");
+    if (norm(b.name).length >= 2 && norm(b.name) === norm(inviter.name)) risks.add("same_name");
+  }
+  return [...risks];
+}
+
 /** Banks offered in the payout form (KFTC member names, short form). */
 export const PAYOUT_BANKS = ["KB국민은행", "신한은행", "우리은행", "하나은행", "NH농협은행", "IBK기업은행", "카카오뱅크", "토스뱅크", "케이뱅크", "SC제일은행", "한국씨티은행", "부산은행", "경남은행", "대구은행(iM뱅크)", "광주은행", "전북은행", "제주은행", "수협은행", "새마을금고", "신협", "우체국"] as const;

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AlertTriangle, ArrowRight, Check, CircleCheck, CircleGauge, Crown, ExternalLink, GraduationCap, KeyRound, LogOut, PlayCircle, Trash2 } from "lucide-react";
 import { PLANS, planName } from "@/lib/site/plans";
-import { requestStudentVerification, type StudentRequestState } from "@/lib/actions/membership";
+import { requestStudentVerification, requestTaxInvoice, type StudentRequestState, type TaxInvoiceState } from "@/lib/actions/membership";
 import { deleteApiKey, saveApiKey, testApiKey, type ApiKeyActionState } from "@/lib/actions/api-keys";
 import { useBi } from "@/lib/i18n/context";
 import { useKeepInputForm } from "@/lib/hooks/use-keep-input-form";
@@ -46,6 +46,8 @@ const KEY_MSG: Record<string, { ko: string; en: string }> = {
   saved: { ko: "확인하고 저장했어요.", en: "Verified and saved." },
   deleted: { ko: "삭제했어요.", en: "Deleted." },
   valid: { ko: "키가 잘 작동해요.", en: "Your key works." },
+  saved_free: { ko: "확인하고 저장했어요. 무료 등급 키라 글 도구는 모두 되지만, 이미지를 만드는 도구는 Google AI Studio에서 결제를 켜야 해요.", en: "Verified and saved. It's a free-tier key: text tools all work, but image tools need billing turned on in Google AI Studio." },
+  valid_free: { ko: "키가 잘 작동해요. 무료 등급 키라 이미지를 만드는 도구는 Google AI Studio에서 결제를 켜야 해요.", en: "Your key works. It's free-tier: image tools need billing turned on in Google AI Studio." },
   invalid_format: { ko: "키 형식이 올바르지 않아요.", en: "That doesn't look like a valid key for this provider." },
   rejected_by_provider: { ko: "제공사가 이 키를 거절했어요. 키가 살아 있는지 확인해 주세요.", en: "The provider rejected this key. Check that it's still active." },
   server_disabled: { ko: "이 서버에는 키 저장이 설정되지 않았어요.", en: "Key storage isn't configured on this server." },
@@ -329,40 +331,100 @@ const PAYMENT_STATUS: Record<PaymentRecord["status"], { ko: string; en: string }
   canceled: { ko: "취소·환불", en: "Canceled / refunded" },
 };
 
+const INVOICE_STATUS: Record<NonNullable<PaymentRecord["taxInvoice"]>, { ko: string; en: string }> = {
+  requested: { ko: "세금계산서 신청됨", en: "Tax invoice requested" },
+  issued: { ko: "세금계산서 발행됨", en: "Tax invoice issued" },
+  rejected: { ko: "세금계산서 반려", en: "Tax invoice declined" },
+};
+
+const INVOICE_MSG: Record<string, { ko: string; en: string }> = {
+  invoice_requested: { ko: "신청했어요. 영업일 2일 안에 적어 주신 메일로 발행해 드려요.", en: "Requested — we'll issue it to that email within 2 business days." },
+  business_no_invalid: { ko: "사업자등록번호 10자리를 확인해 주세요.", en: "Check the 10-digit business registration number." },
+  company_required: { ko: "상호와 대표자 이름을 적어 주세요.", en: "Enter the company and CEO name." },
+  email_invalid: { ko: "받을 이메일 주소를 확인해 주세요.", en: "Check the email address." },
+  already_requested: { ko: "이 결제는 이미 신청했어요.", en: "Already requested for this payment." },
+  order_missing: { ko: "결제 완료된 주문만 신청할 수 있어요.", en: "Only paid orders can get a tax invoice." },
+  rate_limited: { ko: "요청이 너무 잦아요. 잠시 후 다시 시도해 주세요.", en: "Too many requests — try again shortly." },
+  signed_out: { ko: "로그인이 필요해요.", en: "Please sign in." },
+  save_failed: { ko: "저장하지 못했어요. 잠시 후 다시 시도해 주세요.", en: "Couldn't save. Please try again shortly." },
+};
+
+const PLAN_LABEL: Record<string, { ko: string; en: string }> = {
+  plus: { ko: "플러스 30일", en: "Plus · 30 days" },
+  pro: { ko: "프로 30일", en: "Pro · 30 days" },
+  topup: { ko: "크레딧 충전", en: "Credit top-up" },
+};
+
+function TaxInvoiceForm({ orderId, onDone }: { orderId: string; onDone: () => void }) {
+  const L = useBi();
+  const [state, action, pending] = useActionState<TaxInvoiceState, FormData>(requestTaxInvoice, null);
+  const [ref, onSubmit] = useKeepInputForm(action, state);
+  if (state?.ok) {
+    return (
+      <p role="status" className="text-xs text-studio-success">
+        {L(INVOICE_MSG.invoice_requested)}{" "}
+        <button type="button" onClick={onDone} className="text-studio-cyan hover:underline">{L({ ko: "닫기", en: "Close" })}</button>
+      </p>
+    );
+  }
+  return (
+    <form ref={ref} onSubmit={onSubmit} className="grid gap-2 sm:grid-cols-2">
+      <input type="hidden" name="orderId" value={orderId} />
+      <input name="businessNo" required inputMode="numeric" maxLength={12} className={cn(inputClass, "h-10")} placeholder={L({ ko: "사업자등록번호 (000-00-00000)", en: "Business reg. no. (000-00-00000)" })} aria-label={L({ ko: "사업자등록번호", en: "Business registration number" })} />
+      <input name="company" required maxLength={80} className={cn(inputClass, "h-10")} placeholder={L({ ko: "상호", en: "Company name" })} aria-label={L({ ko: "상호", en: "Company name" })} />
+      <input name="ceo" required maxLength={40} className={cn(inputClass, "h-10")} placeholder={L({ ko: "대표자 이름", en: "CEO name" })} aria-label={L({ ko: "대표자 이름", en: "CEO name" })} />
+      <input name="email" type="email" required maxLength={120} className={cn(inputClass, "h-10")} placeholder={L({ ko: "받을 이메일", en: "Email to send it to" })} aria-label={L({ ko: "받을 이메일", en: "Email" })} />
+      <div className="flex flex-wrap items-center gap-2 sm:col-span-2">
+        <button type="submit" disabled={pending} className={cn(primaryButton, "h-9 px-4 text-xs")}>{pending ? L({ ko: "보내는 중…", en: "Sending…" }) : L({ ko: "세금계산서 신청", en: "Request tax invoice" })}</button>
+        <button type="button" onClick={onDone} className={cn(secondaryButton, "h-9 px-3 text-xs")}>{L({ ko: "취소", en: "Cancel" })}</button>
+        {state && !state.ok ? <p role="status" className="text-xs text-danger">{L(INVOICE_MSG[state.message] ?? INVOICE_MSG.save_failed)}</p> : null}
+      </div>
+    </form>
+  );
+}
+
 function PaymentHistory({ payments }: { payments: PaymentRecord[] }) {
   const L = useBi();
+  const [invoiceFor, setInvoiceFor] = useState<string | null>(null);
   return (
     <section className="mt-8" aria-labelledby="payment-history">
-      <h2 id="payment-history" className="font-semibold">{L({ ko: "결제 내역", en: "Payment history" })}</h2>
-      <div className="glass mt-3 overflow-x-auto rounded-[24px]">
-        <table className="w-full text-sm">
-          <thead className="text-left text-2xs text-fg-subtle">
-            <tr>
-              <th className="px-5 py-3 font-medium">{L({ ko: "날짜", en: "Date" })}</th>
-              <th className="px-5 py-3 font-medium">{L({ ko: "금액", en: "Amount" })}</th>
-              <th className="px-5 py-3 font-medium">{L({ ko: "상태", en: "Status" })}</th>
-              <th className="px-5 py-3 font-medium">{L({ ko: "영수증", en: "Receipt" })}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {payments.map((p) => (
-              <tr key={p.orderId} className="border-t border-hairline">
-                <td className="px-5 py-3 font-mono text-xs whitespace-nowrap">{p.createdAt.slice(0, 10)}</td>
-                <td className="px-5 py-3 font-mono text-xs whitespace-nowrap">₩{p.amount.toLocaleString()}</td>
-                <td className={cn("px-5 py-3 text-xs whitespace-nowrap", p.status === "done" ? "text-studio-success" : p.status === "failed" ? "text-danger" : "text-fg-muted")}>{L(PAYMENT_STATUS[p.status])}</td>
-                <td className="px-5 py-3 text-xs whitespace-nowrap">
+      <h2 id="payment-history" className="font-semibold">{L({ ko: "결제 내역 · 영수증", en: "Payments & receipts" })}</h2>
+      <ul className="glass mt-3 divide-y divide-hairline rounded-[24px]">
+        {payments.map((p) => {
+          const refunded = p.refundedAmount > 0 && p.refundedAmount < p.amount;
+          return (
+            <li key={p.orderId} className="px-5 py-4">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+                <span className="font-mono text-xs text-fg-muted">{p.createdAt.slice(0, 10)}</span>
+                <span className="font-semibold">{p.plan && PLAN_LABEL[p.plan] ? L(PLAN_LABEL[p.plan]) : "—"}</span>
+                <span className="font-mono text-xs">{won(p.amount)}</span>
+                <span className={cn("text-xs", p.status === "done" ? "text-studio-success" : p.status === "failed" ? "text-danger" : "text-fg-muted")}>
+                  {refunded ? L({ ko: `부분 환불 ${won(p.refundedAmount)}`, en: `Partly refunded ${won(p.refundedAmount)}` }) : L(PAYMENT_STATUS[p.status])}
+                </span>
+                <span className="ml-auto flex flex-wrap items-center gap-3 text-xs">
                   {p.receiptUrl ? (
-                    <a href={p.receiptUrl} target="_blank" rel="noopener noreferrer" className="text-studio-cyan hover:underline">{L({ ko: "영수증 보기", en: "View receipt" })}</a>
-                  ) : (
-                    <span className="text-fg-subtle">—</span>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <p className="mt-2 text-2xs break-keep text-fg-subtle">{L({ ko: "영수증은 토스페이먼츠에서 발급해요. 현금영수증·세금계산서가 필요하면 고객센터로 문의해 주세요.", en: "Receipts are issued by Toss Payments. For a cash receipt or tax invoice, contact customer service." })}</p>
+                    <a href={p.receiptUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-studio-cyan hover:underline">
+                      {L({ ko: "영수증", en: "Receipt" })} <ExternalLink size={11} aria-hidden />
+                    </a>
+                  ) : null}
+                  {p.taxInvoice ? (
+                    <span className="text-fg-muted">{L(INVOICE_STATUS[p.taxInvoice])}</span>
+                  ) : p.status === "done" && invoiceFor !== p.orderId ? (
+                    <button type="button" onClick={() => setInvoiceFor(p.orderId)} className="text-studio-cyan hover:underline">{L({ ko: "세금계산서 신청", en: "Tax invoice" })}</button>
+                  ) : null}
+                </span>
+              </div>
+              {invoiceFor === p.orderId ? <div className="mt-3"><TaxInvoiceForm orderId={p.orderId} onDone={() => setInvoiceFor(null)} /></div> : null}
+            </li>
+          );
+        })}
+      </ul>
+      <p className="mt-2 text-2xs break-keep text-fg-subtle">
+        {L({
+          ko: "카드 영수증은 토스페이먼츠에서 발급해요. 계좌이체로 결제할 때 현금영수증 번호를 넣으면 자동으로 발급돼요. 사업자는 결제마다 세금계산서를 신청할 수 있어요.",
+          en: "Card receipts come from Toss Payments. Paying by bank transfer, enter your cash-receipt number and it's issued automatically. Businesses can request a tax invoice for each payment.",
+        })}
+      </p>
     </section>
   );
 }

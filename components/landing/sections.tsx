@@ -4,7 +4,9 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "motion/react";
-import { ArrowRight, ShieldCheck } from "lucide-react";
+import { ArrowRight, FileDown, Gift, KeyRound, Languages, ReceiptText, ShieldCheck, Wand2 } from "lucide-react";
+import { FREE_OWN_KEY, REFERRAL_REVENUE_SHARE } from "@/lib/site/access";
+import { REVENUE_SHARE } from "@/lib/referral";
 import {
   CATEGORIES,
   CATEGORY_ORDER,
@@ -16,6 +18,7 @@ import { useBi } from "@/lib/i18n/context";
 import type { CategoryId } from "@/lib/tools/types";
 import { cn } from "@/lib/utils";
 import { SceneVideo, StoryVideo } from "./scene-video";
+import type { ShowcaseItem } from "@/lib/showcase";
 
 export const reveal = {
   initial: { opacity: 0, y: 16 },
@@ -632,6 +635,107 @@ export function PersonasSection() {
           </motion.article>
         ))}
       </div>
+    </section>
+  );
+}
+
+/* ── Showcase: real results the team shared ────────────────────────── */
+
+export function ShowcaseSection({ items }: { items: ShowcaseItem[] }) {
+  const L = useBi();
+  if (!items.length) return null;
+  return (
+    <section id="examples" className="mx-auto max-w-[1200px] scroll-mt-24 px-4 py-16 md:px-6 md:py-20">
+      <SectionHead
+        kicker={L({ ko: "실제로 만든 결과", en: "Made with AI Haeba" })}
+        title={L({ ko: "가입하기 전에 결과부터 보세요", en: "See real results before you sign up" })}
+        body={L({ ko: "AI 해바 도구로 실제로 만든 결과물이에요. 눌러서 처음부터 끝까지 볼 수 있어요.", en: "Real results made with AI Haeba tools. Open one to see it end to end." })}
+      />
+      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {items.map((item, i) => {
+          const tool = catalogTool(item.slug);
+          return (
+            <motion.a
+              key={item.token}
+              {...reveal}
+              transition={{ ...reveal.transition, delay: i * 0.05 }}
+              href={`/share/${item.token}`}
+              className="group flex flex-col rounded-[24px] border border-hairline bg-surface p-5 transition-colors hover:border-accent/50"
+            >
+              <p className="text-xs font-semibold text-accent">{tool ? L(tool.name) : item.slug}</p>
+              <p className="mt-2 line-clamp-3 font-semibold leading-snug break-keep text-fg">{item.title || item.note}</p>
+              {item.title && item.note ? <p className="mt-2 line-clamp-2 text-sm break-keep text-fg-muted">{item.note}</p> : null}
+              <span className="mt-auto inline-flex items-center gap-1 pt-4 text-sm font-semibold text-accent">
+                {L({ ko: "결과 보기", en: "View result" })} <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" aria-hidden />
+              </span>
+            </motion.a>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+/* ── What you get: the everyday features around the tools ──────────── */
+
+export function FeaturesSection() {
+  const L = useBi();
+  const items: { icon: typeof ShieldCheck; title: { ko: string; en: string }; body: { ko: string; en: string } }[] = [
+    ...(FREE_OWN_KEY
+      ? [{ icon: KeyRound, title: { ko: "무료 플랜은 내 Gemini 키로", en: "Free on your own Gemini key" }, body: { ko: "Google AI Studio에서 무료로 받은 키를 등록하면 16개 도구를 크레딧 없이 써요. 키 받는 방법은 영상으로 안내해요.", en: "Add a key you get free from Google AI Studio and use all 16 tools without credits. A video shows how." } }]
+      : []),
+    { icon: FileDown, title: { ko: "바로 쓰는 PDF·Word·PPT", en: "Ready-to-use PDF, Word, PPT" }, body: { ko: "블로그는 붙여 넣는 원고로, 브랜드는 가이드북으로, 광고는 시안 보드로. 도구마다 쓰임에 맞게 디자인된 파일이 나와요.", en: "A blog as a paste-ready manuscript, a brand as a guidebook, ads as a concept board — each file designed for its job." } },
+    { icon: Wand2, title: { ko: "이 부분만 다시", en: "Redo just one part" }, body: { ko: "마음에 안 드는 부분만 골라 '더 짧게', '20대 말투로'처럼 말하면 그 부분만 새로 써요. 원래 결과는 그대로 남아요.", en: "Pick the part you don't like and say 'shorter' or 'in a younger voice'. Only that part is rewritten; the original stays." } },
+    { icon: Languages, title: { ko: "결과는 한국어·영어로", en: "Results in Korean or English" }, body: { ko: "실행 전에 결과 언어를 골라요. 해외 손님용 소개 글도 같은 도구로 만들어요.", en: "Choose the result language before you run, and make copy for overseas customers with the same tools." } },
+    { icon: ReceiptText, title: { ko: "영수증·세금계산서", en: "Receipts and tax invoices" }, body: { ko: "결제마다 카드 영수증을 보고, 사업자는 세금계산서를 신청해 비용 처리할 수 있어요. 자동 결제는 없어요.", en: "See a card receipt for every payment; businesses can request a tax invoice. No auto-renewal." } },
+    ...(REFERRAL_REVENUE_SHARE
+      ? [{ icon: Gift, title: { ko: `친구 초대하면 ${Math.round(REVENUE_SHARE.rate * 100)}% 현금`, en: `${Math.round(REVENUE_SHARE.rate * 100)}% cash for invites` }, body: { ko: `초대한 친구가 ${REVENUE_SHARE.windowDays}일 안에 결제할 때마다 결제 금액(부가세 제외)의 ${Math.round(REVENUE_SHARE.rate * 100)}%를 내 계좌로 받아요.`, en: `Each time a friend you invited pays within ${REVENUE_SHARE.windowDays} days, ${Math.round(REVENUE_SHARE.rate * 100)}% of it (excl. VAT) goes to your bank account.` } }]
+      : []),
+  ];
+  return (
+    <section id="features" className="mx-auto max-w-[1200px] scroll-mt-24 px-4 py-16 md:px-6 md:py-20">
+      <SectionHead
+        kicker={L({ ko: "도구 말고도", en: "Beyond the tools" })}
+        title={L({ ko: "만들고, 고치고, 바로 쓰기까지", en: "Make it, fix it, use it" })}
+        body={L({ ko: "결과를 받은 다음이 더 중요해요. 고치고, 파일로 받고, 비용 처리하는 일까지 한곳에서 끝나요.", en: "What happens after the result matters most: fix it, download it and expense it, all in one place." })}
+      />
+      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {items.map((f, i) => (
+          <motion.div key={f.title.en} {...reveal} transition={{ ...reveal.transition, delay: i * 0.04 }} className="rounded-[24px] border border-hairline bg-surface p-5">
+            <span className="grid size-10 place-items-center rounded-xl bg-accent-dim text-accent" aria-hidden>
+              <f.icon size={18} />
+            </span>
+            <p className="mt-4 font-semibold break-keep text-fg">{L(f.title)}</p>
+            <p className="mt-1.5 text-sm leading-relaxed break-keep text-fg-muted">{L(f.body)}</p>
+          </motion.div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ── Invite band: the referral offer, for members and visitors ─────── */
+
+export function ReferralBand({ signedIn }: { signedIn: boolean }) {
+  const L = useBi();
+  if (!REFERRAL_REVENUE_SHARE) return null;
+  const pct = Math.round(REVENUE_SHARE.rate * 100);
+  return (
+    <section className="mx-auto max-w-[1200px] px-4 pb-4 md:px-6">
+      <motion.div {...reveal} className="flex flex-col gap-4 rounded-[28px] border border-accent/30 bg-accent-dim p-6 md:flex-row md:items-center md:justify-between md:p-8">
+        <div className="flex items-start gap-4">
+          <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-accent text-white" aria-hidden><Gift size={22} /></span>
+          <div>
+            <p className="font-display text-xl font-bold break-keep text-fg">{L({ ko: `아는 사장님을 초대하면 결제의 ${pct}%를 현금으로`, en: `Invite a business owner, earn ${pct}% in cash` })}</p>
+            <p className="mt-1 text-sm break-keep text-fg-muted">
+              {L({ ko: `친구가 ${REVENUE_SHARE.windowDays}일 안에 결제할 때마다 쌓이고, ${REVENUE_SHARE.minPayout.toLocaleString("ko-KR")}원부터 내 계좌로 받아요. 카카오톡으로 링크만 보내면 돼요.`, en: `It builds up each time a friend pays within ${REVENUE_SHARE.windowDays} days; withdraw to your bank from ₩${REVENUE_SHARE.minPayout.toLocaleString("en-US")}. Just send the link on KakaoTalk.` })}
+            </p>
+          </div>
+        </div>
+        <Link href={signedIn ? "/account/referral" : "/auth?next=%2Faccount%2Freferral"} className="inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-accent px-5 text-sm font-semibold text-white hover:bg-accent/90">
+          {signedIn ? L({ ko: "내 초대 링크 받기", en: "Get my invite link" }) : L({ ko: "가입하고 초대 링크 받기", en: "Sign up for an invite link" })} <ArrowRight size={15} aria-hidden />
+        </Link>
+      </motion.div>
     </section>
   );
 }
