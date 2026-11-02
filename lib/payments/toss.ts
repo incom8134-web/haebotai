@@ -79,3 +79,13 @@ export function confirmTossPayment(params: { paymentKey: string; orderId: string
 export function getTossPaymentByOrderId(orderId: string): Promise<TossResult> {
   return call(`https://api.tosspayments.com/v1/payments/orders/${encodeURIComponent(orderId)}`, { method: "GET" }, { orderId });
 }
+
+/** Refunds a payment at Toss — all of it, or `cancelAmount` won. The caller then reconciles the order (revoke_order). */
+export function cancelTossPayment(params: { paymentKey: string; reason: string; cancelAmount?: number; idempotencyKey: string }): Promise<TossResult> {
+  const body = { cancelReason: params.reason, ...(params.cancelAmount ? { cancelAmount: params.cancelAmount } : {}) };
+  return call(
+    `https://api.tosspayments.com/v1/payments/${encodeURIComponent(params.paymentKey)}/cancel`,
+    { method: "POST", headers: { "Idempotency-Key": params.idempotencyKey }, body: JSON.stringify(body) },
+    { paymentKey: params.paymentKey },
+  );
+}

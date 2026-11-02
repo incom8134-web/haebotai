@@ -9,6 +9,7 @@ import { displayName } from "@/lib/site/display-name";
 import type { KeyTier } from "@/lib/ai/key-tier";
 import { getSiteSettings } from "@/lib/admin-ops-server";
 import { canUsePlatformKey } from "@/lib/platform-access";
+import { referralRisks, type ReferralRisk } from "@/lib/referral";
 
 /** A membership row's plan if it is a paid plan with days left, else null (expired, free and student rows count as Free). */
 function activePlan(row: { plan: string; expires_at: string | null } | null | undefined, now = Date.now()): string | null {
@@ -590,6 +591,10 @@ export interface AdminPayout {
   note: string | null;
   /** Bank details to transfer to (opened server-side for staff); null if the account was removed. */
   bank: { holder: string; bank: string; account: string; rrnMasked: string } | null;
+  /** Signs the member may have bought through their own invite (lib/referral.ts referralRisks). */
+  risks: ReferralRisk[];
+  /** Friends whose purchases earned this member a share. */
+  buyers: number;
 }
 
 export interface AdminPayoutSummary {
@@ -607,7 +612,7 @@ export async function listReferralPayouts(): Promise<AdminPayoutSummary | null> 
   const [payouts, accounts, commissions] = await Promise.all([
     admin.from("referral_payouts").select("id, user_id, gross, tax, net, status, requested_at, processed_at, note").order("requested_at", { ascending: false }).limit(200),
     admin.from("referral_payout_accounts").select("user_id, holder_name, bank_name, account_sealed, rrn_sealed"),
-    admin.from("referral_commissions").select("commission, status, available_at, created_at"),
+    admin.from("referral_commissions").select("referrer_id, buyer_id, commission, status, available_at, created_at"),
   ]);
   if (payouts.error || commissions.error) return null;
   const { open } = await import("@/lib/crypto/secret-box");
@@ -621,9 +626,22 @@ export async function listReferralPayouts(): Promise<AdminPayoutSummary | null> 
     }
   };
   const acct = new Map((accounts.data ?? []).map((a) => [a.user_id, a]));
+  const inviters = [...new Set((payouts.data ?? []).map((p) => p.user_id))];
+  const buyersOf = new Map<string, string[]>();
+  for (const c of commissions.data ?? []) {
+    if (!inviters.includes(c.referrer_id)) continue;
+    buyersOf.set(c.referrer_id, [...new Set([...(buyersOf.get(c.referrer_id) ?? []), c.buyer_id])]);
+  }
+  const people = [...new Set([...inviters, ...[...buyersOf.values()].flat()])];
+  // Masked card numbers per person, from Toss's payment records.
+  const cardsOf = new Map<string, string[]>();
+  if (people.length) {
+    const { data: cardRows } = await admin.from("payments").select("user_id, card:raw->card->>number").in("user_id", people).in("status", ["done", "canceled"]);
+    for (const r of cardRows ?? []) if (typeof r.card === "string") cardsOf.set(r.user_id, [...(cardsOf.get(r.user_id) ?? []), r.card]);
+  }
   const users = new Map<string, { email: string; name: string | null }>();
   await Promise.all(
-    [...new Set((payouts.data ?? []).map((p) => p.user_id))].map(async (id) => {
+    people.map(async (id) => {
       const { data } = await admin.auth.admin.getUserById(id);
       if (data.user) users.set(id, { email: data.user.email ?? "", name: profileNameOf(data.user.app_metadata) ?? displayName(data.user.user_metadata) });
     }),
@@ -644,6 +662,11 @@ export async function listReferralPayouts(): Promise<AdminPayoutSummary | null> 
       processedAt: p.processed_at,
       note: p.note,
       bank: a ? { holder: a.holder_name, bank: a.bank_name, account: reveal(a.account_sealed) || "(열 수 없음)", rrnMasked: rrn ? `${rrn.slice(0, 6)}-${rrn.slice(6, 7)}******` : "(열 수 없음)" } : null,
+      risks: referralRisks(
+        { email: users.get(p.user_id)?.email ?? "", cards: cardsOf.get(p.user_id) ?? [], name: a?.holder_name ?? users.get(p.user_id)?.name ?? null },
+        (buyersOf.get(p.user_id) ?? []).map((b) => ({ email: users.get(b)?.email ?? "", cards: cardsOf.get(b) ?? [], name: users.get(b)?.name ?? null })),
+      ),
+      buyers: buyersOf.get(p.user_id)?.length ?? 0,
     };
   });
   rows.sort((a, b) => Number(b.status === "requested") - Number(a.status === "requested"));

@@ -13,6 +13,17 @@ export const PATCH_NOTES: { version: string; date: string; title: Bilingual; ite
     ],
   },
   {
+    version: "3.0.1",
+    date: "2026-11-01",
+    title: { ko: "무료 플랜은 내 Gemini 키로, 결과는 쉬운 우리말로", en: "Free runs on your own Gemini key; results in plain Korean" },
+    items: [
+      { kind: "new", text: { ko: "무료 플랜도 16개 도구를 모두 실행해요. Google AI Studio에서 무료로 받은 내 Gemini API 키를 등록하면 크레딧 없이 쓸 수 있어요", en: "The Free plan now runs all 16 tools. Add a Gemini API key you get free from Google AI Studio, and no credits are used" } },
+      { kind: "new", text: { ko: "API 키 받는 방법을 영상과 PDF 설명서로 볼 수 있어요", en: "A video and PDF guides show how to get an API key" } },
+      { kind: "improved", text: { ko: "화면과 AI 결과에서 '페르소나·CTA·포지셔닝' 같은 외래어 대신 '대표 손님·구매 유도 문구·차별점'처럼 쉬운 말을 써요", en: "Screens and AI results use plain Korean instead of marketing jargon like persona, CTA and positioning" } },
+      { kind: "fixed", text: { ko: "API 키 입력칸에 브라우저가 저장된 비밀번호를 채우던 문제를 고쳤어요", en: "The API key box no longer gets filled with a saved password" } },
+    ],
+  },
+  {
     version: "3.0.0",
     date: "2026-10-29",
     title: { ko: "플러스·프로 플랜, 결과 언어 선택, 도구별 디자인 파일", en: "Plus and Pro plans, result language, designed files per tool" },
