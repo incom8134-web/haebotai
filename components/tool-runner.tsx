@@ -30,6 +30,7 @@ import { briefField, seedFromBrief } from "@/lib/tools/brief";
 import { RunGuide } from "@/components/tools/run-guide";
 import { ApiKeyPrompt } from "@/components/api-key-prompt";
 import { PlanPrompt } from "@/components/plan-prompt";
+import { RegeneratePanel } from "@/components/projects/regenerate-panel";
 import { UpgradeCard } from "@/components/upgrade-button";
 import { cn } from "@/lib/utils";
 import { ExField } from "@/components/tools/experience/controls";
@@ -917,6 +918,8 @@ function ToolRunner({
             provider={final.provider}
             onRerunWithStrategy={(chosen) => handleRun({ strategyOverride: chosen })}
           />
+          {/* Fix one part without running the whole tool again (saved as a new version). */}
+          {final.runId && manifest ? <RegeneratePanel runId={final.runId} toolId={toolId} output={final.output} estimatedCredits={manifest.estimatedCredits} isFree={team} onOwnKey={OWN_KEY_ONLY || freeOnOwnKey} /> : null}
           <div className="mt-5 glass rounded-[20px] p-4">
             <p className="mb-2.5 text-sm font-medium">{L({ ko: "다음은 무엇을 할까요?", en: "What next?" })}</p>
             {nextActions}

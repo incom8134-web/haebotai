@@ -9,6 +9,8 @@ import { displayName } from "@/lib/site/display-name";
 import type { KeyTier } from "@/lib/ai/key-tier";
 import { getSiteSettings } from "@/lib/admin-ops-server";
 import { canUsePlatformKey } from "@/lib/platform-access";
+import { referralRisks, type ReferralRisk } from "@/lib/referral";
+import { revenueSummary, type RevenueSummary } from "@/lib/admin-revenue";
 
 /** A membership row's plan if it is a paid plan with days left, else null (expired, free and student rows count as Free). */
 function activePlan(row: { plan: string; expires_at: string | null } | null | undefined, now = Date.now()): string | null {
@@ -590,6 +592,10 @@ export interface AdminPayout {
   note: string | null;
   /** Bank details to transfer to (opened server-side for staff); null if the account was removed. */
   bank: { holder: string; bank: string; account: string; rrnMasked: string } | null;
+  /** Signs the member may have bought through their own invite (lib/referral.ts referralRisks). */
+  risks: ReferralRisk[];
+  /** Friends whose purchases earned this member a share. */
+  buyers: number;
 }
 
 export interface AdminPayoutSummary {
@@ -607,7 +613,7 @@ export async function listReferralPayouts(): Promise<AdminPayoutSummary | null> 
   const [payouts, accounts, commissions] = await Promise.all([
     admin.from("referral_payouts").select("id, user_id, gross, tax, net, status, requested_at, processed_at, note").order("requested_at", { ascending: false }).limit(200),
     admin.from("referral_payout_accounts").select("user_id, holder_name, bank_name, account_sealed, rrn_sealed"),
-    admin.from("referral_commissions").select("commission, status, available_at, created_at"),
+    admin.from("referral_commissions").select("referrer_id, buyer_id, commission, status, available_at, created_at"),
   ]);
   if (payouts.error || commissions.error) return null;
   const { open } = await import("@/lib/crypto/secret-box");
@@ -621,9 +627,22 @@ export async function listReferralPayouts(): Promise<AdminPayoutSummary | null> 
     }
   };
   const acct = new Map((accounts.data ?? []).map((a) => [a.user_id, a]));
+  const inviters = [...new Set((payouts.data ?? []).map((p) => p.user_id))];
+  const buyersOf = new Map<string, string[]>();
+  for (const c of commissions.data ?? []) {
+    if (!inviters.includes(c.referrer_id)) continue;
+    buyersOf.set(c.referrer_id, [...new Set([...(buyersOf.get(c.referrer_id) ?? []), c.buyer_id])]);
+  }
+  const people = [...new Set([...inviters, ...[...buyersOf.values()].flat()])];
+  // Masked card numbers per person, from Toss's payment records.
+  const cardsOf = new Map<string, string[]>();
+  if (people.length) {
+    const { data: cardRows } = await admin.from("payments").select("user_id, card:raw->card->>number").in("user_id", people).in("status", ["done", "canceled"]);
+    for (const r of cardRows ?? []) if (typeof r.card === "string") cardsOf.set(r.user_id, [...(cardsOf.get(r.user_id) ?? []), r.card]);
+  }
   const users = new Map<string, { email: string; name: string | null }>();
   await Promise.all(
-    [...new Set((payouts.data ?? []).map((p) => p.user_id))].map(async (id) => {
+    people.map(async (id) => {
       const { data } = await admin.auth.admin.getUserById(id);
       if (data.user) users.set(id, { email: data.user.email ?? "", name: profileNameOf(data.user.app_metadata) ?? displayName(data.user.user_metadata) });
     }),
@@ -644,6 +663,11 @@ export async function listReferralPayouts(): Promise<AdminPayoutSummary | null> 
       processedAt: p.processed_at,
       note: p.note,
       bank: a ? { holder: a.holder_name, bank: a.bank_name, account: reveal(a.account_sealed) || "(열 수 없음)", rrnMasked: rrn ? `${rrn.slice(0, 6)}-${rrn.slice(6, 7)}******` : "(열 수 없음)" } : null,
+      risks: referralRisks(
+        { email: users.get(p.user_id)?.email ?? "", cards: cardsOf.get(p.user_id) ?? [], name: a?.holder_name ?? users.get(p.user_id)?.name ?? null },
+        (buyersOf.get(p.user_id) ?? []).map((b) => ({ email: users.get(b)?.email ?? "", cards: cardsOf.get(b) ?? [], name: users.get(b)?.name ?? null })),
+      ),
+      buyers: buyersOf.get(p.user_id)?.length ?? 0,
     };
   });
   rows.sort((a, b) => Number(b.status === "requested") - Number(a.status === "requested"));
@@ -673,4 +697,94 @@ export async function revealPayoutRrn(userId: string): Promise<string | null> {
   } catch {
     return null;
   }
+}
+
+// ── Payments: revenue against costs, refunds, tax invoices ─────────────
+
+export interface AdminPaymentRow {
+  orderId: string;
+  userId: string;
+  email: string;
+  plan: string | null;
+  amount: number;
+  refunded: number;
+  status: string;
+  method: string | null;
+  approvedAt: string | null;
+  createdAt: string;
+  /** Refundable at Toss from here (a paid order with money left on it). */
+  refundable: boolean;
+}
+
+export interface AdminTaxInvoice {
+  id: string;
+  orderId: string;
+  email: string;
+  amount: number;
+  businessNo: string;
+  company: string;
+  ceo: string;
+  sendTo: string;
+  status: "requested" | "issued" | "rejected";
+  createdAt: string;
+}
+
+export interface AdminPayments {
+  days: number;
+  summary: RevenueSummary;
+  rows: AdminPaymentRow[];
+  invoices: AdminTaxInvoice[] | null;
+}
+
+/** The last `days` days of payments with an estimated margin, the latest orders and tax invoice requests. Staff only (callers check getAdminUser). */
+export async function getAdminPayments(days = 30): Promise<AdminPayments> {
+  const admin = createAdminClient();
+  const since = new Date(Date.now() - days * DAY_MS).toISOString();
+  const cols = "order_id, user_id, amount, status, plan, method, approved_at, created_at";
+  const withRefunds = await admin.from("payments").select(`${cols}, refunded_amount`).order("created_at", { ascending: false }).limit(500);
+  // refunded_amount arrives with migration 0025.
+  const payments = withRefunds.error ? await admin.from("payments").select(cols).order("created_at", { ascending: false }).limit(500) : withRefunds;
+  const [runs, shares, invoices] = await Promise.all([
+    admin.from("generations").select("credits_used").eq("status", "done").gte("created_at", since).gt("credits_used", 0).limit(RUN_ROWS),
+    admin.from("referral_commissions").select("commission").eq("status", "pending").gte("created_at", since),
+    admin.from("tax_invoice_requests").select("id, order_id, user_id, business_no, company, ceo_name, email, status, created_at").order("created_at", { ascending: false }).limit(100),
+  ]);
+  type Row = { order_id: string; user_id: string; amount: number; status: string; plan: string | null; method: string | null; approved_at: string | null; created_at: string; refunded_amount?: number };
+  const all = (payments.data ?? []) as unknown as Row[];
+  const inWindow = all.filter((p) => (p.approved_at ?? p.created_at) >= since);
+  const summary = revenueSummary({
+    payments: inWindow.map((p) => ({ amount: p.amount, refunded: p.refunded_amount ?? 0, status: p.status, plan: p.plan, approved: !!p.approved_at })),
+    creditsUsed: (runs.data ?? []).reduce((s, r) => s + (r.credits_used ?? 0), 0),
+    referralShares: (shares.data ?? []).reduce((s, r) => s + r.commission, 0),
+  });
+  const latest = all.slice(0, 100);
+  const ids = [...new Set([...latest.map((p) => p.user_id), ...(invoices.data ?? []).map((i) => i.user_id)])];
+  const emails = new Map<string, string>();
+  await Promise.all(
+    ids.map(async (id) => {
+      const { data } = await admin.auth.admin.getUserById(id);
+      emails.set(id, data.user?.email ?? "");
+    }),
+  );
+  const amountOf = new Map(all.map((p) => [p.order_id, p.amount]));
+  return {
+    days,
+    summary,
+    rows: latest.map((p) => ({
+      orderId: p.order_id,
+      userId: p.user_id,
+      email: emails.get(p.user_id) ?? "",
+      plan: p.plan,
+      amount: p.amount,
+      refunded: p.refunded_amount ?? 0,
+      status: p.status,
+      method: p.method,
+      approvedAt: p.approved_at,
+      createdAt: p.created_at,
+      refundable: p.status === "done" && (p.refunded_amount ?? 0) < p.amount,
+    })),
+    invoices: invoices.error
+      ? null
+      : (invoices.data ?? []).map((i) => ({ id: i.id, orderId: i.order_id, email: emails.get(i.user_id) ?? "", amount: amountOf.get(i.order_id) ?? 0, businessNo: i.business_no, company: i.company, ceo: i.ceo_name, sendTo: i.email, status: i.status, createdAt: i.created_at })),
+  };
 }
