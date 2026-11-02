@@ -17,7 +17,7 @@ import { BEFORE_AFTER, FLOW, PERSONAS, STEPS } from "@/lib/site/landing";
 import { useBi } from "@/lib/i18n/context";
 import type { CategoryId } from "@/lib/tools/types";
 import { cn } from "@/lib/utils";
-import { SceneVideo, StoryVideo } from "./scene-video";
+import { SceneVideo, StoryVideo, type SceneName } from "./scene-video";
 import type { ShowcaseItem } from "@/lib/showcase";
 
 export const reveal = {
@@ -228,177 +228,66 @@ export function FlowSection() {
   );
 }
 
-/* ── Five categories, five pictures ────────────────────────────────── */
+/* ── Five steps, five films ──────────────────────────────────────── */
 
-function DiscoverArt() {
-  return (
-    <div className="space-y-1.5" aria-hidden>
-      {[82, 64, 58].map((v, i) => (
-        <div key={v} className="flex items-center gap-2">
-          <span className="w-6 font-mono text-[10px] text-fg-subtle">{v}</span>
-          <div className="h-2 flex-1 rounded-full bg-fg/8">
-            <div
-              className={cn(
-                "h-full rounded-full",
-                i === 0 ? "bg-accent" : "bg-fg-subtle/50",
-              )}
-              style={{ width: `${v}%` }}
-            />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-function BrandArt() {
-  return (
-    <div className="flex items-center gap-3" aria-hidden>
-      <div className="flex h-12 flex-1 overflow-hidden rounded-xl">
-        {["#F3EBDD", "#8A5A2B", "#1F1B16", "#5E8C7A", "#D9622B"].map((c) => (
-          <span key={c} className="flex-1" style={{ background: c }} />
-        ))}
-      </div>
-      <span
-        className="text-3xl leading-none font-semibold text-fg"
-        style={{ fontFamily: "serif" }}
-      >
-        Aa
-      </span>
-    </div>
-  );
-}
-function CampaignArt() {
-  return (
-    <div className="relative h-14" aria-hidden>
-      {[0, 1, 2].map((i) => (
-        <div
-          key={i}
-          className="absolute rounded-xl border border-hairline bg-surface px-2.5 py-1.5 shadow-sm"
-          style={{
-            left: `${i * 22}%`,
-            top: `${i * 6}px`,
-            transform: `rotate(${(i - 1) * 4}deg)`,
-            width: "52%",
-          }}
-        >
-          <div className="h-1 w-8 rounded-full bg-accent/70" />
-          <div className="mt-1.5 h-1 rounded-full bg-fg/15" />
-          <div className="mt-1 h-1 w-2/3 rounded-full bg-fg/10" />
-        </div>
-      ))}
-    </div>
-  );
-}
-function OperateArt() {
-  return (
-    <div className="grid grid-cols-3 gap-1.5" aria-hidden>
-      {[3, 2, 1].map((n, c) => (
-        <div key={c} className="space-y-1 rounded-lg bg-fg/5 p-1.5">
-          {Array.from({ length: n }).map((_, k) => (
-            <div
-              key={k}
-              className={cn(
-                "h-3 rounded",
-                c === 2 ? "bg-grounded/40" : "bg-surface",
-              )}
-            />
-          ))}
-        </div>
-      ))}
-    </div>
-  );
-}
-function ResearchArt() {
-  return (
-    <div
-      className="relative h-14 rounded-lg border border-dashed border-hairline-str"
-      aria-hidden
-    >
-      <span className="absolute inset-x-0 top-1/2 h-px bg-hairline-str" />
-      <span className="absolute inset-y-0 left-1/2 w-px bg-hairline-str" />
-      {[
-        [18, 30],
-        [70, 22],
-        [40, 70],
-        [82, 66],
-      ].map(([x, y], i) => (
-        <span
-          key={i}
-          className="absolute size-2 -translate-1/2 rounded-full bg-fg-subtle/70"
-          style={{ left: `${x}%`, top: `${y}%` }}
-        />
-      ))}
-      <span
-        className="absolute size-3 -translate-1/2 rounded-full bg-accent ring-4 ring-accent/20"
-        style={{ left: "74%", top: "78%" }}
-      />
-    </div>
-  );
-}
-const ART: Record<CategoryId, () => React.ReactElement> = {
-  discover: DiscoverArt,
-  brand: BrandArt,
-  campaign: CampaignArt,
-  operate: OperateArt,
-  research: ResearchArt,
+// Each step's brand film (public/videos/<name>-loop.mp4), and a line on what it gets you.
+const CHAPTER: Record<CategoryId, { film: SceneName; line: { ko: string; en: string } }> = {
+  discover: { film: "flow", line: { ko: "한 줄의 생각이 팔 수 있는 아이디어와 상품 구성으로 갈라져 나와요.", en: "One line of thought branches into ideas and offers you can sell." } },
+  research: { film: "research", line: { ko: "우리 동네 시장과 손님을 지도처럼 펼쳐 보고, 숫자로 확인해요.", en: "Lay out your local market and customers like a map, and check the numbers." } },
+  brand: { film: "brand", line: { ko: "가게 이름, 색, 로고, 상세페이지, 홈페이지까지 한 번에 어울리게.", en: "Name, colors, logo, product page and website, made to fit together." } },
+  campaign: { film: "content", line: { ko: "상품 사진에 어울리는 광고 문구, 블로그 글, SNS 글을 채널별로.", en: "Ad copy, blog posts and social posts for each channel, made for your product." } },
+  operate: { film: "grow", line: { ko: "사업계획서, 발표 자료, 할 일 계획까지. 한 계단씩 차근차근.", en: "Business plans, decks and the weeks ahead, one step at a time." } },
 };
 
 export function CategorySection() {
   const L = useBi();
   return (
-    <section
-      id="tools"
-      className="mx-auto max-w-[1200px] scroll-mt-24 px-4 py-16 md:px-6 md:py-20"
-    >
+    <section id="tools" className="mx-auto max-w-[1200px] scroll-mt-24 px-4 py-16 md:px-6 md:py-24">
       <SectionHead
         kicker={L({ ko: "다섯 단계", en: "Five steps" })}
-        title={L({
-          ko: "도구마다 결과 화면이 달라요",
-          en: "Every tool has its own result screen",
-        })}
+        title={L({ ko: "아이디어에서 매출까지, 다섯 걸음", en: "From idea to revenue, in five steps" })}
         body={L({
-          ko: "점수표, 브랜드 보드, 광고 문구 카드, 할 일 표, 비교표. 똑같은 입력창이 아니라 일에 맞는 화면이에요.",
-          en: "Score tables, brand boards, ad cards, to-do boards, comparison tables — screens that fit the job, not copies of one form.",
+          ko: "단계마다 맞는 도구가 있고, 앞 단계의 결과가 다음 도구로 이어져요. 필요한 단계만 골라 써도 돼요.",
+          en: "Each step has its tools, and each result carries into the next. Use only the steps you need.",
         })}
       />
-      <div className="mt-10 grid gap-3 md:grid-cols-6">
+      <div className="mt-12 flex flex-col gap-16 md:gap-24">
         {CATEGORY_ORDER.map((id, i) => {
-          const Art = ART[id];
           const tools = toolsIn(id).filter((t) => !t.hidden);
+          const chapter = CHAPTER[id];
           return (
-            <motion.div
-              key={id}
-              {...reveal}
-              transition={{ ...reveal.transition, delay: i * 0.05 }}
-              className={cn(i < 2 ? "md:col-span-3" : "md:col-span-2")}
-            >
-              <Link
-                href={`/tools?category=${id}`}
-                className="group flex h-full flex-col rounded-[24px] border border-hairline bg-surface p-5 transition-[border-color,transform] hover:-translate-y-0.5 hover:border-accent/40"
+            <div key={id} className="grid items-center gap-6 md:grid-cols-2 md:gap-12">
+              <motion.div
+                {...reveal}
+                className={cn(
+                  "relative aspect-video overflow-hidden rounded-[28px] border border-white/40 bg-surface-2 shadow-[0_30px_80px_-40px_rgba(18,68,154,0.55)] ring-1 ring-black/5 dark:border-hairline",
+                  i % 2 === 1 && "md:order-2",
+                )}
               >
-                <Art />
-                <p className="mt-5 text-lg font-semibold break-keep text-fg">
-                  {L(CATEGORIES[id].name)}
-                </p>
-                <p className="mt-1 text-sm break-keep text-fg-muted">
-                  {L(CATEGORIES[id].pitch)}
-                </p>
-                <p className="mt-4 text-2xs leading-relaxed break-keep text-fg-subtle">
-                  {tools.map((t) => L(t.name)).join(" · ")}
-                </p>
-                <span className="mt-auto flex items-center gap-1 pt-4 text-xs font-medium text-accent">
-                  {L({
-                    ko: `도구 ${tools.length}개 보기`,
-                    en: `See ${tools.length} tools`,
-                  })}{" "}
-                  <ArrowRight
-                    size={12}
-                    className="transition-transform group-hover:translate-x-0.5"
-                    aria-hidden
-                  />
+                <SceneVideo name={chapter.film} loop />
+                <span className="absolute top-4 left-4 rounded-full bg-white/80 px-3 py-1 font-mono text-xs font-semibold text-[#12449a] backdrop-blur-md">
+                  {String(i + 1).padStart(2, "0")}
                 </span>
-              </Link>
-            </motion.div>
+              </motion.div>
+              <motion.div {...reveal} transition={{ ...reveal.transition, delay: 0.08 }}>
+                <p className="font-mono text-sm font-semibold text-accent">STEP {String(i + 1).padStart(2, "0")}</p>
+                <h3 className="mt-2 font-display text-[clamp(1.6rem,3vw,2.3rem)] leading-tight font-bold tracking-[-0.02em] break-keep text-fg">{L(CATEGORIES[id].name)}</h3>
+                <p className="mt-3 text-base leading-relaxed break-keep text-fg-muted">{L(chapter.line)}</p>
+                <ul className="mt-5 flex flex-wrap gap-2">
+                  {tools.map((t) => (
+                    <li key={t.slug}>
+                      <Link href={`/tools/${t.slug}`} className="inline-flex items-center rounded-full border border-hairline bg-surface px-3 py-1.5 text-sm text-fg transition-colors hover:border-accent/50 hover:text-accent">
+                        {L(t.name)}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+                <Link href={`/tools?category=${id}`} className="group mt-5 inline-flex items-center gap-1 text-sm font-semibold text-accent">
+                  {L({ ko: `${L(CATEGORIES[id].name)} 도구 보기`, en: `See ${L(CATEGORIES[id].name)} tools` })}
+                  <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" aria-hidden />
+                </Link>
+              </motion.div>
+            </div>
           );
         })}
       </div>
@@ -694,11 +583,16 @@ export function FeaturesSection() {
   ];
   return (
     <section id="features" className="mx-auto max-w-[1200px] scroll-mt-24 px-4 py-16 md:px-6 md:py-20">
-      <SectionHead
-        kicker={L({ ko: "도구 말고도", en: "Beyond the tools" })}
-        title={L({ ko: "만들고, 고치고, 바로 쓰기까지", en: "Make it, fix it, use it" })}
-        body={L({ ko: "결과를 받은 다음이 더 중요해요. 고치고, 파일로 받고, 비용 처리하는 일까지 한곳에서 끝나요.", en: "What happens after the result matters most: fix it, download it and expense it, all in one place." })}
-      />
+      <div className="grid items-center gap-8 md:grid-cols-[1fr_1.1fr]">
+        <SectionHead
+          kicker={L({ ko: "도구 말고도", en: "Beyond the tools" })}
+          title={L({ ko: "만들고, 고치고, 바로 쓰기까지", en: "Make it, fix it, use it" })}
+          body={L({ ko: "결과를 받은 다음이 더 중요해요. 고치고, 파일로 받고, 비용 처리하는 일까지 한곳에서 끝나요.", en: "What happens after the result matters most: fix it, download it and expense it, all in one place." })}
+        />
+        <motion.div {...reveal} className="relative aspect-video overflow-hidden rounded-[28px] border border-white/40 shadow-[0_30px_80px_-40px_rgba(18,68,154,0.55)] ring-1 ring-black/5 dark:border-hairline">
+          <SceneVideo name="owner" loop />
+        </motion.div>
+      </div>
       <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((f, i) => (
           <motion.div key={f.title.en} {...reveal} transition={{ ...reveal.transition, delay: i * 0.04 }} className="rounded-[24px] border border-hairline bg-surface p-5">
