@@ -7,6 +7,7 @@ import { isHost } from "@/lib/platform-access-server";
 import { liveAnnouncements, unreadNotices } from "@/lib/admin-ops-server";
 import { ShellNotices, type ShellNotice } from "@/components/site/service-banner";
 import { dismissMemberNotice } from "@/lib/actions/notices";
+import { planReminders } from "@/lib/reminders";
 
 // Shell data only: who's signed in, credits, plan, whether a support
 // reply is waiting (dot on the Help dock item), and banners from /admin.
@@ -25,8 +26,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   // Site banners from /admin/announcements, then notices staff sent this member.
   const [banners, notices] = await Promise.all([liveAnnouncements().then((a) => a.filter((x) => x.kind === "banner")), user ? unreadNotices(user.id) : []]);
+  const host = await isHost(user?.email);
+  // Plan ending / credits low (lib/reminders.ts); hosts run free, so none for them.
+  const reminders = membership && !host ? planReminders(membership, balance) : [];
   const shellNotices: ShellNotice[] = [
     ...notices.map((n) => ({ id: n.id, source: "notice" as const, tone: "warning" as const, title: { ko: n.title, en: n.title }, body: { ko: n.body, en: n.body }, link: n.link })),
+    ...reminders.map((r) => ({ ...r, source: "announcement" as const })),
     ...banners.map((b) => ({ id: `a:${b.id}`, source: "announcement" as const, tone: b.level, title: b.title, body: b.body, link: b.link })),
   ];
 
@@ -35,7 +40,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       user={user?.email ? { email: user.email } : null}
       balance={balance}
       plan={membership?.plan ?? "free"}
-      host={await isHost(user?.email)}
+      host={host}
       answeredTickets={answered?.count ?? 0}
       notices={shellNotices.length ? <ShellNotices items={shellNotices} dismissNotice={dismissMemberNotice} /> : null}
     >
