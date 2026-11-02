@@ -14,6 +14,8 @@ export interface TossPayment {
   orderId: string;
   status: TossPaymentStatus;
   totalAmount: number;
+  /** What's left after refunds (equals totalAmount until something is refunded). */
+  balanceAmount: number;
   method: string | null;
   approvedAt: string | null;
   receiptUrl: string | null;
@@ -35,7 +37,7 @@ function authHeader(secretKey: string): string {
   return `Basic ${Buffer.from(`${secretKey}:`).toString("base64")}`;
 }
 
-type RawPayment = { paymentKey?: string; orderId?: string; status?: string; totalAmount?: number; method?: string; approvedAt?: string; receipt?: { url?: string } | null; code?: string; message?: string };
+type RawPayment = { paymentKey?: string; orderId?: string; status?: string; totalAmount?: number; balanceAmount?: number; method?: string; approvedAt?: string; receipt?: { url?: string } | null; code?: string; message?: string };
 
 function parsePayment(data: RawPayment, fallback: { paymentKey?: string; orderId?: string } = {}): TossPayment {
   return {
@@ -43,6 +45,7 @@ function parsePayment(data: RawPayment, fallback: { paymentKey?: string; orderId
     orderId: data.orderId ?? fallback.orderId ?? "",
     status: (data.status ?? "READY") as TossPaymentStatus,
     totalAmount: typeof data.totalAmount === "number" ? data.totalAmount : NaN,
+    balanceAmount: typeof data.balanceAmount === "number" ? data.balanceAmount : typeof data.totalAmount === "number" ? data.totalAmount : NaN,
     method: data.method ?? null,
     approvedAt: data.approvedAt ?? null,
     receiptUrl: typeof data.receipt?.url === "string" ? data.receipt.url : null,

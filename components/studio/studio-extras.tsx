@@ -9,9 +9,9 @@ import { useBi } from "@/lib/i18n/context";
 import { CATEGORIES, CATEGORY_ORDER, catalogTool, toolsIn } from "@/lib/tools/catalog";
 import type { CategoryId } from "@/lib/tools/types";
 import { PATCH_NOTES } from "@/lib/site/patch-notes";
-import { REFERRAL } from "@/lib/referral";
+import { REFERRAL, REVENUE_SHARE } from "@/lib/referral";
 import { cn } from "@/lib/utils";
-import { MEMBER_API_KEYS, OWN_KEY_ONLY, REFERRAL_CREDITS, STUDENT_PLAN } from "@/lib/site/access";
+import { MEMBER_API_KEYS, OWN_KEY_ONLY, REFERRAL_CREDITS, REFERRAL_REVENUE_SHARE, STUDENT_PLAN } from "@/lib/site/access";
 
 // The Studio's richer home: an animated hero around the one-input
 // composer, the five areas with their tools, ready-made workflows, a
@@ -108,7 +108,9 @@ export function PromoStrip() {
       icon: Gift,
       tone: "from-studio-cyan/15 to-accent/10",
       kicker: { ko: "친구 초대", en: "Invite friends" },
-      title: { ko: `친구가 첫 결과를 만들면 나는 ${REFERRAL.referrerBonus} 크레딧`, en: `${REFERRAL.referrerBonus} credits when a friend makes their first result` },
+      title: REFERRAL_REVENUE_SHARE
+        ? { ko: `초대한 친구가 결제하면 ${Math.round(REVENUE_SHARE.rate * 100)}%를 현금으로`, en: `Earn ${Math.round(REVENUE_SHARE.rate * 100)}% in cash when friends you invite pay` }
+        : { ko: `친구가 첫 결과를 만들면 나는 ${REFERRAL.referrerBonus} 크레딧`, en: `${REFERRAL.referrerBonus} credits when a friend makes their first result` },
       href: "/account/referral",
       cta: { ko: "초대 링크 받기", en: "Get my link" },
     },
@@ -143,7 +145,7 @@ export function PromoStrip() {
   // Own-key mode: no invites or plans. SaaS: no own keys, and invites only while they pay credits (lib/site/access.ts).
   const promos = OWN_KEY_ONLY
     ? allPromos.filter((p) => p.href !== "/account/referral" && p.href !== "/account/membership")
-    : allPromos.filter((p) => (MEMBER_API_KEYS || p.href !== "/account/api-key") && (REFERRAL_CREDITS || p.href !== "/account/referral"));
+    : allPromos.filter((p) => (MEMBER_API_KEYS || p.href !== "/account/api-key") && (REFERRAL_CREDITS || REFERRAL_REVENUE_SHARE || p.href !== "/account/referral"));
   const [i, setI] = useState(0);
   const [paused, setPaused] = useState(false);
   useEffect(() => {

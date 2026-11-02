@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { AlertTriangle, ArrowLeft, BarChart3, Crown, Filter, Headset, LayoutDashboard, Megaphone, Menu, Search, SlidersHorizontal, Users, X } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Banknote, BarChart3, Crown, Filter, Headset, LayoutDashboard, Megaphone, Menu, Search, SlidersHorizontal, Users, X } from "lucide-react";
 import { BrandLogo } from "@/components/brand-mark";
 import { useBi } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
@@ -28,6 +28,7 @@ const NAV: { group: { ko: string; en: string }; items: { href: string; icon: typ
     items: [
       { href: "/admin/members", icon: Users, label: { ko: "회원 관리", en: "Members" } },
       { href: "/admin/hosts", icon: Crown, label: { ko: "호스트", en: "Hosts" } },
+      { href: "/admin/payouts", icon: Banknote, label: { ko: "추천 정산", en: "Referral payouts" } },
       { href: "/admin/tickets", icon: Headset, label: { ko: "고객 문의", en: "Support" }, badge: "tickets" },
       { href: "/admin/announcements", icon: Megaphone, label: { ko: "공지·패치노트", en: "Announcements" } },
       { href: "/admin/settings", icon: SlidersHorizontal, label: { ko: "운영 설정", en: "Operations" }, badge: "ops" },

@@ -105,6 +105,20 @@ export function planReconcile(order: LedgerOrder, toss: TossView, now: number = 
   }
 }
 
+/**
+ * A finished order that Toss later refunded (from the merchant dashboard or
+ * a cancel API call). A full refund closes the order, which cancels any
+ * referral share still on hold (migration 0024); a partial refund shrinks it.
+ */
+export function planRefund(order: Pick<LedgerOrder, "status" | "amount">, toss: TossView & { balanceAmount?: number }): { kind: "none" } | { kind: "refund_full" } | { kind: "refund_partial"; remaining: number } {
+  if (order.status !== "done" || !toss.found) return { kind: "none" };
+  if (toss.status === "CANCELED") return { kind: "refund_full" };
+  if (toss.status === "PARTIAL_CANCELED" && typeof toss.balanceAmount === "number" && toss.balanceAmount < order.amount) {
+    return toss.balanceAmount <= 0 ? { kind: "refund_full" } : { kind: "refund_partial", remaining: toss.balanceAmount };
+  }
+  return { kind: "none" };
+}
+
 /** Validates a success redirect against the stored order before calling Toss. */
 export function checkConfirm(order: PendingOrder, amount: number): ConfirmCheck {
   if (order.status === "done") return { ok: false, reason: "already_done" };

@@ -573,3 +573,104 @@ export async function listHosts(adminList: { entry: string; addedAt: string; by:
     return { ...e, members, runs30d: use.runs, credits30d: use.credits };
   });
 }
+
+// ── Referral payouts (migration 0024) ──────────────────────────────────
+
+export interface AdminPayout {
+  id: string;
+  userId: string;
+  email: string;
+  name: string | null;
+  gross: number;
+  tax: number;
+  net: number;
+  status: "requested" | "paid" | "rejected";
+  requestedAt: string;
+  processedAt: string | null;
+  note: string | null;
+  /** Bank details to transfer to (opened server-side for staff); null if the account was removed. */
+  bank: { holder: string; bank: string; account: string; rrnMasked: string } | null;
+}
+
+export interface AdminPayoutSummary {
+  rows: AdminPayout[];
+  /** Shares still in their hold, and confirmed but not yet requested, across everyone. */
+  held: number;
+  owed: number;
+  paidThisMonth: number;
+  commissions30d: { count: number; amount: number };
+}
+
+/** Open requests first, then the latest processed ones. Opens bank details — staff only (callers check getAdminUser). */
+export async function listReferralPayouts(): Promise<AdminPayoutSummary | null> {
+  const admin = createAdminClient();
+  const [payouts, accounts, commissions] = await Promise.all([
+    admin.from("referral_payouts").select("id, user_id, gross, tax, net, status, requested_at, processed_at, note").order("requested_at", { ascending: false }).limit(200),
+    admin.from("referral_payout_accounts").select("user_id, holder_name, bank_name, account_sealed, rrn_sealed"),
+    admin.from("referral_commissions").select("commission, status, available_at, created_at"),
+  ]);
+  if (payouts.error || commissions.error) return null;
+  const { open } = await import("@/lib/crypto/secret-box");
+  const { env } = await import("@/lib/env");
+  const secret = env.API_KEY_ENCRYPTION_SECRET;
+  const reveal = (sealed: string) => {
+    try {
+      return secret ? open(sealed, secret) : "";
+    } catch {
+      return "";
+    }
+  };
+  const acct = new Map((accounts.data ?? []).map((a) => [a.user_id, a]));
+  const users = new Map<string, { email: string; name: string | null }>();
+  await Promise.all(
+    [...new Set((payouts.data ?? []).map((p) => p.user_id))].map(async (id) => {
+      const { data } = await admin.auth.admin.getUserById(id);
+      if (data.user) users.set(id, { email: data.user.email ?? "", name: profileNameOf(data.user.app_metadata) ?? displayName(data.user.user_metadata) });
+    }),
+  );
+  const rows: AdminPayout[] = (payouts.data ?? []).map((p) => {
+    const a = acct.get(p.user_id);
+    const rrn = a ? reveal(a.rrn_sealed) : "";
+    return {
+      id: p.id,
+      userId: p.user_id,
+      email: users.get(p.user_id)?.email ?? "",
+      name: users.get(p.user_id)?.name ?? null,
+      gross: p.gross,
+      tax: p.tax,
+      net: p.net,
+      status: p.status,
+      requestedAt: p.requested_at,
+      processedAt: p.processed_at,
+      note: p.note,
+      bank: a ? { holder: a.holder_name, bank: a.bank_name, account: reveal(a.account_sealed) || "(열 수 없음)", rrnMasked: rrn ? `${rrn.slice(0, 6)}-${rrn.slice(6, 7)}******` : "(열 수 없음)" } : null,
+    };
+  });
+  rows.sort((a, b) => Number(b.status === "requested") - Number(a.status === "requested"));
+  const now = Date.now();
+  const monthStart = kstDay(now).slice(0, 8) + "01";
+  const live = (commissions.data ?? []).filter((c) => c.status !== "canceled");
+  const confirmed = live.filter((c) => new Date(c.available_at).getTime() <= now).reduce((s, c) => s + c.commission, 0);
+  const requestedOrPaid = (payouts.data ?? []).filter((p) => p.status !== "rejected").reduce((s, p) => s + p.gross, 0);
+  const recent = live.filter((c) => new Date(c.created_at).getTime() >= now - 30 * DAY_MS);
+  return {
+    rows,
+    held: live.filter((c) => new Date(c.available_at).getTime() > now).reduce((s, c) => s + c.commission, 0),
+    owed: Math.max(0, confirmed - requestedOrPaid),
+    paidThisMonth: (payouts.data ?? []).filter((p) => p.status === "paid" && p.processed_at && kstDay(p.processed_at) >= monthStart).reduce((s, p) => s + p.gross, 0),
+    commissions30d: { count: recent.length, amount: recent.reduce((s, c) => s + c.commission, 0) },
+  };
+}
+
+/** The full resident registration number for one payout, for the 지급명세서 — logged by the caller. */
+export async function revealPayoutRrn(userId: string): Promise<string | null> {
+  const { data } = await createAdminClient().from("referral_payout_accounts").select("rrn_sealed").eq("user_id", userId).maybeSingle();
+  if (!data) return null;
+  const { open } = await import("@/lib/crypto/secret-box");
+  const { env } = await import("@/lib/env");
+  try {
+    return env.API_KEY_ENCRYPTION_SECRET ? open(data.rrn_sealed, env.API_KEY_ENCRYPTION_SECRET) : null;
+  } catch {
+    return null;
+  }
+}

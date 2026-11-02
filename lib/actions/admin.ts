@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getAdminUser, isStaffEmail, keyTierTarget, logAdminAction } from "@/lib/admin";
+import { getAdminUser, isStaffEmail, keyTierTarget, logAdminAction, revealPayoutRrn } from "@/lib/admin";
 import { checkGoogleKeyTier, getUserApiKeySlotFor, type ApiKeyPriority } from "@/lib/api-keys";
 import { PRO_TEXT_MODEL } from "@/lib/ai/gemini-studio";
 import { NOTICE_TEMPLATES, safeLink } from "@/lib/admin-ops";
@@ -397,4 +397,38 @@ export async function setMemberPlan(_prev: AdminActionState, formData: FormData)
   await logAdminAction(staff.id, "set_plan", "memberships", id, { from: row ?? null, to: next, reason });
   revalidatePath(`/admin/members/${id}`);
   return { ok: true, message: plan === "free" ? "plan_cleared" : "plan_saved" };
+}
+
+// ── Referral payouts ───────────────────────────────────────────────────
+
+/** After the bank transfer: mark a requested payout paid (or reject it with a reason, which returns the money to the member's wallet). */
+export async function processReferralPayout(_prev: AdminActionState, formData: FormData): Promise<AdminActionState> {
+  const staff = await getAdminUser();
+  if (!staff) return { ok: false, message: "not_admin" };
+  const id = String(formData.get("id") ?? "");
+  const decision = String(formData.get("decision") ?? "");
+  const note = String(formData.get("note") ?? "").trim().slice(0, 200);
+  if (!id || !["paid", "rejected"].includes(decision)) return { ok: false, message: "save_failed" };
+  if (decision === "rejected" && !note) return { ok: false, message: "reason_required" };
+  const { data, error } = await createAdminClient()
+    .from("referral_payouts")
+    .update({ status: decision, note: note || null, processed_at: new Date().toISOString(), processed_by: staff.id })
+    .eq("id", id)
+    .eq("status", "requested")
+    .select("user_id, gross, net");
+  if (error || !data?.length) return { ok: false, message: "payout_missing" };
+  await logAdminAction(staff.id, decision === "paid" ? "payout_paid" : "payout_rejected", "referral_payouts", id, { note, gross: data[0].gross, net: data[0].net, member: data[0].user_id });
+  revalidatePath("/admin/payouts");
+  return { ok: true, message: decision === "paid" ? "payout_paid" : "payout_rejected" };
+}
+
+/** Shows one member's full resident registration number (for 원천징수 filing). Every view is logged. */
+export async function revealReferralRrn(_prev: AdminActionState, formData: FormData): Promise<AdminActionState> {
+  const staff = await getAdminUser();
+  if (!staff) return { ok: false, message: "not_admin" };
+  const userId = String(formData.get("userId") ?? "");
+  const rrn = userId ? await revealPayoutRrn(userId) : null;
+  if (!rrn) return { ok: false, message: "rrn_unavailable" };
+  await logAdminAction(staff.id, "reveal_rrn", "referral_payout_accounts", userId);
+  return { ok: true, message: "rrn_shown", id: `${rrn.slice(0, 6)}-${rrn.slice(6)}` };
 }
