@@ -83,6 +83,11 @@ export const MSG: Record<string, Bi> = {
   plan_cleared: { ko: "무료로 바꿨어요. 남은 크레딧은 그대로예요.", en: "Moved to Free. Their credits stay." },
   plan_invalid: { ko: "플랜을 골라 주세요.", en: "Choose a plan." },
   days_invalid: { ko: "기간은 1~366일이에요.", en: "Days must be 1–366." },
+  payout_paid: { ko: "입금 완료로 표시했어요.", en: "Marked paid." },
+  payout_rejected: { ko: "반려했어요. 금액은 회원 지갑으로 돌아가요.", en: "Rejected. The amount goes back to the member's wallet." },
+  payout_missing: { ko: "이미 처리됐거나 없는 신청이에요.", en: "Already processed or not found." },
+  rrn_unavailable: { ko: "주민등록번호를 열 수 없어요. 암호화 키(API_KEY_ENCRYPTION_SECRET)를 확인해 주세요.", en: "Couldn't open the ID number. Check API_KEY_ENCRYPTION_SECRET." },
+  rrn_shown: { ko: "조회 기록이 감사 로그에 남았어요.", en: "This view was logged." },
   host_limit: { ko: "호스트는 200개까지 넣을 수 있어요. 도메인(@…)으로 묶어 보세요.", en: "Up to 200 hosts. Try grouping them by domain (@…)." },
 };
 

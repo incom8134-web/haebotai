@@ -4,6 +4,15 @@ export type NoteKind = "new" | "improved" | "fixed";
 
 export const PATCH_NOTES: { version: string; date: string; title: Bilingual; items: { kind: NoteKind; text: Bilingual }[] }[] = [
   {
+    version: "3.1.0",
+    date: "2026-11-02",
+    title: { ko: "친구를 초대하면 결제의 20%를 현금으로", en: "Earn 20% in cash when friends you invite pay" },
+    items: [
+      { kind: "new", text: { ko: "초대한 친구가 90일 안에 결제할 때마다 결제 금액(부가세 제외)의 20%가 내 추천 수익으로 쌓여요. 7일 뒤 확정되고 1만 원부터 본인 계좌로 정산받을 수 있어요", en: "Every payment a friend you invited makes in their first 90 days earns you 20% (excl. VAT). It's confirmed after 7 days, with payouts to your own bank account from ₩10,000" } },
+      { kind: "new", text: { ko: "[계정 → 친구 초대·수익]에서 초대 링크, 보류·출금 가능 금액, 수익·정산 내역을 한눈에 볼 수 있어요", en: "Account → Invite & earn shows your link, held and withdrawable amounts, and every earning and payout" } },
+    ],
+  },
+  {
     version: "3.0.0",
     date: "2026-10-29",
     title: { ko: "플러스·프로 플랜, 결과 언어 선택, 도구별 디자인 파일", en: "Plus and Pro plans, result language, designed files per tool" },

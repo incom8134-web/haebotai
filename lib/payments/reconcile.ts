@@ -1,7 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getTossPaymentByOrderId, type TossPayment } from "./toss";
-import { isRetryable, planReconcile, productFor, type LedgerOrder, type TossView } from "./pro";
+import { isRetryable, planReconcile, planRefund, productFor, type LedgerOrder, type TossView } from "./pro";
 
 // Shared by the confirm route, the Toss webhook and the scheduled job.
 // Whatever triggered it, the order's state is always re-read from Toss
@@ -9,7 +9,7 @@ import { isRetryable, planReconcile, productFor, type LedgerOrder, type TossView
 
 type Admin = ReturnType<typeof createAdminClient>;
 
-type ReconcileOutcome = "activated" | "activate_failed" | "closed" | "waiting" | "amount_mismatch" | "unknown_order" | "toss_error" | "noop";
+type ReconcileOutcome = "refunded" | "partly_refunded" | "activated" | "activate_failed" | "closed" | "waiting" | "amount_mismatch" | "unknown_order" | "toss_error" | "noop";
 
 /** pending → done + the order's plan days + credits, in one transaction (activate_order, migration 0022). The grant comes from the order's stored plan, never from the caller. */
 export async function activateOrder(admin: Admin, orderId: string, payment: TossPayment): Promise<boolean> {
@@ -35,11 +35,31 @@ export async function activateOrder(admin: Admin, orderId: string, payment: Toss
   return data === true;
 }
 
+/** A paid order refunded at Toss: mark it, which cancels (or shrinks) its referral share — migration 0024. */
+async function reconcileRefund(admin: Admin, orderId: string, order: LedgerOrder): Promise<ReconcileOutcome> {
+  const toss = await getTossPaymentByOrderId(orderId);
+  if (!toss.ok) return "noop";
+  const plan = planRefund(order, { found: true, status: toss.payment.status, totalAmount: toss.payment.totalAmount, balanceAmount: toss.payment.balanceAmount });
+  if (plan.kind === "refund_full") {
+    await admin.from("payments").update({ status: "canceled", fail_reason: "refunded", raw: toss.payment.raw }).eq("order_id", orderId).eq("status", "done");
+    return "refunded";
+  }
+  if (plan.kind === "refund_partial") {
+    await admin.from("payments").update({ raw: toss.payment.raw }).eq("order_id", orderId);
+    const { error } = await admin.rpc("shrink_referral_commission", { p_order_id: orderId, p_remaining: plan.remaining });
+    if (error) console.warn("[payments] shrink_referral_commission failed", orderId, error.message);
+    return "partly_refunded";
+  }
+  return "noop";
+}
+
 export async function reconcileOrder(orderId: string): Promise<ReconcileOutcome> {
   const admin = createAdminClient();
   const { data: row } = await admin.from("payments").select("status, amount, fail_reason, created_at").eq("order_id", orderId).maybeSingle();
   if (!row) return "unknown_order";
   const order: LedgerOrder = { status: row.status, amount: row.amount, failReason: row.fail_reason, createdAt: row.created_at };
+  // A finished order only changes if Toss says it was refunded.
+  if (order.status === "done") return reconcileRefund(admin, orderId, order);
   if (!isRetryable(order)) return "noop";
 
   const toss = await getTossPaymentByOrderId(orderId);

@@ -80,3 +80,66 @@ export async function getReferralStatus(userId: string): Promise<ReferralStatus 
   const { data: rows } = await supabase.from("referral_redemptions").select("referrer_rewarded, bonus").eq("referrer_id", userId);
   return { code, invited: rows?.length ?? 0, pending: 0, earned: (rows ?? []).filter((r) => r.referrer_rewarded).reduce((sum, r) => sum + (r.bonus ?? 0), 0) };
 }
+
+// ── Revenue share (migration 0024) ─────────────────────────────────────
+
+export interface RevenueShareStatus {
+  code: string;
+  /** Friends who joined through the link. */
+  invited: number;
+  /** Of those, how many have bought something that earned a share. */
+  buyers: number;
+  wallet: { pending: number; available: number; requested: number; paid: number };
+  commissions: { id: string; buyer: string; amount: number; commission: number; status: "held" | "available" | "canceled"; availableAt: string; createdAt: string }[];
+  payouts: { id: string; gross: number; tax: number; net: number; status: "requested" | "paid" | "rejected"; requestedAt: string; processedAt: string | null; note: string | null }[];
+  account: { holder: string; bank: string; last4: string } | null;
+}
+
+/** "kim***@gmail.com": enough for a referrer to recognize a friend, no more. */
+function maskEmail(email: string): string {
+  const [name, domain] = email.split("@");
+  if (!domain) return "—";
+  return `${name.slice(0, Math.min(3, Math.max(1, name.length - 2)))}***@${domain}`;
+}
+
+/** The member's referral wallet; null when migration 0024 isn't applied yet. */
+export async function getRevenueShareStatus(userId: string): Promise<RevenueShareStatus | null> {
+  const admin = createAdminClient();
+  const { data: code, error: codeError } = await admin.rpc("get_or_create_referral_code", { p_user_id: userId });
+  if (codeError || typeof code !== "string") return null;
+  const [invites, commissions, payouts, wallet, account] = await Promise.all([
+    admin.from("referral_redemptions").select("referee_id").eq("referrer_id", userId),
+    admin.from("referral_commissions").select("id, buyer_id, order_amount, commission, status, available_at, created_at").eq("referrer_id", userId).order("created_at", { ascending: false }).limit(100),
+    admin.from("referral_payouts").select("id, gross, tax, net, status, requested_at, processed_at, note").eq("user_id", userId).order("requested_at", { ascending: false }).limit(50),
+    admin.rpc("referral_wallet", { p_user_id: userId }),
+    admin.from("referral_payout_accounts").select("holder_name, bank_name, account_last4").eq("user_id", userId).maybeSingle(),
+  ]);
+  if (commissions.error || wallet.error) return null;
+  const buyerIds = [...new Set((commissions.data ?? []).map((c) => c.buyer_id))];
+  const emails = new Map<string, string>();
+  await Promise.all(
+    buyerIds.map(async (id) => {
+      const { data } = await admin.auth.admin.getUserById(id);
+      emails.set(id, data.user?.email ? maskEmail(data.user.email) : "—");
+    }),
+  );
+  const w = (Array.isArray(wallet.data) ? wallet.data[0] : wallet.data) as { pending: number; available: number; requested: number; paid: number } | null;
+  const now = Date.now();
+  return {
+    code,
+    invited: invites.data?.length ?? 0,
+    buyers: new Set((commissions.data ?? []).filter((c) => c.status !== "canceled").map((c) => c.buyer_id)).size,
+    wallet: { pending: w?.pending ?? 0, available: w?.available ?? 0, requested: w?.requested ?? 0, paid: w?.paid ?? 0 },
+    commissions: (commissions.data ?? []).map((c) => ({
+      id: c.id,
+      buyer: emails.get(c.buyer_id) ?? "—",
+      amount: c.order_amount,
+      commission: c.commission,
+      status: c.status === "canceled" ? "canceled" : new Date(c.available_at).getTime() <= now ? "available" : "held",
+      availableAt: c.available_at,
+      createdAt: c.created_at,
+    })),
+    payouts: (payouts.data ?? []).map((p) => ({ id: p.id, gross: p.gross, tax: p.tax, net: p.net, status: p.status, requestedAt: p.requested_at, processedAt: p.processed_at, note: p.note })),
+    account: account.data ? { holder: account.data.holder_name, bank: account.data.bank_name, last4: account.data.account_last4 } : null,
+  };
+}
