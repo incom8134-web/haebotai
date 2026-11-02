@@ -35,22 +35,30 @@ export async function activateOrder(admin: Admin, orderId: string, payment: Toss
   return data === true;
 }
 
-/** A paid order refunded at Toss: mark it, which cancels (or shrinks) its referral share — migration 0024. */
+/**
+ * A paid order refunded at Toss: take back its credits and plan days in
+ * proportion to the refund, and cancel (or shrink) the inviter's share —
+ * revoke_order, migration 0025. Safe to repeat: only newly refunded won count.
+ */
 async function reconcileRefund(admin: Admin, orderId: string, order: LedgerOrder): Promise<ReconcileOutcome> {
   const toss = await getTossPaymentByOrderId(orderId);
   if (!toss.ok) return "noop";
   const plan = planRefund(order, { found: true, status: toss.payment.status, totalAmount: toss.payment.totalAmount, balanceAmount: toss.payment.balanceAmount });
-  if (plan.kind === "refund_full") {
-    await admin.from("payments").update({ status: "canceled", fail_reason: "refunded", raw: toss.payment.raw }).eq("order_id", orderId).eq("status", "done");
-    return "refunded";
+  if (plan.kind === "none") return "noop";
+  const { data: row } = await admin.from("payments").select("plan").eq("order_id", orderId).maybeSingle();
+  const product = productFor(row?.plan);
+  await admin.from("payments").update({ raw: toss.payment.raw }).eq("order_id", orderId);
+  const { error } = await admin.rpc("revoke_order", {
+    p_order_id: orderId,
+    p_remaining: plan.kind === "refund_full" ? 0 : plan.remaining,
+    p_days: product?.days ?? 0,
+    p_credits: product?.credits ?? 0,
+  });
+  if (error) {
+    console.error("[payments] revoke_order failed", orderId, error.message);
+    return "noop";
   }
-  if (plan.kind === "refund_partial") {
-    await admin.from("payments").update({ raw: toss.payment.raw }).eq("order_id", orderId);
-    const { error } = await admin.rpc("shrink_referral_commission", { p_order_id: orderId, p_remaining: plan.remaining });
-    if (error) console.warn("[payments] shrink_referral_commission failed", orderId, error.message);
-    return "partly_refunded";
-  }
-  return "noop";
+  return plan.kind === "refund_full" ? "refunded" : "partly_refunded";
 }
 
 export async function reconcileOrder(orderId: string): Promise<ReconcileOutcome> {

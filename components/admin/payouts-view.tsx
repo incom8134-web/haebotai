@@ -19,6 +19,13 @@ import { cn } from "@/lib/utils";
 
 const won = (n: number) => `₩${num(n)}`;
 
+// Hints that the member bought through their own invite (lib/referral.ts referralRisks).
+const RISK: Record<AdminPayout["risks"][number], { ko: string; en: string }> = {
+  same_email: { ko: "친구와 같은 메일함", en: "Same mailbox as a friend" },
+  same_card: { ko: "친구와 같은 카드", en: "Same card as a friend" },
+  same_name: { ko: "친구와 같은 이름", en: "Same name as a friend" },
+};
+
 function RrnReveal({ userId, masked }: { userId: string; masked: string }) {
   const L = useBi();
   const [state, action, pending] = useActionState<AdminActionState, FormData>(revealReferralRrn, null);
@@ -94,8 +101,8 @@ export function PayoutsView({ summary }: { summary: AdminPayoutSummary | null })
       <AdminPageHeader
         title={L({ ko: "추천 정산", en: "Referral payouts" })}
         lead={L({
-          ko: `초대한 친구의 결제(부가세 제외)의 ${Math.round(REVENUE_SHARE.rate * 100)}%가 ${REVENUE_SHARE.holdDays}일 보류 뒤 회원 지갑에 쌓여요. 회원이 정산을 신청하면 아래 계좌로 실수령액을 이체하고 '이체 완료'를 눌러 주세요. 떼어 둔 3.3%는 다음 달 10일까지 홈택스 원천징수 신고·납부해야 해요.`,
-          en: `${Math.round(REVENUE_SHARE.rate * 100)}% of invited friends' payments (excl. VAT) builds up in members' wallets after a ${REVENUE_SHARE.holdDays}-day hold. When a member requests a payout, transfer the net amount to the account below and press 'Mark paid'. File and pay the 3.3% withheld via Hometax by the 10th of next month.`,
+          ko: `초대한 친구의 결제(부가세 제외)의 ${Math.round(REVENUE_SHARE.rate * 100)}%가 ${REVENUE_SHARE.holdDays}일 보류 뒤 회원 지갑에 쌓여요. 회원이 정산을 신청하면 아래 계좌로 실수령액을 이체하고 '이체 완료'를 눌러 주세요. 떼어 둔 ${(REVENUE_SHARE.withholdingRate * 100).toFixed(1)}%는 다음 달 10일까지 홈택스 원천징수 신고·납부하고, 지급명세서도 제출해야 해요. 첫 지급 전에 세무사에게 소득 구분(사업소득 3.3% / 기타소득 8.8%)을 확인하세요 — 바꾸려면 lib/referral.ts의 withholdingRate.`,
+          en: `${Math.round(REVENUE_SHARE.rate * 100)}% of invited friends' payments (excl. VAT) builds up in members' wallets after a ${REVENUE_SHARE.holdDays}-day hold. When a member requests a payout, transfer the net amount to the account below and press 'Mark paid'. File and pay the ${(REVENUE_SHARE.withholdingRate * 100).toFixed(1)}% withheld via Hometax by the 10th of next month, and file the payment statement. Before the first payout, confirm the income type with the tax adviser (business 3.3% / other 8.8%) — lib/referral.ts withholdingRate.`,
         })}
       />
       <div className="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -127,6 +134,12 @@ export function PayoutsView({ summary }: { summary: AdminPayoutSummary | null })
                       <Link href={`/admin/members/${p.userId}`} className="font-semibold text-accent hover:underline">{p.name || p.email}</Link>
                       <span className="block text-xs text-fg-muted">{p.email}</span>
                       <span className="block text-[11px] text-fg-subtle">{fmtDateTime(p.requestedAt)}</span>
+                      <span className="block text-[11px] text-fg-subtle">{L({ ko: `결제한 친구 ${p.buyers}명`, en: `${p.buyers} paying friends` })}</span>
+                      {p.risks.length ? (
+                        <span className="mt-1 flex flex-wrap gap-1" title={L({ ko: "본인이 다른 계정으로 결제했을 수 있어요. 확인 후 이체하세요.", en: "They may have paid from a second account. Check before transferring." })}>
+                          {p.risks.map((r) => <Pill key={r} tone="red">{L(RISK[r])}</Pill>)}
+                        </span>
+                      ) : null}
                     </td>
                     <td className="px-3 py-3">
                       {p.bank ? (
