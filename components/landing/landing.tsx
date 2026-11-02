@@ -23,6 +23,8 @@ import {
   FlowSection,
   PersonasSection,
   SectionHead,
+  FeaturesSection,
+  ReferralBand,
   ShowcaseSection,
   StepsSection,
   reveal,
@@ -457,8 +459,10 @@ function Landing({ signedIn = false, showcase = [] }: { signedIn?: boolean; show
           <StepsSection />
           <BeforeAfterSection />
           <ShowcaseSection items={showcase} />
+          <FeaturesSection />
           <PersonasSection />
           <Pricing />
+          <ReferralBand signedIn={signedIn} />
           <Faq />
           <FinalCta />
         </main>
