@@ -16,6 +16,7 @@ import { useBi } from "@/lib/i18n/context";
 import type { CategoryId } from "@/lib/tools/types";
 import { cn } from "@/lib/utils";
 import { SceneVideo, StoryVideo } from "./scene-video";
+import type { ShowcaseItem } from "@/lib/showcase";
 
 export const reveal = {
   initial: { opacity: 0, y: 16 },
@@ -631,6 +632,43 @@ export function PersonasSection() {
             </ul>
           </motion.article>
         ))}
+      </div>
+    </section>
+  );
+}
+
+/* ── Showcase: real results the team shared ────────────────────────── */
+
+export function ShowcaseSection({ items }: { items: ShowcaseItem[] }) {
+  const L = useBi();
+  if (!items.length) return null;
+  return (
+    <section id="examples" className="mx-auto max-w-[1200px] scroll-mt-24 px-4 py-16 md:px-6 md:py-20">
+      <SectionHead
+        kicker={L({ ko: "실제로 만든 결과", en: "Made with AI Haeba" })}
+        title={L({ ko: "가입하기 전에 결과부터 보세요", en: "See real results before you sign up" })}
+        body={L({ ko: "AI 해바 도구로 실제로 만든 결과물이에요. 눌러서 처음부터 끝까지 볼 수 있어요.", en: "Real results made with AI Haeba tools. Open one to see it end to end." })}
+      />
+      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {items.map((item, i) => {
+          const tool = catalogTool(item.slug);
+          return (
+            <motion.a
+              key={item.token}
+              {...reveal}
+              transition={{ ...reveal.transition, delay: i * 0.05 }}
+              href={`/share/${item.token}`}
+              className="group flex flex-col rounded-[24px] border border-hairline bg-surface p-5 transition-colors hover:border-accent/50"
+            >
+              <p className="text-xs font-semibold text-accent">{tool ? L(tool.name) : item.slug}</p>
+              <p className="mt-2 line-clamp-3 font-semibold leading-snug break-keep text-fg">{item.title || item.note}</p>
+              {item.title && item.note ? <p className="mt-2 line-clamp-2 text-sm break-keep text-fg-muted">{item.note}</p> : null}
+              <span className="mt-auto inline-flex items-center gap-1 pt-4 text-sm font-semibold text-accent">
+                {L({ ko: "결과 보기", en: "View result" })} <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" aria-hidden />
+              </span>
+            </motion.a>
+          );
+        })}
       </div>
     </section>
   );

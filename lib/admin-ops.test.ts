@@ -76,3 +76,14 @@ test("host list: clean entries kept, junk dropped", () => {
   assert.deepEqual(s.hostEmails, ["guest@studio.kr", "@team.co.kr"]);
   assert.equal(s.hostMeta["guest@studio.kr"].note, "partner");
 });
+
+test("showcase: share links or bare tokens, at most one entry per token", async () => {
+  const { parseSettings, shareTokenFrom } = await import("./admin-ops.ts");
+  const token = "AbCdEfGhIjKlMnOpQrStUv";
+  assert.equal(shareTokenFrom(`https://aihaeba.com/share/${token}`), token);
+  assert.equal(shareTokenFrom(`${token}`), token);
+  assert.equal(shareTokenFrom("https://aihaeba.com/pricing/AbCdEfGhIjKlMnOpQrStUvWx"), null);
+  assert.equal(shareTokenFrom("short"), null);
+  const s = parseSettings([{ key: "showcase", value: [{ token, note: "카페 블로그" }, { token }, { token: "bad" }] }]);
+  assert.deepEqual(s.showcase, [{ token, note: "카페 블로그", addedAt: "" }]);
+});

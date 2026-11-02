@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react";
 import Link from "next/link";
-import { Banknote, Check, Copy, Gift, Hourglass, Landmark, ShieldCheck, Wallet } from "lucide-react";
+import { Banknote, Check, Copy, Gift, Hourglass, Landmark, MessageCircle, ShieldCheck, Wallet } from "lucide-react";
 import { PageHeader, inputClass, primaryButton, secondaryButton } from "@/components/site/page";
 import { useBi } from "@/lib/i18n/context";
 import { PAYOUT_BANKS, REVENUE_SHARE, commissionFor } from "@/lib/referral";
@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 type Bi = { ko: string; en: string };
 const won = (n: number) => `₩${n.toLocaleString("ko-KR")}`;
 const pct = `${Math.round(REVENUE_SHARE.rate * 100)}%`;
+const taxPct = `${(REVENUE_SHARE.withholdingRate * 100).toFixed(1)}%`;
 const date = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul" }) : "—");
 
 const MSG: Record<string, Bi> = {
@@ -108,7 +109,7 @@ function PayoutRequest({ status }: { status: RevenueShareStatus }) {
         <p className="font-semibold">{L({ ko: `출금 가능 ${won(Math.max(available, 0))}`, en: `Withdrawable ${won(Math.max(available, 0))}` })}</p>
         <p className="mt-0.5 text-xs text-fg-muted">
           {available > 0
-            ? L({ ko: `원천징수 3.3% ${won(tax)} 제외 후 ${won(available - tax)} 입금`, en: `${won(available - tax)} after 3.3% withholding (${won(tax)})` })
+            ? L({ ko: `원천징수 ${taxPct} ${won(tax)} 제외 후 ${won(available - tax)} 입금`, en: `${won(available - tax)} after ${taxPct} withholding (${won(tax)})` })
             : available < 0
               ? L({ ko: `환불로 ${won(-available)}이 차감돼 있어요. 다음 수익에서 먼저 메워져요.`, en: `${won(-available)} owed from a refund; it comes out of your next earnings.` })
               : L({ ko: `${won(REVENUE_SHARE.minPayout)}부터 신청할 수 있어요.`, en: `Payouts start at ${won(REVENUE_SHARE.minPayout)}.` })}
@@ -135,13 +136,29 @@ const P_STATUS: Record<RevenueShareStatus["payouts"][number]["status"], { label:
 
 export function RevenueSharePanel({ status, link }: { status: RevenueShareStatus | null; link: string | null }) {
   const L = useBi();
-  const [copied, setCopied] = useState(false);
-  async function copy() {
+  const [copied, setCopied] = useState<"link" | "message" | null>(null);
+  // What a friend reads in KakaoTalk: what the site does and why the link.
+  const message = L({
+    ko: "가게 홍보 글·로고·광고 문구·상세페이지를 AI로 바로 만들어 주는 'AI 해바' 써 보세요. 무료로 시작할 수 있어요.",
+    en: "Try AI Haeba: it makes posts, logos, ad copy and product pages for your shop with AI. You can start free.",
+  });
+  async function copy(what: "link" | "message") {
     if (!link) return;
-    const ok = await navigator.clipboard.writeText(link).then(() => true, () => false);
-    if (!ok) return void window.prompt(L({ ko: "아래 링크를 복사해 주세요", en: "Copy this link" }), link);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    const text = what === "link" ? link : `${message}
+${link}`;
+    const ok = await navigator.clipboard.writeText(text).then(() => true, () => false);
+    if (!ok) return void window.prompt(L({ ko: "아래 내용을 복사해 주세요", en: "Copy this" }), text);
+    setCopied(what);
+    setTimeout(() => setCopied(null), 2000);
+  }
+  // Phones open the share sheet (KakaoTalk, 문자, 밴드…); elsewhere the message is copied to paste.
+  async function share() {
+    if (!link) return;
+    if (typeof navigator.share === "function") {
+      const done = await navigator.share({ title: "AI 해바", text: message, url: link }).then(() => true, (e: unknown) => (e as Error)?.name === "AbortError");
+      if (done) return;
+    }
+    await copy("message");
   }
   const plus = commissionFor(PRODUCTS.plus.amount).commission;
   const pro = commissionFor(PRODUCTS.pro.amount).commission;
@@ -162,7 +179,8 @@ export function RevenueSharePanel({ status, link }: { status: RevenueShareStatus
             <p className="flex items-center gap-2 font-semibold"><Gift size={17} className="text-studio-cyan" aria-hidden /> {L({ ko: "내 초대 링크", en: "Your invite link" })}</p>
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <code className="min-w-0 flex-1 truncate rounded-xl bg-surface-2/70 px-3 py-2.5 font-mono text-sm">{link}</code>
-              <button type="button" onClick={copy} className={cn(primaryButton, "h-10")}>{copied ? <Check size={15} aria-hidden /> : <Copy size={15} aria-hidden />} {copied ? L({ ko: "복사했어요", en: "Copied" }) : L({ ko: "링크 복사", en: "Copy link" })}</button>
+              <button type="button" onClick={share} className={cn(primaryButton, "h-10")}>{copied === "message" ? <Check size={15} aria-hidden /> : <MessageCircle size={15} aria-hidden />} {copied === "message" ? L({ ko: "메시지를 복사했어요 — 카톡에 붙여 넣으세요", en: "Message copied — paste it in a chat" }) : L({ ko: "카카오톡 등으로 보내기", en: "Share (KakaoTalk…)" })}</button>
+              <button type="button" onClick={() => copy("link")} className={cn(secondaryButton, "h-10")}>{copied === "link" ? <Check size={15} aria-hidden /> : <Copy size={15} aria-hidden />} {copied === "link" ? L({ ko: "복사했어요", en: "Copied" }) : L({ ko: "링크 복사", en: "Copy link" })}</button>
             </div>
             <p className="mt-2 text-xs text-fg-muted">{L({ ko: `초대 코드 ${status.code} · 친구가 링크로 들어와 가입하거나, 가입 동의 화면에 코드를 적으면 연결돼요.`, en: `Invite code ${status.code}. It links when a friend signs up through the link, or types the code on the sign-up consent screen.` })}</p>
           </section>
