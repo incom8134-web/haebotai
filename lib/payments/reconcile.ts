@@ -54,7 +54,11 @@ async function reconcileRefund(admin: Admin, orderId: string, order: LedgerOrder
     p_days: product?.days ?? 0,
     p_credits: product?.credits ?? 0,
   });
-  if (error) {
+  if (error && (error.code === "PGRST202" || error.code === "42883")) {
+    // Migration 0025 not applied yet: mark the order the old way (0024 cancels or shrinks the share).
+    if (plan.kind === "refund_full") await admin.from("payments").update({ status: "canceled", fail_reason: "refunded" }).eq("order_id", orderId).eq("status", "done");
+    else await admin.rpc("shrink_referral_commission", { p_order_id: orderId, p_remaining: plan.remaining });
+  } else if (error) {
     console.error("[payments] revoke_order failed", orderId, error.message);
     return "noop";
   }
