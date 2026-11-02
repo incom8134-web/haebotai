@@ -59,3 +59,9 @@ test("a quota 429 mentioning billing is a limit, not a refused key", () => {
   const err = new Error(JSON.stringify({ error: { code: 429, message: "You exceeded your current quota, please check your plan and billing details.", status: "RESOURCE_EXHAUSTED" } }));
   assert.equal(isAccessDenied(err), false);
 });
+
+test("an own key out of its free daily quota gets its own message", () => {
+  const err = Object.assign(new Error('{"error":{"code":429,"status":"RESOURCE_EXHAUSTED"}}'), { status: 429 });
+  assert.match(providerErrorMessage(err, { ownKey: true })!, /무료 사용량을 다 썼어요/);
+  assert.match(providerErrorMessage(err)!, /사용 한도/);
+});

@@ -46,6 +46,8 @@ const KEY_MSG: Record<string, { ko: string; en: string }> = {
   saved: { ko: "확인하고 저장했어요.", en: "Verified and saved." },
   deleted: { ko: "삭제했어요.", en: "Deleted." },
   valid: { ko: "키가 잘 작동해요.", en: "Your key works." },
+  saved_free: { ko: "확인하고 저장했어요. 무료 등급 키라 글 도구는 모두 되지만, 이미지를 만드는 도구는 Google AI Studio에서 결제를 켜야 해요.", en: "Verified and saved. It's a free-tier key: text tools all work, but image tools need billing turned on in Google AI Studio." },
+  valid_free: { ko: "키가 잘 작동해요. 무료 등급 키라 이미지를 만드는 도구는 Google AI Studio에서 결제를 켜야 해요.", en: "Your key works. It's free-tier: image tools need billing turned on in Google AI Studio." },
   invalid_format: { ko: "키 형식이 올바르지 않아요.", en: "That doesn't look like a valid key for this provider." },
   rejected_by_provider: { ko: "제공사가 이 키를 거절했어요. 키가 살아 있는지 확인해 주세요.", en: "The provider rejected this key. Check that it's still active." },
   server_disabled: { ko: "이 서버에는 키 저장이 설정되지 않았어요.", en: "Key storage isn't configured on this server." },

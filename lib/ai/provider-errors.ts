@@ -68,6 +68,8 @@ export function retryAfterSeconds(err: unknown): number | null {
 export function providerErrorMessage(err: unknown, opts: { ownKey?: boolean } = {}): string | null {
   const status = statusOf(err);
   if (freeTierBlocked(err)) return "무료 Gemini 키로는 이미지를 만들 수 없습니다 — Google AI Studio에서 결제를 켠 키를 등록해주세요";
+  // A member's own key: Google's free daily allowance, which resets at Pacific midnight (16–17시 KST).
+  if (status === 429 && opts.ownKey) return "오늘 내 Gemini 키의 무료 사용량을 다 썼어요 — 한국 시간 오후 5시쯤 다시 채워져요";
   if (status === 429) return "AI 엔진 사용 한도를 초과했습니다 — 잠시 후 다시 시도해주세요";
   if (status === 503 || status === 529) return "AI 엔진 요청이 많아 지금은 응답할 수 없습니다 — 잠시 후 다시 시도해주세요";
   if (isAccessDenied(err)) {
