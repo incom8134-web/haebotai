@@ -23,9 +23,11 @@ import {
   FlowSection,
   PersonasSection,
   SectionHead,
+  ShowcaseSection,
   StepsSection,
   reveal,
 } from "./sections";
+import type { ShowcaseItem } from "@/lib/showcase";
 import { FREE_OWN_KEY, OWN_KEY_ONLY } from "@/lib/site/access";
 import { FreeKeyBanner } from "@/components/site/free-key-banner";
 import { OwnKeyPricing } from "@/components/site/own-key-pricing";
@@ -442,7 +444,7 @@ function Footer() {
   );
 }
 
-function Landing({ signedIn = false }: { signedIn?: boolean }) {
+function Landing({ signedIn = false, showcase = [] }: { signedIn?: boolean; showcase?: ShowcaseItem[] }) {
   return (
     <SignedIn.Provider value={signedIn}>
       <div className="relative min-h-dvh overflow-x-clip bg-bg">
@@ -454,6 +456,7 @@ function Landing({ signedIn = false }: { signedIn?: boolean }) {
           <CategorySection />
           <StepsSection />
           <BeforeAfterSection />
+          <ShowcaseSection items={showcase} />
           <PersonasSection />
           <Pricing />
           <Faq />
