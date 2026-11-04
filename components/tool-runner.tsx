@@ -335,7 +335,7 @@ function ToolRunner({
   }
   const nextActions = (
     <div className="flex flex-wrap items-center gap-2">
-      <Button onClick={startNew} className="studio-gradient-bg h-10 rounded-2xl px-4 text-white">
+      <Button onClick={startNew} className="studio-gradient-bg h-10 rounded-full px-4 text-white">
         <SquarePen className="size-4" aria-hidden /> {L({ ko: "새로 만들기", en: "Start new" })}
       </Button>
       <Button variant="secondary" onClick={() => handleRun()} className="h-10 rounded-2xl px-4">
@@ -654,7 +654,7 @@ function ToolRunner({
               })}
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
-              <Link href={`/account/api-key?next=${encodeURIComponent(here)}`} className="studio-gradient-bg inline-flex h-11 items-center gap-1.5 rounded-2xl px-5 text-sm font-semibold text-white shadow-[inset_0_1px_0_oklch(1_0_0/30%),0_10px_24px_-10px_var(--studio-violet)] hover:opacity-95">
+              <Link href={`/account/api-key?next=${encodeURIComponent(here)}`} className="studio-gradient-bg inline-flex h-11 items-center gap-1.5 rounded-full px-5 text-sm font-semibold text-white shadow-[inset_0_1px_0_oklch(1_0_0/30%),0_10px_24px_-10px_var(--studio-violet)] hover:opacity-95">
                 <KeyRound size={15} aria-hidden /> {L({ ko: "API 키 등록하기", en: "Add my API key" })}
               </Link>
               <Link href="/help/api-guide#video" className="inline-flex h-11 items-center gap-1.5 rounded-2xl border border-hairline bg-surface px-5 text-sm font-semibold text-fg hover:border-studio-cyan">
@@ -846,7 +846,7 @@ function ToolRunner({
           onClick={() => handleRun()}
           loading={phase === "streaming" || phase === "understanding"}
           shortcut="⌘↵"
-          className="studio-gradient-bg h-11 rounded-2xl px-5 text-white shadow-[inset_0_1px_0_oklch(1_0_0/30%),0_12px_32px_-12px_var(--studio-violet)] transition-transform duration-500 ease-[var(--spring)] hover:-translate-y-0.5"
+          className="studio-gradient-bg h-11 rounded-full px-5 text-white shadow-[inset_0_1px_0_oklch(1_0_0/30%),0_12px_32px_-12px_var(--studio-violet)] transition-transform duration-500 ease-[var(--spring)] hover:-translate-y-0.5"
         >
           {t("run")}
         </Button>

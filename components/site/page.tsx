@@ -24,9 +24,9 @@ export function PageHeader({ title, lead, actions, eyebrow }: { title: string; l
 }
 
 export const primaryButton =
-  "studio-gradient-bg inline-flex h-11 items-center justify-center gap-2 rounded-2xl px-5 text-sm font-semibold text-white shadow-[inset_0_1px_0_oklch(1_0_0/30%),0_12px_32px_-12px_var(--studio-violet)] transition-[transform,box-shadow] duration-500 ease-[var(--spring)] hover:-translate-y-0.5 hover:shadow-[inset_0_1px_0_oklch(1_0_0/35%),0_18px_40px_-12px_var(--studio-violet)] active:translate-y-0 active:scale-[0.98] disabled:opacity-60 disabled:hover:translate-y-0";
+  "studio-gradient-bg btn-sheen inline-flex h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold text-white shadow-[inset_0_1px_0_oklch(1_0_0/22%),0_1px_2px_oklch(0.25_0.03_60/20%),0_10px_24px_-12px_var(--color-accent)] transition-[transform,box-shadow,background-color] duration-500 ease-[var(--spring)] hover:-translate-y-0.5 hover:shadow-[inset_0_1px_0_oklch(1_0_0/26%),0_2px_4px_oklch(0.25_0.03_60/18%),0_18px_36px_-14px_var(--color-accent)] active:translate-y-0 active:scale-[0.98] disabled:opacity-60 disabled:hover:translate-y-0";
 export const secondaryButton =
-  "glass inline-flex h-11 items-center justify-center gap-2 rounded-2xl px-5 text-sm font-medium text-fg transition-[transform,background] duration-500 ease-[var(--spring)] hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-60";
+  "inline-flex h-11 items-center justify-center gap-2 rounded-full border border-hairline-str bg-surface px-5 text-sm font-medium text-fg shadow-[0_1px_2px_oklch(0.25_0.03_60/8%)] transition-[transform,background-color,border-color] duration-500 ease-[var(--spring)] hover:-translate-y-0.5 hover:border-accent/40 hover:bg-surface-2/60 active:scale-[0.98] disabled:opacity-60";
 export const inputClass =
   "h-11 w-full rounded-xl border border-hairline bg-bg/40 px-3.5 text-sm text-fg outline-none backdrop-blur-md transition-[border-color,box-shadow] duration-300 placeholder:text-fg-subtle focus:border-studio-cyan focus:shadow-[0_0_0_4px_color-mix(in_oklch,var(--studio-cyan)_15%,transparent)]";
 export const textareaClass =

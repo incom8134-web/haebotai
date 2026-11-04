@@ -3,6 +3,7 @@
 import { UpgradeCard } from "@/components/upgrade-button";
 import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   ArrowRight,
@@ -331,8 +332,14 @@ export function Dashboard({
     <div className="mx-auto max-w-[1180px] px-4 pt-6 pb-12 md:px-8 md:pt-8">
       <section className="relative overflow-hidden rounded-[32px] border border-hairline bg-surface px-5 py-7 md:px-10 md:py-10">
         <HeroBackdrop />
-        <div className="relative grid gap-8 lg:grid-cols-[1.45fr_1fr] lg:items-center">
-          <div>
+        {/* A frosted-glass dashboard scene (made with Gemini) behind the greeting, fading out below it. */}
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 hidden h-[330px] [mask-image:linear-gradient(to_bottom,black_62%,transparent)] md:block dark:md:hidden">
+          <Image src="/images/studio-hero.webp" alt="" fill priority sizes="1180px" className="object-cover object-[right_58%]" />
+        </div>
+        {/* Dark: teal and violet glows instead (the reference video's dark look). */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 hidden bg-[radial-gradient(36rem_22rem_at_88%_0%,rgb(124_58_237/0.28),transparent_70%),radial-gradient(30rem_20rem_at_62%_12%,rgb(20_184_166/0.18),transparent_70%)] dark:block" />
+        <div className="relative">
+          <div className="md:min-h-[190px] md:max-w-[56%]">
             <Reveal>
               <p className="inline-flex items-center gap-1.5 rounded-full border border-hairline bg-surface/80 px-3 py-1 text-xs text-fg-muted backdrop-blur">
                 <Sparkles size={12} className="text-accent" aria-hidden />
@@ -349,10 +356,11 @@ export function Dashboard({
                   : L({ ko: "한 줄로 적으면 맞는 도구를 골라 드려요. 첫 결과까지 몇 분이면 돼요.", en: "Write it in a line and we'll pick the tool. A first result takes minutes." })}
               </p>
             </Reveal>
-            <Reveal delay={0.1} className="mt-5">
+          </div>
+          <div className="mt-6 grid gap-6 lg:grid-cols-[1.45fr_1fr] lg:items-start">
+            <Reveal delay={0.1}>
               <QuickCreate projects={projects.map((p) => ({ id: p.id, name: p.name }))} />
             </Reveal>
-          </div>
           <Reveal delay={0.15}>
             <div className="grid grid-cols-2 gap-3">
               {/* Free members run on their own key (FREE_OWN_KEY): show the key, not a credit balance they can't spend. */}
@@ -399,6 +407,7 @@ export function Dashboard({
               </Link>
             </div>
           </Reveal>
+          </div>
         </div>
       </section>
 
