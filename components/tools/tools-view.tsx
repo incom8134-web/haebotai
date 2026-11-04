@@ -315,7 +315,7 @@ function ToolsView({ initialCategory, recent }: { initialCategory: CategoryId | 
             <Star size={13} aria-hidden /> {L({ ko: "즐겨찾기", en: "Pinned" })}
           </button>
         </div>
-        <nav aria-label={L({ ko: "단계", en: "Steps" })} className="mt-2 -mx-1 flex gap-1 overflow-x-auto px-1 text-sm">
+        <nav aria-label={L({ ko: "단계", en: "Steps" })} className="x-fade mt-2 -mx-1 flex gap-1 overflow-x-auto px-1 text-sm">
           <button type="button" onClick={() => setF({ ...f, category: "all" })} aria-pressed={f.category === "all"} className={cn("rounded-lg px-2.5 py-1 whitespace-nowrap", f.category === "all" ? "bg-accent-dim font-medium text-accent" : "text-fg-muted hover:text-fg")}>
             {L({ ko: "전체", en: "All" })}
           </button>

@@ -483,3 +483,15 @@ p { text-wrap: pretty; }
   .m-rail::-webkit-scrollbar { display: none; }
   .m-rail > * { flex: 0 0 78%; scroll-snap-align: start; min-width: 0; }
 }
+
+/* A sideways-scrolling strip that is wider than the screen fades out on
+   the right, so it reads as "more this way" instead of text cut off at
+   the edge. Phones only; wider screens show the whole strip. */
+@media (max-width: 767px) {
+  .x-fade {
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(to right, black calc(100% - 36px), transparent);
+    mask-image: linear-gradient(to right, black calc(100% - 36px), transparent);
+  }
+  .x-fade::-webkit-scrollbar { display: none; }
+}

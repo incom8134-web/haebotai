@@ -192,7 +192,7 @@ function AreaBars({ areas }: { areas: StudioActivity["areas"] }) {
         {areas.map((a, i) => {
           const h = Math.max(6, (a.runs / max) * 132);
           return (
-            <li key={a.area} className="relative flex flex-1 flex-col items-center gap-1.5" onPointerEnter={() => setHover(i)} onPointerLeave={() => setHover(null)}>
+            <li key={a.area} className="relative flex min-w-0 flex-1 flex-col items-center gap-1.5" onPointerEnter={() => setHover(i)} onPointerLeave={() => setHover(null)}>
               <AnimatePresence>
                 {hover === i ? (
                   <motion.span
