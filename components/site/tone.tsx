@@ -18,7 +18,7 @@ export const TONE: Record<Tone, { tile: string; chip: string; dot: string; text:
   accent: { tile: "bg-studio-cyan/12 text-studio-cyan", chip: "bg-studio-cyan/12 text-studio-cyan", dot: "bg-studio-cyan", text: "text-studio-cyan", hover: "hover:border-studio-cyan/50", wash: "bg-studio-cyan/[0.06]", hero: "bg-[color-mix(in_oklch,var(--studio-cyan)_7%,var(--color-surface))]" },
 };
 
-/** One clay illustration per tool area (made with Gemini, public/images/areas). */
+/** One frosted-glass illustration per tool area (made with Gemini, public/images/areas). */
 export const AREA_ART: Record<CategoryId, string> = {
   discover: "/images/areas/discover.webp",
   research: "/images/areas/research.webp",

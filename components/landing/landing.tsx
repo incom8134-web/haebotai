@@ -2,6 +2,7 @@
 
 import { createContext, useContext } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "motion/react";
 import { ArrowRight, Building2, Check, ExternalLink, Plus, Wand2 } from "lucide-react";
 import { BusinessInfo } from "@/components/site/business-info";
@@ -16,7 +17,6 @@ import { useBi } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
 import { HeroMock } from "./hero-mock";
 import { ConceptFilm } from "./concept-film";
-import { SceneVideo } from "./scene-video";
 import {
   BeforeAfterSection,
   CategorySection,
@@ -150,10 +150,11 @@ function Hero() {
   const count = publicTools().length;
   return (
     <div className="relative isolate overflow-hidden">
-      {/* A quiet glass-and-light scene on a seamless loop. The wash keeps the headline readable. */}
+      {/* A frosted-glass product scene (made with Gemini); its empty left side
+          carries the headline. The wash keeps text readable. */}
       <div aria-hidden className="absolute inset-0 -z-10">
-        <SceneVideo name="hero" priority loop className="opacity-90 dark:opacity-25" />
-        <div className="absolute inset-0 bg-gradient-to-r from-bg/90 via-bg/60 to-bg/20" />
+        <Image src="/images/landing-hero.webp" alt="" fill priority sizes="100vw" className="object-cover object-[70%_center] dark:opacity-30" />
+        <div className="absolute inset-0 bg-gradient-to-r from-bg/85 via-bg/45 to-transparent max-lg:via-bg/75" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-bg to-transparent" />
       </div>
     <section className="mx-auto grid max-w-[1200px] gap-10 px-4 pt-12 pb-16 md:px-6 md:pt-20 lg:grid-cols-[1fr_1.05fr] lg:items-center lg:gap-14">

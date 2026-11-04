@@ -206,7 +206,7 @@ export function CategoryRail() {
           return (
             <Reveal key={c} delay={i * 0.06}>
               <Link href={`/tools?category=${c}`} className="group relative flex h-full flex-col overflow-hidden rounded-[22px] border border-hairline bg-surface p-4 transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-[0_24px_50px_-30px_rgba(0,0,0,0.45)]">
-                <span className="relative -mx-4 -mt-4 mb-1 block aspect-[4/3] overflow-hidden bg-[#f3efe6]">
+                <span className="relative -mx-4 -mt-4 mb-1 block aspect-[4/3] overflow-hidden bg-[#dfe6ee]">
                   <Image src={AREA_ART[c]} alt="" fill sizes="(min-width: 1024px) 220px, (min-width: 640px) 45vw, 90vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.04] dark:brightness-[0.92]" />
                   <span className={cn("absolute top-3 right-3 rounded-full bg-surface px-2 py-0.5 font-mono text-2xs font-semibold", TONE[c].text)}>{tools.length}</span>
                 </span>
@@ -251,7 +251,7 @@ export function WorkflowShowcase({ projectId }: { projectId?: string }) {
       <div className="mt-4 grid gap-3 lg:grid-cols-3">
         {FLOWS.map((f, i) => (
           <Reveal key={f.name.en} delay={i * 0.08}>
-            <div className="group/flow flex h-full flex-col overflow-hidden rounded-[22px] border border-hairline bg-surface">
+            <div className="rise group/flow flex h-full flex-col overflow-hidden rounded-[22px] border border-hairline bg-surface">
               <div className="relative h-32 overflow-hidden">
                 <Image src={f.image} alt="" fill sizes="(min-width: 1024px) 380px, 100vw" className="object-cover transition-transform duration-700 ease-out group-hover/flow:scale-105 motion-reduce:transition-none" />
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />

@@ -46,7 +46,7 @@ export function UpgradeButton({ plan, host = false, size = "md", className, shor
     <Link
       href={t.href}
       className={cn(
-        "studio-gradient-bg inline-flex shrink-0 items-center justify-center gap-1.5 rounded-2xl font-semibold whitespace-nowrap text-white shadow-[inset_0_1px_0_oklch(1_0_0/30%),0_10px_24px_-12px_var(--studio-violet)] transition-transform duration-500 ease-[var(--spring)] hover:-translate-y-0.5",
+        "studio-gradient-bg inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full font-semibold whitespace-nowrap text-white shadow-[inset_0_1px_0_oklch(1_0_0/30%),0_10px_24px_-12px_var(--studio-violet)] transition-transform duration-500 ease-[var(--spring)] hover:-translate-y-0.5",
         size === "sm" ? "h-11 px-3.5 text-xs" : "h-11 px-5 text-sm",
         className,
       )}

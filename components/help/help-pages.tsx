@@ -62,7 +62,7 @@ export function HelpHome() {
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {doors.map((d) => (
           <Link key={d.href} href={d.href} className="glass glass-hover group flex items-center gap-4 rounded-[24px] p-5">
-            <span className="studio-gradient-bg grid size-11 shrink-0 place-items-center rounded-2xl text-white"><d.icon size={19} aria-hidden /></span>
+            <span className="studio-gradient-bg grid size-11 shrink-0 place-items-center rounded-full text-white"><d.icon size={19} aria-hidden /></span>
             <span className="min-w-0 flex-1">
               <span className="block font-semibold">{L(d.title)}</span>
               <span className="block text-sm text-fg-muted">{L(d.body)}</span>

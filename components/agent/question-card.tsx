@@ -64,7 +64,7 @@ export function QuestionCard({
         ))}
       </div>
       <div className="mt-5 flex flex-wrap items-center gap-2">
-        <Button onClick={() => onSubmit(answers(false))} className="studio-gradient-bg h-10 rounded-2xl px-4 text-white">
+        <Button onClick={() => onSubmit(answers(false))} className="studio-gradient-bg h-10 rounded-full px-4 text-white">
           {L({ ko: "이대로 만들기", en: "Make it" })}
         </Button>
         <Button variant="secondary" onClick={() => onSubmit(answers(true))} className="h-10 rounded-2xl px-4">

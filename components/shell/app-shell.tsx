@@ -90,7 +90,7 @@ function DockButton({ item, active, badge, onClick }: { item: Item; active: bool
         {active ? (
           <motion.span
             layoutId="dock-active"
-            className="studio-gradient-bg absolute inset-0 rounded-2xl shadow-[inset_0_1px_0_oklch(1_0_0/30%),0_8px_24px_-8px_var(--studio-violet)]"
+            className="studio-gradient-bg absolute inset-0 rounded-full shadow-[inset_0_1px_0_oklch(1_0_0/30%),0_8px_24px_-8px_var(--studio-violet)]"
             transition={{ type: "spring", stiffness: 420, damping: 32 }}
           />
         ) : null}
@@ -116,7 +116,7 @@ function FeaturedDockButton({ item, active }: { item: Item; active: boolean }) {
     >
       <span
         className={cn(
-          "studio-gradient-bg relative grid size-12 place-items-center rounded-2xl text-white shadow-[inset_0_1px_0_oklch(1_0_0/30%),0_10px_24px_-8px_var(--studio-violet)] transition-transform duration-500 ease-[var(--spring)] group-hover:scale-105",
+          "studio-gradient-bg relative grid size-12 place-items-center rounded-full text-white shadow-[inset_0_1px_0_oklch(1_0_0/30%),0_10px_24px_-8px_var(--studio-violet)] transition-transform duration-500 ease-[var(--spring)] group-hover:scale-105",
           active && "ring-2 ring-studio-cyan ring-offset-2 ring-offset-surface",
         )}
       >
@@ -347,7 +347,7 @@ function AppShell({ user, balance, plan, host = false, answeredTickets, notices,
           {user ? (
             <UserMenu email={user.email} plan={plan} credits={credits} host={host} />
           ) : (
-            <Link href="/auth" className="studio-gradient-bg pointer-events-auto flex h-11 items-center rounded-2xl px-3.5 text-xs font-semibold text-white lg:hidden">
+            <Link href="/auth" className="studio-gradient-bg pointer-events-auto flex h-11 items-center rounded-full px-3.5 text-xs font-semibold text-white lg:hidden">
               {L({ ko: "로그인", en: "Sign in" })}
             </Link>
           )}
@@ -396,14 +396,14 @@ function AppShell({ user, balance, plan, host = false, answeredTickets, notices,
           </Link>
         )}
         {user && upgradeTarget(plan, host) ? (
-          <Link href={upgradeTarget(plan, host)!.href} className="studio-gradient-bg grid w-12 place-items-center gap-0.5 rounded-2xl py-2 text-white" aria-label={L(upgradeTarget(plan, host)!.label)}>
+          <Link href={upgradeTarget(plan, host)!.href} className="studio-gradient-bg grid w-12 place-items-center gap-0.5 rounded-full py-2 text-white" aria-label={L(upgradeTarget(plan, host)!.label)}>
             <Crown size={16} aria-hidden />
             <span className="text-[10px] font-semibold">{L(upgradeTarget(plan, host)!.to === "pro" ? { ko: "프로", en: "Pro" } : { ko: "플랜", en: "Plans" })}</span>
           </Link>
         ) : null}
         <ThemeLangControls vertical />
         {!user ? (
-          <Link href="/auth" className="studio-gradient-bg mt-1 grid size-12 place-items-center rounded-2xl text-[11px] font-semibold text-white">
+          <Link href="/auth" className="studio-gradient-bg mt-1 grid size-12 place-items-center rounded-full text-[11px] font-semibold text-white">
             {L({ ko: "로그인", en: "Sign in" })}
           </Link>
         ) : null}
