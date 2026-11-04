@@ -333,7 +333,7 @@ export function Dashboard({
 
   return (
     <div className="mx-auto max-w-[1180px] px-4 pt-6 pb-12 md:px-8 md:pt-8">
-      <section className="relative overflow-hidden rounded-[32px] border border-hairline bg-surface px-5 py-7 md:px-10 md:py-10">
+      <section className="relative overflow-hidden rounded-[28px] border border-hairline bg-surface px-4 py-6 sm:rounded-[32px] sm:px-5 sm:py-7 md:px-10 md:py-10">
         <HeroBackdrop />
         {/* A glass-ribbon backdrop made with Gemini, one per theme with the same
             composition; the wash on the left keeps the greeting and composer readable. */}
@@ -384,7 +384,7 @@ export function Dashboard({
                   </Link>
                 </div>
               ) : (
-                <div className="col-span-2 rounded-[22px] border border-hairline bg-surface/85 p-4 backdrop-blur">
+                <div className="col-span-2 rounded-[22px] border border-hairline bg-surface/85 p-4 backdrop-blur max-sm:hidden">
                   <p className="flex items-center gap-1.5 text-xs text-fg-muted">
                     <Coins size={13} className="text-accent" aria-hidden /> {L({ ko: "남은 크레딧", en: "Credits left" })}
                   </p>
