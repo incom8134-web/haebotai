@@ -30,6 +30,7 @@ import { primaryButton, secondaryButton } from "@/components/site/page";
 import { cn } from "@/lib/utils";
 import { FREE_OWN_KEY, OWN_KEY_ONLY } from "@/lib/site/access";
 import { FreeKeyBanner } from "@/components/site/free-key-banner";
+import { ActivityPanel, type StudioActivity } from "@/components/studio/activity-panel";
 import { IconTile, TONE, toneFor, toolTone } from "@/components/site/tone";
 
 // The member's home. Everything here is real account state — no sample
@@ -295,6 +296,7 @@ export function Dashboard({
   recommended,
   lastTool,
   usage,
+  activity,
 }: {
   name: string | null;
   projects: { id: string; name: string; description: string; runs: number }[];
@@ -303,6 +305,7 @@ export function Dashboard({
   recommended: string[];
   lastTool: string | null;
   usage: { balance: number | null; used30: number; runs30: number; keyConnected?: boolean; team?: boolean; paid?: boolean; plan?: string };
+  activity?: StudioActivity;
 }) {
   const L = useBi();
   const { locale } = useLocale();
@@ -416,6 +419,8 @@ export function Dashboard({
       <div className="mt-4">
         <PromoStrip />
       </div>
+
+      {activity ? <ActivityPanel activity={activity} /> : null}
 
       <div className="mt-4 grid gap-4 lg:grid-cols-[1.25fr_1fr]">
         {/* Continue working */}
