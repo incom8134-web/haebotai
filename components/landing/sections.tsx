@@ -321,8 +321,9 @@ export function StepsSection() {
           en: "Five steps — and nothing you've settled gets asked twice",
         })}
       />
-      <motion.div {...reveal} aria-hidden className="mt-10 aspect-video overflow-hidden rounded-[28px] border border-hairline md:aspect-[21/9]">
-        <SceneVideo name="how" loop className="dark:opacity-50" />
+      {/* A motion reel of real results (sample café 달빛정원): prompt → brand and logos → photos → ad and site → deck, blog, plan. */}
+      <motion.div {...reveal} aria-hidden className="mt-10 aspect-[21/9] overflow-hidden rounded-[28px] border border-hairline bg-[#0e0b1a] shadow-[0_30px_70px_-40px_rgb(124_58_237/0.6)]">
+        <SceneVideo name="results" loop />
       </motion.div>
       <ol className="mt-4 grid gap-3 md:grid-cols-5">
         {STEPS.map((s, i) => (
