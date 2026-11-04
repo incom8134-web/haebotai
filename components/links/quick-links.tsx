@@ -8,7 +8,7 @@ import { WORKFLOWS } from "@/lib/site/guides";
 import { useFavorites } from "@/lib/hooks/use-local-list";
 import { useBi, useLocale } from "@/lib/i18n/context";
 import { MEMBER_API_KEYS, OWN_KEY_ONLY } from "@/lib/site/access";
-import { IconTile, PageHero, TONE, toneFor, toolTone, type Tone } from "@/components/site/tone";
+import { IconTile, PageHero, TONE, toneFor, toolTone, type Tone, toolArt, PAGE_ART } from "@/components/site/tone";
 import { cn } from "@/lib/utils";
 
 // /links — one screen of shortcuts: pinned tools, latest results, every
@@ -45,7 +45,7 @@ function QuickLinks({ recent }: { recent: { id: string; toolId: string; createdA
 
   return (
     <div className="mx-auto max-w-[1240px] px-4 pt-6 pb-10 md:px-8 md:pt-10">
-      <PageHero icon={Zap} tone="campaign" eyebrow={L({ ko: "바로가기", en: "Quick links" })} title={L({ ko: "자주 가는 곳, 한 화면에", en: "Everywhere you go, on one screen" })} lead={L({ ko: "고정한 도구, 최근 결과, 앱의 모든 페이지와 함께 쓰는 서비스를 여기서 바로 열어요.", en: "Pinned tools, latest results, every page in the app and the services you use alongside, one tap away." })} />
+      <PageHero icon={Zap} art={PAGE_ART["/links"]} tone="campaign" eyebrow={L({ ko: "바로가기", en: "Quick links" })} title={L({ ko: "자주 가는 곳, 한 화면에", en: "Everywhere you go, on one screen" })} lead={L({ ko: "고정한 도구, 최근 결과, 앱의 모든 페이지와 함께 쓰는 서비스를 여기서 바로 열어요.", en: "Pinned tools, latest results, every page in the app and the services you use alongside, one tap away." })} />
 
       <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
         <section className="glass rounded-[24px] p-6">
@@ -54,7 +54,7 @@ function QuickLinks({ recent }: { recent: { id: string; toolId: string; createdA
             <div className="mt-4 grid gap-2 sm:grid-cols-2">
               {pinned.map((t) => (
                 <Link key={t.id} href={`/tools/${toolSlug(t.id)}/run`} className="glass glass-hover flex items-center gap-3 rounded-2xl p-3">
-                  <IconTile icon={t.icon} tone={toolTone(t.id)} />
+                  <IconTile icon={t.icon} tone={toolTone(t.id)} art={toolArt(t.id)} />
                   <span className="min-w-0 truncate text-[15px] font-semibold">{locale === "en" ? t.name_en : t.name_ko}</span>
                 </Link>
               ))}
@@ -69,7 +69,7 @@ function QuickLinks({ recent }: { recent: { id: string; toolId: string; createdA
                 <li key={r.id}>
                   <Link href={`/library/${r.id}`} className="flex items-center justify-between gap-3 py-2 text-sm hover:text-studio-cyan">
                     <span className="flex min-w-0 items-center gap-2.5">
-                      <IconTile icon={getTool(r.toolId)?.icon ?? FileQuestion} tone={toolTone(r.toolId)} size="sm" />
+                      <IconTile icon={getTool(r.toolId)?.icon ?? FileQuestion} tone={toolTone(r.toolId)} size="sm" art={toolArt(r.toolId)} />
                       <span className="truncate font-medium">{name(r.toolId)}</span>
                     </span>
                     <span className="font-mono text-2xs text-fg-subtle">{fmt.format(new Date(r.createdAt))}</span>
@@ -87,7 +87,7 @@ function QuickLinks({ recent }: { recent: { id: string; toolId: string; createdA
           <div className="mt-4 grid grid-cols-2 gap-2">
             {PAGES.map((p) => (
               <Link key={p.href} href={p.href} className="flex items-center gap-2.5 rounded-xl px-2 py-2 text-sm font-semibold transition-colors hover:bg-surface-2/60">
-                <IconTile icon={p.icon} tone={p.tone} size="sm" /> {L(p.label)}
+                <IconTile icon={p.icon} tone={p.tone} size="sm" art={PAGE_ART[p.href]} /> {L(p.label)}
               </Link>
             ))}
           </div>
