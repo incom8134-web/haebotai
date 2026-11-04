@@ -12,7 +12,7 @@ import type { DictKey } from "@/lib/i18n/dictionaries";
 import { formatDateTime } from "@/lib/format-date";
 import { cn } from "@/lib/utils";
 import { OWN_KEY_ONLY } from "@/lib/site/access";
-import { IconTile, PageHero, TONE, toneFor, toolTone } from "@/components/site/tone";
+import { IconTile, PageHero, TONE, toneFor, toolTone, toolArt, PAGE_ART } from "@/components/site/tone";
 
 interface LibraryRun {
   id: string;
@@ -86,7 +86,7 @@ function LibraryList({ runs: initial, projects = [], canPin = false }: { runs: L
 
   return (
     <div className="mx-auto max-w-4xl px-4 pt-6 pb-10 md:px-8 md:pt-10">
-      <PageHero icon={LibraryIcon} tone="operate" eyebrow={en ? "Everything you made" : "내가 만든 결과물"} title={t("library")} lead={t("library_desc")} className="mb-2" />
+      <PageHero icon={LibraryIcon} art={PAGE_ART["/library"]} tone="operate" eyebrow={en ? "Everything you made" : "내가 만든 결과물"} title={t("library")} lead={t("library_desc")} className="mb-2" />
 
       {all.length ? (
         <div className="mt-5 flex flex-wrap items-center gap-2 text-xs text-fg-muted">
@@ -148,7 +148,7 @@ function LibraryList({ runs: initial, projects = [], canPin = false }: { runs: L
               className="flex min-w-0 flex-1 items-center justify-between gap-2 py-2 pl-3"
             >
               <div className="flex min-w-0 items-center gap-3">
-                <IconTile icon={Icon} tone={toolTone(run.toolId)} />
+                <IconTile icon={Icon} tone={toolTone(run.toolId)} art={toolArt(run.toolId)} />
                 <div className="min-w-0">
                   <p className="truncate text-[15px] font-semibold text-fg">
                     {run.title || (locale === "en" ? run.toolNameEn : run.toolNameKo)}

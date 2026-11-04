@@ -31,7 +31,7 @@ import { cn } from "@/lib/utils";
 import { FREE_OWN_KEY, OWN_KEY_ONLY } from "@/lib/site/access";
 import { FreeKeyBanner } from "@/components/site/free-key-banner";
 import { ActivityPanel, type StudioActivity } from "@/components/studio/activity-panel";
-import { IconTile, TONE, toneFor, toolTone } from "@/components/site/tone";
+import { IconTile, TONE, toneFor, toolTone, toolArt } from "@/components/site/tone";
 
 // The member's home. Everything here is real account state — no sample
 // numbers: what's running or just finished, the projects, the latest
@@ -434,7 +434,7 @@ export function Dashboard({
                 {(() => {
                   const t = catalogTool(latest.toolId);
                   return t ? (
-                    <IconTile icon={t.icon} tone={t.category} size="lg" />
+                    <IconTile icon={t.icon} tone={t.category} size="lg" art={toolArt(t.slug)} />
                   ) : null;
                 })()}
                 <span className="min-w-0 flex-1">
@@ -518,7 +518,7 @@ export function Dashboard({
                     href={`/tools/${slug}/run${latestProject ? `?project=${latestProject.id}` : ""}`}
                     className={cn("flex h-full flex-col rounded-2xl border border-hairline p-3.5 transition-[border-color,transform] duration-300 hover:-translate-y-0.5", TONE[t.category].wash, TONE[t.category].hover)}
                   >
-                    <IconTile icon={t.icon} tone={t.category} />
+                    <IconTile icon={t.icon} tone={t.category} art={toolArt(t.slug)} />
                     <span className="mt-3 text-[15px] font-bold break-keep text-fg">
                       {L(t.name)}
                     </span>
@@ -639,7 +639,7 @@ export function Dashboard({
                     href={`/library/${r.id}`}
                     className="flex items-center gap-3 py-2.5 hover:text-accent"
                   >
-                    <IconTile icon={catalogTool(r.toolId)?.icon ?? Sparkles} tone={toolTone(r.toolId)} size="sm" />
+                    <IconTile icon={catalogTool(r.toolId)?.icon ?? Sparkles} tone={toolTone(r.toolId)} size="sm" art={toolArt(r.toolId)} />
                     <span className="min-w-0 flex-1">
                       <span className="flex items-center gap-2">
                         <span className="truncate text-sm font-semibold text-fg">

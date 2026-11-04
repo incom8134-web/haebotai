@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { LucideIcon } from "lucide-react";
 import { catalogTool } from "@/lib/tools/catalog";
 import type { CategoryId } from "@/lib/tools/types";
@@ -40,11 +41,46 @@ export function toneFor(key: string): Tone {
   return tones[h % tones.length];
 }
 
-const SIZES = { sm: { box: "size-8 rounded-[10px]", icon: 16 }, md: { box: "size-10 rounded-xl", icon: 19 }, lg: { box: "size-12 rounded-2xl", icon: 22 }, xl: { box: "size-16 rounded-[20px]", icon: 30 } } as const;
+const SIZES = { sm: { box: "size-8 rounded-[10px]", icon: 16, art: "size-9", px: 36 }, md: { box: "size-10 rounded-xl", icon: 19, art: "size-12", px: 48 }, lg: { box: "size-12 rounded-2xl", icon: 22, art: "size-14", px: 56 }, xl: { box: "size-16 rounded-[20px]", icon: 30, art: "size-24", px: 96 } } as const;
 
-/** A tinted rounded tile with the icon in the tone's colour. */
-export function IconTile({ icon: Icon, tone, size = "md", className }: { icon: LucideIcon; tone: Tone; size?: keyof typeof SIZES; className?: string }) {
+// 3D glass icons (made with Gemini, backgrounds removed, public/images/icons):
+// one per tool and per main page. They sit on transparent backgrounds, so the
+// same file works in light and dark.
+const ICON = (name: string) => `/images/icons/${name}.webp`;
+const TOOL_ART = new Set(["idea-radar", "offer-architect", "market-desk", "persona-mapper", "brand-dna", "logo-lab", "sales-page", "web-builder", "campaign-planner", "ad-factory", "seo-composer", "content-transformer", "doc-studio", "pitch-director", "ops-planner", "prompt-maker"]);
+
+/** The 3D icon for a tool (slug or stored engine id); a tool's extra modes use their parent's. */
+export function toolArt(slugOrEngine: string | null | undefined): string | undefined {
+  const t = slugOrEngine ? catalogTool(slugOrEngine) : undefined;
+  const slug = t?.hidden ? t.hidden.parent : t?.slug;
+  return slug && TOOL_ART.has(slug) ? ICON(`tool-${slug}`) : undefined;
+}
+
+/** The 3D icon for one of the app's main pages, by its path. */
+export const PAGE_ART: Record<string, string> = {
+  "/studio": ICON("page-studio"),
+  "/tools": ICON("page-tools"),
+  "/library": ICON("page-library"),
+  "/projects": ICON("page-projects"),
+  "/links": ICON("page-links"),
+  "/brand": ICON("page-profile"),
+  "/account": ICON("page-account"),
+  "/account/credits": ICON("page-credits"),
+  "/account/membership": ICON("page-membership"),
+  "/help/contact": ICON("page-support"),
+  "/help/faq": ICON("page-faq"),
+  "/help/whats-new": ICON("page-new"),
+};
+
+/** A tinted rounded tile with the icon in the tone's colour — or, given `art`, the 3D glass icon itself. */
+export function IconTile({ icon: Icon, tone, size = "md", className, art }: { icon: LucideIcon; tone: Tone; size?: keyof typeof SIZES; className?: string; art?: string }) {
   const s = SIZES[size];
+  if (art)
+    return (
+      <span className={cn("relative -m-1 shrink-0 drop-shadow-[0_6px_10px_rgb(30_40_80/0.18)] dark:drop-shadow-[0_6px_14px_rgb(124_58_237/0.35)]", s.art, className)} aria-hidden>
+        <Image src={art} alt="" fill sizes={`${s.px}px`} className="object-contain" />
+      </span>
+    );
   return (
     <span className={cn("grid shrink-0 place-items-center", s.box, TONE[tone].tile, className)} aria-hidden>
       <Icon size={s.icon} strokeWidth={2.1} />
@@ -53,10 +89,16 @@ export function IconTile({ icon: Icon, tone, size = "md", className }: { icon: L
 }
 
 /** The top of an app page: a tinted panel with a large icon, the title and what the page is for. */
-export function PageHero({ icon, tone, eyebrow, title, lead, actions, className }: { icon: LucideIcon; tone: Tone; eyebrow?: string; title: string; lead?: React.ReactNode; actions?: React.ReactNode; className?: string }) {
+export function PageHero({ icon, tone, eyebrow, title, lead, actions, className, art }: { icon: LucideIcon; tone: Tone; eyebrow?: string; title: string; lead?: React.ReactNode; actions?: React.ReactNode; className?: string; art?: string }) {
   return (
     <header className={cn("glass mb-8 flex flex-col gap-5 rounded-[28px] p-6 sm:flex-row sm:items-center md:p-8", TONE[tone].hero, className)}>
-      <IconTile icon={icon} tone={tone} size="xl" className="shadow-[inset_0_1px_0_oklch(1_0_0/40%)]" />
+      {art ? (
+        <span className="relative size-24 shrink-0 animate-[float_6s_ease-in-out_infinite] drop-shadow-[0_14px_22px_rgb(30_40_80/0.22)] motion-reduce:animate-none md:size-28 dark:drop-shadow-[0_14px_26px_rgb(124_58_237/0.45)]" aria-hidden>
+          <Image src={art} alt="" fill priority sizes="112px" className="object-contain" />
+        </span>
+      ) : (
+        <IconTile icon={icon} tone={tone} size="xl" className="shadow-[inset_0_1px_0_oklch(1_0_0/40%)]" />
+      )}
       <div className="min-w-0 flex-1">
         {eyebrow ? <p className={cn("text-sm font-bold tracking-wide", TONE[tone].text)}>{eyebrow}</p> : null}
         <h1 className="font-display text-[clamp(2.1rem,4.2vw,3.1rem)] leading-[1.08] font-bold tracking-[-0.02em] break-keep text-fg">{title}</h1>
