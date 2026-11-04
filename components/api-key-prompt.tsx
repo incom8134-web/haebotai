@@ -25,7 +25,7 @@ export function ApiKeyPrompt({ open, onOpenChange, next, plans = false }: { open
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="gap-0 rounded-[24px] p-6 sm:max-w-md">
-        <span className="studio-gradient-bg mb-4 grid size-12 place-items-center rounded-2xl text-white" aria-hidden>
+        <span className="studio-gradient-bg mb-4 grid size-12 place-items-center rounded-full text-white" aria-hidden>
           <KeyRound size={22} />
         </span>
         <DialogTitle className="text-xl font-bold break-keep">{L({ ko: "먼저 API 키를 등록해 주세요", en: "Add your API key first" })}</DialogTitle>

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Clock, FileCheck2, Hammer, LayoutGrid, MousePointerClick, PencilLine, Search, Star, X } from "lucide-react";
 import { CATEGORIES, CATEGORY_ORDER, modesOf, publicTools, stepNumber, toolNumber, toolsIn, catalogTool, type CatalogTool } from "@/lib/tools/catalog";
 import { getTool } from "@/lib/tools/registry";
@@ -9,7 +10,7 @@ import { useFavorites } from "@/lib/hooks/use-local-list";
 import { useBi } from "@/lib/i18n/context";
 import type { CategoryId } from "@/lib/tools/types";
 import { Page } from "@/components/site/page";
-import { IconTile, PageHero, TONE } from "@/components/site/tone";
+import { AREA_ART, IconTile, PageHero, TONE } from "@/components/site/tone";
 import { cn } from "@/lib/utils";
 
 // Tool list, made to follow in order. A three-picture "how to use" strip,
@@ -89,7 +90,7 @@ function ToolCard({ tool, compact = false }: { tool: CatalogTool; compact?: bool
     </Link>
   );
   const base = cn(
-    "group relative rounded-[20px] border border-hairline bg-surface transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_34px_-22px_var(--studio-violet)] focus-within:ring-2 focus-within:ring-accent/40",
+    "rise group relative rounded-[20px] border border-hairline bg-surface transition-[border-color,box-shadow,translate] duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-24px_oklch(0.3_0.04_60/45%)] focus-within:ring-2 focus-within:ring-accent/40",
     tone.hover,
   );
 
@@ -193,7 +194,7 @@ function HowTo() {
       <h2 id="howto-title" className="text-lg font-semibold">{L({ ko: "이렇게 쓰면 돼요", en: "How it works" })}</h2>
       <ol className="mt-3 grid gap-3 md:grid-cols-3">
         {steps.map((s, i) => (
-          <li key={i} className="flex gap-4 rounded-[20px] border border-hairline bg-surface p-4">
+          <li key={i} className="rise flex gap-4 rounded-[20px] border border-hairline bg-surface p-4">
             <div className="w-28 shrink-0">{s.art}</div>
             <div className="min-w-0">
               <p className="flex items-center gap-2 text-[15px] font-bold break-keep">
@@ -219,12 +220,15 @@ function StepMap({ onPick }: { onPick: (c: CategoryId) => void }) {
         {CATEGORY_ORDER.map((c) => {
           const tools = toolsIn(c);
           return (
-            <li key={c} className="relative">
+            <li key={c} className="rise relative">
               <button
                 type="button"
                 onClick={() => onPick(c)}
-                className={cn("flex h-full w-full flex-col rounded-[20px] border border-hairline p-4 text-left transition-[border-color,transform] duration-300 hover:-translate-y-0.5", TONE[c].wash, TONE[c].hover)}
+                className={cn("group flex h-full w-full flex-col overflow-hidden rounded-[20px] border border-hairline bg-surface p-4 text-left transition-[border-color,transform] duration-300 hover:-translate-y-0.5", TONE[c].hover)}
               >
+                <span className="relative -mx-4 -mt-4 mb-3 block aspect-[16/10] overflow-hidden bg-[#dfe6ee]" aria-hidden>
+                  <Image src={AREA_ART[c]} alt="" fill sizes="(min-width: 768px) 20vw, 90vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.04] dark:brightness-[0.92]" />
+                </span>
                 <span className="flex items-center gap-2">
                   <Num n={stepNumber(c)} tone={c} size="sm" />
                   <span className={cn("text-2xs font-bold tracking-wide", TONE[c].text)}>{L({ ko: `${stepNumber(c)}단계`, en: `Step ${stepNumber(c)}` })}</span>
