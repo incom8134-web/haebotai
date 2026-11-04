@@ -153,12 +153,12 @@ function LibraryList({ runs: initial, projects = [], canPin = false }: { runs: L
                   <p className="truncate text-[15px] font-semibold text-fg">
                     {run.title || (locale === "en" ? run.toolNameEn : run.toolNameKo)}
                     {run.title ? <span className="ml-1.5 text-2xs font-normal text-fg-subtle">{locale === "en" ? run.toolNameEn : run.toolNameKo}</span> : null}
-                    {run.projectId && projectName.get(run.projectId) ? (
-                      <span className={cn("ml-1.5 rounded-full px-2 py-0.5 text-[10px] font-semibold", TONE[toneFor(run.projectId)].chip)}>{projectName.get(run.projectId)}</span>
-                    ) : null}
                   </p>
-                  <p className="font-mono text-2xs text-fg-subtle">
+                  <p className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5 font-mono text-2xs text-fg-subtle">
                     {formatDateTime(run.createdAt, locale)}
+                    {run.projectId && projectName.get(run.projectId) ? (
+                      <span className={cn("max-w-[11rem] truncate rounded-full px-2 py-0.5 font-sans text-[10px] font-semibold", TONE[toneFor(run.projectId)].chip)}>{projectName.get(run.projectId)}</span>
+                    ) : null}
                   </p>
                 </div>
               </div>
