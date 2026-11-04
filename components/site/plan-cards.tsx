@@ -17,14 +17,14 @@ import { FREE_OWN_KEY } from "@/lib/site/access";
 export function PlanCards({ signedIn }: { signedIn: boolean }) {
   const L = useBi();
   return (
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className="grid gap-4 lg:grid-cols-3">
       {PLANS.map((p) => (
-        <article key={p.id} className={cn("relative flex flex-col rounded-[28px] border bg-surface p-7 md:p-8", p.highlight ? "border-accent/60 shadow-[0_28px_60px_-32px_var(--color-accent)] ring-1 ring-accent/25 md:-translate-y-2" : "border-hairline")}>
+        <article key={p.id} className={cn("relative flex flex-col rounded-[28px] border bg-surface p-7 md:p-8", p.highlight ? "border-accent/60 shadow-[0_28px_60px_-32px_var(--color-accent)] ring-1 ring-accent/25 lg:-translate-y-2" : "border-hairline")}>
           {p.highlight ? (
             <span className="absolute -top-3 left-6 rounded-full bg-accent px-3 py-1 text-2xs font-semibold text-white">{L({ ko: "추천", en: "Recommended" })}</span>
           ) : null}
           <p className="text-lg font-semibold text-fg">{L(p.name)}</p>
-          <p className="mt-3 font-display text-[2.75rem] leading-none font-bold tracking-[-0.02em] whitespace-nowrap text-fg md:text-5xl">
+          <p className="mt-3 font-display text-[2.75rem] leading-none font-bold tracking-[-0.02em] whitespace-nowrap text-fg">
             {/* "₩29,900/30일": the period reads as a suffix, so it never wraps the amount. */}
             {L(p.price).split("/")[0]}
             {L(p.price).includes("/") ? <span className="ml-1 text-base font-medium tracking-normal text-fg-muted">/ {L(p.price).split("/").slice(1).join("/").trim()}</span> : null}
