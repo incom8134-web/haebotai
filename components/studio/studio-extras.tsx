@@ -298,85 +298,18 @@ export function WorkflowShowcase({ projectId }: { projectId?: string }) {
 
 // ── What the tools make (illustrated) ──────────────────────────────────
 
-function DeckArt() {
-  return (
-    <svg viewBox="0 0 240 150" className="size-full" aria-hidden>
-      <rect width="240" height="150" fill="#14161a" />
-      <rect x="16" y="18" width="70" height="6" rx="3" fill="#7c8cff" />
-      <rect x="16" y="32" width="130" height="12" rx="3" fill="#f2f2f2" />
-      <rect x="16" y="50" width="100" height="12" rx="3" fill="#f2f2f2" opacity=".7" />
-      {[0, 1, 2, 3, 4].map((i) => (
-        <rect key={i} x={140 + i * 18} y={120 - (i + 2) * 12} width="12" height={(i + 2) * 12} rx="2" fill={i === 4 ? "#ff8a4c" : "#7c8cff"} opacity={0.5 + i * 0.1} />
-      ))}
-      <rect x="16" y="104" width="60" height="22" rx="6" fill="#ff8a4c" />
-    </svg>
-  );
-}
-
-function LogoArt() {
-  const marks = ["#e4572e", "#2e86ab", "#1b998b", "#6c4ab6"];
-  return (
-    <svg viewBox="0 0 240 150" className="size-full" aria-hidden>
-      <rect width="240" height="150" fill="#faf7f2" />
-      {marks.map((c, i) => (
-        <g key={c} transform={`translate(${14 + i * 56} 32)`}>
-          <rect width="48" height="64" rx="8" fill="#fff" stroke="#e6e0d6" />
-          {i === 0 ? <circle cx="24" cy="26" r="13" fill={c} /> : i === 1 ? <rect x="12" y="14" width="24" height="24" rx="6" fill={c} transform="rotate(45 24 26)" /> : i === 2 ? <path d="M12 38 L24 12 L36 38 Z" fill={c} /> : <path d="M12 14 h24 v8 h-16 v16 h-8 z" fill={c} />}
-          <rect x="10" y="48" width="28" height="4" rx="2" fill="#2a2a2a" opacity=".7" />
-        </g>
-      ))}
-    </svg>
-  );
-}
-
-function ReportArt() {
-  return (
-    <svg viewBox="0 0 240 150" className="size-full" aria-hidden>
-      <rect width="240" height="150" fill="#f4f7fb" />
-      <rect x="14" y="14" width="212" height="26" rx="6" fill="#1f4e79" />
-      <rect x="22" y="23" width="80" height="8" rx="3" fill="#fff" opacity=".9" />
-      {[0, 1, 2].map((i) => (
-        <g key={i}>
-          <rect x={14 + i * 72} y="48" width="64" height="34" rx="6" fill="#fff" stroke="#dde5ef" />
-          <rect x={22 + i * 72} y="56" width="30" height="5" rx="2" fill="#9fb3c8" />
-          <rect x={22 + i * 72} y="66" width="40" height="9" rx="2" fill="#1f4e79" />
-        </g>
-      ))}
-      <polyline points="20,134 60,118 100,124 140,102 180,108 220,90" fill="none" stroke="#2f80ed" strokeWidth="3" strokeLinecap="round" />
-      <rect x="14" y="88" width="212" height="1" fill="#dde5ef" />
-    </svg>
-  );
-}
-
-function SiteArt() {
-  return (
-    <svg viewBox="0 0 240 150" className="size-full" aria-hidden>
-      <rect width="240" height="150" fill="#0f1720" />
-      <rect x="0" y="0" width="240" height="14" fill="#1c2733" />
-      {[0, 1, 2].map((i) => (
-        <circle key={i} cx={10 + i * 9} cy="7" r="2.5" fill={["#ff5f57", "#febc2e", "#28c840"][i]} />
-      ))}
-      <rect x="20" y="34" width="110" height="14" rx="3" fill="#e9f1ff" />
-      <rect x="20" y="54" width="80" height="8" rx="3" fill="#8aa4c2" />
-      <rect x="20" y="72" width="54" height="18" rx="9" fill="#3dd6b5" />
-      <circle cx="182" cy="66" r="34" fill="url(#g)" />
-      <defs>
-        <radialGradient id="g">
-          <stop offset="0" stopColor="#7c5cff" />
-          <stop offset="1" stopColor="#3dd6b5" stopOpacity=".2" />
-        </radialGradient>
-      </defs>
-      <rect x="20" y="108" width="200" height="26" rx="6" fill="#1c2733" />
-    </svg>
-  );
-}
-
-const GALLERY: { slug: string; art: React.ReactNode | "photo"; caption: { ko: string; en: string } }[] = [
-  { slug: "ad-factory", art: "photo", caption: { ko: "캠페인 광고 이미지와 카피", en: "Campaign visuals and copy" } },
-  { slug: "pitch-director", art: <DeckArt />, caption: { ko: "주장이 서는 발표 자료", en: "Decks that make a case" } },
-  { slug: "logo-lab", art: <LogoArt />, caption: { ko: "서로 다른 로고 방향 4가지", en: "Four distinct logo directions" } },
-  { slug: "doc-studio", art: <ReportArt />, caption: { ko: "숫자가 맞는 사업계획서", en: "Business plans whose numbers add up" } },
-  { slug: "web-builder", art: <SiteArt />, caption: { ko: "바로 띄우는 홈페이지", en: "Sites you can publish" } },
+// Real results from test runs for a sample café, "달빛정원" (Dalbit Garden),
+// composed into cards (public/images/examples). The headlines on the cards
+// are the runs' own text; nothing here is drawn by hand.
+const GALLERY: { slug: string; image: string; caption: { ko: string; en: string } }[] = [
+  { slug: "ad-photo", image: "/images/examples/product-photos.webp", caption: { ko: "글 한 줄로 만든 제품 사진 4장", en: "Four product shots from one line" } },
+  { slug: "ad-factory", image: "/images/examples/ad-copy.webp", caption: { ko: "광고 이미지와 동기별 카피", en: "Ad visuals and copy per motive" } },
+  { slug: "web-builder", image: "/images/examples/website.webp", caption: { ko: "사진까지 넣어 바로 띄우는 홈페이지", en: "A site with photos, ready to publish" } },
+  { slug: "logo-lab", image: "/images/examples/logos.webp", caption: { ko: "서로 다른 로고 방향 4가지", en: "Four distinct logo directions" } },
+  { slug: "sales-page", image: "/images/examples/product-page.webp", caption: { ko: "스마트스토어용 상세페이지", en: "A product detail page for your store" } },
+  { slug: "pitch-director", image: "/images/examples/deck.webp", caption: { ko: "주장이 서는 발표 자료", en: "Decks that make a case" } },
+  { slug: "seo-composer", image: "/images/examples/blog.webp", caption: { ko: "사진과 함께 올리는 블로그 원고", en: "Blog posts with their photos" } },
+  { slug: "campaign-planner", image: "/images/examples/campaign.webp", caption: { ko: "일정과 무드보드까지 홍보 계획", en: "Promotion plans with a mood board" } },
 ];
 
 export function ResultGallery() {
@@ -386,7 +319,8 @@ export function ResultGallery() {
       <h2 id="gallery" className="font-display text-xl font-bold text-fg">
         {L({ ko: "이런 결과를 만들어요", en: "What you can make" })}
       </h2>
-      <div className="m-rail mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+      <p className="mt-1 text-sm text-fg-muted">{L({ ko: "예시 가게 「달빛정원」으로 실제로 돌려 본 결과예요.", en: "Real runs for a sample café, Dalbit Garden." })}</p>
+      <div className="m-rail mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {GALLERY.map((g, i) => {
           const t = catalogTool(g.slug);
           if (!t) return null;
@@ -395,9 +329,9 @@ export function ResultGallery() {
               <Link href={`/tools/${g.slug}`} className="group block overflow-hidden rounded-[22px] border border-hairline bg-surface">
                 <div className="relative aspect-[8/5] overflow-hidden">
                   <motion.div className="size-full" whileHover={{ scale: 1.06 }} transition={{ duration: 0.5, ease: EASE }}>
-                    {g.art === "photo" ? <Image src="/images/spring-campaign.jpg" alt="" fill sizes="(min-width: 1024px) 20vw, 50vw" className="object-cover" /> : g.art}
+                    <Image src={g.image} alt="" fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 78vw" className="object-cover" />
                   </motion.div>
-                  <span className="absolute top-2 left-2 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur">{L({ ko: "예시", en: "Example" })}</span>
+                  <span className="absolute top-2 left-2 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur">{L({ ko: "실제 결과 예시", en: "Real example" })}</span>
                 </div>
                 <div className="flex items-center gap-2 p-3">
                   <span className="min-w-0 flex-1">
