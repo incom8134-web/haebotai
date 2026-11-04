@@ -95,7 +95,7 @@ function AccountOverview({ email, balance, membership, apiKey, brandName, signOu
       {/* Identity */}
       <section className="glass-strong flex flex-wrap items-center gap-4 rounded-[28px] p-6">
         <span className="studio-gradient-bg grid size-14 place-items-center rounded-[18px] text-lg font-semibold text-white">{email[0]?.toUpperCase()}</span>
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 basis-[12rem]">
           <p className="truncate text-lg font-semibold">{email}</p>
           <p className="text-sm text-fg-muted">
             {OWN_KEY_ONLY ? L({ ko: "내 API 키로 사용", en: "On your own API key" }) : L(plan.name)}

@@ -40,7 +40,7 @@ export function SubNav({ items, id }: { items: SubNavItem[]; id: string }) {
   const L = useBi();
   return (
     <LayoutGroup id={id}>
-      <nav aria-label={id} className="glass mb-8 inline-flex max-w-full gap-1 overflow-x-auto rounded-2xl p-1">
+      <nav aria-label={id} className="x-fade glass mb-8 inline-flex max-w-full gap-1 overflow-x-auto rounded-2xl p-1">
         {items.map((item) => {
           const active = item.exact ? pathname === item.href : pathname === item.href || pathname.startsWith(`${item.href}/`);
           const Icon = ICONS[item.icon];
