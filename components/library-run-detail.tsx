@@ -75,7 +75,7 @@ function LibraryRunDetail({
   if (!manifest) return notFound();
 
   return (
-    <div className="mx-auto max-w-3xl px-4 pt-6 pb-10 md:px-8 md:pt-10">
+    <div className="mx-auto max-w-5xl px-4 pt-6 pb-10 md:px-8 md:pt-10">
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>

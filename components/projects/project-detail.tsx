@@ -148,7 +148,7 @@ export function ProjectDetail({
       </section>
 
       <section className="mt-6">
-        <h2 className="text-sm font-semibold text-fg">{L({ ko: `결과 ${runs.length}개`, en: `${runs.length} results` })}</h2>
+        <h2 className="text-sm font-semibold text-fg">{L({ ko: `결과 ${runs.length}개`, en: `${runs.length} ${runs.length === 1 ? "result" : "results"}` })}</h2>
         <ul className="mt-2 flex flex-col gap-1.5">
           {runs.map((r) => {
             const t = r.tool_id ? getTool(r.tool_id) : undefined;
