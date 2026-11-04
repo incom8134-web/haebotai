@@ -23,7 +23,7 @@ export function PlanPrompt({ open, onOpenChange }: { open: boolean; onOpenChange
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="gap-0 rounded-[24px] p-6 sm:max-w-md">
-        <span className="studio-gradient-bg mb-4 grid size-12 place-items-center rounded-2xl text-white" aria-hidden>
+        <span className="studio-gradient-bg mb-4 grid size-12 place-items-center rounded-full text-white" aria-hidden>
           <Crown size={22} />
         </span>
         <DialogTitle className="text-xl font-bold break-keep">{L({ ko: "실행은 플러스부터예요", en: "Running tools starts with Plus" })}</DialogTitle>

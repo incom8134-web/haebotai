@@ -4,7 +4,9 @@ import { Dashboard, type DashboardRun } from "@/components/studio/dashboard";
 import { getBalance } from "@/lib/credits";
 import { getApiKeyStatus } from "@/lib/api-keys";
 import { getMembership } from "@/lib/membership";
-import { isPaidPlan } from "@/lib/payments/pro";
+import { isPaidPlan, PRODUCTS } from "@/lib/payments/pro";
+import { activitySeries, areaCounts, type ActivityRow } from "@/lib/studio-activity";
+import { CATEGORY_ORDER } from "@/lib/tools/catalog";
 import { isHost } from "@/lib/platform-access-server";
 import { listProjects } from "@/lib/projects/server";
 import { displayName } from "@/lib/site/display-name";
@@ -49,7 +51,7 @@ export default async function StudioPage() {
     user
       ? supabase
           .from("generations")
-          .select("credits_used")
+          .select("credits_used, created_at, tool_id")
           .eq("user_id", user.id)
           .eq("status", "done")
           .gte("created_at", since)
@@ -119,7 +121,10 @@ export default async function StudioPage() {
     ...new Set((used.data ?? []).map((r) => r.tool_id as string)),
   ];
   const lastDone = runs.find((r) => r.status === "done");
-  const monthRuns = month.data ?? [];
+  const monthRuns = (month.data ?? []) as ActivityRow[];
+  const membership = await getMembership();
+  const paid = isPaidPlan(membership.plan);
+  const allotment = paid ? PRODUCTS[membership.plan as "plus" | "pro"]?.credits : undefined;
 
   return (
     <Dashboard
@@ -153,7 +158,13 @@ export default async function StudioPage() {
         runs30: monthRuns.length,
         keyConnected: keyStatus.providers.google.some((s) => s.connected && !s.broken),
         team: await isHost(user?.email),
-        ...(await getMembership().then((m) => ({ paid: isPaidPlan(m.plan), plan: m.plan }))),
+        paid,
+        plan: membership.plan,
+      }}
+      activity={{
+        days: activitySeries(monthRuns, new Date()),
+        areas: areaCounts(monthRuns, CATEGORY_ORDER, (id) => catalogTool(id)?.category),
+        ring: allotment && balance !== null ? { left: balance, of: allotment } : null,
       }}
     />
   );

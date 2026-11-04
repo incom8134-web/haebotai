@@ -27,7 +27,7 @@ export function AdCreatives({ copy, brand }: { copy: CopyOutput; brand?: string 
   return (
     <div className="mt-3 flex flex-col gap-5">
       {copy.core_message ? (
-        <div className="studio-gradient-bg rounded-2xl p-5 text-white">
+        <div className="studio-gradient-bg rounded-full p-5 text-white">
           <p className="text-2xs font-semibold tracking-wide opacity-80">{L({ ko: "핵심 메시지", en: "Core message" })}</p>
           <p className="mt-1.5 text-lg leading-snug font-bold break-keep md:text-xl">{copy.core_message}</p>
         </div>

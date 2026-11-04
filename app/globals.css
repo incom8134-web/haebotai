@@ -12,24 +12,26 @@
  */
 @theme {
   /* Surfaces */
-  --color-bg: #edf1f8;
+  /* Icy glass light theme (the owner's reference video, light): a pale
+     grey-blue page, white frosted panels, cool hairlines. */
+  --color-bg: #eceff3;
   --color-surface: #ffffff;
-  --color-surface-2: #e7edf6;
-  --color-hairline: rgba(15, 30, 60, 0.1);
-  --color-hairline-str: rgba(15, 30, 60, 0.16);
+  --color-surface-2: #e2e7ee;
+  --color-hairline: rgba(20, 30, 50, 0.1);
+  --color-hairline-str: rgba(20, 30, 50, 0.16);
 
   /* Text — muted/subtle measured against bg, surface, and surface-2 to
      clear WCAG AA (4.5:1) on all three; the original slate-500/slate-400
      pairing read fine in isolation but measured as low as 2.4:1 on some
      surfaces. */
-  --color-fg: #111827;
-  --color-fg-muted: #475467;
-  --color-fg-subtle: #5a6577;
+  --color-fg: #14161b;
+  --color-fg-muted: #4a5160;
+  --color-fg-subtle: #5b6271;
 
-  /* Brand accent — the 지니에듀테크 gem's blue (white text on it is 7.7:1) */
-  --color-accent: #1450a8;
-  --color-accent-hover: #0f3d85;
-  --color-accent-dim: #e8f0fb;
+  /* Brand accent — indigo (white text on it is 6.5:1; 5.6:1 as text on bg) */
+  --color-accent: #3d4fd1;
+  --color-accent-hover: #3341b3;
+  --color-accent-dim: #e6e9fb;
 
   /* AI / intelligence accent — deep teal */
   --color-ai: #0f766e;
@@ -132,22 +134,23 @@
   --gem-3: #2b66d9;
 }
 
-/* Dark mode — the toggle theme: deep navy surfaces under the same blue. */
+/* Dark mode (the owner's reference video, dark): near-black navy with
+   glass panels, teal→violet highlights. */
 .dark {
-  --color-bg: #0e131f;
-  --color-surface: #151c2c;
-  --color-surface-2: #1d2538;
-  --color-hairline: rgba(220, 230, 255, 0.09);
-  --color-hairline-str: rgba(220, 230, 255, 0.16);
+  --color-bg: #0d0f14;
+  --color-surface: #151a22;
+  --color-surface-2: #1e252f;
+  --color-hairline: rgba(200, 220, 255, 0.08);
+  --color-hairline-str: rgba(200, 220, 255, 0.15);
 
-  --color-fg: #eef2f8;
-  --color-fg-muted: #aab4c5;
-  --color-fg-subtle: #939eb2;
+  --color-fg: #eef2f7;
+  --color-fg-muted: #a9b2c1;
+  --color-fg-subtle: #959fb0;
   --color-danger: #fb7185;
 
-  --color-accent: #2563c9;
-  --color-accent-hover: #2f72dc;
-  --color-accent-dim: rgba(63, 142, 240, 0.16);
+  --color-accent: #4f5fe0;
+  --color-accent-hover: #5c6cf0;
+  --color-accent-dim: rgba(102, 127, 228, 0.16);
 
   --color-ai: #2dd4bf;
   --color-ai-dim: rgba(45, 212, 191, 0.14);
@@ -161,7 +164,7 @@
    but is too dark as text on the dark surfaces. Accent text, links and
    icons use a lighter gem blue there (≈8:1). */
 .dark :is(.text-accent, .hover\:text-accent:hover, .group:hover .group-hover\:text-accent, .text-studio-cyan, .hover\:text-studio-cyan:hover, .group:hover .group-hover\:text-studio-cyan) {
-  color: #7ab6ff;
+  color: #8fa2ff;
 }
 
 /*
@@ -177,14 +180,13 @@
  * clear AA on the page background; dark values are tuned for the dark theme.
  */
 :root {
-  /* The gem's blues: the gradient on primary buttons and highlighted
-     text runs from the lighter to the deeper one. (The cyan/violet names
-     are from the first prototype; every component reads them.) */
-  --studio-cyan: #2a6fd0;
-  --studio-violet: #12449a;
+  /* The highlight pair: indigo and violet in light, teal and violet in
+     dark (names are from the first prototype; many components read them). */
+  --studio-cyan: #3d4fd1;
+  --studio-violet: #6d3fe0;
   --studio-success: oklch(0.55 0.13 160);
   --studio-warning: oklch(0.7 0.16 75);
-  --studio-grid: oklch(0.3 0.04 255 / 4%);
+  --studio-grid: oklch(0.3 0.04 255 / 4.5%);
   /* Tool-area hues. Light values hold AA as text on the page background. */
   --cat-discover: oklch(0.58 0.15 55);
   --cat-brand: oklch(0.56 0.19 10);
@@ -193,8 +195,8 @@
   --cat-research: oklch(0.52 0.15 250);
 }
 .dark {
-  --studio-cyan: #2a6ad0;
-  --studio-violet: #1a47a3;
+  --studio-cyan: #14b8a6;
+  --studio-violet: #7c3aed;
   --studio-success: oklch(0.79 0.17 160);
   --studio-warning: oklch(0.78 0.16 78);
   --studio-grid: oklch(1 0 0 / 2.5%);
@@ -205,13 +207,21 @@
   --cat-research: oklch(0.76 0.12 245);
 }
 
-.studio-gradient-bg { background-image: linear-gradient(135deg, var(--studio-cyan), var(--studio-violet)); }
+/* Main buttons and highlighted words, from the reference videos: a black
+   pill in light, a teal→blue→violet gradient pill in dark (its teal end is
+   deepened so white text clears AA on every stop). Every primary button
+   and upgrade pill follows from here. */
+.studio-gradient-bg { background-color: #1f2023; }
+a.studio-gradient-bg:hover, button.studio-gradient-bg:hover:not(:disabled) { background-color: #000; }
+.dark .studio-gradient-bg { background-color: #4f5fe0; background-image: linear-gradient(100deg, #0f766e, #4f5fe0 55%, #7c3aed); }
+.dark a.studio-gradient-bg:hover, .dark button.studio-gradient-bg:hover:not(:disabled) { background-image: linear-gradient(100deg, #0d8a80, #5c6cf0 55%, #8b4dff); }
 .studio-gradient-type {
-  background-image: linear-gradient(90deg, var(--studio-cyan), var(--studio-violet));
+  background-image: linear-gradient(90deg, #3d4fd1, #6d3fe0);
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
 }
+.dark .studio-gradient-type { background-image: linear-gradient(90deg, #5eead4, #8fa2ff 50%, #b197fc); }
 
 
 /*
@@ -222,22 +232,22 @@
  * where backdrop-filter isn't supported.
  */
 :root {
-  --glass-tint: var(--color-surface);
-  --glass-tint-strong: var(--color-surface);
-  --glass-rim: transparent;
-  --glass-edge: var(--color-hairline);
-  --glass-sheen: transparent;
-  --glass-shadow: 0 1px 2px oklch(0.3 0.03 255 / 8%), 0 14px 32px -18px oklch(0.3 0.06 255 / 28%);
+  --glass-tint: rgb(255 255 255 / 0.62);
+  --glass-tint-strong: rgb(255 255 255 / 0.82);
+  --glass-rim: rgb(255 255 255 / 0.9);
+  --glass-edge: rgb(20 30 50 / 0.08);
+  --glass-sheen: rgb(255 255 255 / 0.55);
+  --glass-shadow: 0 1px 2px rgb(20 30 50 / 0.06), 0 22px 44px -26px rgb(30 45 80 / 0.3);
   --spring: cubic-bezier(0.22, 1.25, 0.36, 1);
   --ease-glide: cubic-bezier(0.22, 1, 0.36, 1);
 }
 .dark {
-  --glass-tint: var(--color-surface);
-  --glass-tint-strong: var(--color-surface);
-  --glass-rim: transparent;
-  --glass-edge: var(--color-hairline);
-  --glass-sheen: transparent;
-  --glass-shadow: 0 1px 2px oklch(0 0 0 / 35%), 0 14px 36px -20px oklch(0 0 0 / 55%);
+  --glass-tint: rgb(22 27 36 / 0.58);
+  --glass-tint-strong: rgb(22 27 36 / 0.8);
+  --glass-rim: rgb(255 255 255 / 0.07);
+  --glass-edge: rgb(200 220 255 / 0.09);
+  --glass-sheen: rgb(255 255 255 / 0.05);
+  --glass-shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 24px 50px -24px rgb(0 0 0 / 0.75);
 }
 
 .glass,
@@ -245,6 +255,8 @@
   position: relative;
   isolation: isolate;
   background: var(--glass-tint);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  backdrop-filter: blur(18px) saturate(160%);
   border: 1px solid var(--glass-edge);
   box-shadow: inset 0 1px 0 var(--glass-rim), inset 0 -1px 0 oklch(1 0 0 / 3%), var(--glass-shadow);
 }
@@ -284,16 +296,25 @@
   background-size: 64px 64px;
   mask-image: radial-gradient(ellipse at 40% 20%, black, transparent 75%);
 }
-/* Soft colour behind the app pages, so white panels stand off the page. */
+/* Soft light behind the app pages (as in the reference videos): cool
+   glows in light, teal and violet glows in dark. */
 .app-backdrop::after {
   content: "";
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(48rem 30rem at 8% -6%, color-mix(in oklch, var(--studio-cyan) 16%, transparent), transparent 70%),
-    radial-gradient(40rem 28rem at 100% 12%, color-mix(in oklch, var(--cat-campaign) 12%, transparent), transparent 70%),
-    radial-gradient(44rem 30rem at 60% 110%, color-mix(in oklch, var(--cat-operate) 9%, transparent), transparent 70%);
+    radial-gradient(48rem 30rem at 6% -8%, rgb(61 79 209 / 0.1), transparent 70%),
+    radial-gradient(40rem 28rem at 100% 10%, rgb(20 184 166 / 0.08), transparent 70%),
+    radial-gradient(44rem 30rem at 55% 112%, rgb(109 63 224 / 0.08), transparent 70%);
 }
+.dark .app-backdrop::after {
+  background:
+    radial-gradient(48rem 30rem at 6% -8%, rgb(20 184 166 / 0.12), transparent 70%),
+    radial-gradient(40rem 28rem at 100% 10%, rgb(124 58 237 / 0.16), transparent 70%),
+    radial-gradient(44rem 30rem at 55% 112%, rgb(79 95 224 / 0.12), transparent 70%);
+}
+/* Dark-mode glow rim: interactive glass picks up the teal→violet edge. */
+.dark .glass-hover:hover { border-color: rgb(124 58 237 / 0.45); box-shadow: inset 0 1px 0 var(--glass-rim), 0 0 0 1px rgb(20 184 166 / 0.18), 0 26px 60px -28px rgb(124 58 237 / 0.55); }
 
 /* Inside the signed-in app (AppShell's <main>), text runs one step larger
    than the marketing pages: Tailwind's text-* utilities read these vars. */
@@ -398,6 +419,37 @@ p { text-wrap: pretty; }
 @keyframes quick-pulse { from { box-shadow: 0 0 0 0 color-mix(in oklch, var(--studio-cyan) 55%, transparent); } to { box-shadow: 0 0 0 14px transparent; } }
 .quick-pulse { animation: quick-pulse 1.8s ease-out 0.6s 3; }
 @media (prefers-reduced-motion: reduce) { .quick-pulse { animation: none; } }
+
+/* Scroll reveal: cards rise and fade in as they enter the viewport,
+   driven by scroll position (no JS). Browsers without scroll-driven
+   animations, and reduced-motion users, simply see them in place. */
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(28px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .rise {
+      animation: rise-in linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 55%;
+    }
+  }
+}
+
+/* Primary button sheen: a soft light sweeps across on hover. */
+.btn-sheen { position: relative; overflow: hidden; isolation: isolate; }
+.btn-sheen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(110deg, transparent 30%, oklch(1 0 0 / 22%) 50%, transparent 70%);
+  transform: translateX(-120%);
+  transition: transform 700ms var(--ease-glide);
+}
+.btn-sheen:hover::after { transform: translateX(120%); }
+@media (prefers-reduced-motion: reduce) { .btn-sheen::after { display: none; } }
 
 /* Run progress bar (components/run-progress.tsx): a light sweep across the fill. */
 @keyframes run-progress-shimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }

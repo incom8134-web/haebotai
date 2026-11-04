@@ -19,7 +19,7 @@ export function FreeKeyBanner({ signedIn, className }: { signedIn: boolean; clas
     >
       <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
         <div className="flex min-w-0 items-start gap-4">
-          <span className="studio-gradient-bg grid size-12 shrink-0 place-items-center rounded-2xl text-white shadow-[0_10px_24px_-10px_var(--studio-violet)]" aria-hidden>
+          <span className="studio-gradient-bg grid size-12 shrink-0 place-items-center rounded-full text-white shadow-[0_10px_24px_-10px_var(--studio-violet)]" aria-hidden>
             <KeyRound size={22} />
           </span>
           <div className="min-w-0">
