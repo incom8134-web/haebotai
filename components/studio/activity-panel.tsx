@@ -61,7 +61,7 @@ function Delta({ value }: { value: number | null }) {
   );
 }
 
-function LineChart({ days }: { days: ActivityDay[] }) {
+function LineChart({ days, credits = true }: { days: ActivityDay[]; credits?: boolean }) {
   const L = useBi();
   const uid = useId().replace(/:/g, "");
   const reduce = useReducedMotion();
@@ -129,12 +129,12 @@ function LineChart({ days }: { days: ActivityDay[] }) {
           </text>
         ))}
         <motion.path d={area} fill={`url(#fill-${uid})`} initial={reduce ? false : { opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.9, delay: 0.3 }} />
-        <motion.path d={credPath} fill="none" stroke="#8b5cf6" strokeWidth="2.5" strokeLinecap="round" initial={reduce ? false : { pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }} />
+        {credits ? <motion.path d={credPath} fill="none" stroke="#8b5cf6" strokeWidth="2.5" strokeLinecap="round" initial={reduce ? false : { pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }} /> : null}
         <motion.path d={runPath} fill="none" stroke="#14b8a6" strokeWidth="3" strokeLinecap="round" filter={`url(#glow-${uid})`} initial={reduce ? false : { pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 1.2, delay: 0.1, ease: [0.22, 1, 0.36, 1] }} />
         {shown !== null ? (
           <g>
             <line x1={x(shown)} x2={x(shown)} y1={PAD.t} y2={base} className="stroke-fg/25" strokeDasharray="4 4" />
-            <circle cx={credPts[shown][0]} cy={credPts[shown][1]} r="4.5" fill="#8b5cf6" className="stroke-surface" strokeWidth="2" />
+            {credits ? <circle cx={credPts[shown][0]} cy={credPts[shown][1]} r="4.5" fill="#8b5cf6" className="stroke-surface" strokeWidth="2" /> : null}
             <circle cx={runPts[shown][0]} cy={runPts[shown][1]} r="9" fill="#14b8a6" opacity="0.25" />
             <circle cx={runPts[shown][0]} cy={runPts[shown][1]} r="5" fill="#14b8a6" className="stroke-surface" strokeWidth="2" />
           </g>
@@ -158,10 +158,12 @@ function LineChart({ days }: { days: ActivityDay[] }) {
               <span className="flex items-center gap-1.5 text-fg-muted"><span className="size-2 rounded-full bg-[#14b8a6]" aria-hidden />{L({ ko: "실행", en: "Runs" })}</span>
               <span className="font-display text-base font-bold text-fg">{tip.runs}</span>
             </p>
-            <p className="flex items-center justify-between gap-3">
-              <span className="flex items-center gap-1.5 text-fg-muted"><span className="size-2 rounded-full bg-[#8b5cf6]" aria-hidden />{L({ ko: "크레딧", en: "Credits" })}</span>
-              <span className="font-display text-base font-bold text-fg">{tip.credits.toLocaleString()}</span>
-            </p>
+            {credits ? (
+              <p className="flex items-center justify-between gap-3">
+                <span className="flex items-center gap-1.5 text-fg-muted"><span className="size-2 rounded-full bg-[#8b5cf6]" aria-hidden />{L({ ko: "크레딧", en: "Credits" })}</span>
+                <span className="font-display text-base font-bold text-fg">{tip.credits.toLocaleString()}</span>
+              </p>
+            ) : null}
           </motion.div>
         ) : null}
       </AnimatePresence>
@@ -274,7 +276,7 @@ export function ActivityPanel({ activity }: { activity: StudioActivity }) {
         </h2>
         <p className="flex items-center gap-3 text-2xs text-fg-subtle">
           <span className="flex items-center gap-1.5"><span className="h-1 w-4 rounded-full bg-[#14b8a6]" aria-hidden />{L({ ko: "실행", en: "Runs" })}</span>
-          <span className="flex items-center gap-1.5"><span className="h-1 w-4 rounded-full bg-[#8b5cf6]" aria-hidden />{L({ ko: "크레딧", en: "Credits" })}</span>
+          {credits ? <span className="flex items-center gap-1.5"><span className="h-1 w-4 rounded-full bg-[#8b5cf6]" aria-hidden />{L({ ko: "크레딧", en: "Credits" })}</span> : null}
         </p>
       </div>
       <div className="grid gap-4 lg:grid-cols-[1.6fr_1fr]">
@@ -283,13 +285,15 @@ export function ActivityPanel({ activity }: { activity: StudioActivity }) {
             <p className="font-display text-3xl font-bold text-fg">{runs.toLocaleString()}</p>
             <p className="text-sm text-fg-muted">{L({ ko: "번 완료", en: "finished runs" })}</p>
             <Delta value={runDelta} />
-            <p className="ml-auto flex items-center gap-1 text-sm text-fg-muted">
-              <Coins size={14} className="text-[#8b5cf6]" aria-hidden /> {L({ ko: `${credits.toLocaleString()} 크레딧 사용`, en: `${credits.toLocaleString()} credits used` })}
-            </p>
+            {credits ? (
+              <p className="ml-auto flex items-center gap-1 text-sm text-fg-muted">
+                <Coins size={14} className="text-[#8b5cf6]" aria-hidden /> {L({ ko: `${credits.toLocaleString()} 크레딧 사용`, en: `${credits.toLocaleString()} credits used` })}
+              </p>
+            ) : null}
           </div>
           <div className="mt-3">
             {runs ? (
-              <LineChart days={activity.days} />
+              <LineChart days={activity.days} credits={credits > 0} />
             ) : (
               <p className="grid aspect-[640/300] place-items-center rounded-2xl border border-dashed border-hairline-str text-sm break-keep text-fg-muted">
                 {L({ ko: "아직 30일 안에 끝난 실행이 없어요. 첫 결과를 만들면 여기에 그래프가 그려져요.", en: "No finished runs in the last 30 days yet. Your first result starts the chart." })}

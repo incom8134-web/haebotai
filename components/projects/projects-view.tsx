@@ -81,7 +81,7 @@ export function ProjectsView({ projects }: { projects: { id: string; name: strin
                   </span>
                   <span className="mt-auto flex items-center justify-between gap-2 pt-4 text-2xs" suppressHydrationWarning>
                     <span className="flex items-center gap-2">
-                      <span className={cn("rounded-full px-2.5 py-1 font-semibold", TONE[tone].chip)}>{L({ ko: `결과 ${p.runs}개`, en: `${p.runs} results` })}</span>
+                      <span className={cn("rounded-full px-2.5 py-1 font-semibold", TONE[tone].chip)}>{L({ ko: `결과 ${p.runs}개`, en: `${p.runs} ${p.runs === 1 ? "result" : "results"}` })}</span>
                       <span className="text-fg-subtle">{new Date(p.updated_at).toLocaleDateString(locale === "en" ? "en-US" : "ko-KR", { timeZone: "Asia/Seoul" })}</span>
                     </span>
                     <ArrowRight size={16} className={cn("transition-transform group-hover:translate-x-0.5", TONE[tone].text)} aria-hidden />

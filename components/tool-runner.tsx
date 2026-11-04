@@ -791,7 +791,7 @@ function ToolRunner({
               options={availableProviders.map((p) => ({ value: p, label: PROVIDER_LABEL[p] }))}
             />
           </div>
-        ) : MEMBER_API_KEYS && supportedProviders.length > 1 ? (
+        ) : MEMBER_API_KEYS && !SAAS && supportedProviders.length > 1 ? (
           <p className="mt-4 text-xs text-fg-subtle">
             {L({ ko: "Claude 엔진을 쓰려면 API 키를 등록하세요 → ", en: "Register an API key to use the Claude engine → " })}
             <Link href="/account/api-key" className="text-studio-cyan underline underline-offset-2">

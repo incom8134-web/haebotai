@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 // motion or have Data Saver on; phones get a smaller file; background
 // scenes are decorative (aria-hidden) and carry no text of their own.
 
-type SceneName = "hero" | "how";
+type SceneName = "hero" | "how" | "results";
 
 /**
  * Bump when any file in public/videos changes. /videos is cached for a week
@@ -24,7 +24,7 @@ type SceneName = "hero" | "how";
  * showing the old one to anyone who visited before; a new query string
  * makes browsers fetch the new file at once.
  */
-export const VIDEO_REV = "2026-10-13";
+export const VIDEO_REV = "2026-11-04";
 const v = (path: string) => `${path}?v=${VIDEO_REV}`;
 
 const subscribeStill = (notify: () => void) => {

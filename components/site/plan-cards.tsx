@@ -19,19 +19,19 @@ export function PlanCards({ signedIn }: { signedIn: boolean }) {
   return (
     <div className="grid gap-4 md:grid-cols-3">
       {PLANS.map((p) => (
-        <article key={p.id} className={cn("relative flex flex-col rounded-[24px] border bg-surface p-6", p.highlight ? "border-accent/50" : "border-hairline")}>
+        <article key={p.id} className={cn("relative flex flex-col rounded-[28px] border bg-surface p-7 md:p-8", p.highlight ? "border-accent/60 shadow-[0_28px_60px_-32px_var(--color-accent)] ring-1 ring-accent/25 md:-translate-y-2" : "border-hairline")}>
           {p.highlight ? (
             <span className="absolute -top-3 left-6 rounded-full bg-accent px-3 py-1 text-2xs font-semibold text-white">{L({ ko: "추천", en: "Recommended" })}</span>
           ) : null}
-          <p className="font-semibold text-fg">{L(p.name)}</p>
-          <p className="mt-3 font-display text-4xl font-bold tracking-[-0.02em] whitespace-nowrap text-fg">
+          <p className="text-lg font-semibold text-fg">{L(p.name)}</p>
+          <p className="mt-3 font-display text-[2.75rem] leading-none font-bold tracking-[-0.02em] whitespace-nowrap text-fg md:text-5xl">
             {/* "₩29,900/30일": the period reads as a suffix, so it never wraps the amount. */}
             {L(p.price).split("/")[0]}
             {L(p.price).includes("/") ? <span className="ml-1 text-base font-medium tracking-normal text-fg-muted">/ {L(p.price).split("/").slice(1).join("/").trim()}</span> : null}
           </p>
-          <p className="mt-1 text-2xs text-fg-subtle">{L(p.note)}</p>
-          <p className="mt-5 rounded-xl bg-surface-2 px-3 py-2 text-sm font-medium text-fg">{L(p.credits)}</p>
-          <ul className="mt-5 flex-1 space-y-2.5 text-sm text-fg-muted">
+          <p className="mt-2 text-xs text-fg-subtle">{L(p.note)}</p>
+          <p className="mt-5 rounded-xl bg-surface-2 px-3.5 py-2.5 text-[15px] font-semibold text-fg">{L(p.credits)}</p>
+          <ul className="mt-5 flex-1 space-y-3 text-[15px] text-fg-muted">
             {p.features.map((f) => (
               <li key={f.en} className="flex gap-2 break-keep">
                 <Check size={15} className="mt-0.5 shrink-0 text-grounded" aria-hidden /> {L(f)}
@@ -40,7 +40,7 @@ export function PlanCards({ signedIn }: { signedIn: boolean }) {
           </ul>
           <Link
             href={p.id === "free" ? (signedIn ? (FREE_OWN_KEY ? "/account/api-key" : "/tools") : "/auth") : signedIn ? `/account/membership/checkout?product=${p.id}` : `/auth?next=${encodeURIComponent(`/account/membership/checkout?product=${p.id}`)}`}
-            className={cn(p.id === "free" ? secondaryButton : primaryButton, "mt-7")}
+            className={cn(p.id === "free" ? secondaryButton : primaryButton, "mt-8 h-12 text-[15px]")}
           >
             {p.id === "free" ? (FREE_OWN_KEY ? L({ ko: "무료로 시작하기", en: "Start free" }) : L({ ko: "둘러보기", en: "Browse the tools" })) : L({ ko: `${p.name.ko} 시작하기`, en: `Get ${p.name.en}` })}
           </Link>

@@ -116,12 +116,21 @@ export function PricingView({ signedIn }: { signedIn: boolean }) {
         <p className="mt-3 text-2xs text-fg-subtle">{L({ ko: "남은 크레딧은 없어지지 않고, 다음에 플랜을 이용할 때 이어서 써요.", en: "Unused credits don't disappear; they carry over to your next plan period." })}</p>
       </section>
 
-      <section className="mt-12" aria-labelledby="per-tool">
-        <h2 id="per-tool" className="text-lg font-semibold text-fg">{L({ ko: "도구별 크레딧", en: "Credits per tool" })}</h2>
-        <div className="mt-4">
-          <PriceTable />
+      {/* The full per-tool table is long; it opens on demand. */}
+      <details className="smooth mt-12 rounded-[24px] border border-hairline bg-surface" aria-labelledby="per-tool">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-5 md:p-6">
+          <span>
+            <span id="per-tool" className="block text-lg font-semibold text-fg">{L({ ko: "도구별 크레딧", en: "Credits per tool" })}</span>
+            <span className="mt-0.5 block text-sm text-fg-muted">{L({ ko: "16개 도구의 실행 1번당 크레딧과 걸리는 시간", en: "Credits and time per run for all 16 tools" })}</span>
+          </span>
+          <span className="smooth-plus grid size-9 shrink-0 place-items-center rounded-full border border-hairline text-lg text-fg-muted" aria-hidden>+</span>
+        </summary>
+        <div className="smooth-body">
+          <div className="px-5 pb-5 md:px-6 md:pb-6">
+            <PriceTable />
+          </div>
         </div>
-      </section>
+      </details>
 
       <section className="mt-12 max-w-3xl" aria-labelledby="pricing-faq">
         <h2 id="pricing-faq" className="text-lg font-semibold text-fg">{L({ ko: "크레딧에 관한 질문", en: "Questions about credits" })}</h2>

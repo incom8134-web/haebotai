@@ -319,7 +319,7 @@ function AppShell({ user, balance, plan, host = false, answeredTickets, notices,
       {/* Floating top cluster: brand chip + search pill. */}
       <header className="pointer-events-none sticky top-0 z-30 px-3 pt-[max(12px,env(safe-area-inset-top))] pb-3 md:px-6 lg:pr-28">
         {/* Soft fade so page content scrolling under the chips never reads as overlap. */}
-        <div aria-hidden className="absolute inset-x-0 top-0 -z-10 h-[88px] bg-gradient-to-b from-bg via-bg/80 to-transparent" />
+        <div aria-hidden className="absolute inset-x-0 top-0 -z-10 h-[88px] bg-gradient-to-b from-bg via-bg/80 to-transparent max-lg:h-[76px] max-lg:from-bg/85 max-lg:via-bg/70 max-lg:backdrop-blur-md max-lg:[mask-image:linear-gradient(to_bottom,black_72%,transparent)]" />
         <div className="mx-auto flex max-w-[1240px] items-center gap-2">
           <Link href="/studio" className="glass pointer-events-auto flex h-11 items-center gap-2.5 rounded-2xl pr-4 pl-1.5">
             <BrandMark size={30} label={L({ ko: "AI 해바", en: "AI Haeba" })} className="ml-1 min-[440px]:hidden" />
@@ -422,11 +422,11 @@ function AppShell({ user, balance, plan, host = false, answeredTickets, notices,
                 key={item.href}
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className="relative -mt-7 flex min-w-0 flex-1 flex-col items-center gap-1 text-[10px] font-bold text-accent"
+                className="relative -mt-5 flex min-w-0 flex-1 flex-col items-center gap-0.5 text-[10px] font-bold text-accent"
               >
-                <span className="studio-gradient-bg relative grid size-14 place-items-center rounded-full text-white shadow-[0_12px_28px_-10px_var(--studio-violet)] ring-4 ring-bg">
+                <span className="studio-gradient-bg relative grid size-12 place-items-center rounded-full text-white shadow-[0_10px_22px_-12px_var(--studio-violet)] ring-[3px] ring-bg">
                   {active ? null : <span className="quick-pulse absolute inset-0 rounded-full" aria-hidden />}
-                  <item.icon size={23} strokeWidth={2} className="relative" aria-hidden />
+                  <item.icon size={20} strokeWidth={2} className="relative" aria-hidden />
                 </span>
                 <span className="relative">{L(item.label)}</span>
               </Link>
@@ -438,10 +438,10 @@ function AppShell({ user, balance, plan, host = false, answeredTickets, notices,
               href={item.href}
               onClick={item.href === "/help" ? help.markSeen : undefined}
               aria-current={active ? "page" : undefined}
-              className="relative flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-2xl py-2 text-[11px] font-semibold text-fg"
+              className="relative flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-2xl py-1.5 text-[10px] font-semibold text-fg-muted"
             >
               {active ? <motion.span layoutId="tab-active" className="absolute inset-0 rounded-2xl bg-studio-cyan/15" transition={{ type: "spring", stiffness: 420, damping: 34 }} /> : null}
-              <item.icon size={21} strokeWidth={2.1} className="relative text-studio-cyan" aria-hidden />
+              <item.icon size={19} strokeWidth={2.1} className={cn("relative", active ? "text-accent" : "text-fg-muted")} aria-hidden />
               <span className={cn("relative", active && "font-bold text-accent")}>{L(item.label)}</span>
               {item.href === "/help" && help.unseen > 0 ? <span className="absolute top-1.5 right-[30%] size-1.5 rounded-full bg-studio-cyan" aria-hidden /> : null}
             </Link>
