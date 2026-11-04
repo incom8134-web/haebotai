@@ -30,7 +30,7 @@ export default function GlobalError({
             </p>
             {error.digest ? <p className="mt-3 font-mono text-2xs text-fg-subtle">ref: {error.digest}</p> : null}
             <div className="mt-6 flex flex-wrap justify-center gap-2">
-              <button type="button" onClick={() => retry()} className="studio-gradient-bg h-11 rounded-2xl px-5 text-sm font-semibold text-white">
+              <button type="button" onClick={() => retry()} className="studio-gradient-bg h-11 rounded-full px-5 text-sm font-semibold text-white">
                 다시 시도 · Try again
               </button>
               {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- full reload on purpose: the root layout itself failed */}
