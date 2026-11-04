@@ -16,6 +16,7 @@ import { FAQ } from "@/lib/site/faq";
 import { useBi } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
 import { HeroMock } from "./hero-mock";
+import { HeroPops } from "./hero-pops";
 import { ConceptFilm } from "./concept-film";
 import {
   BeforeAfterSection,
@@ -231,7 +232,10 @@ function Hero() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
       >
-        <HeroMock />
+        <div className="relative">
+          <HeroMock />
+          <HeroPops />
+        </div>
       </motion.div>
     </section>
     </div>
