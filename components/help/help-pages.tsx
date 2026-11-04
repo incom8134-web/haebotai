@@ -113,7 +113,7 @@ export function ApiGuide() {
             aria-label={L({ ko: "Google AI Studio 검색부터 키 만들기, 복사, 해바에 붙여넣기까지 8단계 영상 (1분 19초, 한국어 음성)", en: "Video: 8 steps from searching for Google AI Studio to creating, copying and pasting the key into Haeba (1 min 19 s, Korean voice)" })}
             className="aspect-video w-full rounded-[24px] border border-hairline bg-surface-2 object-contain"
           >
-            <source src="/videos/api-key-walkthrough.mp4" type="video/mp4" />
+            <source src={`/videos/api-key-walkthrough.mp4?v=${WALKTHROUGH_REV}`} type="video/mp4" />
             <track kind="captions" src="/videos/api-key-walkthrough.ko.vtt" srcLang="ko" label="한국어" default={locale === "ko"} />
             <track kind="captions" src="/videos/api-key-walkthrough.en.vtt" srcLang="en" label="English" default={locale === "en"} />
           </video>
@@ -202,6 +202,9 @@ export function ApiGuide() {
   );
 }
 
+/** Bump when a walkthrough video in public/videos is replaced: /videos is cached for a week (next.config.ts). */
+const WALKTHROUGH_REV = "2026-11-04";
+
 const GUIDE_FILES = [
   { lang: "ko", href: "/guides/ai-haeba-user-guide-ko.pdf", file: "AI해바_도구_사용설명서.pdf", title: "한국어 설명서", size: "4.8 MB" },
   { lang: "en", href: "/guides/ai-haeba-user-guide-en.pdf", file: "AI_Haeba_Tool_User_Guide.pdf", title: "English guide", size: "4.3 MB" },
@@ -240,6 +243,23 @@ export function UserGuide() {
         title={L({ ko: "도구 사용 설명서", en: "Tool user guide" })}
         lead={L({ ko: "처음 쓰는 사장님을 위해, 가입부터 결과물 내려받기까지 실제 화면으로 하나씩 보여 드려요. 27쪽.", en: "For first-time owners: every step from sign-up to downloading your results, shown on real screens. 27 pages." })}
       />
+      {/* Watch first: a one-minute walkthrough from one line in the Studio to the downloaded file. */}
+      <section id="video" className="mb-6 scroll-mt-24">
+        <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold"><PlayCircle size={18} className="text-studio-cyan" aria-hidden /> {L({ ko: "영상으로 보기", en: "Watch how" })}</h2>
+        <video
+          controls
+          playsInline
+          preload="metadata"
+          poster={`/videos/tools-walkthrough-poster.jpg?v=${WALKTHROUGH_REV}`}
+          aria-label={L({ ko: "스튜디오에서 한 줄로 시작해 결과 확인, 파일 받기, 다음 도구까지 6단계 영상 (1분, 한국어 음성)", en: "Video: 6 steps from one line in the Studio to the result, the files and the next tool (1 min, Korean voice)" })}
+          className="aspect-video w-full max-w-4xl rounded-[24px] border border-hairline bg-surface-2 object-contain"
+        >
+          <source src={`/videos/tools-walkthrough.mp4?v=${WALKTHROUGH_REV}`} type="video/mp4" />
+          <track kind="captions" src={`/videos/tools-walkthrough.ko.vtt?v=${WALKTHROUGH_REV}`} srcLang="ko" label="한국어" default={locale === "ko"} />
+          <track kind="captions" src={`/videos/tools-walkthrough.en.vtt?v=${WALKTHROUGH_REV}`} srcLang="en" label="English" default={locale === "en"} />
+        </video>
+        <p className="mt-2 text-xs text-fg-subtle">{L({ ko: "6단계 · 1분 · 한국어 음성 · 자막 한국어/영어", en: "6 steps · 1 min · Korean voice · captions in Korean and English" })}</p>
+      </section>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1.15fr]">
         <section className="min-w-0">
           <div className="grid grid-cols-3 gap-3">
