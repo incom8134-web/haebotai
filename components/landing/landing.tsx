@@ -15,6 +15,7 @@ import { FAQ } from "@/lib/site/faq";
 import { useBi } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
 import { HeroMock } from "./hero-mock";
+import { ResultGallery } from "@/components/studio/studio-extras";
 import { HeroPops } from "./hero-pops";
 import { SceneVideo } from "./scene-video";
 import { ConceptFilm } from "./concept-film";
@@ -459,6 +460,10 @@ function Landing({ signedIn = false, showcase = [] }: { signedIn?: boolean; show
           <Hero />
           <ConceptFilm />
           <FlowSection />
+          {/* Real results for a sample café, right after the flow: what the tools actually make. */}
+          <section id="examples" className="mx-auto max-w-[1200px] scroll-mt-24 px-4 py-12 md:px-6 md:py-16">
+            <ResultGallery />
+          </section>
           <CategorySection />
           <StepsSection />
           <BeforeAfterSection />

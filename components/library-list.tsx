@@ -163,7 +163,7 @@ function LibraryList({ runs: initial, projects = [], canPin = false }: { runs: L
                 </div>
               </div>
               <div className="flex shrink-0 items-center gap-2">
-                {OWN_KEY_ONLY ? null : (
+                {OWN_KEY_ONLY || !run.credits ? null : (
                   <span className="font-mono text-2xs text-fg-subtle">
                     {run.credits} {t("credits")}
                   </span>
