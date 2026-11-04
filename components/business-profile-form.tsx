@@ -15,7 +15,7 @@ import { BadgeCheck, MapPin, Store, UsersRound, type LucideIcon } from "lucide-r
 import { TagList } from "@/components/tool-form";
 import { upsertBusinessProfile } from "@/lib/profile";
 import { useBi, useT } from "@/lib/i18n/context";
-import { IconTile, PageHero, type Tone } from "@/components/site/tone";
+import { IconTile, PageHero, type Tone, PAGE_ART } from "@/components/site/tone";
 import type { DictKey } from "@/lib/i18n/dictionaries";
 import type { BusinessProfile } from "@/lib/tools/types";
 import { LogoField } from "@/components/brand/logo-field";
@@ -106,7 +106,7 @@ function BusinessProfileForm({ initial, logoUrl = null }: { initial: BusinessPro
 
   return (
     <div className="mx-auto max-w-3xl px-4 pt-6 pb-10 md:px-8 md:pt-10">
-      <PageHero icon={BadgeCheck} tone="brand" eyebrow={L({ ko: "한 번 적으면 모든 도구가 사용", en: "Fill once, every tool uses it" })} title={t("profile_title")} lead={t("profile_desc")} className="mb-2" />
+      <PageHero icon={BadgeCheck} art={PAGE_ART["/brand"]} tone="brand" eyebrow={L({ ko: "한 번 적으면 모든 도구가 사용", en: "Fill once, every tool uses it" })} title={t("profile_title")} lead={t("profile_desc")} className="mb-2" />
 
       <div className="mt-6 flex flex-col gap-5">
         <Group icon={Store} tone="brand" title={L({ ko: "기본 정보", en: "Basics" })}>

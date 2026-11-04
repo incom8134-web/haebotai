@@ -10,7 +10,7 @@ import { useFavorites } from "@/lib/hooks/use-local-list";
 import { useBi } from "@/lib/i18n/context";
 import type { CategoryId } from "@/lib/tools/types";
 import { Page } from "@/components/site/page";
-import { AREA_ART, IconTile, PageHero, TONE } from "@/components/site/tone";
+import { AREA_ART, IconTile, PageHero, TONE, toolArt, PAGE_ART } from "@/components/site/tone";
 import { cn } from "@/lib/utils";
 
 // Tool list, made to follow in order. A three-picture "how to use" strip,
@@ -98,7 +98,7 @@ function ToolCard({ tool, compact = false }: { tool: CatalogTool; compact?: bool
     return (
       <li className={cn(base, "flex items-center gap-3 p-4")}>
         <Num n={n} tone={tool.category} />
-        <IconTile icon={tool.icon} tone={tool.category} />
+        <IconTile icon={tool.icon} tone={tool.category} art={toolArt(tool.slug)} />
         <div className="min-w-0 flex-1">
           {title}
           <p className="mt-0.5 text-sm leading-relaxed break-keep text-fg-muted">{L(tool.promise)}</p>
@@ -112,7 +112,7 @@ function ToolCard({ tool, compact = false }: { tool: CatalogTool; compact?: bool
       <div className="flex items-start justify-between gap-2">
         <span className="flex items-center gap-2">
           <Num n={n} tone={tool.category} />
-          <IconTile icon={tool.icon} tone={tool.category} />
+          <IconTile icon={tool.icon} tone={tool.category} art={toolArt(tool.slug)} />
         </span>
         <FavButton tool={tool} />
       </div>
@@ -151,42 +151,19 @@ function HowTo() {
       icon: MousePointerClick,
       title: L({ ko: "도구 고르기", en: "Pick a tool" }),
       body: L({ ko: "번호 순서대로 따라가도 되고, 필요한 도구만 골라도 돼요.", en: "Go in number order, or pick only the tool you need." }),
-      art: (
-        <div className="grid grid-cols-3 gap-1.5" aria-hidden>
-          {[0, 1, 2, 3, 4, 5].map((i) => (
-            <span key={i} className={cn("h-7 rounded-lg border", i === 4 ? "border-accent bg-accent-dim" : "border-hairline bg-bg")} />
-          ))}
-        </div>
-      ),
+      art: "/images/icons/how-pick.webp",
     },
     {
       icon: PencilLine,
       title: L({ ko: "평소 말하듯 적기", en: "Say it in plain words" }),
       body: L({ ko: "어려운 말 없이 원하는 것을 적으면, 모르는 칸은 비워 둬도 돼요.", en: "Write what you want in plain words; leave blank what you don't know." }),
-      art: (
-        <div className="rounded-lg border border-hairline bg-bg p-2" aria-hidden>
-          <span className="block h-1.5 w-4/5 rounded-full bg-fg/15" />
-          <span className="mt-1.5 block h-1.5 w-3/5 rounded-full bg-fg/15" />
-          <span className="mt-1.5 flex items-center gap-1">
-            <span className="h-1.5 w-2/5 rounded-full bg-accent/50" />
-            <span className="h-3 w-0.5 animate-pulse bg-accent" />
-          </span>
-        </div>
-      ),
+      art: "/images/icons/how-write.webp",
     },
     {
       icon: FileCheck2,
       title: L({ ko: "결과 받고 다음 번호로", en: "Get it, then the next number" }),
       body: L({ ko: "결과는 보관함에 저장되고, 다음 도구에 내용이 미리 채워져요.", en: "Results are saved, and the next tool comes pre-filled." }),
-      art: (
-        <div className="flex items-center gap-1.5" aria-hidden>
-          <span className="grid h-12 flex-1 place-items-center rounded-lg border border-hairline bg-bg">
-            <span className="h-1.5 w-1/2 rounded-full bg-fg/15" />
-          </span>
-          <ArrowRight size={14} className="text-accent" />
-          <span className="grid h-12 flex-1 place-items-center rounded-lg border border-dashed border-accent/60 bg-accent-dim text-xs font-bold text-accent">+1</span>
-        </div>
-      ),
+      art: "/images/icons/how-next.webp",
     },
   ];
   return (
@@ -194,8 +171,8 @@ function HowTo() {
       <h2 id="howto-title" className="text-lg font-semibold">{L({ ko: "이렇게 쓰면 돼요", en: "How it works" })}</h2>
       <ol className="mt-3 grid gap-3 md:grid-cols-3">
         {steps.map((s, i) => (
-          <li key={i} className="rise flex gap-4 rounded-[20px] border border-hairline bg-surface p-4">
-            <div className="w-28 shrink-0">{s.art}</div>
+          <li key={i} className="rise flex items-center gap-4 rounded-[20px] border border-hairline bg-surface p-4">
+            <span className="relative size-24 shrink-0 drop-shadow-[0_10px_16px_rgb(30_40_80/0.2)] dark:drop-shadow-[0_10px_18px_rgb(124_58_237/0.4)]" aria-hidden><Image src={s.art} alt="" fill sizes="96px" className="object-contain" /></span>
             <div className="min-w-0">
               <p className="flex items-center gap-2 text-[15px] font-bold break-keep">
                 <span className="grid size-6 place-items-center rounded-full bg-fg font-mono text-xs text-bg" aria-hidden>{i + 1}</span>
@@ -300,6 +277,7 @@ function ToolsView({ initialCategory, recent }: { initialCategory: CategoryId | 
     <Page wide>
       <PageHero
         icon={LayoutGrid}
+        art={PAGE_ART["/tools"]}
         tone="accent"
         eyebrow={L({ ko: `도구 ${total}개 · 5단계`, en: `${total} tools · 5 steps` })}
         title={L({ ko: "어떤 일을 도와드릴까요?", en: "What can we help with?" })}
