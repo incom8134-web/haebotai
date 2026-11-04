@@ -31,7 +31,7 @@ export function AdBoard({ output }: { output: Record<string, unknown> }) {
   return (
     <div className="mt-3 flex flex-col gap-5">
       {str(output.core_message) ? (
-        <div className="studio-gradient-bg rounded-full p-5 text-white">
+        <div className="studio-gradient-bg rounded-[24px] p-5 text-white md:p-6">
           <p className="text-2xs font-semibold tracking-wide opacity-80">{L({ ko: "핵심 메시지", en: "Core message" })}</p>
           <p className="mt-1.5 text-lg leading-snug font-bold break-keep md:text-xl">{str(output.core_message)}</p>
         </div>
@@ -62,7 +62,15 @@ export function AdBoard({ output }: { output: Record<string, unknown> }) {
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img src={a.image} alt={a.headline} loading="lazy" className="aspect-[4/5] w-full rounded-xl object-cover" />
                 ) : (
-                  <div className="studio-gradient-bg grid aspect-[4/5] place-items-center rounded-xl p-4 text-center text-sm font-bold text-white break-keep">{a.headline}</div>
+                  /* No picture for this ad yet: an invitation to make one, not a blank box. */
+                  <Link
+                    href={`/tools/ad-photo/run?brief=${encodeURIComponent(`${a.headline} — ${a.motive}`)}`}
+                    className="group/photo flex aspect-[4/5] flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-accent/35 bg-accent-dim/60 p-4 text-center transition-colors hover:border-accent hover:bg-accent-dim"
+                  >
+                    <span className="grid size-11 place-items-center rounded-full bg-surface text-accent shadow-sm transition-transform group-hover/photo:scale-110"><Camera size={19} aria-hidden /></span>
+                    <span className="text-sm font-bold text-accent">{L({ ko: "사진 만들기", en: "Make a photo" })}</span>
+                    <span className="text-2xs leading-relaxed text-fg-muted break-keep">{L({ ko: "이 광고에 맞는 제품 사진을 만들어요", en: "A product photo for this ad" })}</span>
+                  </Link>
                 )}
               </div>
               <div className="flex min-w-0 flex-col">

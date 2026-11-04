@@ -422,11 +422,11 @@ function AppShell({ user, balance, plan, host = false, answeredTickets, notices,
                 key={item.href}
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className="relative -mt-7 flex min-w-0 flex-1 flex-col items-center gap-1 text-[10px] font-bold text-accent"
+                className="relative -mt-5 flex min-w-0 flex-1 flex-col items-center gap-0.5 text-[10px] font-bold text-accent"
               >
-                <span className="studio-gradient-bg relative grid size-14 place-items-center rounded-full text-white shadow-[0_12px_28px_-10px_var(--studio-violet)] ring-4 ring-bg">
+                <span className="studio-gradient-bg relative grid size-12 place-items-center rounded-full text-white shadow-[0_10px_22px_-12px_var(--studio-violet)] ring-[3px] ring-bg">
                   {active ? null : <span className="quick-pulse absolute inset-0 rounded-full" aria-hidden />}
-                  <item.icon size={23} strokeWidth={2} className="relative" aria-hidden />
+                  <item.icon size={20} strokeWidth={2} className="relative" aria-hidden />
                 </span>
                 <span className="relative">{L(item.label)}</span>
               </Link>
@@ -438,10 +438,10 @@ function AppShell({ user, balance, plan, host = false, answeredTickets, notices,
               href={item.href}
               onClick={item.href === "/help" ? help.markSeen : undefined}
               aria-current={active ? "page" : undefined}
-              className="relative flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-2xl py-2 text-[11px] font-semibold text-fg"
+              className="relative flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-2xl py-1.5 text-[10px] font-semibold text-fg-muted"
             >
               {active ? <motion.span layoutId="tab-active" className="absolute inset-0 rounded-2xl bg-studio-cyan/15" transition={{ type: "spring", stiffness: 420, damping: 34 }} /> : null}
-              <item.icon size={21} strokeWidth={2.1} className="relative text-studio-cyan" aria-hidden />
+              <item.icon size={19} strokeWidth={2.1} className={cn("relative", active ? "text-accent" : "text-fg-muted")} aria-hidden />
               <span className={cn("relative", active && "font-bold text-accent")}>{L(item.label)}</span>
               {item.href === "/help" && help.unseen > 0 ? <span className="absolute top-1.5 right-[30%] size-1.5 rounded-full bg-studio-cyan" aria-hidden /> : null}
             </Link>

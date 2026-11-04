@@ -228,119 +228,15 @@ export function FlowSection() {
   );
 }
 
-/* ── Five categories, five pictures ────────────────────────────────── */
+/* ── Five categories, each shown by a real result screen ──────────── */
 
-function DiscoverArt() {
-  return (
-    <div className="space-y-1.5" aria-hidden>
-      {[82, 64, 58].map((v, i) => (
-        <div key={v} className="flex items-center gap-2">
-          <span className="w-6 font-mono text-[10px] text-fg-subtle">{v}</span>
-          <div className="h-2 flex-1 rounded-full bg-fg/8">
-            <div
-              className={cn(
-                "h-full rounded-full",
-                i === 0 ? "bg-accent" : "bg-fg-subtle/50",
-              )}
-              style={{ width: `${v}%` }}
-            />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-function BrandArt() {
-  return (
-    <div className="flex items-center gap-3" aria-hidden>
-      <div className="flex h-12 flex-1 overflow-hidden rounded-xl">
-        {["#F3EBDD", "#8A5A2B", "#1F1B16", "#5E8C7A", "#D9622B"].map((c) => (
-          <span key={c} className="flex-1" style={{ background: c }} />
-        ))}
-      </div>
-      <span
-        className="text-3xl leading-none font-semibold text-fg"
-        style={{ fontFamily: "serif" }}
-      >
-        Aa
-      </span>
-    </div>
-  );
-}
-function CampaignArt() {
-  return (
-    <div className="relative h-14" aria-hidden>
-      {[0, 1, 2].map((i) => (
-        <div
-          key={i}
-          className="absolute rounded-xl border border-hairline bg-surface px-2.5 py-1.5 shadow-sm"
-          style={{
-            left: `${i * 22}%`,
-            top: `${i * 6}px`,
-            transform: `rotate(${(i - 1) * 4}deg)`,
-            width: "52%",
-          }}
-        >
-          <div className="h-1 w-8 rounded-full bg-accent/70" />
-          <div className="mt-1.5 h-1 rounded-full bg-fg/15" />
-          <div className="mt-1 h-1 w-2/3 rounded-full bg-fg/10" />
-        </div>
-      ))}
-    </div>
-  );
-}
-function OperateArt() {
-  return (
-    <div className="grid grid-cols-3 gap-1.5" aria-hidden>
-      {[3, 2, 1].map((n, c) => (
-        <div key={c} className="space-y-1 rounded-lg bg-fg/5 p-1.5">
-          {Array.from({ length: n }).map((_, k) => (
-            <div
-              key={k}
-              className={cn(
-                "h-3 rounded",
-                c === 2 ? "bg-grounded/40" : "bg-surface",
-              )}
-            />
-          ))}
-        </div>
-      ))}
-    </div>
-  );
-}
-function ResearchArt() {
-  return (
-    <div
-      className="relative h-14 rounded-lg border border-dashed border-hairline-str"
-      aria-hidden
-    >
-      <span className="absolute inset-x-0 top-1/2 h-px bg-hairline-str" />
-      <span className="absolute inset-y-0 left-1/2 w-px bg-hairline-str" />
-      {[
-        [18, 30],
-        [70, 22],
-        [40, 70],
-        [82, 66],
-      ].map(([x, y], i) => (
-        <span
-          key={i}
-          className="absolute size-2 -translate-1/2 rounded-full bg-fg-subtle/70"
-          style={{ left: `${x}%`, top: `${y}%` }}
-        />
-      ))}
-      <span
-        className="absolute size-3 -translate-1/2 rounded-full bg-accent ring-4 ring-accent/20"
-        style={{ left: "74%", top: "78%" }}
-      />
-    </div>
-  );
-}
-const ART: Record<CategoryId, () => React.ReactElement> = {
-  discover: DiscoverArt,
-  brand: BrandArt,
-  campaign: CampaignArt,
-  operate: OperateArt,
-  research: ResearchArt,
+// Crops of real runs for the sample café 달빛정원 (public/images/examples).
+const ART: Record<CategoryId, { src: string; alt: { ko: string; en: string } }> = {
+  discover: { src: "/images/examples/area-discover.webp", alt: { ko: "사업 아이디어 찾기 결과: 점수를 매긴 아이디어 카드", en: "Find business ideas: scored idea cards" } },
+  research: { src: "/images/examples/area-research.webp", alt: { ko: "시장 조사 결과: 출처가 달린 시장 규모와 소비 데이터", en: "Market research: market size and spending, with sources" } },
+  brand: { src: "/images/examples/area-brand.webp", alt: { ko: "브랜드 정하기 결과: 브랜드 보드와 성격 비율", en: "Define your brand: a brand board and personality mix" } },
+  campaign: { src: "/images/examples/area-campaign.webp", alt: { ko: "광고 문구 쓰기 결과: 사진과 동기별 광고 카피", en: "Write ads: photos and copy per buying motive" } },
+  operate: { src: "/images/examples/area-operate.webp", alt: { ko: "사업계획서 쓰기 결과: 근거가 달린 문제 정의", en: "Write a business plan: a sourced problem statement" } },
 };
 
 export function CategorySection() {
@@ -363,7 +259,7 @@ export function CategorySection() {
       />
       <div className="mt-10 grid gap-3 md:grid-cols-6">
         {CATEGORY_ORDER.map((id, i) => {
-          const Art = ART[id];
+          const art = ART[id];
           const tools = toolsIn(id).filter((t) => !t.hidden);
           return (
             <motion.div
@@ -376,7 +272,10 @@ export function CategorySection() {
                 href={`/tools?category=${id}`}
                 className="group flex h-full flex-col rounded-[24px] border border-hairline bg-surface p-5 transition-[border-color,transform] hover:-translate-y-0.5 hover:border-accent/40"
               >
-                <Art />
+                <span className="relative block aspect-[8/5] overflow-hidden rounded-2xl border border-hairline bg-surface-2">
+                  <Image src={art.src} alt={L(art.alt)} fill sizes="(min-width: 768px) 33vw, 100vw" className="object-cover object-top transition-transform duration-500 group-hover:scale-[1.04]" />
+                  <span className="absolute top-2 left-2 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur">{L({ ko: "실제 결과", en: "Real result" })}</span>
+                </span>
                 <p className="mt-5 text-lg font-semibold break-keep text-fg">
                   {L(CATEGORIES[id].name)}
                 </p>

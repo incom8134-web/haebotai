@@ -25,7 +25,7 @@ export function upgradeTarget(plan: string | null | undefined, host = false): Up
       to: "pro",
       href: "/account/membership/checkout?product=pro",
       label: { ko: "프로로 업그레이드", en: "Upgrade to Pro" },
-      short: { ko: "프로로", en: "Go Pro" },
+      short: { ko: "Pro 업그레이드", en: "Go Pro" },
       pitch: { ko: `프로는 ${won(PRODUCTS.pro.amount)}에 ${PRODUCTS.pro.credits.toLocaleString()} 크레딧 — 플러스의 3배예요`, en: `Pro: ${PRODUCTS.pro.credits.toLocaleString()} credits for ${won(PRODUCTS.pro.amount)} — 3× Plus` },
     };
   return {

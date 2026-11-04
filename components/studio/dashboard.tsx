@@ -343,7 +343,8 @@ export function Dashboard({
           <div className="absolute inset-0 bg-gradient-to-r from-surface/80 via-surface/35 to-transparent max-md:via-surface/70 dark:from-[#0e0b1a]/90 dark:via-[#0e0b1a]/55" />
         </div>
         <div className="relative">
-          <div className="md:min-h-[190px] md:max-w-[56%]">
+          <div className="grid gap-6 lg:grid-cols-[1.45fr_1fr] lg:items-center">
+          <div>
             <Reveal>
               <p className="inline-flex items-center gap-1.5 rounded-full border border-hairline bg-surface/80 px-3 py-1 text-xs text-fg-muted backdrop-blur">
                 <Sparkles size={12} className="text-accent" aria-hidden />
@@ -360,6 +361,13 @@ export function Dashboard({
                   : L({ ko: "한 줄로 적으면 맞는 도구를 골라 드려요. 첫 결과까지 몇 분이면 돼요.", en: "Write it in a line and we'll pick the tool. A first result takes minutes." })}
               </p>
             </Reveal>
+          </div>
+          {/* The hero picture: AI Haeba on a laptop among glass icons (made with Gemini). */}
+          <Reveal delay={0.12}>
+            <div className="relative aspect-[16/9] overflow-hidden rounded-[24px] border border-hairline shadow-[0_24px_50px_-28px_rgb(30_40_80/0.45)] dark:shadow-[0_24px_60px_-26px_rgb(124_58_237/0.55)]">
+              <Image src="/images/studio-hero-laptop.webp" alt={L({ ko: "노트북 화면에 띄운 AI 해바와 문서·차트 아이콘", en: "AI Haeba on a laptop, with document and chart icons" })} fill priority sizes="(min-width: 1024px) 440px, 100vw" className="object-cover transition-transform duration-700 hover:scale-[1.03] dark:brightness-[0.88]" />
+            </div>
+          </Reveal>
           </div>
           <div className="mt-6 grid gap-6 lg:grid-cols-[1.45fr_1fr] lg:items-start">
             <Reveal delay={0.1}>
