@@ -335,12 +335,13 @@ export function Dashboard({
     <div className="mx-auto max-w-[1180px] px-4 pt-6 pb-12 md:px-8 md:pt-8">
       <section className="relative overflow-hidden rounded-[32px] border border-hairline bg-surface px-5 py-7 md:px-10 md:py-10">
         <HeroBackdrop />
-        {/* A frosted-glass dashboard scene (made with Gemini) behind the greeting, fading out below it. */}
-        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 hidden h-[330px] [mask-image:linear-gradient(to_bottom,black_62%,transparent)] md:block dark:md:hidden">
-          <Image src="/images/studio-hero.webp" alt="" fill priority sizes="1180px" className="object-cover object-[right_58%]" />
+        {/* A glass-ribbon backdrop made with Gemini, one per theme with the same
+            composition; the wash on the left keeps the greeting and composer readable. */}
+        <div aria-hidden className="pointer-events-none absolute inset-0">
+          <Image src="/images/studio-bg-light.webp" alt="" fill priority sizes="(min-width: 1180px) 1180px, 100vw" className="object-cover object-right dark:hidden" />
+          <Image src="/images/studio-bg-dark.webp" alt="" fill priority sizes="(min-width: 1180px) 1180px, 100vw" className="hidden object-cover object-right dark:block" />
+          <div className="absolute inset-0 bg-gradient-to-r from-surface/80 via-surface/35 to-transparent max-md:via-surface/70 dark:from-[#0e0b1a]/90 dark:via-[#0e0b1a]/55" />
         </div>
-        {/* Dark: teal and violet glows instead (the reference video's dark look). */}
-        <div aria-hidden className="pointer-events-none absolute inset-0 hidden bg-[radial-gradient(36rem_22rem_at_88%_0%,rgb(124_58_237/0.28),transparent_70%),radial-gradient(30rem_20rem_at_62%_12%,rgb(20_184_166/0.18),transparent_70%)] dark:block" />
         <div className="relative">
           <div className="md:min-h-[190px] md:max-w-[56%]">
             <Reveal>
