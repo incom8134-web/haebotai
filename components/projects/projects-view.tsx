@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { useBi, useLocale } from "@/lib/i18n/context";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { IconTile, PageHero, TONE, toneFor } from "@/components/site/tone";
+import { IconTile, PageHero, TONE, toneFor, PAGE_ART } from "@/components/site/tone";
 import { cn } from "@/lib/utils";
 
 // The projects list and a create form. A project is a business or an
@@ -41,6 +41,7 @@ export function ProjectsView({ projects }: { projects: { id: string; name: strin
     <div className="mx-auto max-w-4xl px-4 pt-6 pb-10 md:px-8 md:pt-10">
       <PageHero
         icon={FolderKanban}
+        art={PAGE_ART["/projects"]}
         tone="discover"
         eyebrow={L({ ko: "사업별 기억", en: "Memory per business" })}
         title={L({ ko: "프로젝트", en: "Projects" })}
@@ -72,7 +73,7 @@ export function ProjectsView({ projects }: { projects: { id: string; name: strin
               <li key={p.id}>
                 <Link href={`/projects/${p.id}`} className={cn("group flex h-full flex-col rounded-[20px] border border-hairline p-5 transition-[border-color,transform] duration-300 hover:-translate-y-0.5", TONE[tone].wash, TONE[tone].hover)}>
                   <span className="flex items-start gap-3">
-                    <IconTile icon={FolderKanban} tone={tone} size="lg" />
+                    <IconTile icon={FolderKanban} tone={tone} size="lg" art={PAGE_ART["/projects"]} />
                     <span className="min-w-0">
                       <span className="block truncate text-lg font-bold text-fg">{p.name}</span>
                       {p.description ? <span className="mt-0.5 line-clamp-2 block text-sm text-fg-muted break-keep">{p.description}</span> : null}
