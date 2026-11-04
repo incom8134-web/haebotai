@@ -7,9 +7,9 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ArrowRight, Gift, GraduationCap, KeyRound, Sparkles, Wand2 } from "lucide-react";
 import { useBi } from "@/lib/i18n/context";
 import { CATEGORIES, CATEGORY_ORDER, catalogTool, toolsIn } from "@/lib/tools/catalog";
-import type { CategoryId } from "@/lib/tools/types";
 import { PATCH_NOTES } from "@/lib/site/patch-notes";
 import { REFERRAL, REVENUE_SHARE } from "@/lib/referral";
+import { AREA_ART, TONE } from "@/components/site/tone";
 import { cn } from "@/lib/utils";
 import { MEMBER_API_KEYS, OWN_KEY_ONLY, REFERRAL_CREDITS, REFERRAL_REVENUE_SHARE, STUDENT_PLAN } from "@/lib/site/access";
 
@@ -55,24 +55,13 @@ export function CountUp({ value, className }: { value: number; className?: strin
   return <span className={className}>{shown.toLocaleString("en-US")}</span>;
 }
 
-/** The hero's moving backdrop: soft color fields drifting behind the composer. */
+/** The hero's backdrop: a faint grid on the warm surface. The drifting
+ *  colour orbs went with the redesign (docs/redesign-plan.md: fewer
+ *  gradients, less glass). */
 export function HeroBackdrop() {
-  const reduce = useReducedMotion();
-  const orb = (cls: string, x: number[], y: number[], d: number) => (
-    <motion.span
-      aria-hidden
-      className={cn("absolute rounded-full blur-3xl", cls)}
-      animate={reduce ? undefined : { x, y }}
-      transition={{ duration: d, repeat: Infinity, repeatType: "mirror", ease: "easeInOut" }}
-    />
-  );
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[32px]" aria-hidden>
-      <div className="absolute inset-0 bg-[radial-gradient(120%_120%_at_0%_0%,color-mix(in_srgb,var(--color-accent)_16%,transparent),transparent_60%)]" />
-      {orb("-top-24 -left-16 size-72 bg-accent/25", [0, 60, -20], [0, 30, 10], 14)}
-      {orb("top-10 right-[-60px] size-80 bg-studio-cyan/20", [0, -50, 20], [0, 40, -10], 17)}
-      {orb("bottom-[-80px] left-1/3 size-72 bg-studio-violet/20", [0, 40, -30], [0, -30, 0], 19)}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,color-mix(in_srgb,var(--color-fg)_5%,transparent)_1px,transparent_1px),linear-gradient(to_bottom,color-mix(in_srgb,var(--color-fg)_5%,transparent)_1px,transparent_1px)] bg-[size:36px_36px] [mask-image:radial-gradient(70%_60%_at_50%_40%,black,transparent)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,color-mix(in_srgb,var(--color-fg)_4%,transparent)_1px,transparent_1px),linear-gradient(to_bottom,color-mix(in_srgb,var(--color-fg)_4%,transparent)_1px,transparent_1px)] bg-[size:36px_36px] [mask-image:radial-gradient(70%_60%_at_50%_40%,black,transparent)]" />
     </div>
   );
 }
@@ -98,7 +87,7 @@ export function PromoStrip() {
   const allPromos = [
     {
       icon: Sparkles,
-      tone: "from-accent/15 to-studio-violet/10",
+      tone: "bg-accent-dim",
       kicker: { ko: `새 기능 · ${latest.version}`, en: `New · ${latest.version}` },
       title: latest.title,
       href: "/help/whats-new",
@@ -106,7 +95,7 @@ export function PromoStrip() {
     },
     {
       icon: Gift,
-      tone: "from-studio-cyan/15 to-accent/10",
+      tone: "bg-accent-dim",
       kicker: { ko: "친구 초대", en: "Invite friends" },
       title: REFERRAL_REVENUE_SHARE
         ? { ko: `초대한 친구가 결제하면 ${Math.round(REVENUE_SHARE.rate * 100)}%를 현금으로`, en: `Earn ${Math.round(REVENUE_SHARE.rate * 100)}% in cash when friends you invite pay` }
@@ -133,7 +122,7 @@ export function PromoStrip() {
         },
     {
       icon: KeyRound,
-      tone: "from-accent/10 to-studio-cyan/15",
+      tone: "bg-accent-dim",
       kicker: { ko: "내 API 키", en: "Your own API key" },
       title: OWN_KEY_ONLY
         ? { ko: "도구는 내 Gemini 키로 실행돼요 — 발급은 5분", en: "Tools run on your own Gemini key — about 5 minutes to get one" }
@@ -159,7 +148,7 @@ export function PromoStrip() {
       aria-label={L({ ko: "소식과 혜택", en: "News and perks" })}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
-      className={cn("relative overflow-hidden rounded-[22px] border border-hairline bg-gradient-to-r p-4 transition-colors duration-700", p.tone)}
+      className={cn("relative overflow-hidden rounded-[22px] border border-hairline p-4", p.tone)}
     >
       <AnimatePresence mode="wait">
         <motion.div
@@ -193,13 +182,6 @@ export function PromoStrip() {
 
 // ── The five areas ─────────────────────────────────────────────────────
 
-const AREA_TONE: Record<CategoryId, string> = {
-  discover: "from-amber-400/25 via-orange-400/10",
-  brand: "from-rose-400/25 via-pink-400/10",
-  campaign: "from-violet-400/25 via-indigo-400/10",
-  operate: "from-sky-400/25 via-cyan-400/10",
-  research: "from-emerald-400/25 via-teal-400/10",
-};
 
 export function CategoryRail() {
   const L = useBi();
@@ -224,16 +206,18 @@ export function CategoryRail() {
           return (
             <Reveal key={c} delay={i * 0.06}>
               <Link href={`/tools?category=${c}`} className="group relative flex h-full flex-col overflow-hidden rounded-[22px] border border-hairline bg-surface p-4 transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-[0_24px_50px_-30px_rgba(0,0,0,0.45)]">
-                <span className={cn("pointer-events-none absolute inset-0 bg-gradient-to-br to-transparent opacity-80 transition-opacity group-hover:opacity-100", AREA_TONE[c])} aria-hidden />
-                <span className="relative flex items-center justify-between">
-                  <span className="grid size-10 place-items-center rounded-xl bg-surface/80 text-fg shadow-sm backdrop-blur">{Lead ? <Lead size={18} aria-hidden /> : null}</span>
-                  <span className="rounded-full bg-surface/80 px-2 py-0.5 font-mono text-2xs text-fg-muted">{tools.length}</span>
+                <span className="relative -mx-4 -mt-4 mb-1 block aspect-[4/3] overflow-hidden bg-[#f3efe6]">
+                  <Image src={AREA_ART[c]} alt="" fill sizes="(min-width: 1024px) 220px, (min-width: 640px) 45vw, 90vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.04] dark:brightness-[0.92]" />
+                  <span className={cn("absolute top-3 right-3 rounded-full bg-surface px-2 py-0.5 font-mono text-2xs font-semibold", TONE[c].text)}>{tools.length}</span>
+                </span>
+                <span className="relative flex items-center gap-2">
+                  <span className={cn("grid size-7 place-items-center rounded-lg", TONE[c].tile)}>{Lead ? <Lead size={15} aria-hidden /> : null}</span>
                 </span>
                 <span className="relative mt-4 text-sm font-bold break-keep text-fg">{L(CATEGORIES[c].name)}</span>
                 <span className="relative mt-1 text-xs leading-relaxed break-keep text-fg-muted">{L(CATEGORIES[c].pitch)}</span>
                 <span className="relative mt-3 flex flex-wrap gap-1">
                   {tools.slice(0, 3).map((t) => (
-                    <span key={t.slug} className="rounded-full bg-surface/80 px-2 py-0.5 text-[10px] text-fg">
+                    <span key={t.slug} className="rounded-full bg-surface-2 px-2 py-0.5 text-[10px] text-fg">
                       {L(t.name)}
                     </span>
                   ))}
