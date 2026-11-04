@@ -10,12 +10,21 @@ import { cn } from "@/lib/utils";
 export type Tone = CategoryId | "accent";
 
 export const TONE: Record<Tone, { tile: string; chip: string; dot: string; text: string; hover: string; wash: string; hero: string }> = {
-  discover: { tile: "bg-cat-discover/14 text-cat-discover", chip: "bg-cat-discover/12 text-cat-discover", dot: "bg-cat-discover", text: "text-cat-discover", hover: "hover:border-cat-discover/50", wash: "bg-cat-discover/[0.06]", hero: "bg-[linear-gradient(135deg,color-mix(in_oklch,var(--cat-discover)_18%,var(--color-surface)),var(--color-surface)_72%)]" },
-  brand: { tile: "bg-cat-brand/14 text-cat-brand", chip: "bg-cat-brand/12 text-cat-brand", dot: "bg-cat-brand", text: "text-cat-brand", hover: "hover:border-cat-brand/50", wash: "bg-cat-brand/[0.06]", hero: "bg-[linear-gradient(135deg,color-mix(in_oklch,var(--cat-brand)_18%,var(--color-surface)),var(--color-surface)_72%)]" },
-  campaign: { tile: "bg-cat-campaign/14 text-cat-campaign", chip: "bg-cat-campaign/12 text-cat-campaign", dot: "bg-cat-campaign", text: "text-cat-campaign", hover: "hover:border-cat-campaign/50", wash: "bg-cat-campaign/[0.06]", hero: "bg-[linear-gradient(135deg,color-mix(in_oklch,var(--cat-campaign)_18%,var(--color-surface)),var(--color-surface)_72%)]" },
-  operate: { tile: "bg-cat-operate/14 text-cat-operate", chip: "bg-cat-operate/12 text-cat-operate", dot: "bg-cat-operate", text: "text-cat-operate", hover: "hover:border-cat-operate/50", wash: "bg-cat-operate/[0.06]", hero: "bg-[linear-gradient(135deg,color-mix(in_oklch,var(--cat-operate)_18%,var(--color-surface)),var(--color-surface)_72%)]" },
-  research: { tile: "bg-cat-research/14 text-cat-research", chip: "bg-cat-research/12 text-cat-research", dot: "bg-cat-research", text: "text-cat-research", hover: "hover:border-cat-research/50", wash: "bg-cat-research/[0.06]", hero: "bg-[linear-gradient(135deg,color-mix(in_oklch,var(--cat-research)_18%,var(--color-surface)),var(--color-surface)_72%)]" },
-  accent: { tile: "bg-studio-cyan/12 text-studio-cyan", chip: "bg-studio-cyan/12 text-studio-cyan", dot: "bg-studio-cyan", text: "text-studio-cyan", hover: "hover:border-studio-cyan/50", wash: "bg-studio-cyan/[0.06]", hero: "bg-[linear-gradient(135deg,color-mix(in_oklch,var(--studio-cyan)_18%,var(--color-surface)),var(--color-surface)_72%)]" },
+  discover: { tile: "bg-cat-discover/14 text-cat-discover", chip: "bg-cat-discover/12 text-cat-discover", dot: "bg-cat-discover", text: "text-cat-discover", hover: "hover:border-cat-discover/50", wash: "bg-cat-discover/[0.06]", hero: "bg-[color-mix(in_oklch,var(--cat-discover)_7%,var(--color-surface))]" },
+  brand: { tile: "bg-cat-brand/14 text-cat-brand", chip: "bg-cat-brand/12 text-cat-brand", dot: "bg-cat-brand", text: "text-cat-brand", hover: "hover:border-cat-brand/50", wash: "bg-cat-brand/[0.06]", hero: "bg-[color-mix(in_oklch,var(--cat-brand)_7%,var(--color-surface))]" },
+  campaign: { tile: "bg-cat-campaign/14 text-cat-campaign", chip: "bg-cat-campaign/12 text-cat-campaign", dot: "bg-cat-campaign", text: "text-cat-campaign", hover: "hover:border-cat-campaign/50", wash: "bg-cat-campaign/[0.06]", hero: "bg-[color-mix(in_oklch,var(--cat-campaign)_7%,var(--color-surface))]" },
+  operate: { tile: "bg-cat-operate/14 text-cat-operate", chip: "bg-cat-operate/12 text-cat-operate", dot: "bg-cat-operate", text: "text-cat-operate", hover: "hover:border-cat-operate/50", wash: "bg-cat-operate/[0.06]", hero: "bg-[color-mix(in_oklch,var(--cat-operate)_7%,var(--color-surface))]" },
+  research: { tile: "bg-cat-research/14 text-cat-research", chip: "bg-cat-research/12 text-cat-research", dot: "bg-cat-research", text: "text-cat-research", hover: "hover:border-cat-research/50", wash: "bg-cat-research/[0.06]", hero: "bg-[color-mix(in_oklch,var(--cat-research)_7%,var(--color-surface))]" },
+  accent: { tile: "bg-studio-cyan/12 text-studio-cyan", chip: "bg-studio-cyan/12 text-studio-cyan", dot: "bg-studio-cyan", text: "text-studio-cyan", hover: "hover:border-studio-cyan/50", wash: "bg-studio-cyan/[0.06]", hero: "bg-[color-mix(in_oklch,var(--studio-cyan)_7%,var(--color-surface))]" },
+};
+
+/** One clay illustration per tool area (made with Gemini, public/images/areas). */
+export const AREA_ART: Record<CategoryId, string> = {
+  discover: "/images/areas/discover.webp",
+  research: "/images/areas/research.webp",
+  brand: "/images/areas/brand.webp",
+  campaign: "/images/areas/campaign.webp",
+  operate: "/images/areas/operate.webp",
 };
 
 /** The tone for a catalog slug or engine id (library rows store engine ids). */

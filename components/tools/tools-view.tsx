@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Clock, FileCheck2, Hammer, LayoutGrid, MousePointerClick, PencilLine, Search, Star, X } from "lucide-react";
 import { CATEGORIES, CATEGORY_ORDER, modesOf, publicTools, stepNumber, toolNumber, toolsIn, catalogTool, type CatalogTool } from "@/lib/tools/catalog";
 import { getTool } from "@/lib/tools/registry";
@@ -9,7 +10,7 @@ import { useFavorites } from "@/lib/hooks/use-local-list";
 import { useBi } from "@/lib/i18n/context";
 import type { CategoryId } from "@/lib/tools/types";
 import { Page } from "@/components/site/page";
-import { IconTile, PageHero, TONE } from "@/components/site/tone";
+import { AREA_ART, IconTile, PageHero, TONE } from "@/components/site/tone";
 import { cn } from "@/lib/utils";
 
 // Tool list, made to follow in order. A three-picture "how to use" strip,
@@ -223,8 +224,11 @@ function StepMap({ onPick }: { onPick: (c: CategoryId) => void }) {
               <button
                 type="button"
                 onClick={() => onPick(c)}
-                className={cn("flex h-full w-full flex-col rounded-[20px] border border-hairline p-4 text-left transition-[border-color,transform] duration-300 hover:-translate-y-0.5", TONE[c].wash, TONE[c].hover)}
+                className={cn("group flex h-full w-full flex-col overflow-hidden rounded-[20px] border border-hairline bg-surface p-4 text-left transition-[border-color,transform] duration-300 hover:-translate-y-0.5", TONE[c].hover)}
               >
+                <span className="relative -mx-4 -mt-4 mb-3 block aspect-[16/10] overflow-hidden bg-[#f3efe6]" aria-hidden>
+                  <Image src={AREA_ART[c]} alt="" fill sizes="(min-width: 768px) 20vw, 90vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.04] dark:brightness-[0.92]" />
+                </span>
                 <span className="flex items-center gap-2">
                   <Num n={stepNumber(c)} tone={c} size="sm" />
                   <span className={cn("text-2xs font-bold tracking-wide", TONE[c].text)}>{L({ ko: `${stepNumber(c)}단계`, en: `Step ${stepNumber(c)}` })}</span>

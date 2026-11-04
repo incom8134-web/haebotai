@@ -12,19 +12,21 @@
  */
 @theme {
   /* Surfaces */
-  --color-bg: #edf1f8;
-  --color-surface: #ffffff;
-  --color-surface-2: #e7edf6;
-  --color-hairline: rgba(15, 30, 60, 0.1);
-  --color-hairline-str: rgba(15, 30, 60, 0.16);
+  /* Warm neutral base (docs/redesign-plan.md): an off-white page that
+     matches the area illustrations, white-ish panels, warm hairlines. */
+  --color-bg: #f5f2ec;
+  --color-surface: #fffdfa;
+  --color-surface-2: #ebe7df;
+  --color-hairline: rgba(60, 45, 20, 0.11);
+  --color-hairline-str: rgba(60, 45, 20, 0.18);
 
   /* Text — muted/subtle measured against bg, surface, and surface-2 to
      clear WCAG AA (4.5:1) on all three; the original slate-500/slate-400
      pairing read fine in isolation but measured as low as 2.4:1 on some
      surfaces. */
-  --color-fg: #111827;
-  --color-fg-muted: #475467;
-  --color-fg-subtle: #5a6577;
+  --color-fg: #1c1a17;
+  --color-fg-muted: #57524a;
+  --color-fg-subtle: #655f55;
 
   /* Brand accent — the 지니에듀테크 gem's blue (white text on it is 7.7:1) */
   --color-accent: #1450a8;
@@ -132,17 +134,17 @@
   --gem-3: #2b66d9;
 }
 
-/* Dark mode — the toggle theme: deep navy surfaces under the same blue. */
+/* Dark mode — the toggle theme: warm charcoal surfaces under the same blue. */
 .dark {
-  --color-bg: #0e131f;
-  --color-surface: #151c2c;
-  --color-surface-2: #1d2538;
-  --color-hairline: rgba(220, 230, 255, 0.09);
-  --color-hairline-str: rgba(220, 230, 255, 0.16);
+  --color-bg: #141311;
+  --color-surface: #1c1b18;
+  --color-surface-2: #26241f;
+  --color-hairline: rgba(255, 240, 220, 0.09);
+  --color-hairline-str: rgba(255, 240, 220, 0.16);
 
-  --color-fg: #eef2f8;
-  --color-fg-muted: #aab4c5;
-  --color-fg-subtle: #939eb2;
+  --color-fg: #f3efe8;
+  --color-fg-muted: #b8b1a5;
+  --color-fg-subtle: #a39c8f;
   --color-danger: #fb7185;
 
   --color-accent: #2563c9;
@@ -177,14 +179,14 @@
  * clear AA on the page background; dark values are tuned for the dark theme.
  */
 :root {
-  /* The gem's blues: the gradient on primary buttons and highlighted
-     text runs from the lighter to the deeper one. (The cyan/violet names
-     are from the first prototype; every component reads them.) */
-  --studio-cyan: #2a6fd0;
-  --studio-violet: #12449a;
+  /* Both set to the signature blue, so anything still drawing a
+     cyan→violet gradient renders as one flat colour. (The names are
+     from the first prototype; many components read them.) */
+  --studio-cyan: #1450a8;
+  --studio-violet: #1450a8;
   --studio-success: oklch(0.55 0.13 160);
   --studio-warning: oklch(0.7 0.16 75);
-  --studio-grid: oklch(0.3 0.04 255 / 4%);
+  --studio-grid: oklch(0.35 0.03 70 / 3.5%);
   /* Tool-area hues. Light values hold AA as text on the page background. */
   --cat-discover: oklch(0.58 0.15 55);
   --cat-brand: oklch(0.56 0.19 10);
@@ -193,8 +195,8 @@
   --cat-research: oklch(0.52 0.15 250);
 }
 .dark {
-  --studio-cyan: #2a6ad0;
-  --studio-violet: #1a47a3;
+  --studio-cyan: #2563c9;
+  --studio-violet: #2563c9;
   --studio-success: oklch(0.79 0.17 160);
   --studio-warning: oklch(0.78 0.16 78);
   --studio-grid: oklch(1 0 0 / 2.5%);
@@ -205,13 +207,12 @@
   --cat-research: oklch(0.76 0.12 245);
 }
 
-.studio-gradient-bg { background-image: linear-gradient(135deg, var(--studio-cyan), var(--studio-violet)); }
-.studio-gradient-type {
-  background-image: linear-gradient(90deg, var(--studio-cyan), var(--studio-violet));
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-}
+/* One signature colour, no gradients (docs/redesign-plan.md). The class
+   names stay so every button and highlight follows from here. */
+.studio-gradient-bg { background-color: var(--color-accent); }
+a.studio-gradient-bg:hover, button.studio-gradient-bg:hover:not(:disabled) { background-color: var(--color-accent-hover); }
+.studio-gradient-type { color: var(--color-accent); }
+.dark .studio-gradient-type { color: #7ab6ff; }
 
 
 /*
@@ -227,7 +228,7 @@
   --glass-rim: transparent;
   --glass-edge: var(--color-hairline);
   --glass-sheen: transparent;
-  --glass-shadow: 0 1px 2px oklch(0.3 0.03 255 / 8%), 0 14px 32px -18px oklch(0.3 0.06 255 / 28%);
+  --glass-shadow: 0 1px 2px oklch(0.3 0.03 60 / 8%), 0 14px 32px -18px oklch(0.3 0.04 60 / 26%);
   --spring: cubic-bezier(0.22, 1.25, 0.36, 1);
   --ease-glide: cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -284,16 +285,8 @@
   background-size: 64px 64px;
   mask-image: radial-gradient(ellipse at 40% 20%, black, transparent 75%);
 }
-/* Soft colour behind the app pages, so white panels stand off the page. */
-.app-backdrop::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(48rem 30rem at 8% -6%, color-mix(in oklch, var(--studio-cyan) 16%, transparent), transparent 70%),
-    radial-gradient(40rem 28rem at 100% 12%, color-mix(in oklch, var(--cat-campaign) 12%, transparent), transparent 70%),
-    radial-gradient(44rem 30rem at 60% 110%, color-mix(in oklch, var(--cat-operate) 9%, transparent), transparent 70%);
-}
+/* No colour blobs behind the app: panels stand off the warm page on
+   their own (the redesign drops decorative gradients). */
 
 /* Inside the signed-in app (AppShell's <main>), text runs one step larger
    than the marketing pages: Tailwind's text-* utilities read these vars. */
@@ -324,7 +317,7 @@ h1, h2, h3 { text-wrap: balance; }
 p { text-wrap: pretty; }
 
 /* Range slider used by tool controls (--fill set inline). */
-.ex-range { -webkit-appearance: none; appearance: none; height: 6px; border-radius: 999px; background: linear-gradient(90deg, var(--studio-cyan) 0, var(--studio-violet) var(--fill, 0%), color-mix(in oklch, var(--color-fg) 12%, transparent) var(--fill, 0%)); outline: none; }
+.ex-range { -webkit-appearance: none; appearance: none; height: 6px; border-radius: 999px; background: linear-gradient(90deg, var(--color-accent) 0, var(--color-accent) var(--fill, 0%), color-mix(in oklch, var(--color-fg) 12%, transparent) var(--fill, 0%)); outline: none; }
 .ex-range::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: var(--color-bg); border: 3px solid var(--studio-cyan); box-shadow: 0 2px 10px color-mix(in oklch, var(--studio-cyan) 45%, transparent); cursor: pointer; transition: transform 300ms var(--spring); }
 .ex-range::-webkit-slider-thumb:hover { transform: scale(1.12); }
 .ex-range::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--color-bg); border: 3px solid var(--studio-cyan); cursor: pointer; }
