@@ -5,6 +5,7 @@ import { CATEGORY_ORDER as CATEGORY_ORDER_ALL } from "@/lib/tools/catalog";
 import { BrandLogo, BrandMark } from "@/components/brand-mark";
 import { useEffect, useMemo, useState, useSyncExternalStore, useTransition } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "motion/react";
 import { FolderKanban, AlertTriangle, CircleGauge, CircleHelp, CircleUserRound, Coins, Crown, KeyRound, LayoutGrid, Library, LogOut, Moon, Search, Sparkles, Sun, UserRound, Wand2, X, Zap, type LucideIcon } from "lucide-react";
@@ -23,6 +24,7 @@ import { useLocalList, useLocalValue } from "@/lib/hooks/use-local-list";
 import { useBi, useLocale } from "@/lib/i18n/context";
 import type { CategoryId, ToolManifest } from "@/lib/tools/types";
 import type { PlanId } from "@/lib/site/plans";
+import { PAGE_ART } from "@/components/site/tone";
 import { cn } from "@/lib/utils";
 
 // Haeba's own shell: content first, navigation as a floating liquid-glass
@@ -194,6 +196,17 @@ function runsOnOwnKey(signedIn: boolean, plan: PlanId, host: boolean): boolean {
   return OWN_KEY_ONLY || (FREE_OWN_KEY && signedIn && !host && !isPaidPlan(plan));
 }
 
+
+/** A 3D glass icon for an account-menu row (public/images/icons), or the line icon if there's none. */
+function MenuArt({ src, fallback: Icon }: { src?: string; fallback: LucideIcon }) {
+  if (!src) return <Icon aria-hidden />;
+  return (
+    <span className="relative size-7 shrink-0 drop-shadow-[0_3px_6px_rgb(30_40_80/0.18)] dark:drop-shadow-[0_3px_8px_rgb(124_58_237/0.35)]" aria-hidden>
+      <Image src={src} alt="" fill sizes="28px" className="object-contain" />
+    </span>
+  );
+}
+
 function UserMenu({ email, plan, credits, host }: { email: string; plan: PlanId; credits: string; host: boolean }) {
   const L = useBi();
   const router = useRouter();
@@ -232,13 +245,13 @@ function UserMenu({ email, plan, credits, host }: { email: string; plan: PlanId;
         ) : null}
         <DropdownMenuSeparator />
         {links.map((item) => (
-          <DropdownMenuItem key={item.href} onClick={() => router.push(item.href)} className="rounded-lg px-2.5 py-2">
-            <item.icon aria-hidden /> {L(item.label)}
+          <DropdownMenuItem key={item.href} onClick={() => router.push(item.href)} className="gap-2.5 rounded-lg px-2 py-1.5">
+            <MenuArt src={PAGE_ART[item.href]} fallback={item.icon} /> {L(item.label)}
           </DropdownMenuItem>
         ))}
         <DropdownMenuSeparator />
-        <DropdownMenuItem disabled={signingOut} onClick={() => startSignOut(() => signOut())} className="rounded-lg px-2.5 py-2">
-          <LogOut aria-hidden /> {signingOut ? L({ ko: "로그아웃 중…", en: "Signing out…" }) : L({ ko: "로그아웃", en: "Log out" })}
+        <DropdownMenuItem disabled={signingOut} onClick={() => startSignOut(() => signOut())} className="gap-2.5 rounded-lg px-2 py-1.5">
+          <MenuArt src={PAGE_ART.logout} fallback={LogOut} /> {signingOut ? L({ ko: "로그아웃 중…", en: "Signing out…" }) : L({ ko: "로그아웃", en: "Log out" })}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
