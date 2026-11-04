@@ -464,3 +464,22 @@ p { text-wrap: pretty; }
 @keyframes run-progress-shimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
 .run-progress-shimmer { background: linear-gradient(90deg, transparent, oklch(1 0 0 / 45%), transparent); animation: run-progress-shimmer 1.6s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .run-progress-shimmer { animation: none; } }
+
+/* Phones: card rows (Studio areas, workflows, gallery) become one swipeable
+   row instead of a tall stack. Unlayered so it wins over the grid utilities;
+   from 640px up the grid classes apply as written. */
+@media (max-width: 639px) {
+  .m-rail {
+    display: flex;
+    gap: 0.75rem;
+    margin-inline: -1rem;
+    padding: 0.25rem 1rem 0.75rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 1rem;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+  .m-rail::-webkit-scrollbar { display: none; }
+  .m-rail > * { flex: 0 0 78%; scroll-snap-align: start; min-width: 0; }
+}

@@ -162,11 +162,11 @@ export function PromoStrip() {
           <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-surface text-accent shadow-sm">
             <p.icon size={18} aria-hidden />
           </span>
-          <span className="min-w-0 flex-1">
+          <span className="min-w-0 flex-1 max-sm:basis-[calc(100%-52px)]">
             <span className="block text-2xs font-semibold tracking-wide text-accent">{L(p.kicker)}</span>
             <span className="block text-sm font-semibold break-keep text-fg">{L(p.title)}</span>
           </span>
-          <Link href={p.href} className="inline-flex items-center gap-1 rounded-full bg-surface px-3 py-1.5 text-xs font-semibold text-fg shadow-sm hover:text-accent">
+          <Link href={p.href} className="inline-flex items-center gap-1 rounded-full bg-surface px-3 py-1.5 text-xs font-semibold text-fg shadow-sm hover:text-accent max-sm:ml-[52px]">
             {L(p.cta)} <ArrowRight size={12} aria-hidden />
           </Link>
         </motion.div>
@@ -195,18 +195,18 @@ export function CategoryRail() {
           </h2>
           <p className="mt-1 text-sm text-fg-muted">{L({ ko: "아이디어부터 매출, 운영까지 — 결과가 다음 도구로 이어져요", en: "From the idea to revenue and operations — each result carries into the next tool" })}</p>
         </div>
-        <Link href="/tools" className="text-xs font-semibold text-accent hover:underline">
+        <Link href="/tools" className="shrink-0 text-xs font-semibold whitespace-nowrap text-accent hover:underline">
           {L({ ko: "전체 보기", en: "See all" })}
         </Link>
       </div>
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="m-rail mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {CATEGORY_ORDER.map((c, i) => {
           const tools = toolsIn(c);
           const Lead = tools[0]?.icon;
           return (
             <Reveal key={c} delay={i * 0.06}>
               <Link href={`/tools?category=${c}`} className="group relative flex h-full flex-col overflow-hidden rounded-[22px] border border-hairline bg-surface p-4 transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-[0_24px_50px_-30px_rgba(0,0,0,0.45)]">
-                <span className="relative -mx-4 -mt-4 mb-1 block aspect-[4/3] overflow-hidden bg-[#dfe6ee]">
+                <span className="relative -mx-4 -mt-4 mb-1 block aspect-[16/10] overflow-hidden sm:aspect-[4/3] bg-[#dfe6ee]">
                   <Image src={AREA_ART[c]} alt="" fill sizes="(min-width: 1024px) 220px, (min-width: 640px) 45vw, 90vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.04] dark:brightness-[0.92]" />
                   <span className={cn("absolute top-3 right-3 rounded-full bg-surface px-2 py-0.5 font-mono text-2xs font-semibold", TONE[c].text)}>{tools.length}</span>
                 </span>
@@ -248,7 +248,7 @@ export function WorkflowShowcase({ projectId }: { projectId?: string }) {
         {L({ ko: "추천 작업 흐름", en: "Workflows that work" })}
       </h2>
       <p className="mt-1 text-sm text-fg-muted">{L({ ko: "앞 도구의 결과가 다음 도구의 입력을 채워요. 첫 단계부터 시작해 보세요.", en: "Each result fills the next tool's inputs. Start with the first step." })}</p>
-      <div className="mt-4 grid gap-3 lg:grid-cols-3">
+      <div className="m-rail mt-4 grid gap-3 lg:grid-cols-3">
         {FLOWS.map((f, i) => (
           <Reveal key={f.name.en} delay={i * 0.08}>
             <div className="rise group/flow flex h-full flex-col overflow-hidden rounded-[22px] border border-hairline bg-surface">
@@ -386,7 +386,7 @@ export function ResultGallery() {
       <h2 id="gallery" className="font-display text-xl font-bold text-fg">
         {L({ ko: "이런 결과를 만들어요", en: "What you can make" })}
       </h2>
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="m-rail mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {GALLERY.map((g, i) => {
           const t = catalogTool(g.slug);
           if (!t) return null;

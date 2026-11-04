@@ -319,7 +319,7 @@ function AppShell({ user, balance, plan, host = false, answeredTickets, notices,
       {/* Floating top cluster: brand chip + search pill. */}
       <header className="pointer-events-none sticky top-0 z-30 px-3 pt-[max(12px,env(safe-area-inset-top))] pb-3 md:px-6 lg:pr-28">
         {/* Soft fade so page content scrolling under the chips never reads as overlap. */}
-        <div aria-hidden className="absolute inset-x-0 top-0 -z-10 h-[88px] bg-gradient-to-b from-bg via-bg/80 to-transparent" />
+        <div aria-hidden className="absolute inset-x-0 top-0 -z-10 h-[88px] bg-gradient-to-b from-bg via-bg/80 to-transparent max-lg:h-[76px] max-lg:from-bg/85 max-lg:via-bg/70 max-lg:backdrop-blur-md max-lg:[mask-image:linear-gradient(to_bottom,black_72%,transparent)]" />
         <div className="mx-auto flex max-w-[1240px] items-center gap-2">
           <Link href="/studio" className="glass pointer-events-auto flex h-11 items-center gap-2.5 rounded-2xl pr-4 pl-1.5">
             <BrandMark size={30} label={L({ ko: "AI 해바", en: "AI Haeba" })} className="ml-1 min-[440px]:hidden" />
