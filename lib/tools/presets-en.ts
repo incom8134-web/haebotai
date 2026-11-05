@@ -35,8 +35,10 @@ const PRESET_VALUES_EN: Record<string, Record<number, Record<string, string | st
     2: { topic: "What a first-year freelance designer should do in January for taxes", product: "Tax filing service for freelancers", audience: "Freelance designers in their first year" },
   },
   "content-transformer": {
-    0: { source: "How to choose running shoes: most beginners pick shoes for looks, but cushioning, width and drop matter more. Walk for 10 minutes in the store, try them on in the evening when your feet are largest, and measure your stride with a phone. The first 3 months, run 20 minutes, 3 times a week.", audience: "People starting running in their 20s–40s", cta: "Book a free gait test in store" },
+    0: { source: "How to choose running shoes: most beginners pick shoes for looks, but cushioning, width and drop matter more. Walk for 10 minutes in the store, try them on in the evening when your feet are largest, and measure your stride with a phone. The first 3 months, run 20 minutes, 3 times a week.", audience: "People starting running in their 20s–40s", cta: "Book a free gait test in store", hashtags: ["#runningshoes", "#newrunner"] },
     1: { source: "Lecture notes: The 3 questions that decide a small business's pricing — 1) what does the customer compare you with? 2) what does the customer lose if they don't buy? 3) what is the smallest unit they'd buy first? Most owners price from cost, but customers price from alternatives.", audience: "Small business owners", cta: "Subscribe to the newsletter" },
+    2: { source: "One year in: last November we opened a 20 m² bakery in a Haeundae alley. The first month we had 12 customers a day; now it's 85 on average. Three things changed — opening at 7am, a fresh-from-the-oven alert at the same time every day, and 30% off leftover bread at 6pm. During anniversary week (18–24 Nov) salt bread is buy one, get one free.", audience: "Haeundae locals and morning commuters", cta: "Visit during anniversary week for 1+1 salt bread", hashtags: ["#haeundaebakery", "#saltbread", "#1styear"] },
+    3: { source: "Product page: low-sugar homemade granola, 500g. 4g sugar per 40g serving, Korean oats and almonds, baked in small batches every Tuesday. Straight into milk or yoghurt; keeps 3 weeks without refrigeration. ₩14,900, free shipping on 2 or more.", audience: "Office workers in their 30s who skip breakfast", cta: "First order via the link in bio", hashtags: ["#lowsugarsnack", "#granola"] },
   },
   "brand-dna": {
     0: { brand_name: "Onsaem Pediatric Clinic", offering: "A neighbourhood pediatric clinic with evening hours, for working parents of children under 10", target_customer: "Working parents in their 30s–40s", values: ["Explain clearly", "No rushing"], avoid: "Cold, hospital-like and intimidating" },
@@ -89,9 +91,10 @@ const PRESET_VALUES_EN: Record<string, Record<number, Record<string, string | st
   },
 
   blog: {
-    0: { topic: "New spring strawberry desserts", audience: "People in their 20s–30s who visit neighborhood cafés" },
-    1: { topic: "Tax deadlines sole proprietors miss in their first year", audience: "Self-employed owners in their first year" },
+    0: { topic: "New spring strawberry desserts", audience: "People in their 20s–30s who visit neighborhood cafés", sub_keywords: ["Haeundae dessert", "strawberry tart"] },
+    1: { topic: "Tax deadlines sole proprietors miss in their first year", audience: "Self-employed owners in their first year", sub_keywords: ["income tax", "VAT filing"] },
     2: { topic: "How to choose a home bread maker", audience: "Home-baking beginners" },
+    3: { topic: "Your first visit to a one-person hair salon in Mangwon-dong", audience: "Office workers in their 30s in Mangwon and Hapjeong", must_include_facts: "Weekdays 10:00–20:00, closed Tuesdays / cut ₩25,000 / bookings via Naver only", sub_keywords: ["Mangwon hair salon", "one-person salon"] },
   },
   keyword: {
     0: { primary_keyword: "custom cake order", region: "Haeundae, Busan" },
@@ -132,9 +135,10 @@ const PRESET_VALUES_EN: Record<string, Record<number, Record<string, string | st
     1: { context: "New low-sugar homemade granola, sold online to office workers in their 30s.", goal: "Secure repeat purchases in the first month" },
   },
   copy: {
-    0: { offer: "Spring strawberry tart launch, April only", audience: "People in their 20s–30s who visit neighborhood cafés", must_include: ["April only", "₩6,500 a slice"] },
-    1: { offer: "Low-sugar granola subscription launch, 20% off the first month", must_include: ["20% off month one", "Under 5g sugar"] },
+    0: { offer: "Spring strawberry tart launch, April only", audience: "People in their 20s–30s who visit neighborhood cafés", must_include: ["April only", "₩6,500 a slice"], deadline: "Until 30 April", avoid_words: ["Best ever", "Guaranteed"] },
+    1: { offer: "Low-sugar granola subscription launch, 20% off the first month", must_include: ["20% off month one", "Under 5g sugar"], deadline: "First 100 people" },
     2: { offer: "Online booking opens for a one-person hair salon", audience: "Office workers in their 30s in Mangwon-dong" },
+    3: { offer: "Pilates studio opening — first class free", audience: "Working women in their 30s–40s in Seongsu-dong", must_include: ["First class free", "1:4 small groups"], deadline: "Until 30 November", avoid_words: ["Lose weight fast", "100% results"] },
   },
   presentation: {
     0: { brief: "Spring strawberry dessert launch — opportunity, target customers, offer, channels, timeline", audience: "Store staff and partner café owners" },

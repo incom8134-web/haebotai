@@ -5,8 +5,10 @@ import { useBi } from "@/lib/i18n/context";
 import { useLocalValue } from "@/lib/hooks/use-local-list";
 import { cn } from "@/lib/utils";
 import { objs, str } from "@/lib/tools/report/util";
+import { PlanCalendar } from "./plan-calendar";
 
-// 할 일 계획 세우기 result: one plan, three ways to work it. 칸반 shows a chosen
+// 할 일 계획 세우기 result: one plan, four ways to work it. 캘린더 puts every
+// task on its date in a month grid (with an .ics export); 칸반 shows a chosen
 // week's tasks as 할 일 / 하는 중 / 완료; 타임라인 lays the phases and
 // milestones over 13 weeks with how far each week is done; 체크리스트
 // lists every task by week. All three share one status per task, kept in
@@ -15,7 +17,7 @@ import { objs, str } from "@/lib/tools/report/util";
 type Status = "todo" | "doing" | "done";
 const DAYS = ["", "월", "화", "수", "목", "금", "토", "일"];
 
-export function OpsBoard({ output, runId }: { output: Record<string, unknown>; runId?: string }) {
+export function OpsBoard({ output, input, runId }: { output: Record<string, unknown>; input?: Record<string, unknown>; runId?: string }) {
   const L = useBi();
   const weeks = objs(output.weeks).map((w) => ({
     no: Number(w.week_no) || 0,
@@ -31,7 +33,7 @@ export function OpsBoard({ output, runId }: { output: Record<string, unknown>; r
     status = {};
   }
   const setStatus = (key: string, s: Status) => setRaw(JSON.stringify({ ...status, [key]: s }));
-  const [tab, setTab] = useState<"kanban" | "timeline" | "checklist">("kanban");
+  const [tab, setTab] = useState<"calendar" | "kanban" | "timeline" | "checklist">("calendar");
   const firstOpen = weeks.find((w) => w.tasks.some((t) => status[t.key] !== "done"))?.no ?? 1;
   const [week, setWeek] = useState<number | null>(null);
   const current = weeks.find((w) => w.no === (week ?? firstOpen)) ?? weeks[0];
@@ -51,6 +53,7 @@ export function OpsBoard({ output, runId }: { output: Record<string, unknown>; r
         <div className="ml-auto flex gap-1 rounded-xl bg-surface-2 p-1 text-xs" role="tablist">
           {(
             [
+              ["calendar", L({ ko: "캘린더", en: "Calendar" })],
               ["kanban", L({ ko: "칸반", en: "Kanban" })],
               ["timeline", L({ ko: "타임라인", en: "Timeline" })],
               ["checklist", L({ ko: "체크리스트", en: "Checklist" })],
@@ -65,6 +68,18 @@ export function OpsBoard({ output, runId }: { output: Record<string, unknown>; r
       <div className="h-1.5 overflow-hidden rounded-full bg-surface-2" aria-hidden>
         <div className="h-full rounded-full bg-accent" style={{ width: `${all.length ? (doneCount / all.length) * 100 : 0}%` }} />
       </div>
+
+      {tab === "calendar" ? (
+        <PlanCalendar
+          tasks={weeks.flatMap((w) => w.tasks.map((t) => ({ key: t.key, week: w.no, day: t.day, title: t.title, category: t.category, minutes: t.minutes, done: t.done })))}
+          milestones={weeks.map((w) => ({ week: w.no, text: w.milestone }))}
+          start={typeof input?.start_date === "string" ? input.start_date : undefined}
+          goal={str(output.goal)}
+          runId={runId}
+          status={status}
+          onStatus={setStatus}
+        />
+      ) : null}
 
       {tab === "kanban" && current ? (
         <section>

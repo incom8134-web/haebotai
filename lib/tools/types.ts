@@ -17,7 +17,7 @@ export type ToolField =
   | { kind: "multiselect"; id: string; label: string; options: FieldOption[]; max?: number }
   | { kind: "number"; id: string; label: string; min?: number; max?: number; unit?: string; required?: boolean }
   | { kind: "image"; id: string; label: string; maxFiles?: number; maxMB?: number; required?: boolean }
-  | { kind: "url"; id: string; label: string; required?: boolean }
+  | { kind: "url"; id: string; label: string; placeholder?: string; required?: boolean }
   | { kind: "chips"; id: string; label: string; placeholder?: string; max?: number };
 
 export interface BusinessProfile {

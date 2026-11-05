@@ -47,6 +47,8 @@ export const blog: ToolManifest = {
       ],
     },
     { kind: "textarea", id: "must_include_facts", label: "포함할 사실", rows: 2 },
+    { kind: "image", id: "photos", label: "글에 넣을 사진 (선택)", maxFiles: 6 },
+    { kind: "chips", id: "sub_keywords", label: "함께 넣을 키워드", max: 6 },
   ],
   usesProfile: ["brand_name", "industry", "region", "tone", "voice_examples", "target_customer"],
   acceptsChainFrom: ["keyword"],

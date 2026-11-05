@@ -1,4 +1,4 @@
-import { Aperture, ArrowRight, Badge, BadgeAlert, BadgeCheck, Ban, Banknote, BookOpen, Box, Braces, Calculator, CalendarCheck, CalendarClock, CalendarDays, CalendarRange, Camera, ChartColumn, Clapperboard, ClipboardCheck, CodeXml, Coffee, Compass, Feather, FileCode, FileDown, Flag, Flame, FlaskConical, FolderArchive, Footprints, Funnel, GalleryHorizontal, Gem, Globe, GraduationCap, Handshake, Heading, Heart, Image, Images, Landmark, Layers, LayoutList, LayoutTemplate, Leaf, LifeBuoy, Link, ListChecks, ListTree, MapPin, Megaphone, MessageSquare, Minus, MonitorSmartphone, Mountain, MousePointerClick, NotebookPen, Package, Repeat, Rocket, Route, Scale, Scan, ScanSearch, Search, Shapes, Shield, ShieldCheck, ShoppingBag, ShoppingCart, Smartphone, SquareDashed, Store, Target, Telescope, TrendingUp, Triangle, Trophy, Type, UserRound, VectorSquare, Zap, CircleDot, type LucideIcon } from "lucide-react";
+import { Aperture, ArrowRight, Badge, BadgeAlert, BadgeCheck, Ban, Banknote, BookOpen, Box, Braces, Calculator, CalendarCheck, CalendarClock, CalendarDays, CalendarRange, Camera, ChartColumn, Clapperboard, ClipboardCheck, CodeXml, Coffee, Compass, Feather, FileCode, FileDown, Flag, Flame, FlaskConical, FolderArchive, Footprints, Funnel, GalleryHorizontal, Gem, Globe, GraduationCap, Handshake, Heading, Heart, Image, Images, Landmark, Layers, LayoutList, LayoutTemplate, Leaf, LifeBuoy, Link, ListChecks, ListTree, MapPin, Megaphone, MessageSquare, Minus, MonitorSmartphone, Mountain, MousePointerClick, NotebookPen, Package, Repeat, Rocket, Route, Scale, Scan, ScanSearch, Search, Shapes, Shield, ShieldCheck, ShoppingBag, ShoppingCart, Smartphone, Smile, Sparkles, SquareDashed, Store, Target, Telescope, TrendingUp, Triangle, Trophy, Type, UserRound, VectorSquare, Zap, CircleDot, type LucideIcon } from "lucide-react";
 
 // Icon names used in lib/tools/experience-*.json → components.
 const ICONS: Record<string, LucideIcon> = {
@@ -40,6 +40,8 @@ const ICONS: Record<string, LucideIcon> = {
   "handshake": Handshake,
   "heading": Heading,
   "heart": Heart,
+  "smile": Smile,
+  "sparkles": Sparkles,
   "image": Image,
   "images": Images,
   "landmark": Landmark,

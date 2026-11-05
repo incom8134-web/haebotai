@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { ArrowRight, ChevronDown, FlaskConical, Star, Trophy } from "lucide-react";
+import { ArrowRight, ChevronDown, FileDown, FlaskConical, Search, Star, Trophy } from "lucide-react";
 import { useBi } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
-import { ARCHETYPE_LABELS, IDEA_AXES, readIdeas } from "@/lib/tools/report/idea-radar";
+import { ARCHETYPE_LABELS, AXIS_MAX, IDEA_AXES, ideaResearchMarkdown, readIdeas } from "@/lib/tools/report/idea-radar";
 import { PALETTES } from "@/lib/tools/report/util";
 import { Chart } from "@/components/results/report-view";
 import { SectionTitle, useLocalSet } from "./shared";
@@ -17,6 +17,7 @@ import { SectionTitle, useLocalSet } from "./shared";
 
 const AXIS_EN: Record<string, string> = { fit: "Fit", demand: "Demand", speed: "Speed", capital: "Low capital", edge: "Edge" };
 const NEXT = [
+  { slug: "market-desk", ko: "시장 조사하기", en: "Research the market" },
   { slug: "revenue-mapper", ko: "수익 구조 짜기", en: "Map revenue" },
   { slug: "mvp-blueprint", ko: "시험용 첫 상품 설계", en: "Plan the MVP" },
   { slug: "market-gap", ko: "시장 빈틈 확인", en: "Check the market" },
@@ -25,7 +26,7 @@ const NEXT = [
 
 type SortKey = "total" | (typeof IDEA_AXES)[number]["key"];
 
-export function IdeaBoard({ output, runId }: { output: Record<string, unknown>; runId?: string }) {
+export function IdeaBoard({ output, input, runId }: { output: Record<string, unknown>; input?: Record<string, unknown>; runId?: string }) {
   const L = useBi();
   const ideas = useMemo(() => readIdeas(output).map((idea, index) => ({ ...idea, index })), [output]);
   const rec = (output.recommendation ?? {}) as { pick?: string; reason?: string; runner_up?: string };
@@ -41,6 +42,16 @@ export function IdeaBoard({ output, runId }: { output: Record<string, unknown>; 
     .sort((a, b) => (sort === "total" ? b.total - a.total : b.scores[axisIndex(sort)] - a.scores[axisIndex(sort)]));
   const compared = ideas.filter((i) => compare.includes(i.index));
   const axisLabel = (key: string, ko: string) => L({ ko, en: AXIS_EN[key] ?? ko });
+  // The market-research brief for the recommended (or best-scoring) idea, as a Markdown file.
+  const downloadResearch = () => {
+    const md = ideaResearchMarkdown(output, input ?? {});
+    if (!md) return;
+    const top = md.split("\n")[0].replace(/^# 시장 조사: /, "").replace(/[\\/:*?"<>|]+/g, "").trim().slice(0, 40);
+    const url = URL.createObjectURL(new Blob([md], { type: "text/markdown;charset=utf-8" }));
+    const a = Object.assign(document.createElement("a"), { href: url, download: `시장조사_${top || "아이디어"}.md` });
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
 
   return (
     <div className="mt-3 flex flex-col gap-5">
@@ -58,6 +69,22 @@ export function IdeaBoard({ output, runId }: { output: Record<string, unknown>; 
               {L({ ko: "다음 후보", en: "Runner-up" })}: {rec.runner_up}
             </p>
           ) : null}
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button type="button" onClick={downloadResearch} className="studio-gradient-bg inline-flex h-9 items-center gap-1.5 rounded-full px-4 text-xs font-semibold text-white">
+              <FileDown className="size-3.5" aria-hidden /> {L({ ko: "시장 조사 문서 받기 (.md)", en: "Market-research brief (.md)" })}
+            </button>
+            {runId ? (
+              <Link href={`/tools/market-desk/run?fromRun=${runId}&pick=${Math.max(0, ideas.findIndex((i) => i.name === rec.pick))}`} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-hairline-str bg-surface px-4 text-xs font-semibold text-fg hover:border-accent/50">
+                <Search className="size-3.5 text-accent" aria-hidden /> {L({ ko: "출처 달린 시장 조사로 이어가기", en: "Continue to sourced research" })}
+              </Link>
+            ) : null}
+          </div>
+        </div>
+      ) : ideas.length ? (
+        <div className="flex flex-wrap gap-2">
+          <button type="button" onClick={downloadResearch} className="studio-gradient-bg inline-flex h-9 items-center gap-1.5 rounded-full px-4 text-xs font-semibold text-white">
+            <FileDown className="size-3.5" aria-hidden /> {L({ ko: "시장 조사 문서 받기 (.md)", en: "Market-research brief (.md)" })}
+          </button>
         </div>
       ) : null}
 
@@ -99,12 +126,14 @@ export function IdeaBoard({ output, runId }: { output: Record<string, unknown>; 
             <article key={idea.index} className={cn("flex flex-col rounded-2xl border bg-surface p-4", idea.name === rec.pick ? "border-accent/50" : "border-hairline")}>
               <header className="flex items-start gap-2">
                 <div className="min-w-0 flex-1">
-                  <p className="text-2xs text-fg-subtle">
-                    {ARCHETYPE_LABELS[idea.archetype] ?? idea.archetype} · {L({ ko: "총점", en: "Total" })} {idea.total}/50
-                  </p>
+                  <p className="text-2xs text-fg-subtle">{ARCHETYPE_LABELS[idea.archetype] ?? idea.archetype}</p>
                   <h4 className="mt-0.5 text-base leading-snug font-bold text-fg break-keep">{idea.name}</h4>
                   {idea.oneLiner ? <p className="mt-1 text-sm leading-relaxed text-fg-muted break-keep">{idea.oneLiner}</p> : null}
                 </div>
+                <p className="shrink-0 text-right leading-none" aria-label={L({ ko: `총점 ${idea.total}점 (100점 만점)`, en: `Total ${idea.total} of 100` })}>
+                  <span className="font-display text-3xl font-bold text-accent tabular-nums">{idea.total}</span>
+                  <span className="text-xs text-fg-subtle">/100</span>
+                </p>
                 <button
                   type="button"
                   onClick={() => toggleFav(String(idea.index))}
@@ -118,12 +147,12 @@ export function IdeaBoard({ output, runId }: { output: Record<string, unknown>; 
 
               <dl className="mt-3 grid gap-1.5">
                 {IDEA_AXES.map((a, i) => (
-                  <div key={a.key} className="grid grid-cols-[4.5rem_1fr_1.5rem] items-center gap-2 text-xs">
+                  <div key={a.key} className="grid grid-cols-[4.5rem_1fr_2.75rem] items-center gap-2 text-xs">
                     <dt className="text-fg-subtle">{axisLabel(a.key, a.label)}</dt>
                     <dd className="h-1.5 overflow-hidden rounded-full bg-surface-2" aria-hidden>
-                      <span className="block h-full rounded-full bg-accent" style={{ width: `${idea.scores[i] * 10}%`, opacity: sort === a.key ? 1 : 0.7 }} />
+                      <span className="block h-full rounded-full bg-accent" style={{ width: `${(idea.scores[i] / AXIS_MAX) * 100}%`, opacity: sort === a.key ? 1 : 0.7 }} />
                     </dd>
-                    <dd className="text-right font-medium tabular-nums text-fg">{idea.scores[i]}</dd>
+                    <dd className="text-right font-medium tabular-nums text-fg">{idea.scores[i]}<span className="text-fg-subtle">/{AXIS_MAX}</span></dd>
                   </div>
                 ))}
               </dl>
@@ -206,7 +235,7 @@ export function IdeaBoard({ output, runId }: { output: Record<string, unknown>; 
             <Chart
               half
               palette={PALETTES["idea-radar"]}
-              spec={{ kind: "radar", axes: IDEA_AXES.map((a) => axisLabel(a.key, a.label)), series: compared.map((i) => ({ name: i.name, values: i.scores })), max: 10 }}
+              spec={{ kind: "radar", axes: IDEA_AXES.map((a) => axisLabel(a.key, a.label)), series: compared.map((i) => ({ name: i.name, values: i.scores })), max: AXIS_MAX }}
             />
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
@@ -221,7 +250,7 @@ export function IdeaBoard({ output, runId }: { output: Record<string, unknown>; 
                 <tbody>
                   {[
                     [L({ ko: "형태", en: "Type" }), (i: (typeof compared)[number]) => ARCHETYPE_LABELS[i.archetype] ?? i.archetype],
-                    [L({ ko: "총점", en: "Total" }), (i: (typeof compared)[number]) => `${i.total}/50`],
+                    [L({ ko: "총점", en: "Total" }), (i: (typeof compared)[number]) => `${i.total}/100`],
                     [L({ ko: "가격(추정)", en: "Price (est.)" }), (i: (typeof compared)[number]) => i.price],
                     ["MVP", (i: (typeof compared)[number]) => i.mvp],
                     [L({ ko: "첫 검증", en: "First test" }), (i: (typeof compared)[number]) => i.test.action],

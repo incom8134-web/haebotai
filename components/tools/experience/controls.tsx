@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Check } from "lucide-react";
+import { CalendarDays, Check } from "lucide-react";
 import { ToolForm } from "@/components/tool-form";
+import { addDays, isIsoDate, weekday } from "@/lib/tools/plan-calendar";
 import { useBi } from "@/lib/i18n/context";
 import type { FieldUi } from "@/lib/tools/experience";
 import type { ToolField } from "@/lib/tools/types";
@@ -275,15 +276,36 @@ function ExFieldBase({ field, ui, value, onChange }: { field: ToolField; ui?: Fi
   }
 
   if (display === "date" && field.kind === "text") {
+    // A calendar picker plus one-tap choices; for the 13-week plan, the finish date too.
+    const today = new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" });
+    const quick = [
+      { label: L({ ko: "오늘", en: "Today" }), v: today },
+      { label: L({ ko: "다음 주 월요일", en: "Next Monday" }), v: addDays(today, 8 - weekday(today)) },
+      { label: L({ ko: "다음 달 1일", en: "1st of next month" }), v: (() => { const [y, m] = today.split("-").map(Number); return new Date(Date.UTC(m === 12 ? y + 1 : y, m % 12, 1)).toISOString().slice(0, 10); })() },
+    ];
+    const v = typeof value === "string" ? value : "";
     return (
       <div>
         <Label field={field} />
-        <input type="date" value={(value as string) ?? ""} onChange={(e) => onChange(e.target.value)} aria-label={field.label} className="h-11 w-full rounded-xl border border-hairline bg-bg/40 px-3.5 text-sm text-fg outline-none focus:border-studio-cyan sm:max-w-xs" />
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="relative w-full sm:w-56">
+            <CalendarDays className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-accent" aria-hidden />
+            <input type="date" value={v} onChange={(e) => onChange(e.target.value)} aria-label={field.label} className="h-12 w-full rounded-2xl border border-hairline-str bg-surface pr-3 pl-10 text-[15px] font-medium text-fg shadow-[0_1px_2px_rgb(20_30_50/0.05)] outline-none transition-[border-color,box-shadow] focus:border-accent focus:shadow-[0_0_0_4px_color-mix(in_oklch,var(--color-accent)_14%,transparent)]" />
+          </span>
+          {quick.map((q) => (
+            <button key={q.label} type="button" aria-pressed={v === q.v} onClick={() => onChange(q.v)} className={cn("h-9 rounded-full border px-3.5 text-xs font-semibold transition-colors", v === q.v ? "border-accent bg-accent text-white" : "border-hairline bg-surface text-fg-muted hover:border-accent/50 hover:text-fg")}>
+              {q.label}
+            </button>
+          ))}
+        </div>
+        {field.id === "start_date" && isIsoDate(v) ? (
+          <p className="mt-2 text-xs text-fg-muted">{L({ ko: `13주 뒤 ${addDays(v, 13 * 7 - 1)}에 끝나요`, en: `Ends after 13 weeks, on ${addDays(v, 13 * 7 - 1)}` })}</p>
+        ) : null}
       </div>
     );
   }
 
   // Fallback: the generic renderer, one field at a time, with a better placeholder.
-  const withPlaceholder = ui?.placeholder && (field.kind === "text" || field.kind === "textarea" || field.kind === "chips") ? ({ ...field, placeholder: L(ui.placeholder) } as ToolField) : field;
+  const withPlaceholder = ui?.placeholder && (field.kind === "text" || field.kind === "textarea" || field.kind === "chips" || field.kind === "url") ? ({ ...field, placeholder: L(ui.placeholder) } as ToolField) : field;
   return <ToolForm fields={[withPlaceholder]} values={{ [field.id]: value }} onChange={(_, v) => onChange(v)} />;
 }
