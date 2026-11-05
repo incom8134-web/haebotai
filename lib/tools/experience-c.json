@@ -1070,6 +1070,19 @@
       },
       {
         "title": {
+          "ko": "사진 (선택)",
+          "en": "Photos (optional)"
+        },
+        "hint": {
+          "ko": "올린 사진을 보고 카드뉴스 장마다 어떤 사진을 쓸지, 캡션에 무엇을 말할지 정해 드려요",
+          "en": "We read your photos and choose which one goes on each slide and what the caption says about it"
+        },
+        "fields": [
+          "photos"
+        ]
+      },
+      {
+        "title": {
           "ko": "어디에 올릴까요",
           "en": "Where it goes"
         },
@@ -1080,15 +1093,30 @@
         "fields": [
           "targets",
           "audience",
-          "cta"
+          "tone"
+        ]
+      },
+      {
+        "title": {
+          "ko": "마무리",
+          "en": "Wrap-up"
+        },
+        "hint": {
+          "ko": "마지막 행동, 링크, 해시태그",
+          "en": "Final action, link and hashtags"
+        },
+        "fields": [
+          "cta",
+          "link",
+          "hashtags"
         ]
       }
     ],
     "ui": {
       "source": {
         "placeholder": {
-          "ko": "여기에 원본을 붙여 넣으세요",
-          "en": "Paste your source here"
+          "ko": "여기에 원본을 붙여 넣으세요 — 예: 블로그 글 전문, 유튜브 대본, 강의 메모",
+          "en": "Paste your source — e.g. a full blog post, a video script, lecture notes"
         }
       },
       "source_type": {
@@ -1101,6 +1129,57 @@
         "placeholder": {
           "ko": "예: 매장에서 무료 보행 분석 예약",
           "en": "e.g. book a free gait test"
+        }
+      },
+      "audience": {
+        "placeholder": {
+          "ko": "예: 러닝을 막 시작한 20~40대 직장인",
+          "en": "e.g. office workers in their 20s–40s new to running"
+        }
+      },
+      "tone": {
+        "display": "cards",
+        "options": {
+          "friendly": {
+            "icon": "smile",
+            "desc": {
+              "ko": "이웃에게 말하듯",
+              "en": "Like a neighbour"
+            }
+          },
+          "expert": {
+            "icon": "graduation-cap",
+            "desc": {
+              "ko": "근거와 숫자로",
+              "en": "With facts and numbers"
+            }
+          },
+          "witty": {
+            "icon": "sparkles",
+            "desc": {
+              "ko": "가볍고 재밌게",
+              "en": "Light and fun"
+            }
+          },
+          "warm": {
+            "icon": "heart",
+            "desc": {
+              "ko": "공감과 이야기로",
+              "en": "Empathy and story"
+            }
+          }
+        }
+      },
+      "link": {
+        "placeholder": {
+          "ko": "https:// 예약·구매·블로그 주소",
+          "en": "https:// booking, shop or blog"
+        }
+      },
+      "hashtags": {
+        "placeholder": {
+          "ko": "Enter로 추가 — 예: #러닝화추천 #부산러닝",
+          "en": "Press Enter — e.g. #runningshoes"
         }
       }
     },

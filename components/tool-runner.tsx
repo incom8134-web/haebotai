@@ -839,14 +839,16 @@ function ToolRunner({
         </>
       )}
 
-      <OutputLanguagePicker className="mt-6" />
-      <div className="mt-3 flex items-center gap-2">
+      <div className="sticky bottom-[calc(max(12px,env(safe-area-inset-bottom))+5.25rem)] z-20 mt-6 lg:bottom-3 flex items-center gap-x-4 gap-y-3 rounded-2xl border border-hairline bg-surface/90 p-2.5 shadow-[0_18px_40px_-24px_oklch(0.2_0.05_280/45%)] backdrop-blur-md sm:p-3.5">
+        <OutputLanguagePicker className="flex-nowrap [&>span]:hidden sm:[&>span]:inline-flex" />
+        <div className="ml-auto flex items-center gap-2">
+        <span className="hidden text-xs text-fg-subtle tabular-nums sm:inline">{L({ ko: `약 ${Math.max(1, Math.round(manifest.estimatedSeconds / 60))}분`, en: `~${Math.max(1, Math.round(manifest.estimatedSeconds / 60))} min` })}</span>
         <Button
           data-run-button
           onClick={() => handleRun()}
           loading={phase === "streaming" || phase === "understanding"}
           shortcut="⌘↵"
-          className="studio-gradient-bg h-11 rounded-full px-5 text-white shadow-[inset_0_1px_0_oklch(1_0_0/30%),0_12px_32px_-12px_var(--studio-violet)] transition-transform duration-500 ease-[var(--spring)] hover:-translate-y-0.5"
+          className="studio-gradient-bg h-11 min-w-32 rounded-full px-6 text-base font-semibold text-white shadow-[inset_0_1px_0_oklch(1_0_0/30%),0_12px_32px_-12px_var(--studio-violet)] transition-transform duration-500 ease-[var(--spring)] hover:-translate-y-0.5"
         >
           {t("run")}
         </Button>
@@ -855,6 +857,7 @@ function ToolRunner({
             {t("cancel")}
           </Button>
         ) : null}
+        </div>
       </div>
       {needsKey ? (
         <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm break-keep text-fg-muted">

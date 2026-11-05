@@ -205,14 +205,16 @@
     "sections": [
       { "title": { "ko": "무엇에 대해, 누구에게", "en": "About what, for whom" }, "hint": { "ko": "키워드 전략 결과를 이어받을 수도 있어요", "en": "Or chain in from Keyword Strategy" }, "fields": ["topic", "audience"] },
       { "title": { "ko": "어디에, 어떤 글로", "en": "Where, and what kind" }, "hint": { "ko": "플랫폼과 글 유형이 구조를 바꿔요", "en": "Platform and type change the structure" }, "fields": ["platform", "post_type", "length"] },
-      { "title": { "ko": "틀리면 안 되는 사실", "en": "Facts that must be right" }, "hint": { "ko": "가격, 영업시간, 주소처럼 확정된 정보", "en": "Prices, hours, addresses" }, "fields": ["must_include_facts"] }
+      { "title": { "ko": "틀리면 안 되는 사실", "en": "Facts that must be right" }, "hint": { "ko": "가격, 영업시간, 주소처럼 확정된 정보", "en": "Prices, hours, addresses" }, "fields": ["must_include_facts", "sub_keywords"] },
+      { "title": { "ko": "사진 (선택)", "en": "Photos (optional)" }, "hint": { "ko": "올린 사진을 보고 어느 소제목 뒤에 어떤 사진을 넣을지, 사진 설명(alt)까지 써 드려요", "en": "We read your photos, place each one under the right heading and write its alt text" }, "fields": ["photos"] }
     ],
     "ui": {
       "topic": { "placeholder": { "ko": "예: 봄 시즌 딸기 디저트 신메뉴", "en": "e.g. Our spring strawberry dessert menu" } },
       "platform": { "display": "cards", "options": { "naver": { "icon": "badge-check", "desc": { "ko": "검색 노출 중심", "en": "Search-first" } }, "tistory": { "icon": "file-code", "desc": { "ko": "구글·다음 검색 노출", "en": "Google SEO" } }, "brunch": { "icon": "feather", "desc": { "ko": "읽는 맛 중심", "en": "Reading-first" } }, "wordpress": { "icon": "globe", "desc": { "ko": "해외·자사 블로그", "en": "Own site" } } } },
       "post_type": { "display": "segmented" },
       "length": { "display": "slider-select" },
-      "must_include_facts": { "placeholder": { "ko": "예: 1조각 6,500원 / 오전 7시~오후 8시 / 월요일 휴무", "en": "e.g. ₩6,500 a slice / 7am–8pm / closed Mondays" } }
+      "must_include_facts": { "placeholder": { "ko": "예: 1조각 6,500원 / 오전 7시~오후 8시 / 월요일 휴무", "en": "e.g. ₩6,500 a slice / 7am–8pm / closed Mondays" } },
+      "sub_keywords": { "placeholder": { "ko": "Enter로 추가 — 예: 해운대 디저트, 딸기 타르트", "en": "Press Enter — e.g. Haeundae dessert" } }
     },
     "stage": { "headline": { "ko": "제목부터 해시태그까지, 한 편 완성", "en": "One finished post, title to hashtags" }, "story": { "ko": "브랜드 톤으로 쓰고, 사실은 출처와 함께. 어느 소제목 뒤에 어떤 사진을 넣을지도 알려 드려요.", "en": "Written in your brand voice, facts sourced, and it tells you which photo goes where." }, "promises": [ { "icon": "heading", "text": { "ko": "제목 5개", "en": "5 titles" } }, { "icon": "image", "text": { "ko": "이미지 자리", "en": "Image slots" } }, { "icon": "file-down", "text": { "ko": ".docx", "en": ".docx" } } ] }
   },
@@ -221,15 +223,20 @@
     "hero": { "title": { "ko": "같은 말, 채널마다 다르게", "en": "Same message, right for every channel" }, "story": { "ko": "인스타그램 캡션과 문자 한 통은 길이도, 말투도 달라야 합니다. 하나의 핵심 메시지를 정하고, 고객이 움직이는 이유별로 다른 각도의 카피를 씁니다.", "en": "An Instagram caption and a text message need different length and voice. We set one core message, then write different angles for each reason people act." } },
     "sections": [
       { "title": { "ko": "무엇을 알리나요", "en": "What you're announcing" }, "hint": { "ko": "한두 문장으로", "en": "In a sentence or two" }, "fields": ["offer", "audience", "goal"] },
+      { "title": { "ko": "광고 사진 (선택)", "en": "Ad photos (optional)" }, "hint": { "ko": "사진을 올리면 사진 속 장면에 맞춰 카피를 쓰고, 어떤 사진에 어떤 카피를 얹을지 짝지어 드려요", "en": "Upload photos and the copy is written for what's in them, paired photo by photo" }, "fields": ["photos"] },
       { "title": { "ko": "어디에 쓰나요", "en": "Where it will run" }, "hint": { "ko": "채널을 고르면 글자 수 제한도 함께 보여요", "en": "Pick channels to see their length limits" }, "fields": ["channels", "variants"] },
-      { "title": { "ko": "꼭 들어갈 사실", "en": "Facts to include" }, "hint": { "ko": "가격·기간은 여기에 넣어야 정확해요", "en": "Put prices and dates here to keep them exact" }, "fields": ["must_include"] }
+      { "title": { "ko": "꼭 들어갈 사실", "en": "Facts to include" }, "hint": { "ko": "가격·기간은 여기에 넣어야 정확해요", "en": "Put prices and dates here to keep them exact" }, "fields": ["must_include", "deadline", "link"] },
+      { "title": { "ko": "피할 표현 (선택)", "en": "Words to avoid (optional)" }, "hint": { "ko": "브랜드에 안 맞거나 광고 심의에 걸릴 말", "en": "Off-brand words or claims ad review would flag" }, "fields": ["avoid_words"] }
     ],
     "ui": {
       "offer": { "placeholder": { "ko": "예: 봄 딸기 타르트 출시, 4월 한 달 한정", "en": "e.g. Spring strawberry tart, April only" } },
       "goal": { "display": "cards", "options": { "awareness": { "icon": "megaphone", "desc": { "ko": "많이 보이게", "en": "Get seen" } }, "conversion": { "icon": "mouse-pointer-click", "desc": { "ko": "지금 사게", "en": "Get action" } }, "retention": { "icon": "repeat", "desc": { "ko": "다시 오게", "en": "Bring back" } } } },
       "channels": { "display": "toggles", "options": { "instagram": { "desc": { "ko": "캡션 ~2,200자", "en": "~2,200 chars" } }, "paid_social": { "desc": { "ko": "헤드라인 ~40자", "en": "~40-char headline" } }, "email": { "desc": { "ko": "제목 ~40자", "en": "~40-char subject" } }, "landing": { "desc": { "ko": "섹션 헤드라인", "en": "Section headlines" } }, "sms": { "desc": { "ko": "~90자 (SMS)", "en": "~90 chars" } } } },
       "variants": { "display": "slider", "min": 1, "max": 5, "step": 1, "unit": { "ko": "가지", "en": "each" } },
-      "must_include": { "placeholder": { "ko": "Enter로 추가 — 예: 4월 한정", "en": "Press Enter — e.g. April only" } }
+      "must_include": { "placeholder": { "ko": "Enter로 추가 — 예: 4월 한정", "en": "Press Enter — e.g. April only" } },
+      "deadline": { "placeholder": { "ko": "예: 4월 30일까지 / 선착순 50명", "en": "e.g. until 30 April / first 50 people" } },
+      "link": { "placeholder": { "ko": "https:// 예약·구매 페이지", "en": "https:// booking or shop page" } },
+      "avoid_words": { "placeholder": { "ko": "Enter로 추가 — 예: 최고, 무조건, 100% 효과", "en": "Press Enter — e.g. best ever, guaranteed" } }
     },
     "stage": { "headline": { "ko": "고객이 움직이는 이유만큼의 카피", "en": "Copy for every reason people act" }, "story": { "ko": "희소성, 품질, 편리함처럼 서로 다른 설득 각도로 헤드라인·본문·행동 유도를 쓰고, 채널별로 다시 다듬습니다. 피해야 할 표현 목록도 함께요.", "en": "Headline, body and CTA per persuasion angle — scarcity, quality, convenience — then tuned per channel, with words to avoid." }, "promises": [ { "icon": "layers", "text": { "ko": "동기별 각도", "en": "Angles by motive" } }, { "icon": "smartphone", "text": { "ko": "채널별 버전", "en": "Per-channel versions" } }, { "icon": "ban", "text": { "ko": "피할 표현", "en": "Words to avoid" } } ] }
   },

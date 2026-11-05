@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useMemo } from "react";
 import { X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Dropzone } from "@/components/ui/dropzone";
@@ -131,7 +132,7 @@ function ToolForm({
                   type={f.kind === "url" ? "url" : "text"}
                   value={(value as string) ?? ""}
                   maxLength={f.kind === "text" ? f.max : undefined}
-                  placeholder={f.kind === "text" ? f.placeholder : undefined}
+                  placeholder={f.placeholder ?? (f.kind === "url" ? "https://" : undefined)}
                   onChange={(e) => onChange(f.id, e.target.value)}
                 />
               </Field>
@@ -239,10 +240,7 @@ function ToolForm({
           case "image":
             return (
               <Field key={f.id} label={f.label} group>
-                <Dropzone
-                  maxFiles={f.maxFiles ?? 1}
-                  onFiles={(files) => onChange(f.id, files)}
-                />
+                <ImageField max={f.maxFiles ?? 1} value={value} onChange={(files) => onChange(f.id, files)} />
               </Field>
             );
 
@@ -250,6 +248,40 @@ function ToolForm({
             return null;
         }
       })}
+    </div>
+  );
+}
+
+// Uploaded photos as thumbnails with a remove button; new drops add to the
+// list until it is full, instead of replacing it.
+function ImageField({ max, value, onChange }: { max: number; value: unknown; onChange: (files: File[]) => void }) {
+  const L = useBi();
+  const files = useMemo(() => (Array.isArray(value) ? value.filter((v): v is File => typeof File !== "undefined" && v instanceof File) : []), [value]);
+  const urls = useMemo(() => files.map((f) => URL.createObjectURL(f)), [files]);
+  useEffect(() => () => urls.forEach((u) => URL.revokeObjectURL(u)), [urls]);
+  const room = max - files.length;
+  return (
+    <div className="flex flex-col gap-2">
+      {files.length > 0 ? (
+        <ul className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+          {files.map((f, i) => (
+            <li key={`${f.name}-${i}`} className="group relative aspect-square overflow-hidden rounded-xl border border-hairline bg-surface-2">
+              {/* eslint-disable-next-line @next/next/no-img-element -- local blob preview */}
+              <img src={urls[i]} alt={f.name} className="size-full object-cover" />
+              <span className="absolute bottom-1 left-1 rounded-full bg-black/60 px-1.5 text-[10px] font-semibold text-white tabular-nums">{i + 1}</span>
+              <button type="button" onClick={() => onChange(files.filter((_, k) => k !== i))} aria-label={L({ ko: `${i + 1}번 사진 빼기`, en: `Remove photo ${i + 1}` })} className="absolute top-1 right-1 grid size-6 place-items-center rounded-full bg-black/60 text-white hover:bg-black/80">
+                <X className="size-3.5" aria-hidden />
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {room > 0 ? (
+        <Dropzone maxFiles={room} onFiles={(added) => onChange([...files, ...added].slice(0, max))} className={files.length ? "[&_[data-slot=dropzone]]:!min-h-0 [&_[data-slot=dropzone]]:!p-3 [&_[data-slot=dropzone]>p:nth-of-type(2)]:hidden" : undefined} />
+      ) : (
+        <p className="text-xs text-fg-subtle">{L({ ko: `최대 ${max}장까지 올렸어요. 바꾸려면 사진을 빼 주세요.`, en: `That's the maximum of ${max}. Remove one to swap it.` })}</p>
+      )}
+      {files.length > 0 ? <p className="text-2xs text-fg-subtle">{L({ ko: `${files.length}/${max}장 · 번호 순서대로 결과에 쓰여요`, en: `${files.length}/${max} · used in this order` })}</p> : null}
     </div>
   );
 }

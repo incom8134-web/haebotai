@@ -598,7 +598,12 @@
           "topic": "봄 시즌 딸기 디저트 신메뉴",
           "audience": "동네 카페를 찾는 20~30대",
           "platform": "naver",
-          "length": "1500"
+          "length": "1500",
+          "post_type": "story",
+          "sub_keywords": [
+            "해운대 디저트",
+            "딸기 타르트"
+          ]
         }
       },
       {
@@ -614,7 +619,12 @@
           "topic": "1인 사업자가 첫해에 놓치는 세금 일정",
           "audience": "창업 1년 차 자영업자",
           "platform": "brunch",
-          "length": "2500"
+          "length": "2500",
+          "post_type": "info",
+          "sub_keywords": [
+            "종합소득세",
+            "부가세 신고"
+          ]
         }
       },
       {
@@ -630,7 +640,30 @@
           "topic": "가정용 제빵기 고르는 법",
           "audience": "홈베이킹 입문자",
           "platform": "tistory",
-          "length": "2500"
+          "length": "2500",
+          "post_type": "review"
+        }
+      },
+      {
+        "title": {
+          "ko": "매장 방문 후기형",
+          "en": "Visit-style review"
+        },
+        "tag": {
+          "ko": "네이버 플레이스",
+          "en": "Naver Place"
+        },
+        "values": {
+          "topic": "망원동 1인 미용실 첫 방문 안내",
+          "audience": "망원동·합정 30대 직장인",
+          "platform": "naver",
+          "post_type": "list",
+          "length": "1500",
+          "must_include_facts": "평일 10:00~20:00, 화요일 휴무 / 커트 25,000원 / 네이버 예약만 받음",
+          "sub_keywords": [
+            "망원동 미용실",
+            "1인 미용실"
+          ]
         }
       }
     ],
@@ -2141,6 +2174,11 @@
           "must_include": [
             "4월 한정",
             "1조각 6,500원"
+          ],
+          "deadline": "4월 30일까지",
+          "avoid_words": [
+            "최고",
+            "무조건"
           ]
         }
       },
@@ -2163,7 +2201,8 @@
           "must_include": [
             "첫 달 20%",
             "당류 5g 이하"
-          ]
+          ],
+          "deadline": "선착순 100명"
         }
       },
       {
@@ -2182,6 +2221,35 @@
             "landing"
           ],
           "variants": 2
+        }
+      },
+      {
+        "title": {
+          "ko": "오픈 이벤트 문자",
+          "en": "Grand-opening SMS"
+        },
+        "tag": {
+          "ko": "오픈",
+          "en": "Opening"
+        },
+        "values": {
+          "offer": "필라테스 스튜디오 오픈, 첫 수업 무료 체험",
+          "audience": "성수동 30~40대 직장 여성",
+          "goal": "conversion",
+          "channels": [
+            "sms",
+            "instagram"
+          ],
+          "variants": 2,
+          "must_include": [
+            "첫 수업 무료",
+            "1:4 소그룹"
+          ],
+          "deadline": "11월 30일까지",
+          "avoid_words": [
+            "살 빠지는",
+            "100% 효과"
+          ]
         }
       }
     ],
@@ -2359,19 +2427,19 @@
       "en": "Businesses you can start with what you have, scored side by side"
     },
     "description": {
-      "ko": "경력·관심·자금·시간·위험 감수를 넣으면 서로 다른 형태의 사업 아이디어 4~6개를 적합도·수요·속도·자본·우위 다섯 축으로 비교합니다. 아이디어마다 고객, 문제, 수익 방식, 시험용 첫 상품, 첫 검증 행동이 붙고, 고른 아이디어는 돈 버는 방법 정리·할 일 계획 세우기·사업 아이디어 찾기로 바로 이어집니다.",
-      "en": "Enter your experience, interests, budget, time and risk appetite to get 4–6 business ideas of different kinds, compared on fit, demand, speed, capital and edge. Each idea comes with a customer, problem, revenue model, MVP and first validation step — and your pick flows straight into Ways to earn, Plan the weeks ahead or Find business ideas."
+      "ko": "경력·관심·자금·시간·위험 감수를 넣으면 서로 다른 사업 아이디어 2개를 적합도·수요·속도·자본·우위 다섯 축(축마다 20점)으로 매겨 100점 만점으로 비교합니다. 아이디어마다 고객, 문제, 수익 방식, 시험용 첫 상품, 첫 검증 행동이 붙고, 1등 아이디어는 시장 조사 문서(Markdown)로 바로 받거나 다음 도구로 이어 갈 수 있어요.",
+      "en": "Enter your experience, interests, budget, time and risk appetite to get two different business ideas, each scored out of 100 on fit, demand, speed, capital and edge (20 points each). Each comes with a customer, problem, revenue model, MVP and first test — and you can download a market-research brief (Markdown) for the top idea or carry it into the next tool."
     },
     "features": [
       {
         "icon": "layers",
         "title": {
-          "ko": "다섯 축 점수 비교",
-          "en": "Five-axis scores"
+          "ko": "100점 만점 점수",
+          "en": "Scored out of 100"
         },
         "body": {
-          "ko": "아이디어마다 적합도·수요·속도·자본·우위를 같은 기준으로 매겨 나란히 봅니다.",
-          "en": "Every idea is scored on the same five axes so you can compare them directly."
+          "ko": "두 아이디어를 적합도·수요·속도·자본·우위(축마다 20점) 같은 기준으로 매겨 나란히 봅니다.",
+          "en": "Both ideas are scored on the same five axes (20 points each) so you can compare them directly."
         }
       },
       {
@@ -3514,7 +3582,12 @@
             "kakao"
           ],
           "audience": "러닝을 시작하는 20~40대",
-          "cta": "매장에서 무료 보행 분석 예약"
+          "cta": "매장에서 무료 보행 분석 예약",
+          "tone": "friendly",
+          "hashtags": [
+            "#러닝화추천",
+            "#러닝입문"
+          ]
         }
       },
       {
@@ -3535,7 +3608,61 @@
             "newsletter"
           ],
           "audience": "소상공인 사장님",
-          "cta": "뉴스레터 구독"
+          "cta": "뉴스레터 구독",
+          "tone": "expert"
+        }
+      },
+      {
+        "title": {
+          "ko": "오픈 1주년 이야기",
+          "en": "Our first anniversary"
+        },
+        "tag": {
+          "ko": "매장 소식",
+          "en": "Shop news"
+        },
+        "values": {
+          "source": "오픈 1년 회고: 작년 11월 해운대 골목에 6평짜리 빵집을 열었다. 첫 달 하루 손님은 12명이었고, 지금은 평균 85명이다. 바뀐 건 세 가지 — 오전 7시 오픈, 매일 같은 시간 갓 구운 빵 알림, 남은 빵 저녁 6시 30% 할인. 1주년 주간(11/18~11/24)에는 소금빵을 1+1로 드린다.",
+          "source_type": "notes",
+          "targets": [
+            "instagram_carousel",
+            "instagram_caption",
+            "kakao"
+          ],
+          "audience": "해운대 주민과 출근길 직장인",
+          "tone": "warm",
+          "cta": "1주년 주간에 방문해 소금빵 1+1 받기",
+          "hashtags": [
+            "#해운대빵집",
+            "#소금빵",
+            "#1주년"
+          ]
+        }
+      },
+      {
+        "title": {
+          "ko": "상품 소개를 릴스로",
+          "en": "Product page to Reels"
+        },
+        "tag": {
+          "ko": "쇼핑몰",
+          "en": "Online shop"
+        },
+        "values": {
+          "source": "상품 소개: 저당 수제 그래놀라 500g. 1회(40g) 당류 4g, 국산 귀리와 아몬드, 소량씩 매주 화요일 굽는다. 우유·요거트에 바로, 냉장 없이 3주 보관. 14,900원, 2봉 이상 무료배송.",
+          "source_type": "product_page",
+          "targets": [
+            "shorts_script",
+            "instagram_caption",
+            "threads"
+          ],
+          "audience": "아침을 거르는 30대 직장인",
+          "tone": "witty",
+          "cta": "프로필 링크에서 첫 주문",
+          "hashtags": [
+            "#저당간식",
+            "#그래놀라"
+          ]
         }
       }
     ],

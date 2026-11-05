@@ -1,12 +1,16 @@
 import { z } from "zod";
 
-// 사업 아이디어 찾기: 4–6 business concepts built from the member's own skills,
-// resources and constraints, each scored on the same five axes so they can
-// be compared side by side, with the one cheap test that would prove or
-// kill it first. Scores are the model's judgement (labelled as such).
-const score = z.number().min(1).max(10);
+// 사업 아이디어 찾기: two clearly different business concepts built from the
+// member's own skills, resources and constraints, each scored out of 100
+// (five axes worth up to 20 points each) so they can be compared side by
+// side, with the one cheap test that would prove or kill it first. Scores
+// are the model's judgement (labelled as such). `scoring: "100"` marks this
+// scale; older runs without it used 1–10 per axis (lib/tools/report/idea-radar.ts
+// scales those up).
+const score = z.number().min(0).max(20);
 
 const outputSchema = z.object({
+  scoring: z.enum(["100"]),
   summary: z.string(),
   lens: z.string(),
   ideas: z
@@ -27,8 +31,7 @@ const outputSchema = z.object({
         risks: z.array(z.string()),
       }),
     )
-    .min(4)
-    .max(6),
+    .length(2),
   recommendation: z.object({ pick: z.string(), reason: z.string(), runner_up: z.string() }),
 });
 

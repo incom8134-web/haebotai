@@ -14,6 +14,7 @@ export const copy: ToolManifest = {
   icon: MessageSquareText,
   inputs: [
     { kind: "textarea", id: "offer", label: "알리고 싶은 것", rows: 3, required: true, max: 600 },
+    { kind: "image", id: "photos", label: "광고에 쓸 사진 (선택)", maxFiles: 4 },
     { kind: "text", id: "audience", label: "대상 고객" },
     {
       kind: "select",
@@ -39,6 +40,9 @@ export const copy: ToolManifest = {
     },
     { kind: "number", id: "variants", label: "동기별 변형 수", min: 1, max: 5 },
     { kind: "chips", id: "must_include", label: "꼭 넣을 사실", max: 6 },
+    { kind: "text", id: "deadline", label: "마감·기간 (선택)", max: 80 },
+    { kind: "url", id: "link", label: "연결할 링크 (선택)" },
+    { kind: "chips", id: "avoid_words", label: "쓰지 않을 표현", max: 6 },
   ],
   usesProfile: ["brand_name", "tone", "voice_examples", "target_customer"],
   acceptsChainFrom: ["hook-lab", "brand-dna", "offer-architect", "strategy", "keyword"],
