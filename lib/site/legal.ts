@@ -15,7 +15,7 @@ import { REVENUE_SHARE } from "../referral.ts";
 
 export type LegalBlock = string | { list: string[] } | { table: { head: string[]; rows: string[][] } };
 
-export interface LegalArticle {
+interface LegalArticle {
   id: string;
   title: string;
   body: LegalBlock[];

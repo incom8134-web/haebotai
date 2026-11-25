@@ -1,4 +1,5 @@
 import JSZip from "jszip";
+import { decodeXml } from "../xml.ts";
 import { z } from "zod";
 import { REFERENCE_LIMITS, referenceModesFor, type ReferenceBundle } from "./reference.ts";
 import type { ImagePart } from "./generate-prompt.ts";
@@ -48,9 +49,6 @@ async function shrinkImage(bytes: Buffer, mime: string): Promise<{ data: Buffer;
     return { data: bytes, mimeType: mime };
   }
 }
-
-const decodeXml = (s: string) =>
-  s.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n))).replace(/&amp;/g, "&");
 
 /** Paragraph text of runs matching `tag` (w:t for Word, a:t for slides). */
 function xmlParagraphs(xml: string, paragraphTag: string, textTag: string): string[] {

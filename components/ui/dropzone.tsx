@@ -7,7 +7,7 @@ import { UploadCloud } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Kbd } from "@/components/ui/kbd";
 
-export interface DropzoneProps {
+interface DropzoneProps {
   onFiles: (files: File[]) => void;
   accept?: string;
   maxFiles?: number;

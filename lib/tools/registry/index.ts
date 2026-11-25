@@ -85,23 +85,17 @@ const registry = new Map<string, ToolManifest>([
 ]);
 const bySlug = new Map([...registry.values()].map((m) => [m.slug ?? m.id, m]));
 
-export function registerTool(manifest: ToolManifest) {
-  const m = withFreeRequest(withCatalog(manifest));
-  registry.set(m.id, m);
-  bySlug.set(m.slug ?? m.id, m);
-}
-
 /** A tool by its engine id (as stored on runs) or its public slug. */
 export function getTool(id: string): ToolManifest | undefined {
   return registry.get(id) ?? bySlug.get(id);
 }
 
-/** The 25 public tools in catalog order (hidden modes and retired tools excluded). */
 /** Public tools a result of `engine` can continue into (the same list a result page offers). */
 export function chainTargets(engine: string): ToolManifest[] {
   return listTools().filter((t) => t.acceptsChainFrom?.includes(engine));
 }
 
+/** Public tools in catalog order, excluding hidden modes and retired tools. */
 export function listTools(): ToolManifest[] {
   return publicTools().map((c) => getTool(c.slug)!);
 }

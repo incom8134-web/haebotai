@@ -15,7 +15,7 @@ export interface Reminder {
   link: string;
 }
 
-export const REMINDER = { endingDays: 3, lowCreditShare: 0.1 } as const;
+const REMINDER = { endingDays: 3, lowCreditShare: 0.1 } as const;
 
 export function planReminders(m: { plan: string; expiresAt: string | null; daysLeft: number | null }, balance: number | null): Reminder[] {
   if (m.plan !== "plus" && m.plan !== "pro") return [];

@@ -22,7 +22,7 @@ export type DocBlock =
   | { type: "callout"; label: string; text: string; tone?: "accent" | "warn" }
   | { type: "image"; prompt: string; caption: string; url?: string; asset_id?: string };
 
-export type SectionStatus = "kept" | "polished" | "rewritten" | "new";
+type SectionStatus = "kept" | "polished" | "rewritten" | "new";
 
 export interface Claim {
   text: string;

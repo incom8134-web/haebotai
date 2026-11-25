@@ -224,7 +224,7 @@ function ToolRunner({
       const untouched = Object.keys(seed.values).every((k) => JSON.stringify(current[k]) === JSON.stringify(seed.values[k]));
       return untouched ? { ...current, ...presetValuesWith(pack.presetsEn, seed.index, seed.values, "en") } : current;
     });
-  }, [locale, toolId]);
+  }, [locale, toolId, pack.presetsEn]);
   const [excludedProfileKeys, setExcludedProfileKeys] = useState<Set<string>>(
     new Set(),
   );
@@ -614,7 +614,6 @@ function ToolRunner({
         </BreadcrumbList>
       </Breadcrumb>
 
-      {/* Story header — each tool opens with its own promise. */}
       <header className="mt-4 max-w-3xl">
         <div className="flex flex-wrap items-center gap-2.5">
           <span className="studio-gradient-bg inline-flex size-9 shrink-0 items-center justify-center rounded-xl text-white">

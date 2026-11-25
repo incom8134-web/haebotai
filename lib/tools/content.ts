@@ -10,7 +10,7 @@ export interface Bilingual {
   en: string;
 }
 
-export type FeatureIcon =
+type FeatureIcon =
   | "user-round"
   | "link"
   | "shield-check"

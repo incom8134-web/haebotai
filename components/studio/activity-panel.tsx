@@ -140,7 +140,6 @@ function LineChart({ days, credits = true }: { days: ActivityDay[]; credits?: bo
           </g>
         ) : null}
       </svg>
-      {/* The glass tooltip that pops up over the chosen day. */}
       <AnimatePresence>
         {tip && shown !== null ? (
           <motion.div
@@ -315,7 +314,6 @@ export function ActivityPanel({ activity }: { activity: StudioActivity }) {
           ) : null}
         </div>
       </div>
-      {/* A floating glass stat card, as in the reference: the area used most. */}
       {top && top.runs > 0 ? (
         <motion.p
           {...(reduce ? {} : { initial: { opacity: 0, y: 10 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { delay: 0.5, duration: 0.5 } })}

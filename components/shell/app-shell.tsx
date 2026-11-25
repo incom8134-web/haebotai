@@ -316,7 +316,6 @@ function AppShell({ user, balance, plan, host = false, answeredTickets, notices,
         {L({ ko: "본문으로 건너뛰기", en: "Skip to content" })}
       </a>
 
-      {/* Floating top cluster: brand chip + search pill. */}
       <header className="pointer-events-none sticky top-0 z-30 px-3 pt-[max(12px,env(safe-area-inset-top))] pb-3 md:px-6 lg:pr-28">
         {/* Soft fade so page content scrolling under the chips never reads as overlap. */}
         <div aria-hidden className="absolute inset-x-0 top-0 -z-10 h-[88px] bg-gradient-to-b from-bg via-bg/80 to-transparent max-lg:h-[76px] max-lg:from-bg/85 max-lg:via-bg/70 max-lg:backdrop-blur-md max-lg:[mask-image:linear-gradient(to_bottom,black_72%,transparent)]" />
@@ -368,7 +367,6 @@ function AppShell({ user, balance, plan, host = false, answeredTickets, notices,
         </div>
       </main>
 
-      {/* Right-side dock (desktop). */}
       <nav aria-label={L({ ko: "주 메뉴", en: "Main" })} className="glass-strong fixed top-1/2 right-4 z-40 hidden -translate-y-1/2 flex-col items-center gap-1 rounded-[28px] p-2 lg:flex">
         {ITEMS.filter((item) => item.href === FEATURED).map((item) => (
           <FeaturedDockButton key={item.href} item={item} active={item.match(pathname)} />
@@ -409,7 +407,6 @@ function AppShell({ user, balance, plan, host = false, answeredTickets, notices,
         ) : null}
       </nav>
 
-      {/* Bottom tab bar (phones/tablets). */}
       <nav
         aria-label={L({ ko: "주 메뉴", en: "Main" })}
         className="glass-strong tab-bar fixed inset-x-3 bottom-[max(12px,env(safe-area-inset-bottom))] z-40 flex items-center justify-around rounded-[26px] p-1.5 lg:hidden"

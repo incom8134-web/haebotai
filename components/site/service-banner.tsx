@@ -18,7 +18,7 @@ const TONES = {
   paused: { box: "border-danger/30 bg-danger/[0.06] text-fg", icon: PauseCircle, iconCls: "text-danger" },
 } as const;
 
-export function ServiceBanner({ tone, title, body, link, linkLabel, onDismiss, className }: { tone: keyof typeof TONES; title: string; body?: string; link?: string | null; linkLabel?: Bi; onDismiss?: () => void; className?: string }) {
+function ServiceBanner({ tone, title, body, link, linkLabel, onDismiss, className }: { tone: keyof typeof TONES; title: string; body?: string; link?: string | null; linkLabel?: Bi; onDismiss?: () => void; className?: string }) {
   const L = useBi();
   const t = TONES[tone];
   const Icon = t.icon;

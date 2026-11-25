@@ -11,7 +11,7 @@
 //
 // Pure logic (tested).
 
-export interface SourceTable {
+interface SourceTable {
   rows: string[][];
 }
 

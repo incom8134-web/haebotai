@@ -14,7 +14,7 @@ import type { DesignSystem } from "./document.ts";
 // Pure logic (tested); the model call is in the document agent.
 
 const VISUAL_KINDS = ["none", "table", "bar", "line", "donut", "timeline", "process", "kpis", "callout", "image", "comparison"] as const;
-export type VisualKind = (typeof VISUAL_KINDS)[number];
+type VisualKind = (typeof VISUAL_KINDS)[number];
 
 export interface PlanSection {
   id: string;

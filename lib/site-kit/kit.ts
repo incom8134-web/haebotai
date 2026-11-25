@@ -508,7 +508,7 @@ function photoRing(o: SceneOptions, k: number, host: HTMLElement): Built & { det
       camera.position.z = w < h ? 13 : 9;
       camera.updateProjectionMatrix();
     },
-    update(t, s) {
+    update(_t, s) {
       spin += vel + s.dt * 0.12 * (0.5 + k);
       vel *= dragging ? 0.6 : 0.94;
       ring.rotation.y = spin + s.progress * 1.6;

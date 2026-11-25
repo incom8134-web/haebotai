@@ -432,7 +432,6 @@ export function Dashboard({
       {activity ? <ActivityPanel activity={activity} /> : null}
 
       <div className="mt-4 grid gap-4 lg:grid-cols-[1.25fr_1fr]">
-        {/* Continue working */}
         <Card title={L({ ko: "이어서 하기", en: "Continue working" })}>
           {latest ? (
             <div className="flex flex-col gap-3">
@@ -515,7 +514,6 @@ export function Dashboard({
           )}
         </Card>
 
-        {/* Recommended */}
         <Card title={L({ ko: "다음에 해 볼 것", en: "Try next" })}>
           <ul className="grid gap-2 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
             {recommended.map((slug) => {
@@ -569,7 +567,6 @@ export function Dashboard({
       </div>
 
       <div className="mt-10 grid gap-4 lg:grid-cols-2">
-        {/* Projects */}
         <Card
           title={L({
             ko: `프로젝트 ${projectCount}`,
@@ -628,7 +625,6 @@ export function Dashboard({
           )}
         </Card>
 
-        {/* Recent results */}
         <Card
           title={L({ ko: "최근 결과", en: "Recent results" })}
           action={

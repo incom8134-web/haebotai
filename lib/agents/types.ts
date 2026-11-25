@@ -17,7 +17,7 @@ import type { Plan } from "./plan.ts";
 
 export type Bi = { ko: string; en: string };
 
-export type AgentEventKind = "stage" | "intent" | "strategy" | "critique" | "revision" | "note" | "handoff";
+type AgentEventKind = "stage" | "intent" | "strategy" | "critique" | "revision" | "note" | "handoff";
 
 export interface AgentEvent {
   at: string;
@@ -163,7 +163,7 @@ export interface StageContext {
   apiKeys: string[];
 }
 
-export interface StageResult {
+interface StageResult {
   /** Next stage id, or "finalize". */
   next: string;
 }

@@ -26,7 +26,7 @@ import { tierFromResponse, type KeyTier } from "@/lib/ai/key-tier";
 // Members register Gemini and Anthropic keys. OpenAI is not offered:
 // no tool runs on it, so a key there would be collected and never used.
 
-export const API_KEY_PROVIDERS = ["google", "anthropic"] as const;
+const API_KEY_PROVIDERS = ["google", "anthropic"] as const;
 export type ApiKeyProvider = (typeof API_KEY_PROVIDERS)[number];
 export type ApiKeyPriority = 1 | 2 | 3;
 

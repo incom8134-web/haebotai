@@ -6,7 +6,7 @@
 // No ICS line-folding (RFC 5545 §3.1) — our lines are short enough in
 // practice; upgrade path if a title runs long is to fold at 75 octets.
 
-export interface CalendarTask {
+interface CalendarTask {
   day: number;
   title: string;
   est_minutes: number;

@@ -25,7 +25,7 @@ export type Block =
   | { type: "chart"; title?: string; chart: ChartSpec; palette: string[]; caption?: string; estimated?: boolean }
   | { type: "callout"; label: string; text: string };
 
-export interface ExportSlide {
+interface ExportSlide {
   title: string;
   points: string[];
   notes?: string;

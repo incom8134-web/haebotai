@@ -1,8 +1,4 @@
-// Single place to change the Anthropic model used across every tool.
-// Verified against platform.claude.com/docs (2026-09-22): Claude Sonnet 5
-// is the current Sonnet-tier model and one of the models structured
-// outputs (output_config.format / messages.parse) actually supports —
-// Sonnet 4.6 is not on that list.
+// Shared model for the Anthropic adapter's structured output requests.
 export const ANTHROPIC_MODEL = "claude-sonnet-5";
 
 // Generous per-tool output ceiling. Hitting it mid-generation is treated

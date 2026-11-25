@@ -8,7 +8,7 @@ import { tossConfigured } from "@/lib/payments/toss";
 // this module — only up/down.
 
 export type ComponentId = "app" | "database" | "ratelimit" | "ai" | "payments";
-export interface ComponentStatus {
+interface ComponentStatus {
   id: ComponentId;
   state: "up" | "down" | "not_configured";
 }

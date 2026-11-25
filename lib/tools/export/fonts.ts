@@ -2,9 +2,7 @@ import "server-only";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-// Pretendard ships static .otf files via npm (same source as
-// lib/tools/render/sangsepage.ts); traced into the export route by
-// next.config.ts outputFileTracingIncludes.
+// Font assets are included in the export route by next.config.ts.
 const FONT_DIR = join(process.cwd(), "node_modules/pretendard/dist/public/static");
 
 /** Font file paths, for renderers that load fonts by path (resvg). */
