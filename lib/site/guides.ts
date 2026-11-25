@@ -40,10 +40,3 @@ export const WORKFLOWS: { id: string; title: Bilingual; body: Bilingual; goal: "
     tools: ["doc-studio", "pitch-director"],
   },
 ];
-
-export const GOALS: { id: "start" | "brand" | "sell" | "grow"; title: Bilingual; body: Bilingual; category: string }[] = [
-  { id: "start", title: { ko: "사업 방향 잡기", en: "Find a direction" }, body: { ko: "아이디어 · 상품·가격", en: "Ideas · Offer and price" }, category: "discover" },
-  { id: "brand", title: { ko: "브랜드와 웹사이트", en: "Brand and website" }, body: { ko: "브랜드 · 로고 · 홈페이지", en: "Brand · Logo · Website" }, category: "brand" },
-  { id: "sell", title: { ko: "판매 준비", en: "Get ready to sell" }, body: { ko: "상세페이지 · 광고", en: "Product page · Ads" }, category: "brand" },
-  { id: "grow", title: { ko: "마케팅 돌리기", en: "Run marketing" }, body: { ko: "홍보 계획 · 광고 · 블로그", en: "Promotion plan · Ads · Blog" }, category: "campaign" },
-];

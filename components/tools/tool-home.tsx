@@ -65,7 +65,6 @@ function ToolHome({ toolId, pack }: { toolId: string; pack: ToolPack }) {
       </Link>
 
       <div className="grid gap-6 lg:grid-cols-[400px_1fr] lg:items-start">
-        {/* Identity card */}
         <aside className="glass-strong rounded-[28px] p-6 lg:sticky lg:top-24 md:p-7">
           <span className="studio-gradient-bg grid size-14 place-items-center rounded-[18px] text-white shadow-[inset_0_1px_0_oklch(1_0_0/35%),0_16px_40px_-16px_var(--studio-violet)]">
             <tool.icon size={26} aria-hidden />
@@ -165,7 +164,6 @@ function ToolHome({ toolId, pack }: { toolId: string; pack: ToolPack }) {
           ) : null}
         </aside>
 
-        {/* Scrolling column */}
         <div className="min-w-0 space-y-6">
           <section>
             <h2 className="mb-1 font-display text-2xl font-bold tracking-[-0.01em]">{L({ ko: "예시에서 시작", en: "Start from an example" })}</h2>

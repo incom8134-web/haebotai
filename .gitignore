@@ -41,3 +41,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 scripts/eval/results/
+
+# Local coding-tool configuration
+/.claude/
+/CLAUDE.md
+/skills-lock.json

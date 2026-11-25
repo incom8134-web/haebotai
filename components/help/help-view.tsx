@@ -149,7 +149,7 @@ function Ask({ signedIn, tickets, initialKind, toolId }: { signedIn: boolean; ti
 }
 
 /** A patch note written in /admin/announcements (newer than the code's history). */
-export interface PublishedNote {
+interface PublishedNote {
   id: string;
   version: string | null;
   date: string;

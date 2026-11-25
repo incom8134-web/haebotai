@@ -1,13 +1,11 @@
 import JSZip from "jszip";
+import { decodeXml } from "../../xml.ts";
 import { buildSource, linesFromText, type SourceDoc, type SourceLine } from "./source.ts";
 
 // Uploads → SourceDoc. Each format keeps the hints it has: Word heading
 // styles, bold runs and tables; PowerPoint slide titles and tables; PDF
 // lines with their font size and page; HTML headings. Nothing is cut off
 // here — size limits are the caller's (the upload limit is 30 MB).
-
-const decodeXml = (s: string) =>
-  s.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n))).replace(/&amp;/g, "&");
 
 const runsText = (xml: string, tag: string) => [...xml.matchAll(new RegExp(`<${tag}(?:\\s[^>]*)?>([^<]*)</${tag}>`, "g"))].map((m) => decodeXml(m[1])).join("");
 

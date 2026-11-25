@@ -8,11 +8,11 @@ import type { Bilingual } from "./content";
 // tools don't all look like the same form. Field ids and option values
 // are checked against the manifests in experience.test.ts.
 
-export type Layout = "split" | "steps" | "canvas";
-export type Visual =
+type Layout = "split" | "steps" | "canvas";
+type Visual =
   | "routes" | "score" | "compass" | "calendar" | "prompt" | "article" | "copy" | "tiers" | "map"
   | "gallery" | "logo" | "model" | "page" | "site" | "doc" | "deck" | "plan" | "checklist";
-export type Display = "cards" | "segmented" | "slider" | "slider-select" | "toggles" | "swatches" | "ratio" | "date";
+type Display = "cards" | "segmented" | "slider" | "slider-select" | "toggles" | "swatches" | "ratio" | "date";
 
 export interface FieldUi {
   display?: Display;

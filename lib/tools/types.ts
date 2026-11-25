@@ -4,7 +4,7 @@ import type { LucideIcon } from "lucide-react";
 
 export type CategoryId = "discover" | "brand" | "campaign" | "operate" | "research";
 
-export interface FieldOption {
+interface FieldOption {
   value: string;
   label: string;
   hint?: string;

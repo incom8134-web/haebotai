@@ -288,7 +288,6 @@ function ToolsView({ initialCategory, recent }: { initialCategory: CategoryId | 
         className="mb-0"
       />
 
-      {/* Find */}
       <div className="sticky top-[64px] z-20 -mx-4 mt-8 border-b border-hairline bg-bg/95 px-4 py-3 md:-mx-8 md:px-8">
         <div className="flex flex-wrap items-center gap-2">
           <label className="flex h-10 min-w-0 flex-1 items-center gap-2 rounded-full border border-hairline bg-surface px-4 focus-within:border-accent sm:max-w-sm">
@@ -349,7 +348,6 @@ function ToolsView({ initialCategory, recent }: { initialCategory: CategoryId | 
         <>
           <HowTo />
 
-          {/* Personal: pinned and recently used (from your real runs) */}
           {favTools.length || recentTools.length ? (
             <section className="mt-10 grid gap-4 md:grid-cols-2">
               {favTools.length ? (

@@ -25,7 +25,7 @@ import type { ModelPort, Usage } from "./port.ts";
 // Pure orchestration over a ModelPort; persisted between stages by the
 // runner (lib/agents/specs/document.ts wires it into the stage loop).
 
-export interface DocCritique {
+interface DocCritique {
   score: number;
   issues: { sectionId: string; severity: "high" | "medium" | "low"; type: string; problem: string; fix: string }[];
   strengths: string[];

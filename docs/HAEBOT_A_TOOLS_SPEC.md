@@ -1,5 +1,5 @@
 # 해봇 AI — TOOL SUITE SPEC
-### Addendum to BUILD_SPEC.md — paste both into Claude Code
+### Tool specification
 
 ---
 

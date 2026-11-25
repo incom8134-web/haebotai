@@ -116,7 +116,6 @@ export function PricingView({ signedIn }: { signedIn: boolean }) {
         <p className="mt-3 text-2xs text-fg-subtle">{L({ ko: "남은 크레딧은 없어지지 않고, 다음에 플랜을 이용할 때 이어서 써요.", en: "Unused credits don't disappear; they carry over to your next plan period." })}</p>
       </section>
 
-      {/* The full per-tool table is long; it opens on demand. */}
       <details className="smooth mt-12 rounded-[24px] border border-hairline bg-surface" aria-labelledby="per-tool">
         <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-5 md:p-6">
           <span>

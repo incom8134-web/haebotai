@@ -33,7 +33,7 @@ import {
 } from "../core/doc-agent";
 import { analysisBlock } from "../core/analysis";
 import { contractBlock } from "../core/contract";
-import { documentReport, type LongDocument } from "../core/document";
+import type { LongDocument } from "../core/document";
 import type { SourceDoc } from "../core/source";
 import type { AgentRunState, AgentSpec, Stage, StageContext } from "../types";
 
@@ -136,7 +136,7 @@ export function documentSpec(toolId: string): AgentSpec {
   const after = (w: DocWork, id: string) => nextStage(w, id, FIRST);
   const stages: Record<string, Stage> = {
     understand: understandStage("analyze"),
-    analyze: stage("analyze", { ko: "자료 분석", en: "Analyzing sources" }, 120, async (ctx, core) => {
+    analyze: stage("analyze", { ko: "자료 분석", en: "Analyzing sources" }, 120, async (_ctx, core) => {
       await analyzeStage(core).catch((err) => console.warn("doc analyze skipped:", (err as Error).message));
       return "contract";
     }),
@@ -213,6 +213,3 @@ export function documentSpec(toolId: string): AgentSpec {
     },
   };
 }
-
-/** The report for a document output (used by the proposal and business-plan builders). */
-export { documentReport };

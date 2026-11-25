@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import satori from "satori";
 import { Resvg } from "@resvg/resvg-js";
+import { createElement } from "react";
 
 // Logo lockups: the image model draws only the symbol (it can't be
 // trusted to spell Hangul), and the brand name is typeset here in
@@ -42,23 +43,18 @@ export async function renderLogoLockup(params: {
   // Long names get a smaller size so they stay on one line.
   const fontSize = brandName.length > 10 ? 72 : brandName.length > 6 ? 96 : 116;
 
-  const tree = {
-    type: "div",
-    props: {
+  const tree = createElement(
+    "div",
+    {
       style: { width: WIDTH, height: HEIGHT, display: "flex", alignItems: "center", justifyContent: "center", gap: 36, backgroundColor: "#FFFFFF", padding: 60 },
-      children: [
-        { type: "img", props: { src: `data:${symbol.mimeType};base64,${symbol.data}`, width: 360, height: 360, style: { objectFit: "contain" } } },
-        {
-          type: "span",
-          props: {
-            style: { fontFamily: "Pretendard", fontSize, fontWeight: WEIGHTS[weight], letterSpacing: TRACKING[tracking], color, lineHeight: 1 },
-            children: brandName,
-          },
-        },
-      ],
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } as any;
+    createElement("img", { src: `data:${symbol.mimeType};base64,${symbol.data}`, width: 360, height: 360, style: { objectFit: "contain" } }),
+    createElement(
+      "span",
+      { style: { fontFamily: "Pretendard", fontSize, fontWeight: WEIGHTS[weight], letterSpacing: TRACKING[tracking], color, lineHeight: 1 } },
+      brandName,
+    ),
+  );
 
   const svg = await satori(tree, { width: WIDTH, height: HEIGHT, fonts: loadFonts() });
   return Buffer.from(new Resvg(svg, { fitTo: { mode: "width", value: WIDTH } }).render().asPng());

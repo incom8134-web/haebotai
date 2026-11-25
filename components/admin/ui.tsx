@@ -26,7 +26,7 @@ export function Card({ title, lead, action, className, children, bodyClassName }
 }
 
 /** A tiny line chart for stat tiles; values oldest → newest. */
-export function Sparkline({ values, tone = "accent", className }: { values: number[]; tone?: Tone; className?: string }) {
+function Sparkline({ values, tone = "accent", className }: { values: number[]; tone?: Tone; className?: string }) {
   const w = 120;
   const h = 34;
   const max = Math.max(1, ...values);

@@ -20,7 +20,7 @@ function wonAmounts(text: string): number[] {
 export function redactInventedPrices(html: string, inputText: string): string {
   const allowed = new Set(wonAmounts(inputText));
   const [head, body = ""] = html.split(/(?=<body[\s>])/i);
-  const cleaned = body.replace(/(<(script|style)[\s\S]*?<\/\2>)|>([^<]+)</gi, (m, block, _tag, text) => {
+  const cleaned = body.replace(/(<(script|style)[\s\S]*?<\/\2>)|>([^<]+)</gi, (_match, block, _tag, text) => {
     if (block) return block;
     const fixed = (text as string).replace(/(\d[\d,]*)\s*(만)?\s*원/g, (amount, digits: string, man: string | undefined) => {
       const n = Number(digits.replace(/,/g, "")) * (man ? 10_000 : 1);

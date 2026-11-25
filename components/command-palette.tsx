@@ -13,7 +13,7 @@ import {
   CommandShortcut,
 } from "@/components/ui/command";
 
-export interface CommandPaletteItem {
+interface CommandPaletteItem {
   id: string;
   label: string;
   icon?: LucideIcon;

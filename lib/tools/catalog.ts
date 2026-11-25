@@ -89,14 +89,6 @@ export const CATEGORIES: Record<CategoryId, { name: Bilingual; pitch: Bilingual;
   },
 };
 
-export const VERBS: Record<Verb, Bilingual> = {
-  build: { ko: "설계하기", en: "Build" },
-  sell: { ko: "판매하기", en: "Sell" },
-  create: { ko: "만들기", en: "Create" },
-  operate: { ko: "운영하기", en: "Operate" },
-  research: { ko: "조사하기", en: "Research" },
-};
-
 const b = (ko: string, en: string): Bilingual => ({ ko, en });
 
 export const CATALOG: CatalogTool[] = [

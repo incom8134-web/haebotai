@@ -10,7 +10,7 @@
 //
 // Pure (tested).
 
-export interface Dimension {
+interface Dimension {
   id: string;
   /** Korean label shown to the strategist. */
   name: string;

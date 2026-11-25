@@ -12,8 +12,8 @@ type Bi = { ko: string; en: string };
 
 // Korea time, formatted by hand: Intl output differs between Node and
 // browsers ("AM" vs "오전"), which breaks hydration.
-export const kst = (iso: string) => new Date(new Date(iso).getTime() + 9 * 60 * 60 * 1000);
-export const pad = (n: number) => String(n).padStart(2, "0");
+const kst = (iso: string) => new Date(new Date(iso).getTime() + 9 * 60 * 60 * 1000);
+const pad = (n: number) => String(n).padStart(2, "0");
 export const fmtDate = (iso: string | null) => {
   if (!iso) return "—";
   const d = kst(iso);
@@ -35,7 +35,7 @@ export const field = "h-10 w-full rounded-xl border border-hairline bg-surface p
 
 // ── Messages from the server actions ──────────────────────────────────
 
-export const MSG: Record<string, Bi> = {
+const MSG: Record<string, Bi> = {
   replied: { ko: "답변을 보냈어요. 회원 화면에 바로 보여요.", en: "Reply sent. The member sees it right away." },
   closed: { ko: "종료로 표시했어요.", en: "Marked closed." },
   reopened: { ko: "다시 대기로 옮겼어요.", en: "Moved back to open." },

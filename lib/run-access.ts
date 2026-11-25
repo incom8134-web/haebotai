@@ -24,8 +24,8 @@ export interface RunAccessInput {
   freeOwnKey?: boolean;
 }
 
-export const PLAN_REQUIRED_MESSAGE = "도구 실행은 플러스 플랜부터 할 수 있어요 — 멤버십에서 플랜을 골라 주세요";
-export const FREE_KEY_REQUIRED_MESSAGE = "무료 플랜은 내 Gemini API 키로 실행해요 — API 키를 등록하거나 플러스 플랜을 골라 주세요";
+const PLAN_REQUIRED_MESSAGE = "도구 실행은 플러스 플랜부터 할 수 있어요 — 멤버십에서 플랜을 골라 주세요";
+const FREE_KEY_REQUIRED_MESSAGE = "무료 플랜은 내 Gemini API 키로 실행해요 — API 키를 등록하거나 플러스 플랜을 골라 주세요";
 
 export function decideRunAccess(i: RunAccessInput): RunAccess {
   if (i.saas) {

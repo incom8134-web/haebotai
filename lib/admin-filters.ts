@@ -3,13 +3,13 @@
 // rows; the page reads the filters from the URL, so a filtered view can
 // be bookmarked or shared with the team.
 
-export type ProviderFilter = "" | "google" | "kakao";
-export type KeyFilter = "" | "yes" | "no";
-export type ActivityFilter = "" | "active7" | "dormant30" | "never";
-export type StatusFilter = "" | "suspended" | "no_name";
+type ProviderFilter = "" | "google" | "kakao";
+type KeyFilter = "" | "yes" | "no";
+type ActivityFilter = "" | "active7" | "dormant30" | "never";
+type StatusFilter = "" | "suspended" | "no_name";
 /** Plan filter: "paid" = Plus or Pro with days left; "host" = runs free on the platform key. */
-export type PlanFilter = "" | "free" | "paid" | "plus" | "pro" | "host";
-export type MemberSort = "new" | "old" | "runs" | "recent" | "name";
+type PlanFilter = "" | "free" | "paid" | "plus" | "pro" | "host";
+type MemberSort = "new" | "old" | "runs" | "recent" | "name";
 
 export interface MemberFilters {
   q: string;

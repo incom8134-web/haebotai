@@ -6,7 +6,7 @@
 // random. Visual/verbal languages stay in lib/tools/directions.ts; this
 // file is about how the work is built.
 
-export interface Approach {
+interface Approach {
   id: string;
   name: string;
   /** When this approach fits. */

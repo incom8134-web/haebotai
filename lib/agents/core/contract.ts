@@ -31,8 +31,8 @@ export type TaskMode =
   /** The source is inspiration only: new structure, new content, nothing copied. */
   | "inspire";
 
-export type SourceRole = "none" | "primary" | "requirements" | "inspiration" | "style" | "data";
-export type LengthUnit = "pages" | "slides" | "words" | "chars" | "sections" | "none";
+type SourceRole = "none" | "primary" | "requirements" | "inspiration" | "style" | "data";
+type LengthUnit = "pages" | "slides" | "words" | "chars" | "sections" | "none";
 
 export interface TaskContract {
   mode: TaskMode;

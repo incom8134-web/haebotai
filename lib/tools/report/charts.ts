@@ -30,7 +30,7 @@ export type ChartSpec =
   | { kind: "circles"; items: { label: string; value: string; note?: string }[] }
   | { kind: "funnel"; stages: { label: string; value: number; display?: string }[] };
 
-export interface Series {
+interface Series {
   name: string;
   values: number[];
 }
@@ -72,7 +72,7 @@ export function textWidth(text: string, size: number): number {
   return w * size;
 }
 
-export function clip(text: string, size: number, max: number): string {
+function clip(text: string, size: number, max: number): string {
   if (textWidth(text, size) <= max) return text;
   let out = "";
   for (const ch of text) {

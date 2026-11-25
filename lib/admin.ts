@@ -98,7 +98,7 @@ function kakaoIdOf(u: User): string | null {
 
 const isSuspended = (u: User) => !!u.banned_until && new Date(u.banned_until).getTime() > Date.now();
 
-export type TierCheck = { value: KeyTier; checkedAt: string };
+type TierCheck = { value: KeyTier; checkedAt: string };
 
 export interface AdminMember extends MemberFacts {
   provider: string;
@@ -345,11 +345,11 @@ export async function getToolUsage(period: UsagePeriod, range?: { from: string; 
 const DAYS = 14;
 
 /** Calendar day in Korea (YYYY-MM-DD) — the team's working day, not UTC's. */
-export function kstDay(iso: string | number | Date): string {
+function kstDay(iso: string | number | Date): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(iso));
 }
 
-export interface AdminDay {
+interface AdminDay {
   day: string;
   signups: number;
   runs: number;

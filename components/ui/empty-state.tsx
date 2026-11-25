@@ -2,7 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-export interface EmptyStateProps {
+interface EmptyStateProps {
   icon: LucideIcon;
   title: string;
   description?: string;

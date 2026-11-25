@@ -11,8 +11,8 @@
 //     so they can be turned back on.
 //   "own-key" (2026-10, before SaaS): members bring their own API key;
 //     no credits are sold or granted. The team runs on the platform key.
-export type AccessModel = "saas" | "own-key";
-export const ACCESS_MODEL = "saas" as AccessModel;
+type AccessModel = "saas" | "own-key";
+const ACCESS_MODEL = "saas" as AccessModel;
 
 /** Members bring their own API key; nothing is sold. */
 export const OWN_KEY_ONLY = ACCESS_MODEL === "own-key";

@@ -92,7 +92,6 @@ function AccountOverview({ email, balance, membership, apiKey, brandName, signOu
   return (
     <>
       <h1 className="sr-only">{L({ ko: "내 계정", en: "My account" })}</h1>
-      {/* Identity */}
       <section className="glass-strong flex flex-wrap items-center gap-4 rounded-[28px] p-6">
         <span className="studio-gradient-bg grid size-14 place-items-center rounded-[18px] text-lg font-semibold text-white">{email[0]?.toUpperCase()}</span>
         <div className="min-w-0 flex-1 basis-[12rem]">
@@ -256,7 +255,6 @@ function MembershipPanel({ membership, payments }: { membership: Membership; pay
         title={L({ ko: "멤버십", en: "Membership" })}
         lead={L(FREE_OWN_KEY ? { ko: "무료 플랜은 내 Gemini API 키로, 플러스와 프로는 키 없이 크레딧으로 모든 도구를 실행해요. 30일 이용권이라 자동 결제는 없고, 남은 기간에 이어서 연장돼요.", en: "Free runs every tool on your own Gemini API key; Plus and Pro run on credits, without a key. Each is a 30-day pass with no auto-renewal, and buying again extends what's left." } : { ko: "무료로 둘러보고, 플러스나 프로로 모든 도구를 실행해요. 30일 이용권이라 자동 결제는 없고, 남은 기간에 이어서 연장돼요.", en: "Browse free; run every tool on Plus or Pro. Each is a 30-day pass with no auto-renewal, and buying again extends what's left." })}
       />
-      {/* Plan */}
       <section>
         <div className="grid gap-3 md:grid-cols-3">
           {PLANS.map((p) => {

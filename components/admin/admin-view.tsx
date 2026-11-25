@@ -603,7 +603,6 @@ export function MemberProfile({ m, notices }: { m: AdminMemberDetail; notices?: 
         {L({ ko: "회원 목록", en: "All members" })}
       </Link>
 
-      {/* Profile card */}
       <section className="overflow-hidden rounded-3xl border border-hairline bg-surface shadow-[0_1px_2px_rgba(16,24,40,.04),0_20px_50px_-24px_rgba(16,24,40,.25)]">
         <div className="h-32 bg-[linear-gradient(120deg,#1e2a5a_0%,#3b6fe3_55%,#7aa2ff_100%)] md:h-40" />
         <div className="px-6 pb-6 md:px-8">
@@ -769,7 +768,6 @@ export function MemberProfile({ m, notices }: { m: AdminMemberDetail; notices?: 
 
       {notices ? <div className="mt-5">{notices}</div> : null}
 
-      {/* Manage: update, suspend, delete */}
       <div className="mt-5 grid gap-5 xl:grid-cols-[1.4fr_1fr]">
         <Card title={L({ ko: "회원 정보 수정", en: "Edit member" })} lead={L({ ko: "이름과 내부 메모 (회원에게는 보이지 않아요)", en: "Name and an internal note (never shown to the member)" })}>
           <form action={editAction} className="flex flex-col gap-3">

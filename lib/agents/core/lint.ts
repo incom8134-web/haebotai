@@ -14,7 +14,7 @@ const STOCK = [
 ];
 const BUZZ = [/혁신적인/, /획기적인/, /최고의/, /차별화된/, /시너지/, /원스톱/, /토탈\s*솔루션/, /고객\s*중심의/, /최적의/, /극대화/, /seamless/i, /cutting[-\s]edge/i, /world[-\s]class/i, /synergy/i, /best[-\s]in[-\s]class/i, /revolutionary/i];
 
-export interface LintFinding {
+interface LintFinding {
   kind: "stock" | "buzzword" | "opener" | "structure" | "filler";
   where: string;
   detail: string;

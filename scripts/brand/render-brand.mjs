@@ -8,7 +8,6 @@
 //   public/brand/haeba-gem.svg        the gem alone
 //   public/brand/haeba-logo-{ko,en}[-white].svg  the lockups (black / white text)
 //   app/icon.png, app/apple-icon.png, app/sublogo.png, app/fulllogo.png, app/opengraph-image.jpg
-// fontkit comes with pdfkit (a dependency), so it is always installed.
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { Resvg } from "@resvg/resvg-js";

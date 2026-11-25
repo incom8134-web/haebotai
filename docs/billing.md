@@ -6,7 +6,7 @@ Decided 2026-10-29 (lib/site/access.ts `ACCESS_MODEL = "saas"`).
 
 | Plan | Price (VAT incl.) | Credits | Max AI cost per payment (1 credit ≈ ₩5) |
 |---|---|---|---|
-| Free | ₩0 | none — browse only | ₩0 |
+| Free | ₩0 | none — runs use the member's Gemini key | ₩0 on the platform key |
 | Plus | ₩29,900 / 30 days | 2,000 | ≈ ₩10,000 |
 | Pro | ₩59,900 / 30 days | 6,000 | ≈ ₩30,000 |
 | Top-up (Plus/Pro only) | ₩5,900 | 500 | ≈ ₩2,500 |
@@ -50,11 +50,11 @@ higher; re-measure per-tool costs against Google Cloud billing monthly.
 
 ## Operating notes
 
-- **Refunds:** done in the Toss merchant dashboard (cancel payment). The
-  webhook marks the order `canceled`, but the credits and days it granted
-  are not taken back automatically — `/admin` shows them but can't edit
-  them yet, so lower `user_credits.balance` and `memberships.expires_at`
-  in the Supabase SQL editor.
+- **Refunds:** initiated in the Toss merchant dashboard. Reconciliation
+  calls `revoke_order` (migration 0025) to reclaim credits and plan days
+  proportionally and adjust referral commissions. Apply migrations 0024–0025
+  before relying on this behavior; the older fallback only updates payment
+  and commission records. Staff can adjust credits from `/admin`.
 - **Terms:** the SaaS terms, privacy policy and refund policy take effect
   on `SAAS_REVISION` in `lib/site/legal.ts`. Announce the change on the
   site at least 30 days before (제3조; ending own keys is a change against

@@ -15,7 +15,7 @@ import type { LintReport } from "./lint.ts";
 //
 // Pure logic (tested).
 
-export interface Check {
+interface Check {
   id: string;
   label: string;
   target: string;

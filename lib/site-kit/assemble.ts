@@ -10,7 +10,7 @@ import * as nodeModule from "node:module";
 // here (the preview loads them from jsDelivr through an import map, the
 // project download lists them in package.json).
 
-export const SITE_PACKAGES = {
+const SITE_PACKAGES = {
   three: "0.186.0",
   gsap: "3.13.0",
   lenis: "1.3.4",
@@ -29,13 +29,13 @@ const IMPORTS: Record<string, string> = {
   "gsap/Observer": `${CDN}/gsap@${SITE_PACKAGES.gsap}/Observer.js`,
   lenis: `${CDN}/lenis@${SITE_PACKAGES.lenis}/dist/lenis.mjs`,
 };
-export const KIT_SPECIFIER = "@site/kit";
+const KIT_SPECIFIER = "@site/kit";
 
 let kitTs: string | null = null;
 let kitJs: string | null = null;
 
 /** The kit's TypeScript source (lib/site-kit/kit.ts). */
-export function kitSource(): string {
+function kitSource(): string {
   kitTs ??= readFileSync(path.join(process.cwd(), "lib/site-kit/kit.ts"), "utf8");
   return kitTs;
 }
@@ -61,7 +61,7 @@ const SCRIPT_TS = /<script\b[^>]*type=["']?text\/typescript["']?[^>]*>([\s\S]*?)
  * Lines put in front of the page's module (and main.ts in the project):
  * GSAP made null-safe, and the entrance-animation safety net.
  */
-export function prelude(ts: string, kit = KIT_SPECIFIER): string {
+function prelude(ts: string, kit = KIT_SPECIFIER): string {
   const usesGsap = /from\s+["']gsap["']/.test(ts);
   return [
     `import { guardGsap as __guardGsap, failsafe as __failsafe } from "${kit}";`,

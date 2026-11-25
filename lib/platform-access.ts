@@ -32,7 +32,7 @@ export function normalizeHostEntry(raw: unknown): string | null {
 }
 
 /** Whether an email matches any host entry. */
-export function matchesHost(email: string | null | undefined, entries: string[]): boolean {
+function matchesHost(email: string | null | undefined, entries: string[]): boolean {
   const e = (email ?? "").trim().toLowerCase();
   if (!e || !e.includes("@")) return false;
   const domain = e.slice(e.lastIndexOf("@"));

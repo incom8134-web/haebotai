@@ -8,8 +8,8 @@ projects, not separate schemas in one project).
 ### 1.1 Run migrations
 
 Migrations live in `supabase/migrations/`, numbered and applied in order.
-None of them have been applied to any live database by this work — apply
-them yourself with the Supabase CLI, pointed at the target project:
+Check the target project's migration history and apply pending migrations
+with the Supabase CLI:
 
 ```bash
 supabase link --project-ref <staging-or-prod-project-ref>
@@ -17,7 +17,7 @@ supabase db push
 ```
 
 Or, without the CLI, paste each file's contents into the SQL editor in
-project order (0001 → 0012, currently).
+project order (0001 → 0025). Check which migrations are already applied first.
 
 | Migration | Purpose |
 |---|---|
@@ -36,6 +36,8 @@ project order (0001 → 0012, currently).
 | `0019_audit_log.sql` | `audit_log` for staff actions in `/admin` (service-role only). Optional: `/admin` works without it, it just records nothing |
 | `0022_saas_plans.sql` | Paid plans: `memberships.plan` allows `plus`; `payments.plan` allows `plus`/`pro`/`topup`; `activate_order` (service-role only) finishes any order by its stored plan — Plus/Pro extend 30 days (stacking; buying Plus never lowers a running Pro), a top-up only adds credits |
 | `0023_admin_credit_adjust.sql` | `admin_adjust_credits` (service-role only): staff add or take back credits from `/admin` in one atomic update, never below 0 |
+| `0024_referral_revenue_share.sql` | Referral commissions, payout accounts, payout requests and refund adjustments |
+| `0025_refund_takes_back.sql` | `revoke_order` reclaims credits and plan days proportionally when an order is refunded |
 
 Storage buckets (`inputs`, `exports`, `logos`) and their RLS policies are
 created by `0001_init.sql` — no manual bucket setup needed.
@@ -67,8 +69,9 @@ In the Supabase dashboard → Authentication → Providers → Google:
 
 The app's own callback (`app/auth/callback/route.ts`) exchanges the code
 for a session, then redirects to `?next=` if it was set (validated as a
-same-site relative path — anything else falls back to `/studio`), or to
-`/brand` for a first-time user with no brand row yet. `app/auth/page.tsx`
+same-site relative path — anything else falls back to `/studio`). Members
+without current consent or a profile name go through `/auth/consent` first.
+The Studio routes new members through onboarding. `app/auth/page.tsx`
 builds the `redirectTo` from `window.location.origin`, so no per-environment
 code change is needed — only the Supabase-side redirect URL allowlist above.
 

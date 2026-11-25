@@ -33,7 +33,7 @@ export interface ResearchResult {
   unanswered: string[];
 }
 
-export const MAX_QUESTIONS = 5;
+const MAX_QUESTIONS = 5;
 
 /**
  * The questions to search: the contract's, else built from the subject —

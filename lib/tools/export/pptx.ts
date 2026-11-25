@@ -445,7 +445,7 @@ class Deck {
     if (!cards.length) return;
     const gap = 0.3;
     const bandPt = 17;
-    const bodyAvail = (n: number, band: number) => BOTTOM - TOP - band - 0.35;
+    const bodyAvail = (band: number) => BOTTOM - TOP - band - 0.35;
     const need = (c: (typeof cards)[number], w: number, pt: number) =>
       c.lines.reduce((h, l) => h + (l.label ? (pt * 1.3) / 72 : 0) + (l.text ? textHeight(l.text, pt, l.bullet ? w - 0.25 : w, 1.28) : 0) + 0.06, 0);
     const bandOf = (c: (typeof cards)[number], w: number) => Math.max(0.75, textHeight(c.title, bandPt, w - (c.badge && c.badge.length <= 3 ? 0.9 : 0), 1.2) + 0.35);
@@ -454,7 +454,7 @@ class Deck {
     for (const n of cards.length % 4 === 0 ? [4, 3, 2] : [3, 2]) {
       if (n > cards.length) continue;
       const w = (CW - gap * (n - 1)) / n;
-      if (cards.every((c) => need(c, w - 0.4, 11) <= bodyAvail(n, bandOf(c, w)))) {
+      if (cards.every((c) => need(c, w - 0.4, 11) <= bodyAvail(bandOf(c, w)))) {
         per = n;
         break;
       }
@@ -467,7 +467,7 @@ class Deck {
       const group = cards.slice(p * per, p * per + per);
       const s = this.content(kicker, p ? `${title} (계속)` : title, color);
       const band = Math.max(...group.map((c) => bandOf(c, w)));
-      const avail = bodyAvail(per, band);
+      const avail = bodyAvail(band);
       const pt = Math.min(...group.map((c) => {
         for (let size = per === 1 ? 20 : per === 2 ? 18 : 16; size > 9; size--) if (need(c, w - 0.4, size) <= avail) return size;
         return 9;
@@ -802,7 +802,7 @@ function renderValue(ctx: Ctx, key: string, value: unknown, title: string, kicke
       return;
     }
     const objs = value.filter(isObj);
-    if (objs.length) renderObjects(ctx, key, objs, title, kicker, color, colorIndex);
+    if (objs.length) renderObjects(ctx, objs, title, kicker, color, colorIndex);
     return;
   }
 
@@ -849,7 +849,7 @@ const SLIDE_SKIP = new Set(["char_count"]);
 
 const PHASE_KEYS = ["phase", "week_no", "week", "month", "stage", "step"];
 
-function renderObjects(ctx: Ctx, key: string, objs: Obj[], title: string, kicker: string, color: Color, colorIndex: number): void {
+function renderObjects(ctx: Ctx, objs: Obj[], title: string, kicker: string, color: Color, colorIndex: number): void {
   const { deck } = ctx;
 
   // day/order + text pairs → a numbered run of steps

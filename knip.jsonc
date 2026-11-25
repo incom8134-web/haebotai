@@ -1,0 +1,14 @@
+{
+  "$schema": "https://unpkg.com/knip/schema.json",
+  "entry": [
+    "scripts/**/*.{mjs,mts}",
+    // Documented integration API for an external email provider.
+    "lib/marketing/audience.ts",
+    // Read as source text and bundled into generated websites.
+    "lib/site-kit/kit.ts"
+  ],
+  "ignoreIssues": {
+    // Independent feature switches intentionally share the current mode value.
+    "lib/site/access.ts": ["duplicates"]
+  }
+}

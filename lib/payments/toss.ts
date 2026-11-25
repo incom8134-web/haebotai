@@ -7,7 +7,7 @@ import { BUSINESS } from "@/lib/site/business";
 // Idempotency-Key, so a retried confirm for the same order can't approve
 // twice on Toss's side either.
 
-export type TossPaymentStatus = "READY" | "IN_PROGRESS" | "WAITING_FOR_DEPOSIT" | "DONE" | "CANCELED" | "PARTIAL_CANCELED" | "ABORTED" | "EXPIRED";
+type TossPaymentStatus = "READY" | "IN_PROGRESS" | "WAITING_FOR_DEPOSIT" | "DONE" | "CANCELED" | "PARTIAL_CANCELED" | "ABORTED" | "EXPIRED";
 
 export interface TossPayment {
   paymentKey: string;
