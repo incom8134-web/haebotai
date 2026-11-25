@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 
 const owner = "incom8134-web";
-const credit = /(?:co-authored-by:\s*[^\n]*(?:claude|codex|copilot|gemini|anthropic|openai)|generated (?:by|with)[^\n]*(?:claude|codex|copilot)|(?:claude|codex)-session:|https:\/\/claude\.ai\/code\/session_)/i;
+const credit = /(?:(?:co-authored-by:|generated (?:by|with))[^\n]*\b(?:claude|codex|copilot|gemini|anthropic|openai|chatgpt|cursor|ai)\b|(?:claude|codex)-session:|https:\/\/claude\.ai\/code\/session_)/i;
 const git = (...args) => execFileSync("git", args, { encoding: "utf8" }).trim();
 const base = process.argv[2] || process.env.BASE_SHA;
 const errors = [];
